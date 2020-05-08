@@ -1,4 +1,4 @@
-# Map2Loop-2
+# README
 
 Generate model input data from geological maps. Revision of objectives in [https://github.com/Loop3D/map2loop](https://github.com/Loop3D/map2loop)
 
@@ -22,14 +22,16 @@ If you wish to, create your own python virtual environment with the following mo
 
 Download and install the docker containerisation framework and CLI [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/)
 
-Clone this repo and navigate inside, then run the following commands to get identical results cross-platform.
+Clone this repo and navigate inside. Run the following to build the 'm2l' container.
 
 ```bash
 docker build -t m2l .
-# Run example
-docker run -v "$(pwd)":/m2l m2l
-# Run interactive env
-docker run -it -v "$(pwd)":/m2l m2l /bin/bash
+```
+
+Then run the following, and click on the jupyter notebook link it outputs.
+
+```bash
+docker run -it -p 8888:8888 --entrypoint ./jupyter-client.sh m2l
 ```
 
 ## Install via PyPi
