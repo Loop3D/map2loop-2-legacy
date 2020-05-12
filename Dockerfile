@@ -19,3 +19,5 @@ RUN git clone https://github.com/Loop3D/map2loop
 RUN pip install /map2loop
 COPY jupyter-client.sh .
 RUN mv map2model /map2loop/m2m_cpp
+
+CMD ["jupyter","notebook","map2loop","--ip=0.0.0.0", "--allow-root", "--no-browser"]

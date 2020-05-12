@@ -28,10 +28,10 @@ Clone this repo and navigate inside. Run the following to build the 'm2l' contai
 docker build -t m2l .
 ```
 
-Then run the following, and click on the jupyter notebook link it outputs.
+Then execute the following  to run the example notebooks.
 
 ```bash
-docker run -it -p 8888:8888 --entrypoint ./jupyter-client.sh m2l
+docker run -it -p 8888:8888 m2l
 ```
 
 ## Install via PyPi
