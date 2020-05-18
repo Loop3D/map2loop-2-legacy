@@ -240,7 +240,8 @@ void IntersectFaultsWithPolygons(const Objects &faults, const Objects &polygons,
   for (std::size_t j = 0; j < faults.size(); j++) {
     // Loop over all multipolygons.
     for (std::size_t i = 0; i < polygons.size(); i++) {
-      if (FaultAndPolygonIntersecting(faults[j], polygons[i])) {
+      double distanceEpsilon = 5.;
+      if (FaultAndPolygonIntersecting(faults[j], polygons[i], distanceEpsilon)) {
 
         std::string unitName = polygons[i].name;
         int faultId = faults[j].id;
@@ -258,7 +259,7 @@ void IntersectFaultsWithPolygons(const Objects &faults, const Objects &polygons,
 }
 //=======================================================================================
 
-bool FaultAndPolygonIntersecting(const Object &fault, const Object &polygon)
+bool FaultAndPolygonIntersecting(const Object &fault, const Object &polygon, double distanceEpsilon)
 {
   // Bounding box check.
   if (!AABB::BoundingBoxesOverlap(fault.aabb, polygon.aabb)) {
@@ -286,6 +287,15 @@ bool FaultAndPolygonIntersecting(const Object &fault, const Object &polygon)
   OpenPathsFromPolyTree(polytree, solution);
 
   if (solution.size() > 0) {
+    //-----------------------------------------------------------------------
+    // Patch to not count fault-unit intersections where the fault only slightly intersects the unit.
+    if (solution[0].size() == 2) {
+      double dist2 = ConverterUtils::GetDistanceSquared(solution[0][0], solution[0][1]);
+      if (dist2 <= distanceEpsilon * distanceEpsilon) {
+          return false;
+      }
+    }
+    //-----------------------------------------------------------------------
     return true;
 
   } else {
@@ -568,54 +578,71 @@ int IntersectPolygons(const Object &poly1, const Object &poly2, Contacts &contac
 {
   // 1. Identifying common edges (those that are present in both multi-polygons).
 
-  Object poly = poly1;
+    Object poly = poly1;
 
-  size_t numCommonEdges = 0;
+    size_t numCommonEdges = 0;
 
-  // Loop over all polygons within the first multi-polygon.
-  for (Paths::iterator path1 = poly.paths.begin(); path1 != poly.paths.end(); path1++)
-  {
-    // Loop over all edges of a polygon.
-    for (Path::iterator vertex1 = path1->begin(); vertex1 != path1->end() - 1; vertex1++)
-    {
-      IntPoint v11 = *vertex1;
-      IntPoint v12 = *(vertex1 + 1);
-
-      bool found = false;
-
-      // Loop over all polygons within the second multi-polygon.
-      for (Paths::const_iterator path2 = poly2.paths.begin(); path2 != poly2.paths.end(); path2++)
-      {
+    // Loop over all polygons within the first multi-polygon.
+    for (Paths::iterator path1 = poly.paths.begin(); path1 != poly.paths.end(); path1++) {
         // Loop over all edges of a polygon.
-        for (Path::const_iterator vertex2 = path2->begin(); vertex2 != path2->end() - 1; vertex2++)
-        {
-          IntPoint v21 = *vertex2;
-          IntPoint v22 = *(vertex2 + 1);
+        for (Path::iterator vertex1 = path1->begin(); vertex1 != path1->end() - 1; vertex1++) {
+            const IntPoint& v11 = *vertex1;
+            const IntPoint& v12 = *(vertex1 + 1);
 
-          // Compare two edges.
-          if ((v11 == v21 && v12 == v22)
-              || (v11 == v22 && v12 == v21))
-          {
-            found = true;
-            break;
-          }
+            bool found = false;
+
+            // Loop over all polygons within the second multi-polygon.
+            for (Paths::const_iterator path2 = poly2.paths.begin(); path2 != poly2.paths.end(); path2++) {
+                // Loop over all edges of a polygon.
+                for (Path::const_iterator vertex2 = path2->begin(); vertex2 != path2->end() - 1; vertex2++) {
+                    const IntPoint& v21 = *vertex2;
+                    const IntPoint& v22 = *(vertex2 + 1);
+
+                    // Compare two edges (exact map coordinates case).
+//                    if ((v11 == v21 && v12 == v22)
+//                        || (v11 == v22 && v12 == v21)) {
+//                        found = true;
+//                        break;
+//                    }
+
+                    //---------------------------------------------------------------------------------
+                    // Patch for non-exact maps.
+                    // Consider vertexes between polygons to coincide if they located within epsilon distance.
+                    double eps2 = 0.1; // epsilon distance (squared), in meters.
+
+                    // Compare two edges: (v11, v12) vs (v21, v22).
+                    double dist2_11_21 = ConverterUtils::GetDistanceSquared(v11, v21);
+                    if (dist2_11_21 <= eps2) {
+                        double dist2_12_22 = ConverterUtils::GetDistanceSquared(v12, v22);
+                        if (dist2_12_22 <= eps2) {
+                          found = true;
+                          break;
+                        }
+                    }
+                    // Compare two edges: (v11, v12) vs (v22, v21).
+                    double dist2_11_22 = ConverterUtils::GetDistanceSquared(v11, v22);
+                    if (dist2_11_22 <= eps2) {
+                        double dist2_12_21 = ConverterUtils::GetDistanceSquared(v12, v21);
+                        if (dist2_12_21 <= eps2) {
+                          found = true;
+                          break;
+                        }
+                    }
+                    //---------------------------------------------------------------------------------
+                }
+                if (found) break;
+            }
+
+            if (!found) {
+                // Mark the edge as not common.
+                vertex1->type = - 1;
+            } else {
+                // Mark the edge as common.
+                vertex1->type = 0;
+                numCommonEdges++;
+            }
         }
-        if (found) break;
-      }
-
-      if (!found)
-      {
-        // Mark the edge as not common.
-        vertex1->type = - 1;
-      }
-      else
-      {
-        // Mark the edge as common.
-        vertex1->type = 0;
-        numCommonEdges++;
-      }
     }
-  }
 
   // 2. Building contacts (polylines).
   // Note that two polygons can have more than one contact.

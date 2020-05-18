@@ -49,7 +49,7 @@ void IntersectFaultsWithFaults(const Objects &faults, FaultIntersectionList &fau
 
 // Intersects a fault with a polygon.
 // Returns whether they are intersecting.
-bool FaultAndPolygonIntersecting(const Object &fault, const Object &polygon);
+bool FaultAndPolygonIntersecting(const Object &fault, const Object &polygon, double distanceEpsilon = 0.);
 
 // Intersects a fault with a fault.
 // Returns intersection type, and intersection angle.

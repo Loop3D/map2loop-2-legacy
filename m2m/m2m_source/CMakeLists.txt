@@ -26,6 +26,10 @@ target_include_directories(map2model PUBLIC ${SRCS_INCLUDE})
 
 ########################################################################################
 
+if (CMAKE_COMPILER_IS_GNUCXX)
+    add_definitions(-std=gnu++0x)
+endif()
+
 # Adding compiler flags.
 if ( CMAKE_COMPILER_IS_GNUCC )
     SET (GCC_FLAGS -m64 -mfpmath=sse -O3 -ffast-math -march=native -funroll-loops -Wall -Wno-unknown-pragmas -Wextra)
