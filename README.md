@@ -20,19 +20,20 @@ If you wish to, create your own python virtual environment with the following mo
 
 ## Build with Docker
 
-Download and install the docker containerisation framework and CLI [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/)
+Download and install the docker containerisation software and CLI [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/)
 
-Clone this repo and navigate inside. Run the following to build the 'm2l' container.
+1. Clone this repo and navigate inside. 
+2. Run the following command and click on the link Jupyter outputs to access the original [map2loop](https://github.com/Loop3D/map2loop) notebooks.
 
-```bash
-docker build -t m2l .
-```
+    ```bash
+    docker-compose up
+    ```
 
-Then execute the following  to run the example notebooks.
+3. To jump into a bash shell in the container itself, open a new terminal and issue the following command. 
 
-```bash
-docker run -it -p 8888:8888 m2l
-```
+    ```bash
+    docker exec -it map2loop-2_dev_1 bash
+    ```
 
 ## Install via PyPi
 

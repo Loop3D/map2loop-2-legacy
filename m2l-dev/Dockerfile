@@ -1,5 +1,8 @@
 FROM continuumio/miniconda3
 
+# Synced development folder
+COPY . /m2l-dev
+
 # Install deps for compiling m2m
 RUN apt update && apt install -y build-essential git cmake
 
@@ -19,5 +22,7 @@ RUN /bin/bash -c "chmod +x build-m2m.sh"
 RUN /bin/bash -c "chmod -R 777 /m2m_source"
 RUN ./build-m2m.sh
 
-
+# Execute jupyter on run 
 CMD ["jupyter","notebook","map2loop","--ip=0.0.0.0", "--allow-root", "--no-browser"]
+
+EXPOSE 8888

@@ -1,0 +1,17 @@
+version: "3"
+
+services:
+  dev:
+    build: ./m2l-dev
+    volumes:
+      - ./m2l-dev:/m2l-dev
+    ports:
+      - 8888:8888
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "0.001"
+    #       memory: 50M
+    #     reservations:
+    #       cpus: "0.0001"
+    #       memory: 20M
