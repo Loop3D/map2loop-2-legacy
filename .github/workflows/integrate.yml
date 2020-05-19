@@ -1,0 +1,14 @@
+name: Container CI
+
+on:
+    pull_request:
+        branches: [master]
+
+jobs:
+    line_endings:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - run: |
+            git config --global core.autocrlf false
+            git config --global core.eol lf
