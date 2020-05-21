@@ -1,0 +1,180 @@
+Ashburton Formation	#31d6d8
+Ashburton Formation	#31d6d8
+Ashburton Formation	#31d6d8
+Beasley River Quartzite	#e37955
+Beasley River Quartzite	#e37955
+Beasley River Quartzite	#e37955
+Bellary Formation	#c9ce5d
+Bellary Formation	#c9ce5d
+Bellary Formation	#c9ce5d
+Boolgeeda Iron Formation	#d0986a
+Boolgeeda Iron Formation	#d0986a
+Boolgeeda Iron Formation	#d0986a
+Boongal Formation	#0ccfab
+Boongal Formation	#0ccfab
+Boongal Formation	#0ccfab
+Bresnahan Group	#cca935
+Bresnahan Group	#cca935
+Bresnahan Group	#cca935
+Brockman Iron Formation	#dc4c42
+Brockman Iron Formation	#dc4c42
+Brockman Iron Formation	#dc4c42
+Bunjinah Formation	#4e80cb
+Bunjinah Formation	#4e80cb
+Bunjinah Formation	#4e80cb
+Capricorn Group	#d54c7a
+Capricorn Group	#d54c7a
+Capricorn Group	#d54c7a
+Cheela Springs Basalt	#ae81df
+Cheela Springs Basalt	#ae81df
+Cheela Springs Basalt	#ae81df
+Cockeraga Leucogranite	#5ebeea
+Cockeraga Leucogranite	#5ebeea
+Cockeraga Leucogranite	#5ebeea
+Collier Group, Depositional package 5	#68ec6d
+Collier Group, Depositional package 5	#68ec6d
+Collier Group, Depositional package 5	#68ec6d
+Duck Creek Dolomite	#5ad19a
+Duck Creek Dolomite	#5ad19a
+Duck Creek Dolomite	#5ad19a
+Durlacher Supersuite	#ca749a
+Durlacher Supersuite	#ca749a
+Durlacher Supersuite	#ca749a
+Edmund Group, Depositional package 1	#14d454
+Edmund Group, Depositional package 1	#14d454
+Edmund Group, Depositional package 1	#14d454
+Edmund Group, Depositional package 2	#db2c8a
+Edmund Group, Depositional package 2	#db2c8a
+Edmund Group, Depositional package 2	#db2c8a
+Edmund Group, Depositional package 3	#aa7dec
+Edmund Group, Depositional package 3	#aa7dec
+Edmund Group, Depositional package 3	#aa7dec
+Edmund Group, Depositional package 4	#30dd47
+Edmund Group, Depositional package 4	#30dd47
+Edmund Group, Depositional package 4	#30dd47
+Elizabeth Hill Supersuite	#9a1dd4
+Elizabeth Hill Supersuite	#9a1dd4
+Elizabeth Hill Supersuite	#9a1dd4
+Fortescue Group	#ea2f48
+Fortescue Group	#ea2f48
+Fortescue Group	#ea2f48
+Hardey Formation	#9deb73
+Hardey Formation	#9deb73
+Hardey Formation	#9deb73
+Jeerinah Formation	#941ce9
+Jeerinah Formation	#941ce9
+Jeerinah Formation	#941ce9
+Kazput Formation	#e462e6
+Kazput Formation	#e462e6
+Kazput Formation	#e462e6
+Koolbye Formation	#6c3cdb
+Koolbye Formation	#6c3cdb
+Koolbye Formation	#6c3cdb
+Kulkatharra Dolerite	#d67ae2
+Kulkatharra Dolerite	#d67ae2
+Kulkatharra Dolerite	#d67ae2
+Kungarra Formation	#e78bc5
+Kungarra Formation	#e78bc5
+Kungarra Formation	#e78bc5
+Kylena Formation	#1a71cd
+Kylena Formation	#1a71cd
+Kylena Formation	#1a71cd
+Leake Spring Metamorphics	#2235d8
+Leake Spring Metamorphics	#2235d8
+Leake Spring Metamorphics	#2235d8
+Maddina Formation	#60d1e0
+Maddina Formation	#60d1e0
+Maddina Formation	#60d1e0
+Marra Mamba Iron Formation	#6262dc
+Marra Mamba Iron Formation	#6262dc
+Marra Mamba Iron Formation	#6262dc
+Metawandy Granite	#6b5fdc
+Metawandy Granite	#6b5fdc
+Metawandy Granite	#6b5fdc
+Milli Milli inlier greenstones	#7adfa6
+Milli Milli inlier greenstones	#7adfa6
+Milli Milli inlier greenstones	#7adfa6
+Milli Milli Inlier metagranitic unit	#c92b9c
+Milli Milli Inlier metagranitic unit	#c92b9c
+Milli Milli Inlier metagranitic unit	#c92b9c
+Moorarie Supersuite	#d146c6
+Moorarie Supersuite	#d146c6
+Moorarie Supersuite	#d146c6
+Mount McGrath Formation	#ec962d
+Mount McGrath Formation	#ec962d
+Mount McGrath Formation	#ec962d
+Mount McRae Shale and Mount Sylvia Formation	#73ef6a
+Mount McRae Shale and Mount Sylvia Formation	#73ef6a
+Mount McRae Shale and Mount Sylvia Formation	#73ef6a
+Mount Minnie Group	#0fee9d
+Mount Minnie Group	#0fee9d
+Mount Minnie Group	#0fee9d
+Mount Roe Basalt	#e2d057
+Mount Roe Basalt	#e2d057
+Mount Roe Basalt	#e2d057
+Mundine Well Dolerite Suite	#b9ee55
+Mundine Well Dolerite Suite	#b9ee55
+Mundine Well Dolerite Suite	#b9ee55
+Nanutarra Formation	#de2f10
+Nanutarra Formation	#de2f10
+Nanutarra Formation	#de2f10
+Nanutarra Formation and Yarraloola Conglomerate	#d7723b
+Nanutarra Formation and Yarraloola Conglomerate	#d7723b
+Nanutarra Formation and Yarraloola Conglomerate	#d7723b
+Narimbunna Dolerite	#7f99d5
+Narimbunna Dolerite	#7f99d5
+Narimbunna Dolerite	#7f99d5
+Pilbara Supergroup	#b9e926
+Pilbara Supergroup	#b9e926
+Pilbara Supergroup	#b9e926
+Pooranoo Metamorphics	#a9de7c
+Pooranoo Metamorphics	#a9de7c
+Pooranoo Metamorphics	#a9de7c
+Proterozoic mafic intrusive unit	#ef5f80
+Proterozoic mafic intrusive unit	#ef5f80
+Proterozoic mafic intrusive unit	#ef5f80
+Pyradie Formation	#765ddb
+Pyradie Formation	#765ddb
+Pyradie Formation	#765ddb
+Rocklea Inlier greenstones	#7ad35d
+Rocklea Inlier greenstones	#7ad35d
+Rocklea Inlier greenstones	#7ad35d
+Rocklea Inlier metagranitic unit	#25e2d3
+Rocklea Inlier metagranitic unit	#25e2d3
+Rocklea Inlier metagranitic unit	#25e2d3
+Sisters Supersuite	#74b6e4
+Sisters Supersuite	#74b6e4
+Sisters Supersuite	#74b6e4
+Tumbiana Formation	#3ed561
+Tumbiana Formation	#3ed561
+Tumbiana Formation	#3ed561
+Turee Creek Group	#4de6be
+Turee Creek Group	#4de6be
+Turee Creek Group	#4de6be
+Uaroo Group	#63cc51
+Uaroo Group	#63cc51
+Uaroo Group	#63cc51
+Weeli Wolli Formation	#c01eec
+Weeli Wolli Formation	#c01eec
+Weeli Wolli Formation	#c01eec
+Winning Group	#c0ee88
+Winning Group	#c0ee88
+Winning Group	#c0ee88
+Wittenoom Formation	#d2b37a
+Wittenoom Formation	#d2b37a
+Wittenoom Formation	#d2b37a
+Wooly Dolomite	#dcd61a
+Wooly Dolomite	#dcd61a
+Wooly Dolomite	#dcd61a
+Woongarra Rhyolite	#27b2d8
+Woongarra Rhyolite	#27b2d8
+Woongarra Rhyolite	#27b2d8
+Wyloo Group	#f08f92
+Wyloo Group	#f08f92
+Wyloo Group	#f08f92
+Wyloo Inlier greenstones	#ca14a9
+Wyloo Inlier greenstones	#ca14a9
+Wyloo Inlier greenstones	#ca14a9
+Yarraloola Conglomerate	#cce539
+Yarraloola Conglomerate	#cce539
+Yarraloola Conglomerate	#cce539

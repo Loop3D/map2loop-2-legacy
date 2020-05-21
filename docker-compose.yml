@@ -2,9 +2,9 @@ version: "3"
 
 services:
   dev:
-    build: ./m2l-dev
+    build: ./
     volumes:
-      - ./m2l-dev:/m2l-dev
+      - ./:/map2loop-2
     ports:
       - 8888:8888
     # deploy:

@@ -1,0 +1,61 @@
+Kulkatharra Dolerite	#265e99
+Kazput Formation	#299299
+Nanutarra Formation and Yarraloola Conglomerate	#2ab7c9
+Bresnahan Group	#2b35a6
+Collier Group, Depositional package 5	#2e50c9
+Metawandy Granite	#2fa158
+Moorarie Supersuite	#319e35
+Nanutarra Formation	#327ac2
+Wyloo Group	#3850a6
+Sisters Supersuite	#38c964
+Duck Creek Dolomite	#3936c2
+Edmund Group, Depositional package 1	#3a9984
+Durlacher Supersuite	#3bb528
+Mount Minnie Group	#3c68ba
+Woongarra Rhyolite	#3fc491
+Leake Spring Metamorphics	#407ead
+Brockman Iron Formation	#47c47b
+Ashburton Formation	#4b9ec4
+Koolbye Formation	#4dbfac
+Pyradie Formation	#4f47c4
+Kylena Formation	#54379e
+Wooly Dolomite	#5a9e2f
+Boongal Formation	#5fb52a
+Milli Milli Inlier metagranitic unit	#6522a1
+Edmund Group, Depositional package 2	#8322a3
+Capricorn Group	#8443c4
+Tumbiana Formation	#863a9c
+Uaroo Group	#90b846
+Bellary Formation	#92a339
+Jeerinah Formation	#94c736
+Wittenoom Formation	#99803a
+Turee Creek Group	#998c2b
+Bunjinah Formation	#9a2ac9
+Yarraloola Conglomerate	#9c2794
+Marra Mamba Iron Formation	#9c3a6f
+Winning Group	#9e3c4b
+Rocklea Inlier metagranitic unit	#9e5936
+Narimbunna Dolerite	#a1274f
+Proterozoic mafic intrusive unit	#a13d27
+Boolgeeda Iron Formation	#a16e33
+Cockeraga Leucogranite	#a32c7d
+Wyloo Inlier greenstones	#a33336
+Elizabeth Hill Supersuite	#a7bf3b
+Edmund Group, Depositional package 3	#a84262
+Cheela Springs Basalt	#a842a1
+Mount McGrath Formation	#b02865
+Edmund Group, Depositional package 4	#b150c7
+Mount McRae Shale and Mount Sylvia Formation	#b23ac2
+Weeli Wolli Formation	#bac229
+Milli Milli inlier greenstones	#bf7030
+Mundine Well Dolerite Suite	#c2384f
+Kungarra Formation	#c26134
+Pooranoo Metamorphics	#c2b84e
+Fortescue Group	#c4a72f
+<all other values>	#c4f2ef
+Rocklea Inlier greenstones	#c72e82
+Hardey Formation	#c93ca6
+Maddina Formation	#c93d2a
+Pilbara Supergroup	#c9433c
+Mount Roe Basalt	#c9517f
+Beasley River Quartzite	#c99444
