@@ -69,7 +69,7 @@ class Project(object):
         self.workflow = workflow
 
     def update_roi(self, bbox):
-        # TODO: Make crs defaults and specifyable not from config
+        # TODO: Make crs defaults and specifiable not from config
         minx=bbox[0]
         maxx=bbox[1]
         miny=bbox[2]
