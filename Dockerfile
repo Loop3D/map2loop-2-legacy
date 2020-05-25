@@ -23,6 +23,10 @@ RUN pip install /LoopStructural
 # > Gempy
 RUN pip install -r /map2loop-2/engines/gempy-requirements.txt
 RUN pip install gempy
+# > PyNoddy
+RUN git clone https://github.com/cgre-aachen/pynoddy
+RUN cp /map2loop-2/engines/noddy /usr/bin
+RUN pip install pynoddy
 
 # Build map2model from source
 ADD maps/m2m /
