@@ -9,6 +9,7 @@ from maps.roi import ROI
 class Project(object):
     def __init__(self, 
                 workflow={'model_engine':'geomodeller'},
+                # TODO: Add top and base
                 bbox=(500057,7455348,603028,7567953)   #region of interest coordinates in metre-based system (or non-degree system)
                 ):
         

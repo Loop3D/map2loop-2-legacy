@@ -1,6 +1,6 @@
 FROM continuumio/miniconda3
 
-# # Synced development folder
+# Synced development folder
 COPY . /map2loop-2
 
 # Install deps for compiling m2m
@@ -15,9 +15,14 @@ RUN /bin/bash -c "source activate m2l"
 RUN git clone https://github.com/Loop3D/map2loop
 RUN pip install /map2loop
 
+# Fetch and install ensemble generator
+RUN git clone --branch docker --single-branch https://Loop3D:2fae576a7fb2b205dddfc7a8004a694812623142@github.com/Loop3D/ensemble_generator
+RUN pip install /ensemble_generator
+
 # Fetch and install model engines
 RUN git clone https://Loop3D:2fae576a7fb2b205dddfc7a8004a694812623142@github.com/Loop3D/LoopStructural
 # > Structural
+RUN pip install lavavu
 RUN pip install -r /LoopStructural/requirements.txt
 RUN pip install /LoopStructural
 # > Gempy

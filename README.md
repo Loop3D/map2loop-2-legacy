@@ -1,4 +1,4 @@
-# README
+# Map2Loop 2.0
 
 Generate model input data from geological maps. Revision of objectives in [https://github.com/Loop3D/map2loop](https://github.com/Loop3D/map2loop)
 
@@ -39,6 +39,8 @@ Download and install the docker containerisation software and CLI [https://docs.
 
 Still to come...
 
-### Bugs
+### Known Issues
+
+- Developing using docker on a Windows host will mean you will not have GPU passthrough funtionality - so can't use a discrete graphics card in the container even if you have one.
 
 ### References
