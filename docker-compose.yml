@@ -7,11 +7,11 @@ services:
       - ./:/map2loop-2
     ports:
       - 8888:8888
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: "0.001"
-    #       memory: 50M
-    #     reservations:
-    #       cpus: "0.0001"
-    #       memory: 20M
+    deploy:
+      resources:
+        # limits:
+        #   cpus: "0.001"
+        #   memory: 50M
+        reservations:
+          # cpus: "0.0001"
+          memory: 4G
