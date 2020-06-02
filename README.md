@@ -25,9 +25,15 @@ Download and install the docker containerisation software and CLI [https://docs.
 1. Clone this repo and navigate inside.
 2. Run the following command and click on the link Jupyter outputs to access the original [map2loop](https://github.com/Loop3D/map2loop) notebooks.
 
+<<<<<<< HEAD
    ```bash
    docker-compose --compatibility up
    ```
+=======
+    ```bash
+    docker-compose --compatability up
+    ```
+>>>>>>> 295a4a5f2eff1699f892bdd87412999f7f501124
 
 3. To jump into a bash shell in the container itself, open a new terminal and issue the following command.
 
