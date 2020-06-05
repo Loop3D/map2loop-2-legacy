@@ -17,6 +17,8 @@ class Project(object):
         self.update_workflow(workflow)
         self.update_roi(bbox)
 
+    # TODO: Make workflow dictionary more editable
+
     def update_workflow(self, workflow):
         if(workflow['model_engine'] == 'geomodeller'):
             workflow.update({'seismic_section': False,
@@ -72,6 +74,7 @@ class Project(object):
 
     def update_roi(self, bbox):
         # TODO: Make crs defaults and specifiable not from config
+        self.bbox = bbox
         minx = bbox[0]
         maxx = bbox[1]
         miny = bbox[2]
@@ -81,15 +84,15 @@ class Project(object):
         bbox_geom = Polygon(zip(lon_point_list, lat_point_list))
         polygon = gpd.GeoDataFrame(
             index=[0], crs=dst_crs, geometry=[bbox_geom])
-        self.roi = ROI(polygon)
+        self.roi = ROI(polygon, self.bbox[:4])
 
 
-def main():
-    proj = Project()
-    # print(proj.roi)
-    # print(proj.workflow)
-    print(proj)
+# def main():
+#     proj = Project()
+#     # print(proj.roi)
+#     # print(proj.workflow)
+#     print(proj)
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
