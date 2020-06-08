@@ -22,24 +22,23 @@ If you wish to, create your own python virtual environment with the following mo
 
 Download and install the docker containerisation software and CLI [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/)
 
-1. Clone this repo and navigate inside.
+1. Clone this repo and navigate inside using the recurse submodules flag to fetch the example data. 
+
+    ```bash
+    git clone --recurse-submodules https://github.com/Loop3D/map2loop-2
+    ```
+
 2. Run the following command and click on the link Jupyter outputs to access the original [map2loop](https://github.com/Loop3D/map2loop) notebooks.
 
-<<<<<<< HEAD
-   ```bash
-   docker-compose --compatibility up
-   ```
-=======
     ```bash
-    docker-compose --compatability up
+    docker-compose --compatibility up
     ```
->>>>>>> 295a4a5f2eff1699f892bdd87412999f7f501124
 
-3. To jump into a bash shell in the container itself, open a new terminal and issue the following command.
+3. To jump into a bash shell in the container itself, open a new terminal and issue the following command. 
 
-   ```bash
-   docker exec -it map2loop-2_dev_1 bash
-   ```
+    ```bash
+    docker exec -it map2loop-2_dev_1 bash
+    ```
 
 ## Install via PyPi
 
