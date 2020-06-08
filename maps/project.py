@@ -17,7 +17,9 @@ class Project(object):
                  fault_file="/map2loop-2/maps/data/GEOS_GEOLOGY_LINEARSTRUCTURE_500K_GSD.shp",
                  structure_file="/map2loop-2/maps/data/hams2_structure.shp",
                  mindep_file="/map2loop-2/maps/data/mindeps_2018.shp",
-                 bbox=(500057, 7455348, 603028, 7567953, -8200, 1200)
+                 bbox=(500057, 7455348, 603028, 7567953, -8200, 1200),
+                 src_crs={'init': 'EPSG:4326'},
+                 dst_crs={'init': 'EPSG:28350'}
                  ):
         # TODO: Create ways to get and set local files
         self.update_workflow(workflow)
@@ -25,6 +27,8 @@ class Project(object):
         self.fault_file = fault_file
         self.structure_file = structure_file
         self.mindep_file = mindep_file
+        self.src_crs = src_crs
+        self.dst_crs = dst_crs
 
         self.update_roi(bbox)
     # TODO: Make workflow dictionary more editable
@@ -93,10 +97,9 @@ class Project(object):
         lon_point_list = [minx, maxx, maxx, minx, minx]
         bbox_geom = Polygon(zip(lon_point_list, lat_point_list))
         polygon = gpd.GeoDataFrame(
-            index=[0], crs=dst_crs, geometry=[bbox_geom])
-        # TODO: Allow acces to polygon dataframe
+            index=[0], crs=self.dst_crs, geometry=[bbox_geom])
         self.roi = ROI(self.geology_file, self.fault_file,
-                       self.structure_file, self.mindep_file, self.bbox[:4], c_l)
+                       self.structure_file, self.mindep_file, self.bbox[:4], polygon, c_l)
 
 
 # def main():
