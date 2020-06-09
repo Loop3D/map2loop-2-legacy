@@ -25,6 +25,7 @@ class Project(object):
                      "base": -8200,
                      "top": 1200,
                  },
+                 step_out=0.1,
                  src_crs={'init': 'EPSG:4326'},
                  dst_crs={'init': 'EPSG:28350'}
                  ):
@@ -37,7 +38,7 @@ class Project(object):
         self.src_crs = src_crs
         self.dst_crs = dst_crs
 
-        self.update_roi(bbox)
+        self.update_roi(bbox, step_out)
     # TODO: Make workflow dictionary more editable
 
     def update_workflow(self, workflow):
@@ -93,7 +94,7 @@ class Project(object):
                              'contact_dips': False})
         self.workflow = workflow
 
-    def update_roi(self, bbox):
+    def update_roi(self, bbox, step_out):
         # TODO: Make crs defaults and specifiable not from config
         minx, miny, maxx, maxy = list(bbox.values())[:4]
         lat_point_list = [miny, miny, maxy, maxy, maxy]
@@ -102,7 +103,7 @@ class Project(object):
         polygon = gpd.GeoDataFrame(
             index=[0], crs=self.dst_crs, geometry=[bbox_geom])
         self.roi = ROI(self.geology_file, self.fault_file,
-                       self.structure_file, self.mindep_file, bbox, polygon, c_l)
+                       self.structure_file, self.mindep_file, bbox, polygon, step_out, c_l)
 
     def plot_roi(self):
         self.roi.plot()
