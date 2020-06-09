@@ -20,9 +20,7 @@ class ROI(object):
             self.structures.plot(ax=base, color='none', edgecolor='black')
             self.lines.plot(ax=base, cmap='rainbow',
                             column=self.c_l['f'], figsize=(10, 10), linewidth=0.4)
-            # TODO: - polygon roi not plotting correctly
-            #       - make a plot function in project that plots the above stuff in here
-            # polygon.plot(ax=base, color='none', edgecolor='black')
+            self.polygon.plot(ax=base, color='none', edgecolor='black')
 
         except Exception as e:
             print(e)
