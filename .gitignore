@@ -5,7 +5,8 @@
 
 ### M2L stuff ###
 notebooks/model-test
-notebooks/.ipynb_checkpoints
+notebooks/.ipynb_checkpoints/*
+notebooks/Testing.ipynb
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
