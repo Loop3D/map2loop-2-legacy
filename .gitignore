@@ -2,6 +2,11 @@
 # Created by https://www.gitignore.io/api/python,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=python,visualstudiocode
 
+
+### M2L stuff ###
+notebooks/model-test
+notebooks/.ipynb_checkpoints
+
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
