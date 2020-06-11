@@ -17,15 +17,6 @@ class Project(object):
                  fault_file="/map2loop-2/maps/data/GEOS_GEOLOGY_LINEARSTRUCTURE_500K_GSD.shp",
                  structure_file="/map2loop-2/maps/data/hams2_structure.shp",
                  mindep_file="/map2loop-2/maps/data/mindeps_2018.shp",
-                 bbox={
-                     "minx": 500057,
-                     "maxx": 7455348,
-                     "miny": 603028,
-                     "maxy": 7567953,
-                     "base": -8200,
-                     "top": 1200,
-                 },
-                 step_out=0.1,
                  src_crs={'init': 'EPSG:4326'},
                  dst_crs={'init': 'EPSG:28350'}
                  ):
@@ -37,9 +28,6 @@ class Project(object):
         self.mindep_file = mindep_file
         self.src_crs = src_crs
         self.dst_crs = dst_crs
-
-        self.update_model(bbox, step_out)
-    # TODO: Make workflow dictionary more editable
 
     def update_workflow(self, workflow):
         if(workflow['model_engine'] == 'geomodeller'):
@@ -94,16 +82,26 @@ class Project(object):
                              'contact_dips': False})
         self.workflow = workflow
 
-    def update_model(self, bbox, step_out):
+    def update_model(self,
+                     bbox_3d={
+                         "minx": 500057,
+                         "maxx": 7455348,
+                         "miny": 603028,
+                         "maxy": 7567953,
+                         "base": -8200,
+                         "top": 1200,
+                     },
+                     step_out=0.1,
+                     ):
         # TODO: Make crs defaults and specifiable not from config
-        minx, miny, maxx, maxy = list(bbox.values())[:4]
+        minx, miny, maxx, maxy = list(bbox_3d.values())[:4]
         lat_point_list = [miny, miny, maxy, maxy, maxy]
         lon_point_list = [minx, maxx, maxx, minx, minx]
         bbox_geom = Polygon(zip(lon_point_list, lat_point_list))
         polygon = gpd.GeoDataFrame(
             index=[0], crs=self.dst_crs, geometry=[bbox_geom])
         self.model = Model(self.geology_file, self.fault_file,
-                           self.structure_file, self.mindep_file, bbox, polygon, step_out, c_l)
+                           self.structure_file, self.mindep_file, bbox_3d, polygon, step_out, c_l)
 
     def plot_model(self):
         self.model.plot()
