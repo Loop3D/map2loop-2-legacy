@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from shapely.geometry import Polygon
 
-from maps.roi import ROI
+from maps.model import Model
 
 
 class Project(object):
@@ -38,7 +38,7 @@ class Project(object):
         self.src_crs = src_crs
         self.dst_crs = dst_crs
 
-        self.update_roi(bbox, step_out)
+        self.update_model(bbox, step_out)
     # TODO: Make workflow dictionary more editable
 
     def update_workflow(self, workflow):
@@ -94,7 +94,7 @@ class Project(object):
                              'contact_dips': False})
         self.workflow = workflow
 
-    def update_roi(self, bbox, step_out):
+    def update_model(self, bbox, step_out):
         # TODO: Make crs defaults and specifiable not from config
         minx, miny, maxx, maxy = list(bbox.values())[:4]
         lat_point_list = [miny, miny, maxy, maxy, maxy]
@@ -102,8 +102,8 @@ class Project(object):
         bbox_geom = Polygon(zip(lon_point_list, lat_point_list))
         polygon = gpd.GeoDataFrame(
             index=[0], crs=self.dst_crs, geometry=[bbox_geom])
-        self.roi = ROI(self.geology_file, self.fault_file,
-                       self.structure_file, self.mindep_file, bbox, polygon, step_out, c_l)
+        self.model = Model(self.geology_file, self.fault_file,
+                           self.structure_file, self.mindep_file, bbox, polygon, step_out, c_l)
 
-    def plot_roi(self):
-        self.roi.plot()
+    def plot_model(self):
+        self.model.plot()

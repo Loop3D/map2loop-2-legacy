@@ -2,7 +2,7 @@ import geopandas as gpd
 import os
 
 
-class ROI(object):
+class Model(object):
     def __init__(self, geology_file, fault_file, structure_file, mindep_file, bbox_3d, polygon, step_out, c_l={}):
         self.bbox_3d = bbox_3d
         self.bbox = tuple(list(bbox_3d.values())[:4])
@@ -10,13 +10,13 @@ class ROI(object):
         self.step_out = step_out
         self.c_l = c_l
 
-        # Create file structure for roi instance
+        # Create file structure for model instance
         self.geology_file = geology_file
         self.structure_file = structure_file
         self.fault_file = fault_file
         self.mindep_file = mindep_file
 
-        self.test_data_path = './roi-test/'
+        self.test_data_path = './model-test/'
 
         self.graph_path = self.test_data_path+'graph/'
         self.tmp_path = self.test_data_path+'tmp/'
