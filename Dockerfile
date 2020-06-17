@@ -4,7 +4,11 @@ FROM continuumio/miniconda3
 COPY . /map2loop-2
 
 # Install deps for compiling m2m
-RUN apt update && apt install -y build-essential git cmake python3-vtk7 pybind11-dev xvfb 
+RUN apt update && apt install -y build-essential mlocate git cmake vim python3-dev python3-vtk7 xvfb 
+RUN updatedb
+
+RUN git clone https://gist.github.com/yohanderose/083a04767328de71128b542d300e75dc vimstuff
+RUN cp vimstuff/.vimrc /etc/vim/vimrc
 
 # Create m2l conda environment:
 RUN conda env create -f /map2loop-2/environment.yml
@@ -24,6 +28,7 @@ RUN ./build-m2m.sh
 
 # Install new package
 RUN pip install -e /map2loop-2
+RUN pip install pybind11
 
 # Fetch and install model engines
 # > Structural
