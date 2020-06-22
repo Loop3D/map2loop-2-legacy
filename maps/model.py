@@ -17,28 +17,30 @@ class Model(object):
         self.fault_file = fault_file
         self.mindep_file = mindep_file
 
-        self.test_data_path = './model-test/'
+        self.project_path = './model-test'
 
-        self.graph_path = self.test_data_path+'graph/'
-        self.tmp_path = self.test_data_path+'tmp/'
-        self.data_path = self.test_data_path+'data/'
-        self.dtm_path = self.test_data_path+'dtm/'
-        self.output_path = self.test_data_path+'output/'
-        self.vtk_path = self.test_data_path+'vtk/'
+        self.graph_path = self.project_path+'/graph'
+        self.tmp_path = self.project_path+'/tmp'
+        self.data_path = self.project_path+'/data'
+        self.dtm_path = self.project_path+'/dtm'
+        self.output_path = self.project_path+'/output'
+        self.vtk_path = self.project_path+'/vtk'
 
-        self.fault_file_csv = self.tmp_path + "faults.csv"
-        self.structure_file_csv = self.tmp_path + "structure.csv"
-        self.geology_file_csv = self.tmp_path + "geology.csv"
-        self.mindep_file_csv = self.tmp_path + "mindep.csv"
+        self.fault_file_csv = self.tmp_path + "/faults.csv"
+        self.structure_file_csv = self.tmp_path + "/structure.csv"
+        self.geology_file_csv = self.tmp_path + "/geology.csv"
+        self.mindep_file_csv = self.tmp_path + "/mindep.csv"
 
-        self.strat_graph_file = self.graph_path + "graph_strat_NONE.gml"
-        self.dtm_file = self.dtm_path+'dtm.tif'
-        self.dtm_reproj_file = self.dtm_path+'dtm_rp.tif'
+        self.strat_graph_file = self.graph_path + "/graph_strat_NONE.gml"
+        self.dtm_file = self.dtm_path+'/dtm.tif'
+        self.dtm_reproj_file = self.dtm_path+'/dtm_rp.tif'
 
-        if(not os.path.isdir(self.test_data_path)):
-            os.mkdir(self.test_data_path)
+        if(not os.path.isdir(self.project_path)):
+            os.mkdir(self.project_path)
         if(not os.path.isdir(self.tmp_path)):
             os.mkdir(self.tmp_path)
+        if(not os.path.isdir(self.data_path)):
+            os.mkdir(self.data_path)
         if(not os.path.isdir(self.output_path)):
             os.mkdir(self.output_path)
         if(not os.path.isdir(self.dtm_path)):
@@ -91,3 +93,10 @@ class Model(object):
             # Save faults
             sub_lines = lines[['geometry', self.c_l['o'], self.c_l['f']]]
             Topology.save_faults_wkt(sub_lines, self.fault_file_csv, self.c_l)
+
+            # Return those sub frames for debugging
+            # return sub_geol, sub_lines, sub_pts, sub_mindep
+
+    def update_parfile(self):
+        Topology.save_parfile(self, self.c_l, self.data_path, self.geology_file_csv, self.fault_file_csv, self.structure_file_csv,
+                              self.mindep_file_csv, self.bbox[0], self.bbox[1], self.bbox[2], self.bbox[3], 500.0, 'Fe,Cu,Au,NONE')
