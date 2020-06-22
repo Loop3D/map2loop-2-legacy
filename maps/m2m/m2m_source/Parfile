@@ -26,9 +26,9 @@ Distance buffer (fault stops on another fault) (m)  =20.0
 Distance buffer (point on contact) (m)              =100.0
 --- PATHS: -------------------------------------------------------------------------------------
 Path to the output data folder                      =output
-Path to geology data file                           =../data/out_geology/T1_500k_geol.csv
-Path to faults data file                            =../data/out_faults/T1_500k_linear.csv
-Path to mineral deposits data file                  =../data/mindeps_2018.csv
+Path to geology data file                           =data/out_geology/T1_500k_geol.csv
+Path to faults data file                            =data/out_faults/T1_500k_linear.csv
+Path to mineral deposits data file                  =data/mindeps_2018.csv
 ------------------------------------------------------------------------------------------------
 Clipping window X1 Y1 X2 Y2 (zeros for infinite)    =500000.000000003 7456480.23640195 654844.07850165 7566413.63123776
 Min length fraction for strat/fault graphs          =0.2

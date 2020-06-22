@@ -1,5 +1,6 @@
 import geopandas as gpd
 import os
+from maps.topology import Topology
 
 
 class Model(object):
@@ -47,18 +48,34 @@ class Model(object):
         if(not os.path.isdir(self.graph_path)):
             os.mkdir(self.graph_path)
 
-    def plot(self):
+    def preprocess(self, command="plot"):
         geology = gpd.read_file(self.geology_file, bbox=self.bbox)
         lines = gpd.read_file(self.fault_file, bbox=self.bbox)
         structures = gpd.read_file(self.structure_file, bbox=self.bbox)
+        mindep = gpd.read_file(self.mindep_file, bbox=self.bbox)
 
-        try:
-            base = geology.plot(column=self.c_l['c'], figsize=(
-                10, 10), edgecolor='#000000', linewidth=0.2)
-            structures.plot(ax=base, color='none', edgecolor='black')
-            lines.plot(ax=base, cmap='rainbow',
-                       column=self.c_l['f'], figsize=(10, 10), linewidth=0.4)
-            self.polygon.plot(ax=base, color='none', edgecolor='black')
+        if command == "plot":
+            try:
+                base = geology.plot(column=self.c_l['c'], figsize=(
+                    10, 10), edgecolor='#000000', linewidth=0.2)
+                structures.plot(ax=base, color='none', edgecolor='black')
+                lines.plot(ax=base, cmap='rainbow',
+                           column=self.c_l['f'], figsize=(10, 10), linewidth=0.4)
+                self.polygon.plot(ax=base, color='none', edgecolor='black')
 
-        except Exception as e:
-            print(e)
+            except Exception as e:
+                print(e)
+
+        elif command == "export_csv":
+            # Save geology polygons
+            hint_flag = False  # use GSWA strat database to provide relative age hints
+            sub_geol = geology[['geometry', self.c_l['o'], self.c_l['c'], self.c_l['g'],
+                                self.c_l['u'], self.c_l['min'], self.c_l['max'], self.c_l['ds'], self.c_l['r1'], self.c_l['r2']]]
+            Topology.save_geol_wkt(
+                sub_geol, self.geology_file_csv, self.c_l, hint_flag)
+
+            # Save mineral deposits
+            sub_mindep = mindep[['geometry', self.c_l['msc'], self.c_l['msn'],
+                                 self.c_l['mst'], self.c_l['mtc'], self.c_l['mscm'], self.c_l['mcom']]]
+            Topology.save_mindep_wkt(
+                sub_mindep, self.mindep_file_csv, self.c_l)

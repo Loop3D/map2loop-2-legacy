@@ -104,4 +104,4 @@ class Project(object):
                            self.structure_file, self.mindep_file, bbox_3d, polygon, step_out, c_l)
 
     def plot_model(self):
-        self.model.plot()
+        self.model.preprocess("plot")
