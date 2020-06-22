@@ -27,7 +27,7 @@ class Model(object):
         self.vtk_path = self.test_data_path+'vtk/'
 
         self.fault_file_csv = self.tmp_path + "faults.csv"
-        self.fault_file_csv = self.tmp_path + "structure.csv"
+        self.structure_file_csv = self.tmp_path + "structure.csv"
         self.geology_file_csv = self.tmp_path + "geology.csv"
         self.mindep_file_csv = self.tmp_path + "mindep.csv"
 
@@ -61,6 +61,8 @@ class Model(object):
                 structures.plot(ax=base, color='none', edgecolor='black')
                 lines.plot(ax=base, cmap='rainbow',
                            column=self.c_l['f'], figsize=(10, 10), linewidth=0.4)
+                structures[['geometry', self.c_l['gi'],
+                            self.c_l['d'], self.c_l['dd']]].plot(ax=base)
                 self.polygon.plot(ax=base, color='none', edgecolor='black')
 
             except Exception as e:
@@ -79,3 +81,13 @@ class Model(object):
                                  self.c_l['mst'], self.c_l['mtc'], self.c_l['mscm'], self.c_l['mcom']]]
             Topology.save_mindep_wkt(
                 sub_mindep, self.mindep_file_csv, self.c_l)
+
+            # Save orientation data
+            sub_pts = structures[[
+                'geometry', self.c_l['gi'], self.c_l['d'], self.c_l['dd']]]
+            Topology.save_structure_wkt(
+                sub_pts, self.structure_file_csv, self.c_l)
+
+            # Save faults
+            sub_lines = lines[['geometry', self.c_l['o'], self.c_l['f']]]
+            Topology.save_faults_wkt(sub_lines, self.fault_file_csv, self.c_l)

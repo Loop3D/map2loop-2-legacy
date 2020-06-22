@@ -70,6 +70,34 @@ class Topology(object):
 
         f.close()
 
+    def save_structure_wkt(sub_pts, structure_file_csv, c_l):
+        f = open(structure_file_csv, "w+")
+        f.write('WKT\t'+c_l['gi']+'\t'+c_l['d']+'\t'+c_l['dd']+'\n')
+
+        print(len(sub_pts), " points")
+
+        for i in range(0, len(sub_pts)):
+            line = "\""+str(sub_pts.loc[i].geometry)+"\"\t\""+str(sub_pts.loc[i][c_l['gi']])+"\"\t\"" +\
+                str(sub_pts.loc[i][c_l['d']])+"\"\t\"" + \
+                str(sub_pts.loc[i][c_l['dd']])+"\"\n"
+            f.write(functools.reduce(operator.add, (line)))
+
+        f.close()
+
+    def save_faults_wkt(sub_lines, fault_file_csv, c_l):
+        f = open(fault_file_csv, "w+")
+        f.write('WKT\t'+c_l['o']+'\t'+c_l['f']+'\n')
+
+        print(len(sub_lines), " polylines")
+
+        for i in range(0, len(sub_lines)):
+            if(c_l['fault'] in sub_lines.loc[i][c_l['f']]):
+                f.write("\""+str(sub_lines.loc[i].geometry)+"\"\t")
+                f.write("\""+str(sub_lines.loc[i][c_l['o']])+"\"\t")
+                f.write("\""+str(sub_lines.loc[i][c_l['f']])+"\"\n")
+
+        f.close()
+
     def save_parfile(self, c_l, graph_path, geology_file_csv, fault_file_csv, structure_file_csv, mindep_file_csv, minx, maxx, miny, maxy, deposit_dist, commodities):
         f = open('/bin/Parfile', 'w')
         f.write(
