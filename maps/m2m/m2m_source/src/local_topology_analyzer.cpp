@@ -212,7 +212,7 @@ void LocalTopologyAnalyzer::BuildLocalGraphs(const Parameters &par, Converter &c
     converter.BuildUnitsAndGroupsLists();
 
     Contacts contacts;
-    converter.FindContacts(contacts);
+    converter.FindContacts(contacts, par.intersectPolygonsDistanceBuffer);
 
     converter.IdentifyPolygonContactTypes(contacts, par.angleEpsilon, par.distanceEpsilon);
     converter.SplitMixedPolygonContacts(contacts);

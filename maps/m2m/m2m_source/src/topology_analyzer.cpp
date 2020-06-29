@@ -284,7 +284,7 @@ void TopologyAnalyzer::AnalyzeGlobalTopology(const Parameters &par, const std::s
 
   Contacts contacts, fault_contacts, stratigraphic_contacts;
 
-  double contact_length = converter.FindContacts(contacts);
+  double contact_length = converter.FindContacts(contacts, par.intersectPolygonsDistanceBuffer);
   converter.WriteImage("polygons_with_all_contacts", windows, 0, &contacts);
 
   converter.IdentifyPolygonContactTypes(contacts, par.angleEpsilon, par.distanceEpsilon);

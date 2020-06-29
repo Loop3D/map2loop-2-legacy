@@ -43,7 +43,7 @@ public:
 
   // Finds contacts between every pair of polygons.
   // Returns the total contact length.
-  double FindContacts(Contacts &contacts) const;
+  double FindContacts(Contacts &contacts, double distanceBuffer) const;
 
   //! Identify types of polygon contacts.
   void IdentifyPolygonContactTypes(Contacts &contacts, double angleEpsilon, double distanceEpsilon) const;

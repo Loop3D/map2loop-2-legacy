@@ -149,7 +149,12 @@ void FindClosestContactForPoints(PointPolygonIntersectionList &pointPolygonInter
                 }
             }
         }
-        assert(closestContactIndex >= 0);
+
+        if (closestContactIndex < 0) {
+            std::cout << "Failed to find the closest contact! Problems with the map!" << std::endl;
+            std::cout << "Try increasing \"Intersect polygons distance buffer\"." << std::endl;
+            exit(0);
+        }
 
         const Contact& closestContact = contacts[closestContactIndex];
 
@@ -574,13 +579,15 @@ std::size_t IntersectContactWithFault(Contact &contact, const Object &fault,
 }
 //=======================================================================================
 
-int IntersectPolygons(const Object &poly1, const Object &poly2, Contacts &contacts)
+int IntersectPolygons(const Object &poly1, const Object &poly2, Contacts &contacts, double distanceBuffer)
 {
   // 1. Identifying common edges (those that are present in both multi-polygons).
 
     Object poly = poly1;
 
     size_t numCommonEdges = 0;
+
+    double distanceBuffer2 = distanceBuffer * distanceBuffer;
 
     // Loop over all polygons within the first multi-polygon.
     for (Paths::iterator path1 = poly.paths.begin(); path1 != poly.paths.end(); path1++) {
@@ -608,22 +615,21 @@ int IntersectPolygons(const Object &poly1, const Object &poly2, Contacts &contac
                     //---------------------------------------------------------------------------------
                     // Patch for non-exact maps.
                     // Consider vertexes between polygons to coincide if they located within epsilon distance.
-                    double eps2 = 0.1; // epsilon distance (squared), in meters.
 
                     // Compare two edges: (v11, v12) vs (v21, v22).
                     double dist2_11_21 = ConverterUtils::GetDistanceSquared(v11, v21);
-                    if (dist2_11_21 <= eps2) {
+                    if (dist2_11_21 <= distanceBuffer2) {
                         double dist2_12_22 = ConverterUtils::GetDistanceSquared(v12, v22);
-                        if (dist2_12_22 <= eps2) {
+                        if (dist2_12_22 <= distanceBuffer2) {
                           found = true;
                           break;
                         }
                     }
                     // Compare two edges: (v11, v12) vs (v22, v21).
                     double dist2_11_22 = ConverterUtils::GetDistanceSquared(v11, v22);
-                    if (dist2_11_22 <= eps2) {
+                    if (dist2_11_22 <= distanceBuffer2) {
                         double dist2_12_21 = ConverterUtils::GetDistanceSquared(v12, v21);
-                        if (dist2_12_21 <= eps2) {
+                        if (dist2_12_21 <= distanceBuffer2) {
                           found = true;
                           break;
                         }

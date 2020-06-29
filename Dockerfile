@@ -65,6 +65,6 @@ RUN printf "#\041/bin/sh \n rm -f /tmp/.X99-lock && xvfb-run -s '-screen 0 1600x
 ENTRYPOINT ["/tini", "--", "/usr/local/bin/xvfbrun.sh"]
 
 # Execute jupyter on run 
-CMD ["jupyter","notebook","--ip=0.0.0.0", "--allow-root", "--no-browser"]
+CMD ["jupyter","notebook","--ip=0.0.0.0", "--allow-root", "--no-browser", "--NotebookApp.password=''"]
 
 EXPOSE 8888
