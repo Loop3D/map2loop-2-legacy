@@ -19,6 +19,10 @@ RUN /bin/bash -c "source activate m2l"
 # Fetch, install and setup original repo
 RUN git clone https://github.com/Loop3D/map2loop
 RUN pip install -e /map2loop
+RUN conda install -c conda-forge ipywidgets
+RUN conda install -c conda-forge ipyleaflet
+RUN conda install -c conda-forge folium
+RUN jupyter nbextension enable --py --sys-prefix ipyleaflet
 
 # Build map2model from source
 ADD maps/m2m /
