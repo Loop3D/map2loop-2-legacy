@@ -13,7 +13,7 @@ jobs:
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
-          name: yohanderose/map2loop-2_dev
+          name: yohanderose/map2loop-2_dev:0.0.2
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
           dockerfile: Dockerfile
