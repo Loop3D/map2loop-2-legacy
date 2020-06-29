@@ -160,6 +160,10 @@ std::string Parameters::Read(const std::string &filename)
     std::cout << buf << c << pointToContactDistanceBuffer << std::endl;
     infile.get(c);
 
+    infile.get(buf, 200, '='); infile.get(c); infile >> intersectPolygonsDistanceBuffer;
+    std::cout << buf << c << intersectPolygonsDistanceBuffer << std::endl;
+    infile.get(c);
+
     //--- PATHS: -------------------------------------------------------------------------------------
     std::getline(infile, line);
     std::cout << line << std::endl;

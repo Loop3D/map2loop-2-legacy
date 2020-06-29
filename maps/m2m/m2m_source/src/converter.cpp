@@ -303,7 +303,7 @@ Objects Converter::ClipDataObj(const Objects &objects, const AABB &window, bool 
 }
 //========================================================================================
 
-double Converter::FindContacts(Contacts &contacts) const
+double Converter::FindContacts(Contacts &contacts, double distanceBuffer) const
 {
   std::cout << "Finding contacts..." << std::endl;
 
@@ -317,7 +317,7 @@ double Converter::FindContacts(Contacts &contacts) const
       // Bounding box test.
       if (AABB::BoundingBoxesOverlap(it_i->aabb, it_j->aabb))
       {
-        numCommonEdges += IntersectPolygons(*it_i, *it_j, contacts);
+        numCommonEdges += IntersectPolygons(*it_i, *it_j, contacts, distanceBuffer);
       }
     }
   }
@@ -379,6 +379,10 @@ void Converter::PrintLengths(double contacts_length) const
   double length1 = m_window_length + 2.0 * contacts_length;
   double length2 = m_units_length;
   std::cout << "PERIMETER LENGTHS: " << length1 << " " << length2 << " " << length1 - length2 << std::endl;
+
+  if (abs(length1 - length2) > 1.0) {
+      std::cout << "WARNING: Map accuracy problems!" << std::endl;
+  }
 }
 //========================================================================================
 
@@ -954,7 +958,7 @@ UnitContacts Converter::FilterIgneousUnitContacts(const UnitContacts &contacts)
     for (UnitContacts::const_iterator it = contacts.cbegin();
          it != contacts.cend(); ++it) {
 
-        if (it->isIntrusiveIgneous && it->type != FaultContact) {
+        if (it->isIgneous && it->type != FaultContact) {
             filteredContacts.push_back(*it);
         }
     }

@@ -1,7 +1,7 @@
 /******************************************************************************
 * Different types used in ConverterLib.
 *
-* Author: Vitaliy Ogarko (2016).
+* Author: Vitaliy Ogarko, vogarko@gmail.com
 *******************************************************************************/
 
 #ifndef converter_types_h
@@ -23,33 +23,34 @@ namespace ConverterLib {
 class Object
 {
 public:
-  // Unique id.
-  int id;
-  // Min/max age ma (for polygons).
-  double min_age, max_age;
-  // Unit name (for polygons).
-  std::string name;
-  // Group name (for polygons).
-  std::string group;
-  // ENGUINT code (for polygons).
-  std::string code;
-  // Description (for polygons).
-  std::string description;
-  // Rocktypes (for polygons).
-  std::string rocktype1, rocktype2;
+    Object():
+        id(-1),
+        min_age(0.),
+        max_age(0.)
+    {};
 
-  // Site code (for deposits).
-  std::string site_code;
-  // Site commodity (for deposits).
-  std::string site_commo;
-
-  // Polygons withing a multi-polygon, or a fault, or point coordinates.
-  Paths paths;
-  // Bounding box (AABB), Y-axis points down.
-  AABB aabb;
-
-  Object(AABB _aabb = AABB(0)):
-         aabb(_aabb) {};
+    // Unique id.
+    int id;
+    // Min/max age ma (for polygons).
+    double min_age, max_age;
+    // Unit name (for polygons).
+    std::string name;
+    // Group name (for polygons).
+    std::string group;
+    // ENGUINT code (for polygons).
+    std::string code;
+    // Description (for polygons).
+    std::string description;
+    // Rocktypes (for polygons).
+    std::string rocktype1, rocktype2;
+    // Site code (for deposits).
+    std::string site_code;
+    // Site commodity (for deposits).
+    std::string site_commo;
+    // Polygons withing a multi-polygon, or a fault, or point coordinates.
+    Paths paths;
+    // Bounding box (AABB), Y-axis points down.
+    AABB aabb;
 };
 
 enum ContactType { StratigraphicContact, FaultContact, MixedContact, NotSpecifiedContact,
@@ -59,32 +60,47 @@ enum ContactType { StratigraphicContact, FaultContact, MixedContact, NotSpecifie
 class Contact
 {
 public:
-  // Unique contact id.
-  int id;
-  // Pointers to polygons that share a contact.
-  const Object *obj1, *obj2;
-  // Coordinates of vertexes.
-  Path path;
-  // The contact length (in meters).
-  double length;
-  // Contact type.
-  ContactType type;
+    Contact():
+        id(-1),
+        obj1(NULL),
+        obj2(NULL),
+        length(0.),
+        type(NotSpecifiedContact),
+        faultID(-1)
+    {};
 
-  // For fault contact type.
-  int faultID;
+    // Unique contact id.
+    int id;
+    // Pointers to polygons that share a contact.
+    const Object *obj1, *obj2;
+    // Coordinates of vertexes.
+    Path path;
+    // The contact length (in meters).
+    double length;
+    // Contact type.
+    ContactType type;
+    // For fault contact type.
+    int faultID;
 
-  Contact(int _id = - 1):
-          id(_id) {};
-
-  bool operator< (const Contact &other) const
-  {
-    return id < other.id;
-  }
+    bool operator< (const Contact &other) const {
+        return id < other.id;
+    }
 };
 
 struct PointInPolygon {
-    const Object* point;
+    PointInPolygon():
+        point(NULL),
+        onContact(false),
+        containingPolygon(NULL),
+        neighbourPolygon(NULL),
+        contactType(NotSpecifiedContact),
+        distanceToContact2(-1.),
+        faultObjectID(-1)
+    {};
 
+    // Point data (coordinates etc).
+    const Object* point;
+    // Flag if deposit sits on the contact.
     bool onContact;
     // Containing and neighbor polygons.
     const Object *containingPolygon, *neighbourPolygon;
@@ -101,29 +117,36 @@ typedef std::vector<PointInPolygon> PointPolygonIntersectionList;
 class Unit
 {
 public:
-  // Unique id only within a local (clipped) map.
-  int id;
-  // Unit name (unique identifier).
-  std::string name;
-  // Group name.
-  std::string group;
-  // ENGUINT codes of polygons that share this unit.
-  std::vector<std::string> codes;
-  // Perimeter length (total length of all polygon segments that belong to this unit).
-  double length;
-  // Min/max age (ma).
-  double min_age, max_age;
-  // A flag for sill-units.
-  bool is_sill;
-  // Rocktypes.
-  std::string rocktype1, rocktype2;
-  // Deposits located on this unit.
-  std::vector<const PointInPolygon*> deposits;
+    Unit():
+        id(-1),
+        length(0.),
+        min_age(0.),
+        max_age(0.),
+        is_sill(false)
+    {};
 
-  bool operator< (const Unit &other) const
-  {
-    return length < other.length;
-  }
+    // Unique id only within a local (clipped) map.
+    int id;
+    // Unit name (unique identifier).
+    std::string name;
+    // Group name.
+    std::string group;
+    // ENGUINT codes of polygons that share this unit.
+    std::vector<std::string> codes;
+    // Perimeter length (total length of all polygon segments that belong to this unit).
+    double length;
+    // Min/max age (ma).
+    double min_age, max_age;
+    // A flag for sill-units.
+    bool is_sill;
+    // Rocktypes.
+    std::string rocktype1, rocktype2;
+    // Deposits located on this unit.
+    std::vector<const PointInPolygon*> deposits;
+
+    bool operator< (const Unit &other) const {
+        return length < other.length;
+    }
 };
 
 typedef std::vector<Contact> Contacts;
@@ -132,21 +155,34 @@ typedef std::vector<Contact> Contacts;
 class UnitContact
 {
 public:
-  // Units that are in contact.
-  const Unit *unit1, *unit2;
-  // Polygon contacts which the unit contact is made of.
-  Contacts contacts;
-  // Total contact length, length of fault, stratigraphic and mixed contacts.
-  double total_length, faults_length, stratigraphic_length, mixed_length;
-  // Relative contact length w.r.t. (average) unit length.
-  double relative_length;
-  // Contact type.
-  ContactType type;
-  // Flags for igneous contacts;
-  bool isIgneous;
-  bool isIntrusiveIgneous;
-  // Deposits located on this contact.
-  std::vector<const PointInPolygon*> deposits;
+    UnitContact():
+        unit1(NULL),
+        unit2(NULL),
+        total_length(0.),
+        faults_length(0.),
+        stratigraphic_length(0.),
+        mixed_length(0.),
+        relative_length(0.),
+        type(NotSpecifiedContact),
+        isIgneous(false),
+        isIntrusiveIgneous(false)
+    {};
+
+    // Units that are in contact.
+    const Unit *unit1, *unit2;
+    // Polygon contacts which the unit contact is made of.
+    Contacts contacts;
+    // Total contact length, length of fault, stratigraphic and mixed contacts.
+    double total_length, faults_length, stratigraphic_length, mixed_length;
+    // Relative contact length w.r.t. (average) unit length.
+    double relative_length;
+    // Contact type.
+    ContactType type;
+    // Flags for igneous contacts;
+    bool isIgneous;
+    bool isIntrusiveIgneous;
+    // Deposits located on this contact.
+    std::vector<const PointInPolygon*> deposits;
 };
 
 typedef std::vector<Object> Objects;

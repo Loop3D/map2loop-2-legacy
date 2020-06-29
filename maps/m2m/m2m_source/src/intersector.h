@@ -64,7 +64,7 @@ std::size_t IntersectContactWithFault(Contact &contact, const Object &fault,
 
 // Finds common parts of boundaries between two multi-polygons.
 // Returns the number of common edges.
-int IntersectPolygons(const Object &poly1, const Object &poly2, Contacts &contacts);
+int IntersectPolygons(const Object &poly1, const Object &poly2, Contacts &contacts, double distanceBuffer);
 
 };
 

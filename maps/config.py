@@ -1,27 +1,27 @@
 import os
 
 # ROI
-# padding arounf dtm to ensure reprojected dtm covers target area (in degrees)
-step_out = 0.1
-inset = 0  # unused??
+# # padding arounf dtm to ensure reprojected dtm covers target area (in degrees)
+# step_out = 0.1
+# inset = 0  # unused??
 
-# region of interest coordinates in metre-based system (or non-degree system)
-minx = 500057
-maxx = 603028
-miny = 7455348
-maxy = 7567953
-model_top = 1200
-model_base = -8200
+# # region of interest coordinates in metre-based system (or non-degree system)
+# minx = 500057
+# maxx = 603028
+# miny = 7455348
+# maxy = 7567953
+# model_top = 1200
+# model_base = -8200
 
 # PATHS
 
 # flag to use local or WFS source for data inputs (True = local)
-local_paths = True
+# local_paths = True
 
-test_data_path = './test_data/'
+# test_data_path = './test_data/'
 
-if(not os.path.isdir(test_data_path)):
-    os.mkdir(test_data_path)
+# if(not os.path.isdir(test_data_path)):
+#     os.mkdir(test_data_path)
 
 geology_file = 'hams2_geol.shp'  # input geology file (if local)
 # input fault file (if local)
@@ -115,46 +115,3 @@ pluton_dip = 45  # surface dip of pluton contacts
 # saucers: \__+_+__/  batholith: +/       \+   domes: /  +  + \  pendant: +\_____/+
 pluton_form = 'domes'
 fault_dip = 90  # surface dip of faults
-
-# DERIVED AND FIXED PATHS
-
-m2m_cpp_path = './m2m_cpp/'
-if (not os.path.isdir(m2m_cpp_path)):
-    os.mkdir(m2m_cpp_path)
-
-graph_path = test_data_path+'graph/'
-tmp_path = test_data_path+'tmp/'
-data_path = test_data_path+'data/'
-dtm_path = test_data_path+'dtm/'
-output_path = test_data_path+'output/'
-vtk_path = test_data_path+'vtk/'
-
-fault_file = data_path+fault_file
-structure_file = data_path+structure_file
-geology_file = data_path+geology_file
-mindep_file = data_path+mindep_file
-
-fault_file_csv = fault_file.replace(".shp", ".csv").replace("/data/", "/tmp/")
-structure_file_csv = structure_file.replace(
-    ".shp", ".csv").replace("/data/", "/tmp/")
-geology_file_csv = geology_file.replace(
-    ".shp", ".csv").replace("/data/", "/tmp/")
-mindep_file_csv = mindep_file.replace(
-    ".shp", ".csv").replace("/data/", "/tmp/")
-
-strat_graph_file = test_data_path+'graph/graph_strat_NONE.gml'
-
-dtm_file = dtm_path+'dtm.tif'
-dtm_reproj_file = dtm_path+'dtm_rp.tif'
-
-
-if(not os.path.isdir(tmp_path)):
-    os.mkdir(tmp_path)
-if(not os.path.isdir(output_path)):
-    os.mkdir(output_path)
-if(not os.path.isdir(dtm_path)):
-    os.mkdir(dtm_path)
-if(not os.path.isdir(vtk_path)):
-    os.mkdir(vtk_path)
-if(not os.path.isdir(graph_path)):
-    os.mkdir(graph_path)

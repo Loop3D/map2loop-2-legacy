@@ -52,6 +52,9 @@ public:
   // Distance buffer from a point (deposit) to contact (to find if a point is sitting on the contact).
   double pointToContactDistanceBuffer;
 
+  // Distance buffer for IntersectPolygons (for finding contacts) - for bad maps.
+  double intersectPolygonsDistanceBuffer;
+
   // Deposit names for which we are adding info on the graph.
   std::vector<std::string> depositListForGraphInfo;
 

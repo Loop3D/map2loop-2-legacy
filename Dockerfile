@@ -4,7 +4,11 @@ FROM continuumio/miniconda3
 COPY . /map2loop-2
 
 # Install deps for compiling m2m
-RUN apt update && apt install -y build-essential git cmake python3-vtk7 pybind11-dev xvfb 
+RUN apt update && apt install -y build-essential mlocate git cmake vim python3-dev python3-vtk7 xvfb 
+RUN updatedb
+
+RUN git clone https://gist.github.com/yohanderose/083a04767328de71128b542d300e75dc vimstuff
+RUN cp vimstuff/.vimrc /etc/vim/vimrc
 
 # Create m2l conda environment:
 RUN conda env create -f /map2loop-2/environment.yml
@@ -15,6 +19,10 @@ RUN /bin/bash -c "source activate m2l"
 # Fetch, install and setup original repo
 RUN git clone https://github.com/Loop3D/map2loop
 RUN pip install -e /map2loop
+RUN conda install -c conda-forge ipywidgets
+RUN conda install -c conda-forge ipyleaflet
+RUN conda install -c conda-forge folium
+RUN jupyter nbextension enable --py --sys-prefix ipyleaflet
 
 # Build map2model from source
 ADD maps/m2m /
@@ -24,6 +32,7 @@ RUN ./build-m2m.sh
 
 # Install new package
 RUN pip install -e /map2loop-2
+RUN pip install pybind11
 
 # Fetch and install model engines
 # > Structural
@@ -60,6 +69,6 @@ RUN printf "#\041/bin/sh \n rm -f /tmp/.X99-lock && xvfb-run -s '-screen 0 1600x
 ENTRYPOINT ["/tini", "--", "/usr/local/bin/xvfbrun.sh"]
 
 # Execute jupyter on run 
-CMD ["jupyter","notebook","--ip=0.0.0.0", "--allow-root", "--no-browser"]
+CMD ["jupyter","notebook","--ip=0.0.0.0", "--allow-root", "--no-browser", "--NotebookApp.password=''"]
 
 EXPOSE 8888

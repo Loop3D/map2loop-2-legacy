@@ -1,7 +1,7 @@
 /******************************************************************************
 * A class of bounding box used in the ConverterLib.
 *
-* Author: Vitaliy Ogarko (2016).
+* Author: Vitaliy Ogarko, vogarko@gmail.com
 *******************************************************************************/
 
 #ifndef bounding_box_h
@@ -24,14 +24,16 @@ public:
   IntPoint TopLeft;
   IntPoint BtmRight;
 
-  AABB(IntPoint _TopLeft = IntPoint(0, 0),
-       IntPoint _BtmRight = IntPoint(0, 0)):
-       TopLeft(_TopLeft), BtmRight(_BtmRight) {};
+  AABB():
+      TopLeft(IntPoint(0, 0)), BtmRight(IntPoint(0, 0)) {};
 
-  AABB(int a = 0): TopLeft(IntPoint(a, a)), BtmRight(IntPoint(a, a)) {};
+  AABB(IntPoint _TopLeft, IntPoint _BtmRight):
+      TopLeft(_TopLeft), BtmRight(_BtmRight) {};
 
-  AABB(double tx = 0., double ty = 0.,
-       double bx = 0., double by = 0.):
+  AABB(int a):
+      TopLeft(IntPoint(a, a)), BtmRight(IntPoint(a, a)) {};
+
+  AABB(double tx, double ty, double bx, double by):
        TopLeft(IntPoint(ConverterUtils::CoordToInteger(tx), ConverterUtils::CoordToInteger(ty))),
        BtmRight(IntPoint(ConverterUtils::CoordToInteger(bx), ConverterUtils::CoordToInteger(by))) {};
 
