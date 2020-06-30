@@ -38,11 +38,6 @@ RUN pip install pynoddy
 # RUN git clone --branch docker --single-branch https://Loop3D:2fae576a7fb2b205dddfc7a8004a694812623142@github.com/Loop3D/ensemble_generator
 # RUN pip install -e /ensemble_generator
 
-# Build map2model from source
-ADD maps/m2m /
-RUN /bin/bash -c "chmod +x build-m2m.sh"
-RUN /bin/bash -c "chmod -R 777 /m2m_source"
-RUN ./build-m2m.sh
 
 # Add Tini
 ENV TINI_VERSION v0.18.0
@@ -56,16 +51,15 @@ ENTRYPOINT ["/tini", "--", "/usr/local/bin/xvfbrun.sh"]
 
 # Fetch, install and setup original repo
 RUN git clone https://github.com/Loop3D/map2loop
-RUN pip install -e /map2loop
+# Build map2model from source
+RUN mkdir /map2loop/m2m_source/build 
+RUN cd /map2loop/m2m_source/build && cmake .. && make -j2 && cp map2model ../../m2m_cpp
+# Install deps and then the package itself
 RUN conda install -c conda-forge ipywidgets
 RUN conda install -c conda-forge ipyleaflet
 RUN conda install -c conda-forge folium
 RUN jupyter nbextension enable --py --sys-prefix ipyleaflet
-# Build map2model from source
-ADD maps/m2m /
-RUN /bin/bash -c "chmod +x build-m2m.sh"
-RUN /bin/bash -c "chmod -R 777 /m2m_source"
-RUN ./build-m2m.sh
+RUN pip install -e /map2loop
 
 # Execute jupyter on run 
 CMD ["jupyter","notebook","--ip=0.0.0.0", "--allow-root", "--no-browser", "--NotebookApp.password=''"]
