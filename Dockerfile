@@ -16,20 +16,6 @@ ENV PATH /opt/conda/envs/m2l/bin:$PATH
 ENV CONDA_DEFAULT_ENV m2l
 RUN /bin/bash -c "source activate m2l"
 
-# Fetch, install and setup original repo
-RUN git clone https://github.com/Loop3D/map2loop
-RUN pip install -e /map2loop
-RUN conda install -c conda-forge ipywidgets
-RUN conda install -c conda-forge ipyleaflet
-RUN conda install -c conda-forge folium
-RUN jupyter nbextension enable --py --sys-prefix ipyleaflet
-
-# Build map2model from source
-ADD maps/m2m /
-RUN /bin/bash -c "chmod +x build-m2m.sh"
-RUN /bin/bash -c "chmod -R 777 /m2m_source"
-RUN ./build-m2m.sh
-
 # Install new package
 RUN pip install -e /map2loop-2
 RUN pip install pybind11
@@ -37,7 +23,7 @@ RUN pip install pybind11
 # Fetch and install model engines
 # > Structural
 RUN pip install lavavu
-RUN git clone https://Loop3D:2fae576a7fb2b205dddfc7a8004a694812623142@github.com/Loop3D/LoopStructural
+RUN git clone https://github.com/Loop3D/LoopStructural
 RUN pip install -r /LoopStructural/requirements.txt
 RUN pip install -e /LoopStructural 
 # > Gempy
@@ -49,14 +35,9 @@ RUN cp /map2loop-2/engines/noddy /usr/bin
 RUN pip install pynoddy
 
 # Fetch and install ensemble generator
-RUN git clone --branch docker --single-branch https://Loop3D:2fae576a7fb2b205dddfc7a8004a694812623142@github.com/Loop3D/ensemble_generator
-RUN pip install -e /ensemble_generator
+# RUN git clone --branch docker --single-branch https://Loop3D:2fae576a7fb2b205dddfc7a8004a694812623142@github.com/Loop3D/ensemble_generator
+# RUN pip install -e /ensemble_generator
 
-# Build map2model from source
-ADD maps/m2m /
-RUN /bin/bash -c "chmod +x build-m2m.sh"
-RUN /bin/bash -c "chmod -R 777 /m2m_source"
-RUN ./build-m2m.sh
 
 # Add Tini
 ENV TINI_VERSION v0.18.0
@@ -67,6 +48,18 @@ RUN printf "#\041/bin/sh \n rm -f /tmp/.X99-lock && xvfb-run -s '-screen 0 1600x
     chmod +x /usr/local/bin/xvfbrun.sh
 # note we use xvfb which to mimic the X display for lavavu
 ENTRYPOINT ["/tini", "--", "/usr/local/bin/xvfbrun.sh"]
+
+# Fetch, install and setup original repo
+RUN git clone https://github.com/Loop3D/map2loop
+# Build map2model from source
+RUN mkdir /map2loop/m2m_source/build 
+RUN cd /map2loop/m2m_source/build && cmake .. && make -j2 && cp map2model ../../m2m_cpp
+# Install deps and then the package itself
+RUN conda install -c conda-forge ipywidgets
+RUN conda install -c conda-forge ipyleaflet
+RUN conda install -c conda-forge folium
+RUN jupyter nbextension enable --py --sys-prefix ipyleaflet
+RUN pip install -e /map2loop
 
 # Execute jupyter on run 
 CMD ["jupyter","notebook","--ip=0.0.0.0", "--allow-root", "--no-browser", "--NotebookApp.password=''"]

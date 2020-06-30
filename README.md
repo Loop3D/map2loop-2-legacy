@@ -27,29 +27,29 @@ Download and install the docker containerisation software and CLI [https://docs.
 If you do not wish to develop map2loop, you can simply pull the complete docker image with map2loop and LoopStructural preinstalled, and run the container to interact with the notebooks.
 
 ```bash
-docker pull yohanderose/map2loop-2_dev:0.0.2
-docker run -it -p 8888:8888 yohanderose/map2loop-2_dev:0.0.2
+docker pull yohanderose/map2loop-2_dev:dev
+docker run -it -p 8888:8888 yohanderose/map2loop-2_dev:dev
 ```
 
 ### Development
 
-1. Clone this repo and navigate inside using the recurse submodules flag to fetch the example data. 
+1. Clone this repo and navigate inside using the recurse submodules flag to fetch the example data.
 
-    ```bash
-    git clone --recurse-submodules https://github.com/Loop3D/map2loop-2
-    ```
+   ```bash
+   git clone --recurse-submodules https://github.com/Loop3D/map2loop-2
+   ```
 
 2. Run the following command and click on the link Jupyter outputs to access the original [map2loop](https://github.com/Loop3D/map2loop) notebooks.
 
-    ```bash
-    docker-compose up
-    ```
+   ```bash
+   docker-compose up
+   ```
 
-3. To jump into a bash shell in the container itself, open a new terminal and issue the following command. 
+3. To jump into a bash shell in the container itself, open a new terminal and issue the following command.
 
-    ```bash
-    docker exec -it map2loop-2_dev_1 bash
-    ```
+   ```bash
+   docker exec -it map2loop-2_dev_1 bash
+   ```
 
 ## Install via PyPi and Conda
 
