@@ -1,3 +1,7 @@
 [submodule "data"]
 	path = maps/data
 	url = https://github.com/yohanderose/data
+
+[submodule "map2model-cpp"]
+	path = maps/map2model-cpp
+	url = https://github.com/Loop3D/map2model-cpp

@@ -44,7 +44,7 @@ class Topology(object):
             'fault', case=False)]
         faults_only.to_csv(fault_file_csv, index=False)
 
-    def save_parfile(self, c_l, data_path, geology_file_csv, fault_file_csv, structure_file_csv, mindep_file_csv, minx, maxx, miny, maxy, deposit_dist, commodities):
+    def save_parfile(self, c_l, output_path, geology_file_csv, fault_file_csv, structure_file_csv, mindep_file_csv, minx, maxx, miny, maxy, deposit_dist, commodities):
         with open('Parfile', 'w') as f:
             f.write(
                 '--- COLUMN NAMES IN CSV DATA FILES: -------------------------------------------------------------\n')
@@ -68,27 +68,28 @@ class Topology(object):
                 '--- SOME CONSTANTS: ----------------------------------------------------------------------------\n')
             f.write('FAULT AXIAL FEATURE NAME        ='+c_l['fold']+'\n')
             f.write('SILL UNIT DESCRIPTION CONTAINS  ='+c_l['sill']+'\n')
-            f.write('IGNEOUS ROCKTYPE CONTAINS                           =' +
-                    c_l['intrusive']+'\n')
-            f.write('VOLCANIC ROCKTYPE CONTAINS                          =' +
-                    c_l['volcanic']+'\n')
+            f.write(
+                'IGNEOUS ROCKTYPE CONTAINS                           ='+c_l['intrusive']+'\n')
+            f.write(
+                'VOLCANIC ROCKTYPE CONTAINS                          ='+c_l['volcanic']+'\n')
             f.write(
                 'IGNORE DEPOSITS WITH SITE TYPE                      =Infrastructure\n')
             f.write('Intersect Contact With Fault: angle epsilon (deg)   =1.0\n')
             f.write('Intersect Contact With Fault: distance epsilon (m)  =15.0\n')
             f.write('Distance buffer (fault stops on another fault) (m)  =20.0\n')
-            f.write('Distance buffer (point on contact) (m)              =' +
-                    str(deposit_dist)+'\n')
+            f.write(
+                'Distance buffer (point on contact) (m)              ='+str(deposit_dist)+'\n')
+            f.write('Intersect polygons distance buffer (for bad maps)   =3.\n')
             f.write(
                 '------------------------------------------------------------------------------------------------\n')
             f.write(
-                'Path to the output data folder                      ='+data_path+'\n')
-            f.write('Path to geology data file                           =' +
-                    geology_file_csv+'\n')
-            f.write('Path to faults data file                            =' +
-                    fault_file_csv+'\n')
-            f.write('Path to mineral deposits data file                  =' +
-                    mindep_file_csv+'\n')
+                'Path to the output data folder                      ='+output_path+'\n')
+            f.write(
+                'Path to geology data file                           ='+geology_file_csv+'\n')
+            f.write(
+                'Path to faults data file                            ='+fault_file_csv+'\n')
+            f.write(
+                'Path to mineral deposits data file                  ='+mindep_file_csv+'\n')
             f.write(
                 '------------------------------------------------------------------------------------------------\n')
             f.write('Clipping window X1 Y1 X2 Y2 (zeros for infinite)    =' +
@@ -96,7 +97,8 @@ class Topology(object):
             f.write('Min length fraction for strat/fault graphs          =0.0\n')
             f.write(
                 'Graph edge width categories (three doubles)         =2000. 20000. 200000.\n')
-            f.write('Graph edge direction (0-min age, 1-max age, 2-avg)  =2\n')
+            f.write(
+                'Graph edge direction (0-min age, 1-max age, 2-avg)  ='+str(2)+'\n')
             f.write(
                 'Deposit names for adding info on the graph          ='+commodities+'\n')
             f.write('Partial graph polygon ID                            =32\n')

@@ -1,3 +1,5 @@
+Author: Vitaliy Ogarko, vogarko@gmail.com
+
 ## To build map2model execute:
 
 mkdir build  

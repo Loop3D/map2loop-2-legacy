@@ -98,5 +98,5 @@ class Config(object):
             # return sub_geol, sub_lines, sub_pts, sub_mindep
 
     def update_parfile(self):
-        Topology.save_parfile(self, self.c_l, self.data_path, self.geology_file_csv, self.fault_file_csv, self.structure_file_csv,
+        Topology.save_parfile(self, self.c_l, self.output_path, self.geology_file_csv, self.fault_file_csv, self.structure_file_csv,
                               self.mindep_file_csv, self.bbox[0], self.bbox[1], self.bbox[2], self.bbox[3], 500.0, 'Fe,Cu,Au,NONE')
