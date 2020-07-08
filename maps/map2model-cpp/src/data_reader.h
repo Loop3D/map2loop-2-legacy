@@ -10,7 +10,6 @@
 #include <map>
 #include <string>
 
-
 #include "converter_types.h"
 
 namespace ConverterLib {

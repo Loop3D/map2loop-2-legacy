@@ -1,20 +1,19 @@
 /******************************************************************************
-* Parameter reader.
-*
-* Author: Vitaliy Ogarko, vogarko@gmail.com
-*******************************************************************************/
+ * Parameter reader.
+ *
+ * Author: Vitaliy Ogarko, vogarko@gmail.com
+ *******************************************************************************/
 
 #ifndef parameters_reader_h
 #define parameters_reader_h
 
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace ConverterLib {
 
-class Parameters
-{
+class Parameters {
 public:
   // Field names in CSV data files, and some other literal constants.
   std::map<std::string, std::string> constNames;
@@ -45,14 +44,16 @@ public:
   // Constants for IntersectContactWithFault routine.
   double angleEpsilon;
   double distanceEpsilon;
-
-  // Distance buffer from a point to segment (to find if a fault stops on another fault).
+  // Distance buffer from a point to segment (to find if a fault stops on //
+  // another fault).
   double faultFaultDistanceBuffer;
 
-  // Distance buffer from a point (deposit) to contact (to find if a point is sitting on the contact).
+  // Distance buffer from a point (deposit) to contact (to find if a point is
+  // sitting on the contact).
   double pointToContactDistanceBuffer;
 
-  // Distance buffer for IntersectPolygons (for finding contacts) - for bad maps.
+  // Distance buffer for IntersectPolygons (for finding contacts) - for bad
+  // maps.
   double intersectPolygonsDistanceBuffer;
 
   // Deposit names for which we are adding info on the graph.
@@ -61,13 +62,13 @@ public:
   // Reading input parameters from a file.
   // Returns parameter lines that were read.
   std::string Read(const std::string &filename);
-
+  std::string directRead(const std::string output, const std::string geology,
+                         const std::string faults, const std::string points);
 };
 
-std::string getConstName(const std::map<std::string, std::string>& constNames,
-                         const std::string& key);
+std::string getConstName(const std::map<std::string, std::string> &constNames,
+                         const std::string &key);
 
-}
+} // namespace ConverterLib
 
 #endif
-

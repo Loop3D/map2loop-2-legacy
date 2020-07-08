@@ -1,10 +1,10 @@
-from maps.config import *
+from maps.cfg import *
 import geopandas as gpd
 import pandas as pd
 import numpy as np
 from shapely.geometry import Polygon
 
-from maps.model import Model
+from maps.config import Config
 
 
 class Project(object):
@@ -82,17 +82,17 @@ class Project(object):
                              'contact_dips': False})
         self.workflow = workflow
 
-    def update_model(self,
-                     bbox_3d={
-                         "minx": 500057,
-                         "maxx": 7455348,
-                         "miny": 603028,
-                         "maxy": 7567953,
-                         "base": -8200,
-                         "top": 1200,
-                     },
-                     step_out=0.1,
-                     ):
+    def update_config(self,
+                      bbox_3d={
+                          "minx": 500057,
+                          "maxx": 7455348,
+                          "miny": 603028,
+                          "maxy": 7567953,
+                          "base": -8200,
+                          "top": 1200,
+                      },
+                      step_out=0.1,
+                      ):
         # TODO: Make crs defaults and specifiable not from config
         minx, miny, maxx, maxy = list(bbox_3d.values())[:4]
         lat_point_list = [miny, miny, maxy, maxy, maxy]
@@ -100,8 +100,8 @@ class Project(object):
         bbox_geom = Polygon(zip(lon_point_list, lat_point_list))
         polygon = gpd.GeoDataFrame(
             index=[0], crs=self.dst_crs, geometry=[bbox_geom])
-        self.model = Model(self.geology_file, self.fault_file,
-                           self.structure_file, self.mindep_file, bbox_3d, polygon, step_out, c_l)
+        self.config = Config(self.geology_file, self.fault_file,
+                             self.structure_file, self.mindep_file, bbox_3d, polygon, step_out, c_l)
 
-    def plot_model(self):
-        self.model.preprocess("plot")
+    def plot(self):
+        self.config.preprocess("plot")
