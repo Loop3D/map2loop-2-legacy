@@ -17,7 +17,7 @@ class Config(object):
         self.fault_file = fault_file
         self.mindep_file = mindep_file
 
-        self.project_path = './model-test'
+        self.project_path = 'model-test'
 
         self.graph_path = self.project_path+'/graph'
         self.tmp_path = self.project_path+'/tmp'

@@ -85,7 +85,8 @@ c_l = {
     "syn": 'syncline',
     # ids
     "o": 'OBJECTID',  # field that contains unique id of geometry object
-    "gi": 'GEOPNT_ID'  # field that contains unique id of structure point
+    "gi": 'GEOPNT_ID',  # field that contains unique id of structure point
+    "deposit_dist": 500.0
 }
 
 # DECIMATION

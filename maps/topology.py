@@ -1,6 +1,9 @@
 import numpy as np
 import pandas as pd
 
+import functools
+import operator
+
 
 class Topology(object):
     def __init__(self):
@@ -20,29 +23,85 @@ class Topology(object):
                 if(not indx in hint_list):
                     hint_list.append(indx)
 
-        # TODO: Understand and apply hints
-        sub_geol.columns.values[0] = "WKT"
-        # map2model needs '' as unassigned cells, make nones NaNs
-        sub_geol.replace(to_replace=[None], value=np.nan, inplace=True)
-        sub_geol.fillna(value=np.nan, inplace=True)
-        # then make NaNs empties
-        sub_geol.replace(np.nan, '', regex=True)
-        sub_geol.replace('None', '', inplace=True)
-        sub_geol.to_csv(geology_file_csv, index=False)
+        f = open(geology_file_csv, "w+")
+        f.write('WKT\t'+c_l['o'].replace("\n", "")+'\t'+c_l['u'].replace("\n", "")+'\t'+c_l['g'].replace("\n", "")+'\t'+c_l['min'].replace("\n", "")+'\t'+c_l['max'].replace(
+            "\n", "")+'\t'+c_l['c'].replace("\n", "")+'\t'+c_l['r1'].replace("\n", "")+'\t'+c_l['r2'].replace("\n", "")+'\t'+c_l['ds'].replace("\n", "")+'\n')
+        # display(sub_geol)
+        print(len(sub_geol), " polygons")
+        # print(sub_geol)
+        for i in range(0, len(sub_geol)):
+            # print('**',sub_geol.loc[i][[c_l['o']]],'++')
+            f.write("\""+str(sub_geol.loc[i].geometry)+"\"\t")
+            f.write("\""+str(sub_geol.loc[i][c_l['o']])+"\"\t")
+            f.write("\""+str(sub_geol.loc[i][c_l['c']])+"\"\t")
+            # since map2model is looking for "" not "None"
+            f.write(
+                "\""+str(sub_geol.loc[i][c_l['g']]).replace("None", "")+"\"\t")
 
-    def save_mindep_wkt(sub_mindep, mindep_file_csv, c_l):
-        sub_mindep.columns.values[0] = "WKT"
-        sub_mindep.to_csv(mindep_file_csv, index=False)
+            if(hint_flag == True and sub_geol.loc[i][c_l['c']] in hint_list):
+                hint = code_hints.loc[sub_geol.loc[i][c_l['c']]]['hint']
+            else:
+                hint = 0
+            min = float(sub_geol.loc[i][c_l['min']])+float(hint)
+            max = float(sub_geol.loc[i][c_l['max']])+float(hint)
+            # f.write("\""+str(sub_geol.loc[i][c_l['min']])+"\"\t")
+            # f.write("\""+str(sub_geol.loc[i][c_l['max']])+"\"\t")
+            f.write("\""+str(min)+"\"\t")
+            f.write("\""+str(max)+"\"\t")
+            f.write("\""+str(sub_geol.loc[i][c_l['u']])+"\"\t")
+            f.write("\""+str(sub_geol.loc[i][c_l['r1']])+"\"\t")
+            f.write("\""+str(sub_geol.loc[i][c_l['r2']])+"\"\t")
+            f.write("\""+str(sub_geol.loc[i][c_l['ds']])+"\"\n")
+        f.close()
 
     def save_structure_wkt(sub_pts, structure_file_csv, c_l):
-        sub_pts.columns.values[0] = "WKT"
-        sub_pts.to_csv(structure_file_csv, index=False)
+        f = open(structure_file_csv, "w+")
+        f.write('WKT\t'+c_l['gi']+'\t'+c_l['d']+'\t'+c_l['dd']+'\n')
+
+        print(len(sub_pts), " points")
+
+        # for i in range(0,len(sub_pts)):
+        #    for j in range(0,len(sub_geol)):
+        #        if(sub_pts.loc[i].geometry.within(sub_geol.loc[j].geometry)):
+        #            print(i,j)
+
+        for i in range(0, len(sub_pts)):
+            line = "\""+str(sub_pts.loc[i].geometry)+"\"\t\""+str(sub_pts.loc[i][c_l['gi']])+"\"\t\"" +\
+                str(sub_pts.loc[i][c_l['d']])+"\"\t\"" + \
+                str(sub_pts.loc[i][c_l['dd']])+"\"\n"
+            f.write(functools.reduce(operator.add, (line)))
+
+        f.close()
+
+    def save_mindep_wkt(sub_mindep, mindep_file_csv, c_l):
+        f = open(mindep_file_csv, "w+")
+        f.write('WKT\t'+c_l['msc']+'\t'+c_l['msn']+'\t'+c_l['mst'] +
+                '\t'+c_l['mtc']+'\t'+c_l['mscm']+'\t'+c_l['mcom']+'\n')
+
+        print(len(sub_mindep), " points")
+
+        for i in range(0, len(sub_mindep)):
+            line = "\""+str(sub_mindep.loc[i].geometry)+"\"\t\""+str(sub_mindep.loc[i][c_l['msc']])+"\"\t\"" +\
+                str(sub_mindep.loc[i][c_l['msn']])+"\"\t\""+str(sub_mindep.loc[i][c_l['mst']])+"\"\t\"" +\
+                str(sub_mindep.loc[i][c_l['mtc']])+"\"\t\""+str(sub_mindep.loc[i][c_l['mscm']])+"\"\t\"" +\
+                str(sub_mindep.loc[i][c_l['mcom']])+"\"\n"
+            f.write(functools.reduce(operator.add, (line)))
+
+        f.close()
 
     def save_faults_wkt(sub_lines, fault_file_csv, c_l):
-        sub_lines.columns.values[0] = "WKT"
-        faults_only = sub_lines[sub_lines["FEATURE"].str.contains(
-            'fault', case=False)]
-        faults_only.to_csv(fault_file_csv, index=False)
+        f = open(fault_file_csv, "w+")
+        f.write('WKT\t'+c_l['o']+'\t'+c_l['f']+'\n')
+
+        print(len(sub_lines), " polylines")
+
+        for i in range(0, len(sub_lines)):
+            if(c_l['fault'] in sub_lines.loc[i][c_l['f']]):
+                f.write("\""+str(sub_lines.loc[i].geometry)+"\"\t")
+                f.write("\""+str(sub_lines.loc[i][c_l['o']])+"\"\t")
+                f.write("\""+str(sub_lines.loc[i][c_l['f']])+"\"\n")
+
+        f.close()
 
     def save_parfile(self, c_l, output_path, geology_file_csv, fault_file_csv, structure_file_csv, mindep_file_csv, minx, maxx, miny, maxy, deposit_dist, commodities):
         with open('Parfile', 'w') as f:

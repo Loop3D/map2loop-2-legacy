@@ -105,3 +105,6 @@ class Project(object):
 
     def plot(self):
         self.config.preprocess("plot")
+
+    def export_csv(self):
+        self.config.preprocess("export_csv")
