@@ -3,5 +3,8 @@
     "cSpell.words": [
         "myfile"
     ],
-    "cmake.configureOnOpen": false
+    "cmake.configureOnOpen": false,
+    "files.associations": {
+        "algorithm": "cpp"
+    }
 }
