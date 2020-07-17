@@ -26,7 +26,7 @@ class get_pybind_include(object):
 
 ext_modules = [
     Extension(
-        'BOBS',
+        'map2model',
         # Sort input source files to ensure bit-for-bit reproducible builds
         # (https://github.com/pybind/python_example/pull/53)
         sources=sorted(cpp_src),
