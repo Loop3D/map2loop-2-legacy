@@ -17,7 +17,7 @@ ENV CONDA_DEFAULT_ENV m2l
 RUN /bin/bash -c "source activate m2l"
 
 # Install new package
-RUN pip install pybind11
+RUN pip install pybind11 pytest
 RUN cd /map2loop-2 && git submodule update --recursive && pip install -e .
 
 # Fetch and install model engines
