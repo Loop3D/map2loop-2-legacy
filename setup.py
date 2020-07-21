@@ -8,6 +8,8 @@ long_description = ""
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+print(os.getcwd())
+
 cpp_src = []
 for file in os.listdir(r'maps/map2model_cpp/src'):
     cpp_src.append(str("maps/map2model_cpp/src/" + file))
