@@ -1,7 +1,7 @@
 FROM continuumio/miniconda3
 
 # Synced development folder
-COPY . /map2loop-2
+# COPY . /map2loop-2
 
 # Install deps for compiling m2m
 RUN apt update && apt install -y build-essential mlocate git cmake vim python3-dev python3-vtk7 xvfb 
@@ -10,7 +10,7 @@ RUN updatedb
 RUN git clone https://gist.github.com/yohanderose/083a04767328de71128b542d300e75dc vimstuff
 RUN cp vimstuff/.vimrc /etc/vim/vimrc
 
-# RUN git clone --recurse-submodules https://github.com/Loop3D/map2loop-2
+RUN git clone --recurse-submodules https://github.com/Loop3D/map2loop-2
 
 # Create m2l conda environment:
 RUN conda env create -f /map2loop-2/environment.yml
