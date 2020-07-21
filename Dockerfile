@@ -60,6 +60,7 @@ RUN cd /map2loop/m2m_source/build && cmake .. && make -j2 && cp map2model ../../
 RUN conda install -c conda-forge ipywidgets
 RUN conda install -c conda-forge ipyleaflet
 RUN conda install -c conda-forge folium
+RUN pip install ipyfilechooser
 RUN jupyter nbextension enable --py --sys-prefix ipyleaflet
 RUN pip install -e /map2loop
 
