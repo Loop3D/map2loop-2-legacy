@@ -1,7 +1,8 @@
 FROM continuumio/miniconda3
 
 # Synced development folder
-COPY . /map2loop-2
+# COPY . /map2loop-2
+RUN git clone --recurse-submodules https://github.com/Loop3D/map2loop-2
 
 # Install deps for compiling m2m
 RUN apt update && apt install -y build-essential mlocate git cmake vim python3-dev python3-vtk7 xvfb 
@@ -18,7 +19,6 @@ RUN /bin/bash -c "source activate m2l"
 
 # Install new package
 RUN pip install pybind11 pytest
-RUN cd /map2loop-2 && git submodule update --recursive 
 RUN pip install -e map2loop-2
 
 # Fetch and install model engines

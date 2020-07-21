@@ -36,7 +36,7 @@ docker run -it -p 8888:8888 yohanderose/map2loop-2_dev:dev
 1. Clone this repo and navigate inside using the recurse submodules flag to fetch the example data.
 
    ```bash
-   git clone --recurse-submodules https://github.com/Loop3D/map2loop-2
+   git clone https://github.com/Loop3D/map2loop-2
    ```
 
 2. Run the following command and click on the link Jupyter outputs to access the original [map2loop](https://github.com/Loop3D/map2loop) notebooks.
