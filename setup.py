@@ -10,7 +10,7 @@ with open("README.md", "r") as fh:
 
 cpp_src = []
 for file in os.listdir(r'maps/map2model_cpp/src'):
-    cpp_src.append(str("/maps/map2model_cpp/src/" + file))
+    cpp_src.append(str("maps/map2model_cpp/src/" + file))
 
 
 class get_pybind_include(object):
@@ -32,7 +32,7 @@ ext_modules = [
         sources=sorted(cpp_src),
         include_dirs=[
             get_pybind_include(),
-            '/maps/map2model_cpp/include'
+            'maps/map2model_cpp/include'
         ],
         language='c++'
     ),
