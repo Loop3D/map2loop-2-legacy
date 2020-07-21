@@ -8,10 +8,22 @@ long_description = ""
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-print(os.getcwd())
+
+def list_files(startpath):
+    for root, dirs, files in os.walk(startpath):
+        level = root.replace(startpath, '').count(os.sep)
+        indent = ' ' * 4 * (level)
+        print('{}{}/'.format(indent, os.path.basename(root)))
+        subindent = ' ' * 4 * (level + 1)
+        for f in files:
+            print('{}{}'.format(subindent, f))
+
+
+print("Current working dir:", os.getcwd())
+list_files("maps/map2model_cpp")
 
 cpp_src = []
-for file in os.listdir(r'maps/map2model_cpp/src'):
+for file in os.listdir("maps/map2model_cpp/src"):
     cpp_src.append(str("maps/map2model_cpp/src/" + file))
 
 
