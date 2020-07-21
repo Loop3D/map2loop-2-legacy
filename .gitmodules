@@ -1,9 +1,9 @@
-[submodule "data"]
-	path = maps/data
-	url = https://github.com/yohanderose/data
 [submodule "maps/map2model_cpp"]
 	path = maps/map2model_cpp
 	url = https://github.com/Loop3D/map2model_cpp
 [submodule "notebooks/Turner_Syncline"]
 	path = notebooks/Turner_Syncline
 	url = https://github.com/Loop3D/Turner_Syncline
+[submodule "maps/data"]
+	path = maps/data
+	url = https://github.com/yohanderose/data
