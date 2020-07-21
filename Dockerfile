@@ -10,6 +10,8 @@ RUN updatedb
 RUN git clone https://gist.github.com/yohanderose/083a04767328de71128b542d300e75dc vimstuff
 RUN cp vimstuff/.vimrc /etc/vim/vimrc
 
+# RUN git clone --recurse-submodules https://github.com/Loop3D/map2loop-2
+
 # Create m2l conda environment:
 RUN conda env create -f /map2loop-2/environment.yml
 ENV PATH /opt/conda/envs/m2l/bin:$PATH
@@ -17,8 +19,8 @@ ENV CONDA_DEFAULT_ENV m2l
 RUN /bin/bash -c "source activate m2l"
 
 # Install new package
-RUN pip install pybind11
-RUN cd /map2loop-2 && git submodule update --recursive && pip install -e .
+RUN pip install pybind11 pytest
+RUN pip install -e map2loop-2
 
 # Fetch and install model engines
 # > Structural
