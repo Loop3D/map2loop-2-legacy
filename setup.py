@@ -20,8 +20,7 @@ def list_files(startpath):
 
 
 print("Current working dir:", os.getcwd())
-list_files("maps/map2model_cpp")
-
+# list_files("maps/map2model_cpp")
 cpp_src = []
 for file in os.listdir("maps/map2model_cpp/src"):
     cpp_src.append(str("maps/map2model_cpp/src/" + file))
