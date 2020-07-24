@@ -1,6 +1,7 @@
 import geopandas as gpd
 import os
-from maps.topology import Topology
+from map2loop.topology import Topology
+import map2model
 
 
 class Config(object):
@@ -100,3 +101,10 @@ class Config(object):
     def update_parfile(self):
         Topology.save_parfile(self, self.c_l, self.output_path, self.geology_file_csv, self.fault_file_csv, self.structure_file_csv,
                               self.mindep_file_csv, self.bbox[0], self.bbox[1], self.bbox[2], self.bbox[3], 500.0, 'Fe,Cu,Au,NONE')
+
+    def runMap2Model(self):
+        print(map2model.run(self.output_path, self.geology_file_csv,
+                            self.fault_file_csv, self.mindep_file_csv,
+                            self.bbox_3d,
+                            self.c_l,
+                            "Fe,Cu,Au,NONE"))
