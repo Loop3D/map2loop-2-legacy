@@ -1,22 +1,22 @@
-from maps.cfg import *
+from map2loop.cfg import *
 import geopandas as gpd
 import pandas as pd
 import numpy as np
 from shapely.geometry import Polygon
 
-from maps.config import Config
+from map2loop.config import Config
 
 
 class Project(object):
     def __init__(self,
-                 workflow={'model_engine': 'geomodeller'},
                  # region of interest coordinates in metre-based system (or non-degree system)
                  # (minx, miny, maxx, maxy, bottom, top)
                  # TODO: Remove harcoding if local files ship with examples
-                 geology_file="/map2loop-2/maps/data/hams-test.shp",
-                 fault_file="/map2loop-2/maps/data/GEOS_GEOLOGY_LINEARSTRUCTURE_500K_GSD.shp",
-                 structure_file="/map2loop-2/maps/data/hams2_structure.shp",
-                 mindep_file="/map2loop-2/maps/data/mindeps_2018.shp",
+                 geology_file,
+                 fault_file,
+                 structure_file,
+                 mindep_file,
+                 workflow={'model_engine': 'geomodeller'},
                  src_crs={'init': 'EPSG:4326'},
                  dst_crs={'init': 'EPSG:28350'}
                  ):
@@ -106,5 +106,7 @@ class Project(object):
     def plot(self):
         self.config.preprocess("plot")
 
-    def export_csv(self):
+    def run(self):
+        print("Generating topology analyser input...")
         self.config.preprocess("export_csv")
+        self.config.runMap2Model()
