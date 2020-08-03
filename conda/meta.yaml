@@ -14,23 +14,22 @@ build:
 
 requirements:
   host:
-    - geopandas
     - map2model
-    - numpy >=1.17.0
+    - numpy 
     - pandas
+    - geopandas
     - pip
     - python
     - pybind11
     - setuptools
     - matplotlib
   run:
-    - geopandas
     - map2model
     - numpy
     - pandas
-    - python
-    - setuptools
+    - geopandas
     - matplotlib
+    - python
 
 test:
   imports:
