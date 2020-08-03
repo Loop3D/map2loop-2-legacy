@@ -1,9 +1,9 @@
 name: Publish Docker Hub
 on:
-  push:
-    branches:
-      - master
-      - dev
+  # push:
+  #   branches:
+  #     - master
+  #     - dev
 
 jobs:
   build:
