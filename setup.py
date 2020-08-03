@@ -4,9 +4,10 @@ long_description = ""
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+
 setuptools.setup(
     name="map2loop",
-    version="1.0.1",
+    version="1.0.3",
     author="Yohan de Rose",
     author_email="contact@loop3d.org",
     description="Generate 3D model data using 2D maps.",
@@ -18,12 +19,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-    ],
-    install_requires=[
-        'map2model-loop3d==1.0.0',
-        'numpy',
-        'pandas',
-        'geopandas',
     ],
     python_requires='>=3.6',
 )
