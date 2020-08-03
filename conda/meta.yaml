@@ -15,7 +15,7 @@ build:
 requirements:
   host:
     - geopandas
-    - loop3d::map2model
+    - map2model
     - numpy
     - pandas
     - pip
@@ -25,7 +25,7 @@ requirements:
     - matplotlib
   run:
     - geopandas
-    - loop3d::map2model
+    - map2model
     - numpy
     - pandas
     - python
