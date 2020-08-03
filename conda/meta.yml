@@ -1,0 +1,50 @@
+{% set name = "map2loop" %}
+{% set version = "1.0.3" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  git_url: https://github.com/Loop3D/map2loop-2
+
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install ."
+
+requirements:
+  host:
+    - geopandas
+    - map2model
+    - numpy
+    - pandas
+    - pip
+    - python
+    - pybind11
+    - setuptools
+    - matplotlib
+  run:
+    - geopandas
+    - map2model
+    - numpy
+    - pandas
+    - python
+    - setuptools
+    - matplotlib
+
+test:
+  imports:
+    - map2loop
+
+about:
+  home: "https://github.com/Loop3D/map2loop-2"
+  license: MIT
+  license_family: MIT
+  license_file: 
+  summary: "Generate 3D model data using 2D maps."
+  doc_url: 
+  dev_url: 
+
+extra:
+  recipe-maintainers:
+    - yohanderose
