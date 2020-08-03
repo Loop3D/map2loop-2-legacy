@@ -24,7 +24,6 @@ requirements:
     - numpy
     - pandas
     - geopandas
-    - matplotlib
 test:
   imports:
     - map2loop
