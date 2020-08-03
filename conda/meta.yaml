@@ -16,7 +16,7 @@ requirements:
   host:
     - geopandas
     - map2model
-    - numpy
+    - numpy >=1.17.0
     - pandas
     - pip
     - python
