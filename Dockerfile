@@ -52,17 +52,17 @@ RUN printf "#\041/bin/sh \n rm -f /tmp/.X99-lock && xvfb-run -s '-screen 0 1600x
 ENTRYPOINT ["/tini", "--", "/usr/local/bin/xvfbrun.sh"]
 
 # Fetch, install and setup original repo
-RUN git clone https://github.com/Loop3D/map2loop
-# Build map2model from source
-RUN mkdir /map2loop/m2m_source/build 
-RUN cd /map2loop/m2m_source/build && cmake .. && make -j2 && cp map2model ../../m2m_cpp
-# Install deps and then the package itself
-RUN conda install -c conda-forge ipywidgets
-RUN conda install -c conda-forge ipyleaflet
-RUN conda install -c conda-forge folium
-RUN pip install ipyfilechooser
-RUN jupyter nbextension enable --py --sys-prefix ipyleaflet
-RUN pip install -e /map2loop
+# RUN git clone https://github.com/Loop3D/map2loop
+# # Build map2model from source
+# RUN mkdir /map2loop/m2m_source/build 
+# RUN cd /map2loop/m2m_source/build && cmake .. && make -j2 && cp map2model ../../m2m_cpp
+# # Install deps and then the package itself
+# RUN conda install -c conda-forge ipywidgets
+# RUN conda install -c conda-forge ipyleaflet
+# RUN conda install -c conda-forge folium
+# RUN pip install ipyfilechooser
+# RUN jupyter nbextension enable --py --sys-prefix ipyleaflet
+# RUN pip install -e /map2loop
 
 # Execute jupyter on run 
 CMD ["jupyter","notebook","--ip=0.0.0.0", "--allow-root", "--no-browser", "--NotebookApp.password=''"]

@@ -20,5 +20,12 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    install_requires=[
+        'map2model-loop3d',
+        'numpy',
+        'pandas',
+        'geopandas',
+        'matplotlib'
+    ],
     python_requires='>=3.6',
 )

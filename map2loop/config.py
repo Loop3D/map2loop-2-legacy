@@ -7,7 +7,8 @@ import map2model
 class Config(object):
     def __init__(self, geology_file, fault_file, structure_file, mindep_file, bbox_3d, polygon, step_out, c_l={}):
         self.bbox_3d = bbox_3d
-        self.bbox = tuple(list(bbox_3d.values())[:4])
+        self.bbox = tuple([bbox_3d["minx"], bbox_3d["miny"],
+                           bbox_3d["maxx"], bbox_3d["maxy"]])
         self.polygon = polygon
         self.step_out = step_out
         self.c_l = c_l
