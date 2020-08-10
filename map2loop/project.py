@@ -103,10 +103,10 @@ class Project(object):
         self.config = Config(self.geology_file, self.fault_file,
                              self.structure_file, self.mindep_file, bbox_3d, polygon, step_out, c_l)
 
-    def plot(self):
+        # Store important data frames and display
         self.config.preprocess("plot")
 
     def run(self):
         print("Generating topology analyser input...")
-        self.config.preprocess("export_csv")
+        self.config.export_csv()
         self.config.runMap2Model()

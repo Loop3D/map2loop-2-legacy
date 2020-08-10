@@ -52,56 +52,63 @@ class Config(object):
         if(not os.path.isdir(self.graph_path)):
             os.mkdir(self.graph_path)
 
-    def preprocess(self, command="plot"):
+    def preprocess(self, command=""):
         geology = gpd.read_file(self.geology_file, bbox=self.bbox)
-        lines = gpd.read_file(self.fault_file, bbox=self.bbox)
+        faults = gpd.read_file(self.fault_file, bbox=self.bbox)
         structures = gpd.read_file(self.structure_file, bbox=self.bbox)
-        mindep = gpd.read_file(self.mindep_file, bbox=self.bbox)
+        mindeps = gpd.read_file(self.mindep_file, bbox=self.bbox)
+
+        self.geology = geology
+        self.faults = faults
+        self.structures = structures
+        self.mindeps = mindeps
 
         if command == "plot":
             try:
                 base = geology.plot(column=self.c_l['c'], figsize=(
                     10, 10), edgecolor='#000000', linewidth=0.2)
                 structures.plot(ax=base, color='none', edgecolor='black')
-                lines.plot(ax=base, cmap='rainbow',
-                           column=self.c_l['f'], figsize=(10, 10), linewidth=0.4)
+                faults.plot(ax=base, cmap='rainbow',
+                            column=self.c_l['f'], figsize=(10, 10), linewidth=0.4)
                 structures[['geometry', self.c_l['gi'],
                             self.c_l['d'], self.c_l['dd']]].plot(ax=base)
                 self.polygon.plot(ax=base, color='none', edgecolor='black')
 
+                return
             except Exception as e:
                 print(e)
 
-        elif command == "export_csv":
-            # Save geology polygons
-            hint_flag = False  # use GSWA strat database to provide relative age hints
-            sub_geol = geology[['geometry', self.c_l['o'], self.c_l['c'], self.c_l['g'],
-                                self.c_l['u'], self.c_l['min'], self.c_l['max'], self.c_l['ds'], self.c_l['r1'], self.c_l['r2']]]
-            Topology.save_geol_wkt(
-                sub_geol, self.geology_file_csv, self.c_l, hint_flag)
+    def export_csv(self):
+        # Save geology polygons
+        hint_flag = False  # use GSWA strat database to provide relative age hints
+        sub_geol = self.geology[['geometry', self.c_l['o'], self.c_l['c'], self.c_l['g'],
+                                 self.c_l['u'], self.c_l['min'], self.c_l['max'], self.c_l['ds'], self.c_l['r1'], self.c_l['r2']]]
+        Topology.save_geol_wkt(
+            sub_geol, self.geology_file_csv, self.c_l, hint_flag)
 
-            # Save mineral deposits
-            sub_mindep = mindep[['geometry', self.c_l['msc'], self.c_l['msn'],
-                                 self.c_l['mst'], self.c_l['mtc'], self.c_l['mscm'], self.c_l['mcom']]]
-            Topology.save_mindep_wkt(
-                sub_mindep, self.mindep_file_csv, self.c_l)
+        # Save mineral deposits
+        sub_mindep = self.mindeps[['geometry', self.c_l['msc'], self.c_l['msn'],
+                                   self.c_l['mst'], self.c_l['mtc'], self.c_l['mscm'], self.c_l['mcom']]]
+        Topology.save_mindep_wkt(
+            sub_mindep, self.mindep_file_csv, self.c_l)
 
-            # Save orientation data
-            sub_pts = structures[[
-                'geometry', self.c_l['gi'], self.c_l['d'], self.c_l['dd']]]
-            Topology.save_structure_wkt(
-                sub_pts, self.structure_file_csv, self.c_l)
+        # Save orientation data
+        sub_pts = self.structures[[
+            'geometry', self.c_l['gi'], self.c_l['d'], self.c_l['dd']]]
+        Topology.save_structure_wkt(
+            sub_pts, self.structure_file_csv, self.c_l)
 
-            # Save faults
-            sub_lines = lines[['geometry', self.c_l['o'], self.c_l['f']]]
-            Topology.save_faults_wkt(sub_lines, self.fault_file_csv, self.c_l)
-
-            # Return those sub frames for debugging
-            # return sub_geol, sub_lines, sub_pts, sub_mindep
+        # Save faults
+        sub_faults = self.faults[['geometry', self.c_l['o'], self.c_l['f']]]
+        Topology.save_faults_wkt(sub_faults, self.fault_file_csv, self.c_l)
 
     def update_parfile(self):
         Topology.save_parfile(self, self.c_l, self.output_path, self.geology_file_csv, self.fault_file_csv, self.structure_file_csv,
                               self.mindep_file_csv, self.bbox[0], self.bbox[1], self.bbox[2], self.bbox[3], 500.0, 'Fe,Cu,Au,NONE')
+
+    def export_png(self):
+        self.geology.plot(column=self.c_l['c'], figsize=(
+            10, 10), edgecolor='#000000', linewidth=0.2).savefig(self.tmp_path+"/geology.png")
 
     def runMap2Model(self):
         print(map2model.run(self.output_path, self.geology_file_csv,
