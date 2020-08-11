@@ -1,7 +1,9 @@
+import os
+import time
+
 import numpy as np
 import pandas as pd
 import geopandas as gpd
-import os
 from map2loop.topology import Topology
 from map2loop import m2l_utils
 import map2model
@@ -9,6 +11,7 @@ import map2model
 import networkx as nx
 import matplotlib.pyplot as plt
 import rasterio
+import shapely
 
 
 class Config(object):
@@ -77,12 +80,17 @@ class Config(object):
             try:
                 base = geology.plot(column=self.c_l['c'], figsize=(
                     10, 10), edgecolor='#000000', linewidth=0.2, legend=True)
+                leg = base.get_legend()
+                leg.set_bbox_to_anchor((1.04, 1))
                 self.geology_figure = base.get_figure()
+
                 structures.plot(ax=base, color='none', edgecolor='black')
+
                 faults.plot(ax=base, cmap='rainbow',
                             column=self.c_l['f'], figsize=(10, 10), linewidth=0.4)
                 structures[['geometry', self.c_l['gi'],
                             self.c_l['d'], self.c_l['dd']]].plot(ax=base)
+
                 fig = self.polygon.plot(ax=base, color='none', edgecolor='black').set_title(
                     "Input {}".format(self.bbox)).get_figure()
                 fig.savefig(self.tmp_path+"/input-data.png")
@@ -91,8 +99,6 @@ class Config(object):
                       self.tmp_path + "/input-fig.png")
 
                 self.export_png()
-
-                plt.tight_layout()
                 plt.show()
 
                 return
@@ -218,7 +224,7 @@ class Config(object):
         # Structures
         list1 = ['geometry', self.c_l['d'],
                  self.c_l['dd'], self.c_l['sf'], self.c_l['bo']]
-        list2 = unique_list(list1)
+        list2 = list(set(list1))
         sub_pts = self.structures[list2]
         structure_code = gpd.sjoin(sub_pts, geol_clip, how="left", op="within")
 
@@ -226,7 +232,7 @@ class Config(object):
         y_point_list = [miny, miny, maxy, maxy, miny]
         x_point_list = [minx, maxx, maxx, minx, minx]
 
-        bbox_geom = Polygon(zip(x_point_list, y_point_list))
+        bbox_geom = shapely.geometry.Polygon(zip(x_point_list, y_point_list))
 
         # TODO: 'polygo' is never used
         polygo = gpd.GeoDataFrame(
@@ -245,7 +251,7 @@ class Config(object):
 
         structure_clip = structure_clip[~structure_clip[self.c_l['o']].isnull(
         )]
-        structure_clip.to_file(tmp_path+'/structure_clip.shp')
+        structure_clip.to_file(self.tmp_path+'/structure_clip.shp')
 
         # Save geology clips
         Topology.save_group(self.G, self.tmp_path,

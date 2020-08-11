@@ -116,4 +116,5 @@ class Project(object):
         self.config.join_features()
 
         if(workflow['cover_map']):
+            # Depth to basement calculation
             pass
