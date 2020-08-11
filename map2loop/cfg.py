@@ -47,16 +47,21 @@ c_l = {
     "bedding": 'Bed',
     # flag to determine measurement convention (currently 'strike' or 'dip direction')
     "otype": 'dip direction',
+    "bo": "TYPE",  # field that contains type of foliation
+    # text to search for in field defined by bo code to show that this is an overturned bedding measurement
+    "btype": 'overturned',
     # Stratigraphy
     "g": 'GROUP_',  # field that contains coarser stratigraphic coding
-    "c": 'CODE',  # field that contains finer stratigraphic coding
+    # field that contains alternate coarser stratigraphic coding if 'g' is blank
+    "g2": 'SUPERSUITE',
+    "c": 'UNITNAME',  # field that contains finer stratigraphic coding
     "ds": 'DESCRIPTN',  # field that contains information about lithology
     # field that contains alternate stratigraphic coding (not used??)
-    "u": 'UNITNAME',
+    "u": 'CODE',
     "r1": 'ROCKTYPE1',  # field that contains  extra lithology information
     "r2": 'ROCKTYPE2',  # field that contains even more lithology information
     "sill": 'sill',  # text to search for in field defined by ds code to show that this is a sill
-    # text to search for in field defined by ds code to show that this is an intrusion
+    # text to search for in field defined by r1 code to show that this is an intrusion
     "intrusive": 'intrusive',
     # text to search for in field defined by ds code to show that this is an volv=canic (not intrusion)
     "volcanic": 'volcanic',
@@ -76,8 +81,18 @@ c_l = {
     "f": 'FEATURE',  # field that contains information on type of structure
     # text to search for in field defined by f code to show that this is a fault
     "fault": 'Fault',
+    "ff": 'FEATURE',  # field that contains information on type of structure
     # text to search for in field defined by f code to show that this is a fold axial trace
     "fold": 'Fold axial trace',
+    "fdip": 'DIP',               # field for numeric fault dip value
+    # text to search for in field defined by fdip to show that this has no known dip
+    "fdipnull": '0',
+    "fdipdir": 'DIP_DIR',        # field for text fault dip direction value
+    # flag for text fault dip direction type num e.g. 045 or alpha e.g. southeast
+    "fdipdir_flag": 'alpha',
+    "fdipest": 'DIP_EST',        # field for text fault dip estimate value
+    # text to search for in field defined by fdipest to give fault dip estimate in increasing steepness
+    "fdipest_vals": 'gentle,moderate,steep',
     # field that contains information on name of fault (not used??)
     "n": 'NAME',
     "t": 'TYPE',  # field that contains information on type of fold
@@ -85,8 +100,7 @@ c_l = {
     "syn": 'syncline',
     # ids
     "o": 'OBJECTID',  # field that contains unique id of geometry object
-    "gi": 'GEOPNT_ID',  # field that contains unique id of structure point
-    "deposit_dist": 500.0
+    "gi": 'GEOPNT_ID'  # field that contains unique id of structure point
 }
 
 # DECIMATION

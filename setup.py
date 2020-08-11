@@ -28,7 +28,8 @@ setuptools.setup(
         'matplotlib',
         'networkx',
         'shapely',
-        'rasterio'
+        'rasterio',
+        'scipy'
     ],
     python_requires='>=3.6',
 )
