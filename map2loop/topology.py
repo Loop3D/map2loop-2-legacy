@@ -942,12 +942,17 @@ class Topology(object):
         return(super_groups, use_gcode3)
 
     def use_asud(strat_graph_file, graph_path):
-        asud_strat_file = "/map2loop-2/map2loop/ASUD.csv"
+        asud_strat_file = "https://gist.githubusercontent.com/yohanderose/3b257dc768fafe5aaf70e64ae55e4c42/raw/8598c7563c1eea5c0cd1080f2c418dc975cc5433/ASUD.csv"
+        print(graph_path)
 
         G = nx.read_gml(strat_graph_file, label='id')
-
         Gp = G.copy().to_directed()
-        ASUD = pd.read_csv(asud_strat_file, ",")
+
+        try:
+            ASUD = pd.read_csv(asud_strat_file, ",")
+        except Exception as e:
+            print(e)
+            return
 
         for e in G.edges:
             glabel_0 = G.nodes[e[0]]['LabelGraphics']['text']
@@ -995,4 +1000,3 @@ class Topology(object):
             print('no cycles')
 
         nx.write_gml(Gp, graph_path+'/ASUD_strat.gml')
-        print(graph_path)
