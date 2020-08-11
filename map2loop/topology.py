@@ -189,6 +189,7 @@ class Topology(object):
 
             plt.figure(p+1)  # display strat graph for one group
             plt.title(glabels[p])
+            plt.tight_layout()
             nx.draw_networkx(GD, pos=nx.kamada_kawai_layout(
                 GD), arrows=True, with_labels=False)
             nx.draw_networkx_labels(GD, pos=nx.kamada_kawai_layout(

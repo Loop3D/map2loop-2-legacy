@@ -17,8 +17,6 @@ class Project(object):
                  structure_file,
                  mindep_file,
                  workflow={'model_engine': 'geomodeller'},
-                 src_crs={'init': 'EPSG:4326'},
-                 dst_crs={'init': 'EPSG:28350'}
                  ):
         # TODO: Create ways to get and set local files
         self.update_workflow(workflow)
@@ -26,8 +24,6 @@ class Project(object):
         self.fault_file = fault_file
         self.structure_file = structure_file
         self.mindep_file = mindep_file
-        self.src_crs = src_crs
-        self.dst_crs = dst_crs
 
     def update_workflow(self, workflow):
         if(workflow['model_engine'] == 'geomodeller'):
@@ -92,16 +88,22 @@ class Project(object):
                           "top": 1200,
                       },
                       step_out=0.1,
+                      src_crs={'init': 'EPSG:4326'},
+                      dst_crs={'init': 'EPSG:28350'}
                       ):
         # TODO: Make crs defaults and specifiable not from config
-        minx, miny, maxx, maxy = list(bbox_3d.values())[:4]
+        minx, miny, maxx, maxy = tuple([bbox_3d["minx"], bbox_3d["miny"],
+                                        bbox_3d["maxx"], bbox_3d["maxy"]])
         lat_point_list = [miny, miny, maxy, maxy, maxy]
         lon_point_list = [minx, maxx, maxx, minx, minx]
         bbox_geom = Polygon(zip(lon_point_list, lat_point_list))
         polygon = gpd.GeoDataFrame(
-            index=[0], crs=self.dst_crs, geometry=[bbox_geom])
-        self.config = Config(self.geology_file, self.fault_file,
-                             self.structure_file, self.mindep_file, bbox_3d, polygon, step_out, c_l)
+            index=[0], crs=dst_crs, geometry=[bbox_geom])
+        self.config = Config(
+            self.geology_file, self.fault_file,
+            self.structure_file, self.mindep_file,
+            bbox_3d, polygon, step_out, src_crs, dst_crs, c_l
+        )
 
         # Store important data frames and display
         self.config.preprocess("plot")
@@ -110,3 +112,8 @@ class Project(object):
         print("Generating topology analyser input...")
         self.config.export_csv()
         self.config.runMap2Model()
+        self.config.load_dtm()
+        self.config.join_features()
+
+        if(workflow['cover_map']):
+            pass

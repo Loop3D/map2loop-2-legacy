@@ -27,7 +27,8 @@ setuptools.setup(
         'geopandas',
         'matplotlib',
         'networkx',
-        'shapely'
+        'shapely',
+        'rasterio'
     ],
     python_requires='>=3.6',
 )
