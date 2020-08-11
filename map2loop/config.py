@@ -3,6 +3,8 @@ import os
 from map2loop.topology import Topology
 import map2model
 
+import networkx as nx
+
 
 class Config(object):
     def __init__(self, geology_file, fault_file, structure_file, mindep_file, bbox_3d, polygon, step_out, c_l={}):
@@ -80,7 +82,7 @@ class Config(object):
 
     def export_csv(self):
         # Save geology polygons
-        hint_flag = False  # use GSWA strat database to provide relative age hints
+        hint_flag = False  # use GSWA strat database to provide topology hints
         sub_geol = self.geology[['geometry', self.c_l['o'], self.c_l['c'], self.c_l['g'],
                                  self.c_l['u'], self.c_l['min'], self.c_l['max'], self.c_l['ds'], self.c_l['r1'], self.c_l['r2']]]
         Topology.save_geol_wkt(
@@ -111,8 +113,30 @@ class Config(object):
             10, 10), edgecolor='#000000', linewidth=0.2).savefig(self.tmp_path+"/geology.png")
 
     def runMap2Model(self):
-        print(map2model.run(self.output_path, self.geology_file_csv,
+        print(map2model.run(self.graph_path, self.geology_file_csv,
                             self.fault_file_csv, self.mindep_file_csv,
                             self.bbox_3d,
                             self.c_l,
                             "Fe,Cu,Au,NONE"))
+
+        print("Resolving known ambiguities using ASUD...", end='\toutput_dir:')
+        aus = True
+        if aus:
+            Topology.use_asud(self.strat_graph_file,  self.graph_path)
+            self.strat_graph_file = self.graph_path+'/ASUD_strat.gml'
+        print("Done.")
+
+        print("Generating topology graph...")
+        self.G = nx.read_gml(self.strat_graph_file, label='id')
+        selected_nodes = [n for n, v in self.G.nodes(data=True) if n >= 0]
+        nx.draw_networkx(self.G, pos=nx.kamada_kawai_layout(
+            self.G), arrows=True, nodelist=selected_nodes)
+        nlist = list(self.G.nodes.data('LabelGraphics'))
+        nlist.sort()
+        for node in nlist:
+            if node[0] >= 0:
+                elem = str(node[1]).replace(
+                    "{'text':", "").replace(", 'fontSize': 14}", "")
+                # second=elem.split(":").replace("'","")
+                print(node[0], " ", elem)
+        print("Done")

@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="map2loop",
-    version="1.0.3",
+    version="1.0.4",
     author="Yohan de Rose",
     author_email="contact@loop3d.org",
     description="Generate 3D model data using 2D maps.",
@@ -25,7 +25,9 @@ setuptools.setup(
         'numpy',
         'pandas',
         'geopandas',
-        'matplotlib'
+        'matplotlib',
+        'networkx',
+        'shapely'
     ],
     python_requires='>=3.6',
 )
