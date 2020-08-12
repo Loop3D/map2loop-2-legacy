@@ -25,6 +25,10 @@ requirements:
     - pandas
     - geopandas
     - matplotlib
+    - networkx
+    - shapely
+    - rasterio
+    - scipy
 test:
   imports:
     - map2loop

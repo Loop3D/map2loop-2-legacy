@@ -415,3 +415,6 @@ class Config(object):
         plt.imshow(contact_grid, cmap="hsv",
                    origin='lower', vmin=-360, vmax=360)
         plt.show()
+
+    def export_faults(self):
+        pass

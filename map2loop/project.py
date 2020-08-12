@@ -148,3 +148,5 @@ class Project(object):
         self.config.export_contacts()
 
         self.config.test_interpolation()
+
+        self.export_faults()
