@@ -8,21 +8,25 @@ import rasterio
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 from rasterio.transform import from_origin
 from rasterio import features
-import re    #typo? check
+import re  # typo? check
 from urllib.request import urlopen
 from IPython.display import Image
 from math import sin, cos, atan, atan2, asin, radians, degrees, sqrt, pow, acos, fmod, fabs, isnan
 from owslib.wcs import WebCoverageService
-
+import matplotlib.pyplot as plt
 ############################################
 # output version number
 ############################################
+
+
 def v():
     print('0.0.50')
-    
+
 ############################################
 # first test
 ############################################
+
+
 def hw():
     print("Hello world")
 
@@ -33,16 +37,18 @@ def hw():
 # Args:
 # a number
 # b modulus Returns: modulus of a,b or 0 if b==0
-# 
+#
 # Calculate a modulo b (a%b) for decimation with special case of b=0 resulting in no decimation.
 ############################################
-def mod_safe(a,b):
-    
-    if(b==0):
+
+
+def mod_safe(a, b):
+
+    if(b == 0):
         return(0)
     else:
-        return(a%b)
-        
+        return(a % b)
+
 ############################################
 # get value from a rasterio raster at location x,y (real world coords)
 #
@@ -51,15 +57,17 @@ def mod_safe(a,b):
 # dataset rasterio format georeferenced dataset
 # locations list of x,y locations in same coordinate system for which values will be calculated Returns:
 # list of values for specified lcoations
-# 
+#
 # Given rasterio georeferenced grid of data, return value at list of locations stored in x1,y1 using same projection. From...
 ############################################
-def value_from_raster(dataset,locations):
-    #print(locations[0][0],locations[0][1],dataset.bounds[0],dataset.bounds[1],dataset.bounds[2],dataset.bounds[3])
-    if(locations[0][0] > dataset.bounds[0] and locations[0][0] < dataset.bounds[2] and  
-    locations[0][1] > dataset.bounds[1] and locations[0][1] < dataset.bounds[3]):       
+
+
+def value_from_raster(dataset, locations):
+    # print(locations[0][0],locations[0][1],dataset.bounds[0],dataset.bounds[1],dataset.bounds[2],dataset.bounds[3])
+    if(locations[0][0] > dataset.bounds[0] and locations[0][0] < dataset.bounds[2] and
+       locations[0][1] > dataset.bounds[1] and locations[0][1] < dataset.bounds[3]):
         for val in dataset.sample(locations):
-            value=str(val).replace("[","").replace("]","")
+            value = str(val).replace("[", "").replace("]", "")
         return(value)
     else:
         return(-999)
@@ -75,45 +83,46 @@ def value_from_raster(dataset,locations):
 # cover_map boolean wrt to use of dtb
 # locations list of x,y locations in same coordinate system for which values will be calculated Returns:
 # list of values for specified lcoations
-# 
+#
 # Given rasterio georeferenced grid of dtm and maybe dtb, return value at list of locations stored in x1,y1 using same projection. From...
 ############################################
 
-def value_from_dtm_dtb(dtm,dtb,dtb_null,cover_map,locations):
+
+def value_from_dtm_dtb(dtm, dtb, dtb_null, cover_map, locations):
     if(cover_map):
-        if(locations[0][0] > dtm.bounds[0] and locations[0][0] < dtm.bounds[2] and  
-        locations[0][1] > dtm.bounds[1] and locations[0][1] < dtm.bounds[3] and
-        locations[0][0] > dtb.bounds[0] and locations[0][0] < dtb.bounds[2] and  
-        locations[0][1] > dtb.bounds[1] and locations[0][1] < dtb.bounds[3]):       
+        if(locations[0][0] > dtm.bounds[0] and locations[0][0] < dtm.bounds[2] and
+           locations[0][1] > dtm.bounds[1] and locations[0][1] < dtm.bounds[3] and
+           locations[0][0] > dtb.bounds[0] and locations[0][0] < dtb.bounds[2] and
+           locations[0][1] > dtb.bounds[1] and locations[0][1] < dtb.bounds[3]):
             for val in dtm.sample(locations):
-                value_dtm=float(str(val).replace("[","").replace("]",""))
+                value_dtm = float(str(val).replace("[", "").replace("]", ""))
 
             for val in dtb.sample(locations):
-                value_dtb=float(str(val).replace("[","").replace("]",""))
+                value_dtb = float(str(val).replace("[", "").replace("]", ""))
 
-            if(value_dtb==float(dtb_null) or value_dtb==-999999):
-                value_dtb=0
+            if(value_dtb == float(dtb_null) or value_dtb == -999999):
+                value_dtb = 0
 
             return(str(value_dtm-value_dtb))
         else:
             return(-999)
-    else: 
-        if(locations[0][0] > dtm.bounds[0] and locations[0][0] < dtm.bounds[2] and  
-        locations[0][1] > dtm.bounds[1] and locations[0][1] < dtm.bounds[3]):       
+    else:
+        if(locations[0][0] > dtm.bounds[0] and locations[0][0] < dtm.bounds[2] and
+           locations[0][1] > dtm.bounds[1] and locations[0][1] < dtm.bounds[3]):
             for val in dtm.sample(locations):
-                value_dtm=str(val).replace("[","").replace("]","")
-                
+                value_dtm = str(val).replace("[", "").replace("]", "")
+
             return(value_dtm)
         else:
             return(-999)
-           
+
 
 ############################################
 # turn a simple list into a list of paired data
 #
 # pairs(lst)
-#Args:
-#lst simple list a,b,c,d becomes list (a,b), (c,d) etc.
+# Args:
+# lst simple list a,b,c,d becomes list (a,b), (c,d) etc.
 ############################################
 def pairs(lst):
     for i in range(1, len(lst)):
@@ -129,59 +138,61 @@ def pairs(lst):
 #
 # Extracts and saves to file digital terrain model from GA hosted data for Australia. Highest horizontal resolution is ? m. Min/max lat/long in WGS84 dtm_file is relative path filename.
 ############################################
-def get_dtm_hawaii(path_out, minlong,maxlong,minlat,maxlat):
-    
-    step_out=0
-    minxll=int(((minlong+180)*120)-step_out)
-    maxxll=int(((maxlong+180)*120)+step_out)
-    minyll=int(((minlat+90)*120)-step_out)
-    maxyll=int(((maxlat+90)*120)+step_out)  
-      
-    sizex=round(maxxll-minxll+1)
-    sizey=round(maxyll-minyll+1)
-    
-    minxll=str(minxll)
-    maxxll=str(maxxll)
-    minyll=str(minyll)
-    maxyll=str(maxyll)
-    bbox="["+minyll+":1:"+maxyll+"]["+minxll+":1:"+maxxll+"]"
+
+
+def get_dtm_hawaii(path_out, minlong, maxlong, minlat, maxlat):
+
+    step_out = 0
+    minxll = int(((minlong+180)*120)-step_out)
+    maxxll = int(((maxlong+180)*120)+step_out)
+    minyll = int(((minlat+90)*120)-step_out)
+    maxyll = int(((maxlat+90)*120)+step_out)
+
+    sizex = round(maxxll-minxll+1)
+    sizey = round(maxyll-minyll+1)
+
+    minxll = str(minxll)
+    maxxll = str(maxxll)
+    minyll = str(minyll)
+    maxyll = str(maxyll)
+    bbox = "["+minyll+":1:"+maxyll+"]["+minxll+":1:"+maxxll+"]"
 
     link = "https://pae-paha.pacioos.hawaii.edu/thredds/dodsC/srtm30plus_v11_land.ascii?elev"+bbox
     print(link)
     f = urlopen(link)
     myfile = f.read()
-    myfile2=myfile.decode("utf-8") 
-    data=myfile2.split("---------------------------------------------")
+    myfile2 = myfile.decode("utf-8")
+    data = myfile2.split("---------------------------------------------")
     #import re
 
-    grid=re.sub('\[.*\]','',data[1]).replace(",","").replace("elev.elev","").replace("\n"," ").replace("  "," ")
-    #print(grid)
-    grid=grid.split(" ")
-    grid=grid[2:(sizex*sizey)+2]
-    
+    grid = re.sub('\[.*\]', '', data[1]).replace(",",
+                                                 "").replace("elev.elev", "").replace("\n", " ").replace("  ", " ")
+    # print(grid)
+    grid = grid.split(" ")
+    grid = grid[2:(sizex*sizey)+2]
+
     #OPeNDAP = np.ones((sizey,sizex), dtype='int16')
-    #k=0
-    #for j in range (0, sizey, 1):
+    # k=0
+    # for j in range (0, sizey, 1):
     #    for i in range (0, sizex, 1):
     #        OPeNDAP[sizey-1-j][i]=int(float(grid[k]))
     #        k+=1
 
-    OPeNDAP=np.asarray(grid,dtype=np.float16).reshape(sizey,sizex)
-    OPeNDAP=OPeNDAP.astype('int16')
-    OPeNDAP=np.flipud(OPeNDAP)
+    OPeNDAP = np.asarray(grid, dtype=np.float16).reshape(sizey, sizex)
+    OPeNDAP = OPeNDAP.astype('int16')
+    OPeNDAP = np.flipud(OPeNDAP)
 
-
-    transform = from_origin(minlong, maxlat,0.008333333,0.008333333)
+    transform = from_origin(minlong, maxlat, 0.008333333, 0.008333333)
 
     new_dataset = rasterio.open(path_out, 'w', driver='GTiff',
-                                height = OPeNDAP.shape[0], width = OPeNDAP.shape[1],
+                                height=OPeNDAP.shape[0], width=OPeNDAP.shape[1],
                                 count=1, dtype=str(OPeNDAP.dtype),
                                 crs='+proj=longlat',
                                 transform=transform)
 
     new_dataset.write(OPeNDAP, 1)
     new_dataset.close()
-    print("dtm geotif saved as",path_out)
+    print("dtm geotif saved as", path_out)
 
 ############################################
 # get dtm data from GA SRTM server and save as geotiff
@@ -193,23 +204,25 @@ def get_dtm_hawaii(path_out, minlong,maxlong,minlat,maxlat):
 #
 # Extracts and saves to file digital terrain model from GA hosted data for Australia. Highest horizontal resolution is ? m. Min/max lat/long in WGS84 dtm_file is relative path filename.
 ############################################
-def get_dtm(path_out, minlong,maxlong,minlat,maxlat):
 
 
-    bbox=(minlong,minlat,maxlong,maxlat)
+def get_dtm(path_out, minlong, maxlong, minlat, maxlat):
 
-    url="http://services.ga.gov.au/gis/services/DEM_SRTM_1Second_over_Bathymetry_Topography/MapServer/WCSServer?"
-    wcs = WebCoverageService(url,version='1.0.0')
+    bbox = (minlong, minlat, maxlong, maxlat)
 
-    cvg=wcs.getCoverage(identifier='1',  bbox=bbox, format='GeoTIFF', crs=4326, width=200, height=200)
+    url = "http://services.ga.gov.au/gis/services/DEM_SRTM_1Second_over_Bathymetry_Topography/MapServer/WCSServer?"
+    wcs = WebCoverageService(url, version='1.0.0')
+
+    cvg = wcs.getCoverage(identifier='1',  bbox=bbox,
+                          format='GeoTIFF', crs=4326, width=200, height=200)
 
     f = open(path_out, 'wb')
     bytes_written = f.write(cvg.read())
     f.close()
-    print("dtm geotif saved as",path_out)
-    
+    print("dtm geotif saved as", path_out)
+
 ############################################
-#reproject a dtm 
+# reproject a dtm
 #
 # reproject_dtm(dtm_file,dtm_reproj_file,src_crs,dst_crs)
 # Args:
@@ -217,10 +230,12 @@ def get_dtm(path_out, minlong,maxlong,minlat,maxlat):
 # dtm_reproj_file path to location of geotiff of elevation (in projection defined by dst_crs)
 # src_crs Coordinate Reference System of source geotif (normally WGS 84 lat/long (EPSG:4326))
 # dst_crs Coordinate Reference System of destination geotif (any length-based projection)
-# 
+#
 # Returns rasterio format reprojected of filename dtm_reproj_file of grid of geotif file defined by dtm_file assuming source coordinate reference system (CRS) of src_crs and destination CRS of dsr_crs
 ############################################
-def reproject_dtm(path_in,path_out,src_crs,dst_crs):
+
+
+def reproject_dtm(path_in, path_out, src_crs, dst_crs):
     with rasterio.open(path_in) as src:
         transform, width, height = calculate_default_transform(
             src.crs, dst_crs, src.width, src.height, *src.bounds)
@@ -232,7 +247,6 @@ def reproject_dtm(path_in,path_out,src_crs,dst_crs):
             'height': height
         })
 
-
         with rasterio.open(path_out, 'w', **kwargs) as dst:
             for i in range(1, src.count + 1):
                 reproject(
@@ -243,8 +257,8 @@ def reproject_dtm(path_in,path_out,src_crs,dst_crs):
                     dst_transform=transform,
                     dst_crs=dst_crs,
                     resampling=Resampling.nearest)
-            dst.close()        
-    print("reprojected dtm geotif saved as",path_out)
+            dst.close()
+    print("reprojected dtm geotif saved as", path_out)
 
 ############################################
 # get bounds of a dtm
@@ -255,48 +269,53 @@ def reproject_dtm(path_in,path_out,src_crs,dst_crs):
 # returns:
 # bounding box of raster
 ############################################
-def get_dtm_bounds(path_in,dst_crs):            
+
+
+def get_dtm_bounds(path_in, dst_crs):
     with rasterio.open(path_in) as dataset:
 
         # Read the dataset's valid data mask as a ndarray.
         mask = dataset.dataset_mask()
         for geom, val in rasterio.features.shapes(
-                    mask, transform=dataset.transform):
+                mask, transform=dataset.transform):
 
-                # Transform shapes from the dataset's own coordinate
-                # reference system to 28350.
-                geom_rp = rasterio.warp.transform_geom(
-                    dataset.crs, dst_crs, geom, precision=6)
+            # Transform shapes from the dataset's own coordinate
+            # reference system to 28350.
+            geom_rp = rasterio.warp.transform_geom(
+                dataset.crs, dst_crs, geom, precision=6)
 
-                # Print GeoJSON shapes to stdout.
-                #print(geom_rp)
-                return(geom_rp)
-                
+            # Print GeoJSON shapes to stdout.
+            # print(geom_rp)
+            return(geom_rp)
+
 ############################################
 # https://gist.github.com/mhweber/cf36bb4e09df9deee5eb54dc6be74d26
-# code to explode a MultiPolygon to Polygons    
+# code to explode a MultiPolygon to Polygons
 ############################################
+
+
 def explode(indf):
-#    indf = gpd.GeoDataFrame.from_file(indata)
+    #    indf = gpd.GeoDataFrame.from_file(indata)
     outdf = gpd.GeoDataFrame(columns=indf.columns)
     for idx, row in indf.iterrows():
         if type(row.geometry) == Polygon:
-            outdf = outdf.append(row,ignore_index=True)
+            outdf = outdf.append(row, ignore_index=True)
         if type(row.geometry) == MultiPolygon:
             multdf = gpd.GeoDataFrame(columns=indf.columns)
             recs = len(row.geometry)
-            multdf = multdf.append([row]*recs,ignore_index=True)
+            multdf = multdf.append([row]*recs, ignore_index=True)
             for geom in range(recs):
-                multdf.loc[geom,'geometry'] = row.geometry[geom]
-            outdf = outdf.append(multdf,ignore_index=True)
+                multdf.loc[geom, 'geometry'] = row.geometry[geom]
+            outdf = outdf.append(multdf, ignore_index=True)
     return outdf
 
-###https://github.com/earthlab/earthpy/blob/master/earthpy/clip.py
+# https://github.com/earthlab/earthpy/blob/master/earthpy/clip.py
 ###
-### earthpy.clip
-### ============
-### A module to clip vector data using GeoPandas.
+# earthpy.clip
+# ============
+# A module to clip vector data using GeoPandas.
 ###
+
 
 def _clip_points(shp, clip_obj):
     """Clip point geometry to the clip_obj GeoDataFrame extent.
@@ -419,6 +438,8 @@ def _clip_multi_poly_line(shp, clip_obj):
 ####################################################
 # master function to clip shapely geometry to a shapely polygon
 ####################################################
+
+
 def clip_shp(shp, clip_obj):
     """Clip points, lines, or polygon geometries to the clip_obj extent.
     Both layers must be in the same Coordinate Reference System (CRS) and will
@@ -503,16 +524,19 @@ def clip_shp(shp, clip_obj):
 # minx,maxx,miny,maxy coordinates of bounding box
 # dst_crs Coordinate Refernce System
 ####################################################
-def save_clip_to_bbox(path,geom,minx,maxx,miny,maxy,dst_crs):
+
+
+def save_clip_to_bbox(path, geom, minx, maxx, miny, maxy, dst_crs):
     y_point_list = [miny, miny, maxy, maxy, miny]
     x_point_list = [minx, maxx, maxx, minx, minx]
 
     bbox_geom = Polygon(zip(x_point_list, y_point_list))
 
-    polygo = gpd.GeoDataFrame(index=[0], crs=dst_crs, geometry=[bbox_geom]) 
-    
-    clipped=clip_shp(geom,polygo)
+    polygo = gpd.GeoDataFrame(index=[0], crs=dst_crs, geometry=[bbox_geom])
+
+    clipped = clip_shp(geom, polygo)
     clipped.to_file(path)
+
 
 try:
     import httplib
@@ -526,6 +550,8 @@ except:
 # url URL of site to test
 # Determines if network access to URL is available, returns Boolean
 ####################################################
+
+
 def have_access(url):
     conn = httplib.HTTPConnection(url, timeout=5)
     try:
@@ -549,15 +575,17 @@ def have_access(url):
 # dipdir clockwise degrees from North of dip direction
 # Returns:
 # l,m,n direction cosines of pole to plane
-# 
+#
 # Converts dip, dip direction to three direction cosine arrays(l,m,n)
 ####################################################
-def ddd2dircos(dip,dipdir):
+
+
+def ddd2dircos(dip, dipdir):
     l = sin(radians(dipdir))*cos(radians(90-dip))
     m = cos(radians(dipdir))*cos(radians(90-dip))
     n = sin(radians(90-dip))
-    return(l,m,n)
-    
+    return(l, m, n)
+
 ####################################################
 # calculate dip, dipdirection from 3D direction cosines
 #
@@ -565,19 +593,21 @@ def ddd2dircos(dip,dipdir):
 # Args:
 # l,m,n direction cosines of pole to plane Returns: dip dip of bedding from horizontal
 # dipdir clockwise degrees from North of dip direction
-# 
-# Converts (l,m,n) direction cosine arrays to dip, dip direction 
+#
+# Converts (l,m,n) direction cosine arrays to dip, dip direction
 ####################################################
-def dircos2ddd(l,m,n):
-    if(m>0):
-        dipdir=(360+degrees(atan(l/m)))%360
-    elif(m<0):
-        dipdir=(540+degrees(atan(l/m)))%360
+
+
+def dircos2ddd(l, m, n):
+    if(m > 0):
+        dipdir = (360+degrees(atan(l/m))) % 360
+    elif(m < 0):
+        dipdir = (540+degrees(atan(l/m))) % 360
     else:
-        dipdir=90
-    dip =90-degrees(asin(n))
-    return(dip,dipdir)
-    
+        dipdir = 90
+    dip = 90-degrees(asin(n))
+    return(dip, dipdir)
+
 ####################################################
 # Calulate 2D direction cosines from two points
 #
@@ -587,19 +617,20 @@ def dircos2ddd(l,m,n):
 # p2x,p2y another point
 # Returns:
 # l,m 2D direction cosines of line segment
-# 
+#
 # Returns l,m direction cosines of line segment defined by points
 ####################################################
-    
-def pts2dircos(p1x,p1y,p2x,p2y):
-    dlsx=p1x-p2x
-    dlsy=p1y-p2y
-    if(p1x==p2x and p1y==p2y):
-        return(0,0)
-    l=dlsx/sqrt((dlsx*dlsx)+(dlsy*dlsy))
-    m=dlsy/sqrt((dlsx*dlsx)+(dlsy*dlsy))        
-    return(l,m)
-    
+
+
+def pts2dircos(p1x, p1y, p2x, p2y):
+    dlsx = p1x-p2x
+    dlsy = p1y-p2y
+    if(p1x == p2x and p1y == p2y):
+        return(0, 0)
+    l = dlsx/sqrt((dlsx*dlsx)+(dlsy*dlsy))
+    m = dlsy/sqrt((dlsx*dlsx)+(dlsy*dlsy))
+    return(l, m)
+
 ####################################################
 # calculate distance between two points
 # duplicated in m2l_geometry, don't know why!
@@ -607,12 +638,14 @@ def pts2dircos(p1x,p1y,p2x,p2y):
 # Args:
 # p1x,p1y a point
 # p2x,p2y another point
-#Calculates distance between two points 
+# Calculates distance between two points
 ####################################################
-def ptsdist(p1x,p1y,p2x,p2y):
-    dist=sqrt(pow(p1x-p2x,2)+pow(p1y-p2y,2))
+
+
+def ptsdist(p1x, p1y, p2x, p2y):
+    dist = sqrt(pow(p1x-p2x, 2)+pow(p1y-p2y, 2))
     return(dist)
-    
+
 ###########################################
 # Apical angle between three points, first point is at apex
 #
@@ -623,153 +656,168 @@ def ptsdist(p1x,p1y,p2x,p2y):
 #
 # Caluclates angle of three points
 ###########################################
-def tri_angle(p1x,p1y,p2x,p2y,p3x,p3y):
-    p12=ptsdist(p1x,p1y,p2x,p2y)
-    p13=ptsdist(p1x,p1y,p3x,p3y)
-    p23=ptsdist(p2x,p2y,p3x,p3y)
-      
-    numerator=pow(p12,2.0)+pow(p13,2.0)-pow(p23,2.0)
-    divisor=2*p12*p13
 
-    if(fabs(numerator/divisor)>1.0 ):
-        angle=180.0
+
+def tri_angle(p1x, p1y, p2x, p2y, p3x, p3y):
+    p12 = ptsdist(p1x, p1y, p2x, p2y)
+    p13 = ptsdist(p1x, p1y, p3x, p3y)
+    p23 = ptsdist(p2x, p2y, p3x, p3y)
+
+    numerator = pow(p12, 2.0)+pow(p13, 2.0)-pow(p23, 2.0)
+    divisor = 2*p12*p13
+
+    if(fabs(numerator/divisor) > 1.0):
+        angle = 180.0
     else:
-        angle=degrees(acos(numerator/divisor))
-    
+        angle = degrees(acos(numerator/divisor))
+
     return(angle)
 
 ###########################################
 # plot_points on map
 ###########################################
 
-def plot_points(point_source,geol_clip, colour_code,x_code,y_code,legend,dtype):
+
+def plot_points(point_source, geol_clip, colour_code, x_code, y_code, legend, dtype):
+    plot_title = point_source.split("/")[-1].split(".")[0]
+
     from shapely.geometry import Point
-    thick=pd.read_csv(point_source,encoding = "ISO-8859-1", dtype='object')
-    if(dtype=='numeric'):
-        thick['cc']=pd.to_numeric(thick[colour_code])
+    thick = pd.read_csv(point_source, encoding="ISO-8859-1", dtype='object')
+    if(dtype == 'numeric'):
+        thick['cc'] = pd.to_numeric(thick[colour_code])
     else:
-        thick['cc']=thick[colour_code]
-    thick[x_code]=thick[x_code].astype('float64')
-    thick[y_code]=thick[y_code].astype('float64')
-    thick=gpd.GeoDataFrame(thick, geometry=[Point(xy) for xy in zip(thick[x_code], thick[y_code])])
-    base=geol_clip.plot(color='white',figsize=(7,7),edgecolor='#000000',linewidth=0.2)
-    plot2 = thick.plot(ax=base, column='cc', markersize=15,cmap='rainbow',legend=legend)
-    plot2 = plot2.figure; plot2.tight_layout()
+        thick['cc'] = thick[colour_code]
+    thick[x_code] = thick[x_code].astype('float64')
+    thick[y_code] = thick[y_code].astype('float64')
+    thick = gpd.GeoDataFrame(thick, geometry=[Point(
+        xy) for xy in zip(thick[x_code], thick[y_code])])
+    base = geol_clip.plot(color='white', figsize=(
+        7, 7), edgecolor='#000000', linewidth=0.2)
+    plot2 = thick.plot(ax=base, column='cc', markersize=15,
+                       cmap='rainbow', legend=legend)
+    plot2 = plot2.set_title(plot_title).figure
+    plot2.tight_layout()
 
 ###########################################
 # plot bedding stereonets
 ###########################################
-def plot_bedding_stereonets(orientations_clean,geology,c_l):
+
+
+def plot_bedding_stereonets(orientations_clean, geology, c_l):
     import mplstereonet
     import matplotlib.pyplot as plt
-    
-    orientations = gpd.sjoin(orientations_clean, geology, how="left", op="within")
-    
-    groups=geology[c_l['g']].unique()
-    codes=geology[c_l['c']].unique()
-    print("All observations n=",len(orientations_clean))
-    print('groups',groups,'\ncodes',codes)
 
-    fig, ax = mplstereonet.subplots(figsize=(7,7))
-    if(c_l['otype']=='dip direction'):
-        strikes = orientations[c_l['dd']].values -90
+    orientations = gpd.sjoin(
+        orientations_clean, geology, how="left", op="within")
+
+    groups = geology[c_l['g']].unique()
+    codes = geology[c_l['c']].unique()
+    print("All observations n=", len(orientations_clean))
+    print('groups', groups, '\ncodes', codes)
+
+    fig, ax = mplstereonet.subplots(figsize=(7, 7))
+    if(c_l['otype'] == 'dip direction'):
+        strikes = orientations[c_l['dd']].values - 90
     else:
         strikes = orientations[c_l['dd']].values
-       
+
     dips = orientations[c_l['d']].values
     cax = ax.density_contourf(strikes, dips, measurement='poles')
     ax.pole(strikes, dips, markersize=5, color='w')
     ax.grid(True)
     text = ax.text(2.2, 1.37, "All data", color='b')
     plt.show()
-    group_girdle={}
+    group_girdle = {}
 
     for gp in groups:
-        
-        all_orientations=orientations[orientations[c_l['g']]==gp]
-        if(len(all_orientations)==1):
+
+        all_orientations = orientations[orientations[c_l['g']] == gp]
+        if(len(all_orientations) == 1):
             print("----------------------------------------------------------------------------------------------------------------------")
-            print(gp,"observations has 1 observation")
-            group_girdle[gp]=(-999,-999,1)
-            
-        elif(len(all_orientations)>0):
+            print(gp, "observations has 1 observation")
+            group_girdle[gp] = (-999, -999, 1)
+
+        elif(len(all_orientations) > 0):
             print("----------------------------------------------------------------------------------------------------------------------")
-            print(gp,"observations n=",len(all_orientations))
-            fig, ax = mplstereonet.subplots(figsize=(5,5))
-            if(c_l['otype']=='dip direction'):
-                strikes = all_orientations[c_l['dd']].values -90
+            print(gp, "observations n=", len(all_orientations))
+            fig, ax = mplstereonet.subplots(figsize=(5, 5))
+            if(c_l['otype'] == 'dip direction'):
+                strikes = all_orientations[c_l['dd']].values - 90
             else:
                 strikes = all_orientations[c_l['dd']].values
-               
+
             dips = all_orientations[c_l['d']].values
             cax = ax.density_contourf(strikes, dips, measurement='poles')
             ax.pole(strikes, dips, markersize=5, color='w')
             ax.grid(True)
-            text = ax.text(2.2, 1.37,gp, color='b')
+            text = ax.text(2.2, 1.37, gp, color='b')
             fit_strike, fit_dip = mplstereonet.fit_girdle(strikes, dips)
-            (plunge,), (bearing,) = mplstereonet.pole2plunge_bearing(fit_strike, fit_dip)            
-            group_girdle[gp]=(plunge, bearing,len(all_orientations))
-            print('strike/dip of girdle',fit_strike, '/', fit_dip)                
+            (plunge,), (bearing,) = mplstereonet.pole2plunge_bearing(
+                fit_strike, fit_dip)
+            group_girdle[gp] = (plunge, bearing, len(all_orientations))
+            print('strike/dip of girdle', fit_strike, '/', fit_dip)
             plt.show()
         else:
             print("----------------------------------------------------------------------------------------------------------------------")
-            print(gp,"observations has no observations")
-            group_girdle[gp]=(-999,-999,0)
+            print(gp, "observations has no observations")
+            group_girdle[gp] = (-999, -999, 0)
 
     if(False):
         for gp in groups:
 
             print("----------------------------------------------------------------------------------------------------------------------")
             print(gp)
-            #display(all_sorts2)
-            ind=0
-            orientations2=orientations[orientations[c_l['g']]==gp]
-    
+            # display(all_sorts2)
+            ind = 0
+            orientations2 = orientations[orientations[c_l['g']] == gp]
+
             for code in codes:
-                orientations3=orientations2[orientations2[c_l['c']]==code]
-                ind2=int(fmod(ind,3))
-                if(len(orientations3)>0):
-                    print(code,"observations n=",len(orientations3))
-                #display(orientations2)
-                if(len(orientations3)>0):
-                    if(ind2==0):
-                        fig, ax = mplstereonet.subplots(1,3,figsize=(15,15))
-                    if(c_l['otype']=='dip direction'):
-                        strikes = orientations3[c_l['dd']].values -90
+                orientations3 = orientations2[orientations2[c_l['c']] == code]
+                ind2 = int(fmod(ind, 3))
+                if(len(orientations3) > 0):
+                    print(code, "observations n=", len(orientations3))
+                # display(orientations2)
+                if(len(orientations3) > 0):
+                    if(ind2 == 0):
+                        fig, ax = mplstereonet.subplots(1, 3, figsize=(15, 15))
+                    if(c_l['otype'] == 'dip direction'):
+                        strikes = orientations3[c_l['dd']].values - 90
                     else:
                         strikes = orientations3[c_l['dd']].values
-    
+
                     dips = orientations3[c_l['d']].values
-    
-                    cax = ax[ind2].density_contourf(strikes, dips, measurement='poles')
+
+                    cax = ax[ind2].density_contourf(
+                        strikes, dips, measurement='poles')
                     ax[ind2].pole(strikes, dips, markersize=5, color='w')
                     ax[ind2].grid(True)
-                    #fig.colorbar(cax)
+                    # fig.colorbar(cax)
                     text = ax[ind2].text(2.2, 1.37, code, color='b')
-                    
+
                     # Fit a plane to the girdle of the distribution and display it.
-                    fit_strike, fit_dip = mplstereonet.fit_girdle(strikes, dips)
-                    print('strike/dip of girdle',fit_strike, '/', fit_dip)                
-                   
-                    if(ind2==2):
+                    fit_strike, fit_dip = mplstereonet.fit_girdle(
+                        strikes, dips)
+                    print('strike/dip of girdle', fit_strike, '/', fit_dip)
+
+                    if(ind2 == 2):
                         plt.show()
-    
-                    ind=ind+1
-                    
-    
-            if(ind>0 and not ind2==2):
+
+                    ind = ind+1
+
+            if(ind > 0 and not ind2 == 2):
                 plt.show()
     return(group_girdle)
-            
-def plot_bedding_stereonets_old(orientations,all_sorts):
+
+
+def plot_bedding_stereonets_old(orientations, all_sorts):
     import mplstereonet
     import matplotlib.pyplot as plt
-    
-    groups=all_sorts['group'].unique()
-    print("All observations n=",len(orientations))
 
-    fig, ax = mplstereonet.subplots(figsize=(7,7))
-    strikes = orientations["azimuth"].values -90
+    groups = all_sorts['group'].unique()
+    print("All observations n=", len(orientations))
+
+    fig, ax = mplstereonet.subplots(figsize=(7, 7))
+    strikes = orientations["azimuth"].values - 90
     dips = orientations["dip"].values
     cax = ax.density_contourf(strikes, dips, measurement='poles')
     ax.pole(strikes, dips, markersize=5, color='w')
@@ -778,80 +826,86 @@ def plot_bedding_stereonets_old(orientations,all_sorts):
     plt.show()
 
     for gp in groups:
-        all_sorts2=all_sorts[all_sorts["group"]==gp]
-        all_sorts2.set_index("code",  inplace = True)
+        all_sorts2 = all_sorts[all_sorts["group"] == gp]
+        all_sorts2.set_index("code",  inplace=True)
 
-        frames={}
-        first=True
-        for indx,as2 in all_sorts2.iterrows():
-            orientations2=orientations[orientations["formation"]==indx]
+        frames = {}
+        first = True
+        for indx, as2 in all_sorts2.iterrows():
+            orientations2 = orientations[orientations["formation"] == indx]
             if(first):
-                first=False
-                all_orientations=orientations2.copy()
+                first = False
+                all_orientations = orientations2.copy()
             else:
-                all_orientations=pd.concat([all_orientations,orientations2],sort=False)
+                all_orientations = pd.concat(
+                    [all_orientations, orientations2], sort=False)
 
-        if(len(all_orientations)>0):
+        if(len(all_orientations) > 0):
             print("----------------------------------------------------------------------------------------------------------------------")
-            print(gp,"observations n=",len(all_orientations))
-            fig, ax = mplstereonet.subplots(figsize=(5,5))
-            strikes = all_orientations["azimuth"].values -90
+            print(gp, "observations n=", len(all_orientations))
+            fig, ax = mplstereonet.subplots(figsize=(5, 5))
+            strikes = all_orientations["azimuth"].values - 90
             dips = all_orientations["dip"].values
             cax = ax.density_contourf(strikes, dips, measurement='poles')
             ax.pole(strikes, dips, markersize=5, color='w')
             ax.grid(True)
-            text = ax.text(2.2, 1.37,gp, color='b')
+            text = ax.text(2.2, 1.37, gp, color='b')
             plt.show()
 
     for gp in groups:
-        all_sorts2=all_sorts[all_sorts["group"]==gp]
-        all_sorts2.set_index("code",  inplace = True)
+        all_sorts2 = all_sorts[all_sorts["group"] == gp]
+        all_sorts2.set_index("code",  inplace=True)
 
         print("----------------------------------------------------------------------------------------------------------------------")
         print(gp)
-        #display(all_sorts2)
-        ind=0
+        # display(all_sorts2)
+        ind = 0
 
-        for indx,as2 in all_sorts2.iterrows():
-            ind2=int(fmod(ind,3))
-            orientations2=orientations[orientations["formation"]==indx]
-            print(indx,"observations n=",len(orientations2))
-            #display(orientations2)
-            if(len(orientations2)>0):
-                if(ind2==0):
-                    fig, ax = mplstereonet.subplots(1,3,figsize=(15,15))
-                strikes = orientations2["azimuth"].values -90
+        for indx, as2 in all_sorts2.iterrows():
+            ind2 = int(fmod(ind, 3))
+            orientations2 = orientations[orientations["formation"] == indx]
+            print(indx, "observations n=", len(orientations2))
+            # display(orientations2)
+            if(len(orientations2) > 0):
+                if(ind2 == 0):
+                    fig, ax = mplstereonet.subplots(1, 3, figsize=(15, 15))
+                strikes = orientations2["azimuth"].values - 90
                 dips = orientations2["dip"].values
 
-                cax = ax[ind2].density_contourf(strikes, dips, measurement='poles')
+                cax = ax[ind2].density_contourf(
+                    strikes, dips, measurement='poles')
                 ax[ind2].pole(strikes, dips, markersize=5, color='w')
                 ax[ind2].grid(True)
-                #fig.colorbar(cax)
+                # fig.colorbar(cax)
                 text = ax[ind2].text(2.2, 1.37, indx, color='b')
-                
+
                 # Fit a plane to the girdle of the distribution and display it.
                 fit_strike, fit_dip = mplstereonet.fit_girdle(strikes, dips)
-                print('strike/dip of girdle',fit_strike, '/', fit_dip)                
-               
-                if(ind2==2):
+                print('strike/dip of girdle', fit_strike, '/', fit_dip)
+
+                if(ind2 == 2):
                     plt.show()
 
-                ind=ind+1
+                ind = ind+1
 
-        if(ind>0 and not ind2==2):
+        if(ind > 0 and not ind2 == 2):
             plt.show()
-            
+
+
 def hextofloats(h):
     '''Takes a hex rgb string (e.g. #ffffff) and returns an RGB tuple (float, float, float).'''
-    return tuple(int(h[i:i + 2], 16) / 255. for i in (1, 3, 5)) # skip '#'
+    return tuple(int(h[i:i + 2], 16) / 255. for i in (1, 3, 5))  # skip '#'
+
 
 def floatstohex(rgb):
     '''Takes an RGB tuple or list and returns a hex RGB string.'''
     return f'#{int(rgb[0]*255):02x}{int(rgb[1]*255):02x}{int(rgb[2]*255):02x}'
-    
+
+
 def hextoints(h):
     '''Takes a hex rgb string (e.g. #ffffff) and returns an RGB tuple (float, float, float).'''
-    return tuple(int(h[i:i + 2], 16)  for i in (1, 3, 5))
+    return tuple(int(h[i:i + 2], 16) for i in (1, 3, 5))
+
 
 def intstohex(rgb):
     '''Takes an RGB tuple or list and returns a hex RGB string.'''

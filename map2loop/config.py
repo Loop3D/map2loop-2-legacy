@@ -158,7 +158,6 @@ class Config(object):
         self.G = nx.read_gml(self.strat_graph_file, label='id')
         selected_nodes = [n for n, v in self.G.nodes(data=True) if n >= 0]
 
-        plt.figure(1, figsize=(19, 12))
         nx.draw_networkx(self.G, pos=nx.kamada_kawai_layout(
             self.G), arrows=True, nodelist=selected_nodes)
         nlist = list(self.G.nodes.data('LabelGraphics'))
@@ -170,8 +169,7 @@ class Config(object):
                 # second=elem.split(":").replace("'","")
                 print(node[0], " ", elem)
 
-        plt.axis("off")
-        plt.savefig(self.tmp_path+"topology-fig.png")
+        # plt.savefig(self.tmp_path+"topology-fig.png")
         print("Topology figure saved to", self.tmp_path+"topology-fig.png")
 
         # Save groups of stratigraphic units
@@ -212,9 +210,10 @@ class Config(object):
         geom_rp = m2l_utils.reproject_dtm(
             self.dtm_file, self.dtm_reproj_file, self.src_crs, self.dst_crs)
         self.dtm = rasterio.open(self.dtm_reproj_file)
-        fig = plt.imshow(self.dtm.read(1), cmap='terrain',
-                         vmin=0, vmax=1000).get_figure()
-        plt.tight_layout(5)
+        plt.imshow(self.dtm.read(1), cmap='terrain',
+                   vmin=0, vmax=1000)
+
+        plt.title('DTM')
         plt.show()
 
     def join_features(self):
@@ -311,3 +310,7 @@ class Config(object):
             self.structure_clip, self.output_path, self.c_l, orientation_decimate, self.dtm, self.dtb, self.dtb_null, False)
         m2l_utils.plot_points(self.output_path+'orientations.csv',
                               self.geol_clip, 'formation', 'X', 'Y', False, 'alpha')
+
+        # Create arbitrary points for series without orientation data
+        m2l_geometry.create_orientations(
+            self.tmp_path, self.output_path, self.dtm, self.dtb, self.dtb_null, False, self.geol_clip, self.structure_clip, self.c_l)
