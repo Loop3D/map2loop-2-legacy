@@ -691,14 +691,14 @@ def save_contact_vectors(geology_file, tmp_path, dtm, dtb, dtb_null, cover_map, 
 ####################################
 # combine interpolated contact information (to provide l,m with interpolated dip,dipdirection data (to provide n)
 #
-# join_contacts_and_orientations(combo_file,geology_file,tmp_path,dtm_reproj_file,c_l,lo,mo,no,lc,mc,xy,dst_crs,bbox,fault_flag)
+# join_contacts_and_orientations(combo_file,geology_file,tmp_path,dtm_reproj_file,c_l,lo,mo,no,lc,mc,xy,proj_crs,bbox,fault_flag)
 # combo_file path to temporary combined information geology_file path to basal contacts layer
 # tmp_path directory of temporary outputs from m2l
 # dtm_reproj_file path to reprojected dtm file
 # c_l dictionary of codes and labels specific to input geo information layers
 # lo,mo,no 3D direction cosines of interpolated orientations
 # lc,mc 2D direction cosines of interpolated contacts
-# xy interpolated orientations (used to get x,y locations only) dst_crs Coordinate Reference System of destination geotif (any length-based projection)
+# xy interpolated orientations (used to get x,y locations only) proj_crs Coordinate Reference System of destination geotif (any length-based projection)
 # bbox bounding box of region of interest
 # fault_flag toggle whether calc for near-fault orientations or not
 #
@@ -708,7 +708,7 @@ def save_contact_vectors(geology_file, tmp_path, dtm, dtb, dtb_null, cover_map, 
 #
 # Useful for adding data where no orientations are available (e.g. in fault bounded domains) and for calculating true thickness of layers. Assumes a 2D plane of data, but if 3D RBF was calulated and projected contact info was used it should apply with topography too.
 ####################################
-def join_contacts_and_orientations(combo_file, geology_file, output_path, dtm_reproj_file, dtb, dtb_null, cover_map, c_l, lo, mo, no, lc, mc, xy, dst_crs, bbox, fault_flag):
+def join_contacts_and_orientations(combo_file, geology_file, output_path, dtm_reproj_file, dtb, dtb_null, cover_map, c_l, lo, mo, no, lc, mc, xy, proj_crs, bbox, fault_flag):
     f = open(combo_file, 'w')
     f.write('x,y,dip,dipdirection,misorientation,dotproduct\n')
 
@@ -742,16 +742,16 @@ def join_contacts_and_orientations(combo_file, geology_file, output_path, dtm_re
     f.close()
 
     geology = gpd.read_file(geology_file, bbox=bbox)
-    geology.crs = dst_crs
+    geology.crs = proj_crs
     geology = m2l_utils.explode(geology)
 
     data = pd.read_csv(combo_file)
 
     geometry = [Point(xy) for xy in zip(data['x'], data['y'])]
 
-    gdf = GeoDataFrame(data, crs=dst_crs, geometry=geometry)
+    gdf = GeoDataFrame(data, crs=proj_crs, geometry=geometry)
 
-    gdf.crs = dst_crs
+    gdf.crs = proj_crs
     print(gdf.crs, geology.crs)
     structure_code = gpd.sjoin(gdf, geology, how="left", op="within")
     dtm = rasterio.open(dtm_reproj_file)
@@ -945,7 +945,7 @@ def interpolate_orientations_with_fat(structure_file, output_path, bbox, c_l, th
 
 ####################################################
 # For each fault string:
-# process_fault_throw_and_near_orientations(tmp_path,output_path,dtm_reproj_file,c_l,use_gcode,use_gcode2,dst_crs,bbox,scheme)
+# process_fault_throw_and_near_orientations(tmp_path,output_path,dtm_reproj_file,c_l,use_gcode,use_gcode2,proj_crs,bbox,scheme)
 # Args:
 #
 #    incementally advance along polyline every at each inter-node (no point in doing more?)
@@ -962,7 +962,7 @@ def interpolate_orientations_with_fat(structure_file, output_path, bbox, c_l, th
 ###################################################
 
 
-def process_fault_throw_and_near_orientations(tmp_path, output_path, dtm_reproj_file, dtb, dtb_null, cover_map, c_l, use_gcode, use_gcode2, dst_crs, bbox, scheme):
+def process_fault_throw_and_near_orientations(tmp_path, output_path, dtm_reproj_file, dtb, dtb_null, cover_map, c_l, use_gcode, use_gcode2, proj_crs, bbox, scheme):
     fault_file = tmp_path+'faults_clip.shp'
     geology_file = tmp_path+'geol_clip.shp'
 
@@ -1016,8 +1016,8 @@ def process_fault_throw_and_near_orientations(tmp_path, output_path, dtm_reproj_
                 lgeom = [Point(xy) for xy in lcoords]
                 rgeom = [Point(xy) for xy in rcoords]
 
-                lgdf = GeoDataFrame(index, crs=dst_crs, geometry=lgeom)
-                rgdf = GeoDataFrame(index, crs=dst_crs, geometry=rgeom)
+                lgdf = GeoDataFrame(index, crs=proj_crs, geometry=lgeom)
+                rgdf = GeoDataFrame(index, crs=proj_crs, geometry=rgeom)
                 lcode = gpd.sjoin(lgdf, geology, how="left", op="within")
                 rcode = gpd.sjoin(rgdf, geology, how="left", op="within")
                 # display(lcode)
@@ -1170,8 +1170,8 @@ def process_fault_throw_and_near_orientations(tmp_path, output_path, dtm_reproj_
 
                     lgeom = [Point(xy) for xy in lcoords]
                     rgeom = [Point(xy) for xy in rcoords]
-                    lgdf = GeoDataFrame(index, crs=dst_crs, geometry=lgeom)
-                    rgdf = GeoDataFrame(index, crs=dst_crs, geometry=rgeom)
+                    lgdf = GeoDataFrame(index, crs=proj_crs, geometry=lgeom)
+                    rgdf = GeoDataFrame(index, crs=proj_crs, geometry=rgeom)
                     lcode = gpd.sjoin(lgdf, geology, how="left", op="within")
                     rcode = gpd.sjoin(rgdf, geology, how="left", op="within")
 
@@ -1338,9 +1338,9 @@ def process_fault_throw_and_near_orientations(tmp_path, output_path, dtm_reproj_
                        '.csv', skiprows=1, delimiter=',', dtype=float)
 
     join_contacts_and_orientations(combo_file, geology_file, tmp_path, dtm_reproj_file,
-                                   dtb, dtb_null, cover_map, c_l, lo, mo, no, lc, mc, xy, dst_crs, bbox, True)
+                                   dtb, dtb_null, cover_map, c_l, lo, mo, no, lc, mc, xy, proj_crs, bbox, True)
     join_contacts_and_orientations(ex_combo_file, geology_file, tmp_path+'ex_', dtm_reproj_file,
-                                   dtb, dtb_null, cover_map, c_l, ex_lo, ex_mo, ex_no, ex_lc, ex_mc, ex_xy, dst_crs, bbox, True)
+                                   dtb, dtb_null, cover_map, c_l, ex_lo, ex_mo, ex_no, ex_lc, ex_mc, ex_xy, proj_crs, bbox, True)
 
     # loop though all nodes and calulate true displacement based on local estimated dip
 
@@ -1509,7 +1509,7 @@ def interpolate_contacts_grid(contacts, calc, xcoords_group, ycoords_group):
         return(0, 0, 0)
 
 
-def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spacing, dst_crs, scheme, super_groups, c_l):
+def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spacing, proj_crs, scheme, super_groups, c_l):
     geology = gpd.read_file(geology_file, bbox=bbox)
     structures_code = gpd.read_file(structure_file, bbox=bbox)
     contacts = gpd.read_file(basal_contacts, bbox=bbox)
@@ -1533,7 +1533,7 @@ def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spac
 
     nodes = gpd.GeoDataFrame(
         xycoords, geometry=[Point(xy) for xy in zip(xcoords, ycoords)])
-    nodes.crs = dst_crs
+    nodes.crs = proj_crs
     nodes_code = gpd.sjoin(nodes, geology, how="left", op="within")
     # structures_code = gpd.sjoin(
     #     structures_code, geology, how="left", op="within")
@@ -1656,7 +1656,7 @@ def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spac
     return(orientation_interp, contact_interp, combo_interp)
 
 
-def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_reproj_file, dtb, dtb_null, cover_map, c_l, dst_crs, bbox, scheme, dip_grid, dip_dir_grid, xgrid, ygrid, spacing):
+def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_reproj_file, dtb, dtb_null, cover_map, c_l, proj_crs, bbox, scheme, dip_grid, dip_dir_grid, xgrid, ygrid, spacing):
     fault_file = tmp_path+'faults_clip.shp'
     geology_file = tmp_path+'geol_clip.shp'
 
@@ -1712,8 +1712,8 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                 lgeom = [Point(xy) for xy in lcoords]
                 rgeom = [Point(xy) for xy in rcoords]
 
-                lgdf = GeoDataFrame(index, crs=dst_crs, geometry=lgeom)
-                rgdf = GeoDataFrame(index, crs=dst_crs, geometry=rgeom)
+                lgdf = GeoDataFrame(index, crs=proj_crs, geometry=lgeom)
+                rgdf = GeoDataFrame(index, crs=proj_crs, geometry=rgeom)
                 lcode = gpd.sjoin(lgdf, geology, how="left", op="within")
                 rcode = gpd.sjoin(rgdf, geology, how="left", op="within")
                 # display(lcode)
@@ -1877,8 +1877,8 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
 
                     lgeom = [Point(xy) for xy in lcoords]
                     rgeom = [Point(xy) for xy in rcoords]
-                    lgdf = GeoDataFrame(index, crs=dst_crs, geometry=lgeom)
-                    rgdf = GeoDataFrame(index, crs=dst_crs, geometry=rgeom)
+                    lgdf = GeoDataFrame(index, crs=proj_crs, geometry=lgeom)
+                    rgdf = GeoDataFrame(index, crs=proj_crs, geometry=rgeom)
                     lcode = gpd.sjoin(lgdf, geology, how="left", op="within")
                     rcode = gpd.sjoin(rgdf, geology, how="left", op="within")
 

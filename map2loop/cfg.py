@@ -33,8 +33,8 @@ import os
 # # CRS
 
 # # coordinate reference system for imported dtms (geodetic lat/long WGS84)
-# src_crs = {'init': 'EPSG:4326'}
-# dst_crs = {'init': 'EPSG:28350'}  # coordinate system for data
+# dtm_crs = {'init': 'EPSG:4326'}
+# proj_crs = {'init': 'EPSG:28350'}  # coordinate system for data
 
 # CODES AND LABELS
 # these refer to specific fields (codes) in GIS layer or database that contain the info needed for these calcs and text substrings (labels) in the contents of these fields
@@ -120,7 +120,7 @@ fold_decimate = 5
 gridx = 50  # x grid dimensions (no of points, not distance) for interpolations
 gridy = 50  # x grid dimensions (no of points, not distance) for interpolations
 scheme = 'scipy_rbf'  # interpolation scheme
-# buffer distance for clipping points by faults (in metres or same units as dst_crs)
+# buffer distance for clipping points by faults (in metres or same units as proj_crs)
 dist_buffer = 5
 intrusion_mode = 0        # 1 all intrusions exluded from basal contacts, 0 only sills
 use_interpolations = False    # flag to use interpolated orientations or not.

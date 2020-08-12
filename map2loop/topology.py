@@ -735,7 +735,7 @@ class Topology(object):
 
         f.close()
 
-    def check_near_fault_contacts(path_faults, all_sorts_path, fault_dimensions_path, gp_fault_rel_path, contacts_path, c_l, dst_crs):
+    def check_near_fault_contacts(path_faults, all_sorts_path, fault_dimensions_path, gp_fault_rel_path, contacts_path, c_l, proj_crs):
         faults_clip = gpd.read_file(path_faults)
         gp_fault_rel = pd.read_csv(gp_fault_rel_path)
         gp_fault_rel.set_index('group',  inplace=True)
@@ -779,7 +779,7 @@ class Topology(object):
                             for half in splits:
                                 half_poly = Polygon(half)
                                 half_ellipse = gpd.GeoDataFrame(
-                                    index=[0], crs=dst_crs, geometry=[half_poly])
+                                    index=[0], crs=proj_crs, geometry=[half_poly])
                                 has_contacts = True
                                 for indx, as2 in all_sorts2.iterrows():
                                     contacts2 = contacts[contacts["formation"] == indx]
@@ -841,7 +841,7 @@ class Topology(object):
                             for half in splits:
                                 half_poly = Polygon(half)
                                 half_ellipse = gpd.GeoDataFrame(
-                                    index=[0], crs=dst_crs, geometry=[half_poly])
+                                    index=[0], crs=proj_crs, geometry=[half_poly])
                                 has_contacts = True
                                 for indx, as2 in all_sorts2.iterrows():
                                     contacts2 = contacts[contacts["formation"] == indx]

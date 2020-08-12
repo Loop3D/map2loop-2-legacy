@@ -17,7 +17,7 @@ import shapely
 
 
 class Config(object):
-    def __init__(self, geology_file, fault_file, structure_file, mindep_file, bbox_3d, polygon, step_out, src_crs, dst_crs, c_l={}):
+    def __init__(self, geology_file, fault_file, structure_file, mindep_file, bbox_3d, polygon, step_out, dtm_crs, proj_crs, c_l={}):
         self.bbox_3d = bbox_3d
         self.bbox = tuple([bbox_3d["minx"], bbox_3d["miny"],
                            bbox_3d["maxx"], bbox_3d["maxy"]])
@@ -25,8 +25,8 @@ class Config(object):
         self.step_out = step_out
         self.c_l = c_l
 
-        self.src_crs = src_crs
-        self.dst_crs = dst_crs
+        self.dtm_crs = dtm_crs
+        self.proj_crs = proj_crs
 
         # Create file structure for model instance
         self.geology_file = geology_file
@@ -182,7 +182,7 @@ class Config(object):
         print("Done")
 
     def load_dtm(self):
-        polygon_ll = self.polygon.to_crs(self.src_crs)
+        polygon_ll = self.polygon.to_crs(self.dtm_crs)
 
         minlong = polygon_ll.total_bounds[0]-self.step_out
         maxlong = polygon_ll.total_bounds[2]+self.step_out
@@ -209,7 +209,7 @@ class Config(object):
         print('Done.')
 
         geom_rp = m2l_utils.reproject_dtm(
-            self.dtm_file, self.dtm_reproj_file, self.src_crs, self.dst_crs)
+            self.dtm_file, self.dtm_reproj_file, self.dtm_crs, self.proj_crs)
         self.dtm = rasterio.open(self.dtm_reproj_file)
         plt.imshow(self.dtm.read(1), cmap='terrain',
                    vmin=0, vmax=1000)
@@ -220,8 +220,9 @@ class Config(object):
     def join_features(self):
         # Geology
         self.geol_clip = m2l_utils.explode(self.geology)
-        self.geol_clip.crs = self.dst_crs
-        self.geol_clip.to_file(self.tmp_path + "self.geol_clip.shp")
+        self.geol_clip.crs = self.proj_crs
+        self.geol_clip_file = self.tmp_path + "self.geol_clip.shp"
+        self.geol_clip.to_file(self.geol_clip_file)
 
         pd.set_option('display.max_columns', None)
         pd.set_option('display.max_rows', None)
@@ -242,12 +243,12 @@ class Config(object):
 
         # TODO: 'polygo' is never used
         polygo = gpd.GeoDataFrame(
-            index=[0], crs=self.dst_crs, geometry=[bbox_geom])
+            index=[0], crs=self.proj_crs, geometry=[bbox_geom])
         is_bed = structure_code[self.c_l['sf']].str.contains(
             self.c_l['bedding'], regex=False)
 
         structure_clip = structure_code[is_bed]
-        structure_clip.crs = self.dst_crs
+        structure_clip.crs = self.proj_crs
 
         if(self.c_l['otype'] == 'strike'):
             structure_clip['azimuth2'] = structure_clip.apply(
@@ -257,7 +258,8 @@ class Config(object):
 
         self.structure_clip = structure_clip[~structure_clip[self.c_l['o']].isnull(
         )]
-        self.structure_clip.to_file(self.tmp_path+'structure_clip.shp')
+        self.structure_clip_file = self.tmp_path+'structure_clip.shp'
+        self.structure_clip.to_file(self.structure_clip_file)
 
         # Save geology clips
         Topology.save_group(Topology, self.G, self.tmp_path,
@@ -304,7 +306,7 @@ class Config(object):
         dtb = rasterio.open(dtb_clip)
 
         m2l_geometry.process_cover(output_path, dtm, dtb, dtb_null, cover,
-                                   workflow['cover_map'], cover_dip, bbox, dst_crs, cover_spacing, contact_decimate=3, use_vector=True, use_grid=True)
+                                   workflow['cover_map'], cover_dip, bbox, proj_crs, cover_spacing, contact_decimate=3, use_vector=True, use_grid=True)
 
     def export_orientations(self):
         # store every nth orientation point (in object order)
@@ -327,7 +329,7 @@ class Config(object):
 
         # Remove basal contacts defined by faults, no decimation
         m2l_geometry.save_basal_no_faults(
-            self.tmp_path+'basal_contacts.shp', self.tmp_path+'faults_clip.shp', ls_dict, 10, self.c_l, self.dst_crs)
+            self.tmp_path+'basal_contacts.shp', self.tmp_path+'faults_clip.shp', ls_dict, 10, self.c_l, self.proj_crs)
 
         # Remove faults from decimated basal contacts then save
         contacts = gpd.read_file(self.tmp_path+'basal_contacts.shp')
@@ -340,8 +342,10 @@ class Config(object):
     # Interpolates a regular grid of orientations from an shapefile of
     # arbitrarily-located points and saves out four csv files of l,m & n
     # direction cosines and dip dip direction data
-    def test_interpolation(self, geology_file, structure_file):
+    def test_interpolation(self):
 
+        geology_file = self.geol_clip_file
+        structure_file = self.structure_clip_file
         basal_contacts = self.tmp_path+'basal_contacts.shp'
         spacing = 500  # grid spacing in meters
         misorientation = 30
@@ -356,7 +360,7 @@ class Config(object):
         bbox = self.bbox
 
         orientation_interp, contact_interp, combo_interp = m2l_interpolation.interpolation_grids(
-            geology_file, structure_file, basal_contacts, bbox, spacing, self.dst_crs, scheme, super_groups, self.c_l)
+            geology_file, structure_file, basal_contacts, bbox, spacing, self.proj_crs, scheme, super_groups, self.c_l)
 
         with open(self.tmp_path+'interpolated_orientations.csv', 'w') as f:
             f.write('X,Y,l,m,n,dip,dip_dir\n')
@@ -370,7 +374,7 @@ class Config(object):
                 ostr = '{},{},{},{},{}\n'.format(
                     row[0], row[1], row[2], row[3], row[4])
                 f.write(ostr)
-        with open(tmp_path+'interpolated_combined.csv', 'w') as f:
+        with open(self.tmp_path+'interpolated_combined.csv', 'w') as f:
             f.write('X,Y,l,m,n,dip,dip_dir\n')
             for row in combo_interp:
                 ostr = '{},{},{},{},{},{},{}\n'.format(
@@ -401,4 +405,13 @@ class Config(object):
 
         print('interpolated dips')
         plt.imshow(dip_grid, cmap="hsv", origin='lower', vmin=-90, vmax=90)
+        plt.show()
+
+        print('interpolated dip directions')
+        plt.imshow(dip_dir_grid, cmap="hsv", origin='lower', vmin=0, vmax=360)
+        plt.show()
+
+        print('interpolated contacts')
+        plt.imshow(contact_grid, cmap="hsv",
+                   origin='lower', vmin=-360, vmax=360)
         plt.show()

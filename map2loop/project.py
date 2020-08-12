@@ -94,8 +94,8 @@ class Project(object):
                           "base": -10000,
                           "top": 1200,
                       },
-                      src_crs={'init': 'EPSG:4326'},
-                      dst_crs=None,
+                      dtm_crs={'init': 'EPSG:4326'},
+                      proj_crs=None,
                       step_out=None
                       ):
 
@@ -107,8 +107,8 @@ class Project(object):
                 "minx": self.proj_bounds[3],
             })
 
-        if dst_crs is None:
-            dst_crs = self.proj_crs
+        if proj_crs is None:
+            proj_crs = self.proj_crs
 
         if step_out is None:
             step_out = self.step_out
@@ -120,11 +120,11 @@ class Project(object):
         lon_point_list = [minx, maxx, maxx, minx, minx]
         bbox_geom = Polygon(zip(lon_point_list, lat_point_list))
         polygon = gpd.GeoDataFrame(
-            index=[0], crs=dst_crs, geometry=[bbox_geom])
+            index=[0], crs=proj_crs, geometry=[bbox_geom])
         self.config = Config(
             self.geology_file, self.fault_file,
             self.structure_file, self.mindep_file,
-            bbox_3d, polygon, step_out, src_crs, dst_crs, c_l
+            bbox_3d, polygon, step_out, dtm_crs, proj_crs, c_l
         )
 
         # Store important data frames and display
@@ -147,5 +147,4 @@ class Project(object):
         self.config.export_orientations()
         self.config.export_contacts()
 
-        self.config.test_interpolation(
-            geology_file=self.geology_file, structure_file=self.structure_file)
+        self.config.test_interpolation()

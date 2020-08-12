@@ -224,24 +224,24 @@ def get_dtm(path_out, minlong, maxlong, minlat, maxlat):
 ############################################
 # reproject a dtm
 #
-# reproject_dtm(dtm_file,dtm_reproj_file,src_crs,dst_crs)
+# reproject_dtm(dtm_file,dtm_reproj_file,dtm_crs,proj_crs)
 # Args:
 # dtm_file path to location of geotiff of elevation (in WGS84 lat/long)
-# dtm_reproj_file path to location of geotiff of elevation (in projection defined by dst_crs)
-# src_crs Coordinate Reference System of source geotif (normally WGS 84 lat/long (EPSG:4326))
-# dst_crs Coordinate Reference System of destination geotif (any length-based projection)
+# dtm_reproj_file path to location of geotiff of elevation (in projection defined by proj_crs)
+# dtm_crs Coordinate Reference System of source geotif (normally WGS 84 lat/long (EPSG:4326))
+# proj_crs Coordinate Reference System of destination geotif (any length-based projection)
 #
-# Returns rasterio format reprojected of filename dtm_reproj_file of grid of geotif file defined by dtm_file assuming source coordinate reference system (CRS) of src_crs and destination CRS of dsr_crs
+# Returns rasterio format reprojected of filename dtm_reproj_file of grid of geotif file defined by dtm_file assuming source coordinate reference system (CRS) of dtm_crs and destination CRS of dsr_crs
 ############################################
 
 
-def reproject_dtm(path_in, path_out, src_crs, dst_crs):
+def reproject_dtm(path_in, path_out, dtm_crs, proj_crs):
     with rasterio.open(path_in) as src:
         transform, width, height = calculate_default_transform(
-            src.crs, dst_crs, src.width, src.height, *src.bounds)
+            src.crs, proj_crs, src.width, src.height, *src.bounds)
         kwargs = src.meta.copy()
         kwargs.update({
-            'crs': dst_crs,
+            'crs': proj_crs,
             'transform': transform,
             'width': width,
             'height': height
@@ -253,9 +253,9 @@ def reproject_dtm(path_in, path_out, src_crs, dst_crs):
                     source=rasterio.band(src, i),
                     destination=rasterio.band(dst, i),
                     src_transform=src.transform,
-                    src_crs=src.crs,
+                    dtm_crs=src.crs,
                     dst_transform=transform,
-                    dst_crs=dst_crs,
+                    proj_crs=proj_crs,
                     resampling=Resampling.nearest)
             dst.close()
     print("reprojected dtm geotif saved as", path_out)
@@ -265,13 +265,13 @@ def reproject_dtm(path_in, path_out, src_crs, dst_crs):
 #
 # Args:
 # path_in path to file rasterio can read
-# dst_crs coordinate reference system of raster
+# proj_crs coordinate reference system of raster
 # returns:
 # bounding box of raster
 ############################################
 
 
-def get_dtm_bounds(path_in, dst_crs):
+def get_dtm_bounds(path_in, proj_crs):
     with rasterio.open(path_in) as dataset:
 
         # Read the dataset's valid data mask as a ndarray.
@@ -282,7 +282,7 @@ def get_dtm_bounds(path_in, dst_crs):
             # Transform shapes from the dataset's own coordinate
             # reference system to 28350.
             geom_rp = rasterio.warp.transform_geom(
-                dataset.crs, dst_crs, geom, precision=6)
+                dataset.crs, proj_crs, geom, precision=6)
 
             # Print GeoJSON shapes to stdout.
             # print(geom_rp)
@@ -517,22 +517,22 @@ def clip_shp(shp, clip_obj):
 ####################################################
 # convert rectangle to shapefile
 #
-# save_clip_to_bbox(path,geom,minx,maxx,miny,maxy,dst_crs)
+# save_clip_to_bbox(path,geom,minx,maxx,miny,maxy,proj_crs)
 # Args:
 # path path to shapefile output
 # geom NOT USED
 # minx,maxx,miny,maxy coordinates of bounding box
-# dst_crs Coordinate Refernce System
+# proj_crs Coordinate Refernce System
 ####################################################
 
 
-def save_clip_to_bbox(path, geom, minx, maxx, miny, maxy, dst_crs):
+def save_clip_to_bbox(path, geom, minx, maxx, miny, maxy, proj_crs):
     y_point_list = [miny, miny, maxy, maxy, miny]
     x_point_list = [minx, maxx, maxx, minx, minx]
 
     bbox_geom = Polygon(zip(x_point_list, y_point_list))
 
-    polygo = gpd.GeoDataFrame(index=[0], crs=dst_crs, geometry=[bbox_geom])
+    polygo = gpd.GeoDataFrame(index=[0], crs=proj_crs, geometry=[bbox_geom])
 
     clipped = clip_shp(geom, polygo)
     clipped.to_file(path)
