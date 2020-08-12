@@ -1535,13 +1535,20 @@ def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spac
         xycoords, geometry=[Point(xy) for xy in zip(xcoords, ycoords)])
     nodes.crs = dst_crs
     nodes_code = gpd.sjoin(nodes, geology, how="left", op="within")
-    #structures_code = gpd.sjoin(structures, geology, how="left", op="within")
+    # structures_code = gpd.sjoin(
+    #     structures_code, geology, how="left", op="within")
+    # contacts = gpd.sjoin(contacts, geology, how="left", op="within")
+
+    # TODO: nodes_code has nan values to deal with properly
+    # nodes_code.dropna()
 
     first_supergroup = True
     for groups in super_groups:
         first = True
         for group in groups:
 
+            # print(group)
+            # print(nodes_code[c_l['g']])
             if(first):
                 all_nodes = nodes_code[nodes_code[c_l['g']] == group]
                 all_structures = structures_code[structures_code[c_l['g']] == group]

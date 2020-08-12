@@ -679,7 +679,9 @@ def tri_angle(p1x, p1y, p2x, p2y, p3x, p3y):
 
 
 def plot_points(point_source, geol_clip, colour_code, x_code, y_code, legend, dtype):
-    plot_title = point_source.split("/")[-1].split(".")[0]
+
+    # Strip pathing and numbers from filename
+    plot_title = re.sub(r'\d+', '',  point_source.split("/")[-1].split(".")[0])
 
     from shapely.geometry import Point
     thick = pd.read_csv(point_source, encoding="ISO-8859-1", dtype='object')

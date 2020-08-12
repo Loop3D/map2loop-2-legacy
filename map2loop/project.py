@@ -145,3 +145,7 @@ class Project(object):
             self.config.calc_depth_grid()
 
         self.config.export_orientations()
+        self.config.export_contacts()
+
+        self.config.test_interpolation(
+            geology_file=self.geology_file, structure_file=self.structure_file)

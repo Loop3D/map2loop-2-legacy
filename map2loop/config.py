@@ -7,6 +7,7 @@ import geopandas as gpd
 from map2loop.topology import Topology
 from map2loop import m2l_utils
 from map2loop import m2l_geometry
+from map2loop import m2l_interpolation
 import map2model
 
 import networkx as nx
@@ -271,7 +272,8 @@ class Config(object):
         print("dtb and dtb_null set to 0")
         return
 
-        # TODO: Paths need to be defined
+        # TODO: Paths need to be defined, every function call bellow here that has
+        #       a False boolean is referening to the workflow['cover_map'] flag
         # dtb_grid=data_path+'young_cover_grid.tif' #obviously hard-wired for the moment
         # dtb_null='-2147483648' #obviously hard-wired for the moment
         # cover_map_path=data_path+'Young_Cover_FDS_MGA_clean.shp' #obviously hard-wired for the moment
@@ -305,6 +307,7 @@ class Config(object):
                                    workflow['cover_map'], cover_dip, bbox, dst_crs, cover_spacing, contact_decimate=3, use_vector=True, use_grid=True)
 
     def export_orientations(self):
+        # store every nth orientation point (in object order)
         orientation_decimate = 0
         m2l_geometry.save_orientations(
             self.structure_clip, self.output_path, self.c_l, orientation_decimate, self.dtm, self.dtb, self.dtb_null, False)
@@ -314,3 +317,88 @@ class Config(object):
         # Create arbitrary points for series without orientation data
         m2l_geometry.create_orientations(
             self.tmp_path, self.output_path, self.dtm, self.dtb, self.dtb_null, False, self.geol_clip, self.structure_clip, self.c_l)
+
+    def export_contacts(self):
+        contact_decimate = 5  # store every nth contact point (in object order)
+        intrusion_mode = 0      # 1 all intrusions exluded from basal contacts, 0 only sills
+
+        ls_dict, ls_dict_decimate = m2l_geometry.save_basal_contacts(
+            self.tmp_path, self.dtm, self.dtb, self.dtb_null, False, self.geol_clip, contact_decimate, self.c_l, intrusion_mode)
+
+        # Remove basal contacts defined by faults, no decimation
+        m2l_geometry.save_basal_no_faults(
+            self.tmp_path+'basal_contacts.shp', self.tmp_path+'faults_clip.shp', ls_dict, 10, self.c_l, self.dst_crs)
+
+        # Remove faults from decimated basal contacts then save
+        contacts = gpd.read_file(self.tmp_path+'basal_contacts.shp')
+        m2l_geometry.save_basal_contacts_csv(
+            contacts, self.output_path, self.dtm, self.dtb, self.dtb_null, False, contact_decimate, self.c_l)
+        # False in this call was already false and isn't the cover flag
+        m2l_utils.plot_points(self.output_path+'contacts4.csv',
+                              self.geol_clip, 'formation', 'X', 'Y', False, 'alpha')
+
+    # Interpolates a regular grid of orientations from an shapefile of
+    # arbitrarily-located points and saves out four csv files of l,m & n
+    # direction cosines and dip dip direction data
+    def test_interpolation(self, geology_file, structure_file):
+
+        basal_contacts = self.tmp_path+'basal_contacts.shp'
+        spacing = 500  # grid spacing in meters
+        misorientation = 30
+        scheme = 'scipy_rbf'
+        orientations = self.structures
+        group_girdle = m2l_utils.plot_bedding_stereonets(
+            orientations, self.geology, self.c_l)
+        super_groups, use_gcode3 = Topology.super_groups_and_groups(
+            group_girdle, self.tmp_path, misorientation)
+        # print(super_groups)
+        # print(self.geology['GROUP_'].unique())
+        bbox = self.bbox
+
+        orientation_interp, contact_interp, combo_interp = m2l_interpolation.interpolation_grids(
+            geology_file, structure_file, basal_contacts, bbox, spacing, self.dst_crs, scheme, super_groups, self.c_l)
+
+        with open(self.tmp_path+'interpolated_orientations.csv', 'w') as f:
+            f.write('X,Y,l,m,n,dip,dip_dir\n')
+            for row in orientation_interp:
+                ostr = '{},{},{},{},{},{},{}\n'.format(
+                    row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+                f.write(ostr)
+        with open(self.tmp_path+'interpolated_contacts.csv', 'w') as f:
+            f.write('X,Y,l,m,angle\n')
+            for row in contact_interp:
+                ostr = '{},{},{},{},{}\n'.format(
+                    row[0], row[1], row[2], row[3], row[4])
+                f.write(ostr)
+        with open(tmp_path+'interpolated_combined.csv', 'w') as f:
+            f.write('X,Y,l,m,n,dip,dip_dir\n')
+            for row in combo_interp:
+                ostr = '{},{},{},{},{},{},{}\n'.format(
+                    row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+                f.write(ostr)
+
+        if(spacing < 0):
+            spacing = -(bbox[2]-bbox[0])/spacing
+        x = int((bbox[2]-bbox[0])/spacing)+1
+        y = int((bbox[3]-bbox[1])/spacing)+1
+        print(x, y)
+        dip_grid = np.ones((y, x))
+        dip_grid = dip_grid*-999
+        dip_dir_grid = np.ones((y, x))
+        dip_dir_grid = dip_dir_grid*-999
+        contact_grid = np.ones((y, x))
+        contact_grid = dip_dir_grid*-999
+        for row in combo_interp:
+            r = int((row[1]-bbox[1])/spacing)
+            c = int((row[0]-bbox[0])/spacing)
+            dip_grid[r, c] = float(row[5])
+            dip_dir_grid[r, c] = float(row[6])
+
+        for row in contact_interp:
+            r = int((row[1]-bbox[1])/spacing)
+            c = int((row[0]-bbox[0])/spacing)
+            contact_grid[r, c] = float(row[4])
+
+        print('interpolated dips')
+        plt.imshow(dip_grid, cmap="hsv", origin='lower', vmin=-90, vmax=90)
+        plt.show()
