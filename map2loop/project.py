@@ -115,6 +115,11 @@ class Project(object):
         self.config.load_dtm()
         self.config.join_features()
 
-        if(workflow['cover_map']):
+        if(self.workflow['cover_map']):
             # Depth to basement calculation
-            pass
+            self.config.calc_depth_grid()
+        else:
+            # FOr now this function just zeros dtb and exits prematurely
+            self.config.calc_depth_grid()
+
+        self.config.export_orientations()

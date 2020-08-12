@@ -291,12 +291,12 @@ class Topology(object):
     # Takes stratigraphy graph created by map2model c++ code to generate list of groups found in the region of interest
     # Uses first of each possible set of toplogies per unit and per group, which is arbitrary. On the other hand we are not checking relative ages again to see if this helps reduce ambiguity, which I think it would.
     ####################################
-    def save_group(G, path_out, glabels, geol, c_l):
+    def save_group(self, G, path_out, glabels, geol, c_l):
         Gp = nx.Graph().to_directed()  # New Group graph
 
         geology_file = gpd.read_file(path_out+'geol_clip.shp')
 
-        abs_age_groups(geol, path_out, c_l)
+        self.abs_age_groups(geol, path_out, c_l)
         geology_file.drop_duplicates(subset=c_l['c'],  inplace=True)
 
         geology_file.set_index(c_l['c'],  inplace=True)
@@ -318,8 +318,9 @@ class Topology(object):
             if(G.nodes[e[0]]['gid'] != G.nodes[e[1]]['gid']):
                 glabel_0 = G.nodes[e[0]]['LabelGraphics']['text']
                 glabel_1 = G.nodes[e[1]]['LabelGraphics']['text']
-                # print(glabel_0,glabel_1)
-                # print(geology_file.loc[glabel_0][c_l['g']])
+                # print(glabel_0, glabel_1)
+                # print(df[df.CODE == "A-FOh-xs-f"])
+                # exit()
                 if(str(geology_file.loc[glabel_0][c_l['g']]) == 'None'):
                     grp0 = glabel_0.replace(" ", "_").replace("-", "_")
                 else:
@@ -395,7 +396,7 @@ class Topology(object):
 
         # display('lencon',len(contents[0]))
         k = 0
-        ag = open(path_out+'/all_sorts.csv', "w")
+        ag = open(path_out+'all_sorts.csv', "w")
         ag.write("index,group number,index in group,number in group,code,group\n")
         if(len(contents.shape) == 1):
             for i in range(1, len(contents)):
@@ -1000,4 +1001,4 @@ class Topology(object):
         except:
             print('no cycles')
 
-        nx.write_gml(Gp, graph_path+'/ASUD_strat.gml')
+        nx.write_gml(Gp, graph_path+'ASUD_strat.gml')

@@ -23,18 +23,18 @@ import os
 # if(not os.path.isdir(test_data_path)):
 #     os.mkdir(test_data_path)
 
-geology_file = 'hams2_geol.shp'  # input geology file (if local)
-# input fault file (if local)
-fault_file = 'GEOS_GEOLOGY_LINEARSTRUCTURE_500K_GSD.shp'
-# input bedding orientation file (if local)
-structure_file = 'hams2_structure.shp'
-mindep_file = 'mindeps_2018.shp'  # input mineral deposit file (if local)
+# geology_file = 'hams2_geol.shp'  # input geology file (if local)
+# # input fault file (if local)
+# fault_file = 'GEOS_GEOLOGY_LINEARSTRUCTURE_500K_GSD.shp'
+# # input bedding orientation file (if local)
+# structure_file = 'hams2_structure.shp'
+# mindep_file = 'mindeps_2018.shp'  # input mineral deposit file (if local)
 
-# CRS
+# # CRS
 
-# coordinate reference system for imported dtms (geodetic lat/long WGS84)
-src_crs = {'init': 'EPSG:4326'}
-dst_crs = {'init': 'EPSG:28350'}  # coordinate system for data
+# # coordinate reference system for imported dtms (geodetic lat/long WGS84)
+# src_crs = {'init': 'EPSG:4326'}
+# dst_crs = {'init': 'EPSG:28350'}  # coordinate system for data
 
 # CODES AND LABELS
 # these refer to specific fields (codes) in GIS layer or database that contain the info needed for these calcs and text substrings (labels) in the contents of these fields
@@ -100,7 +100,8 @@ c_l = {
     "syn": 'syncline',
     # ids
     "o": 'OBJECTID',  # field that contains unique id of geometry object
-    "gi": 'GEOPNT_ID'  # field that contains unique id of structure point
+    "gi": 'GEOPNT_ID',  # field that contains unique id of structure point
+    "deposit_dist": 500
 }
 
 # DECIMATION

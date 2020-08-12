@@ -6,6 +6,7 @@ import pandas as pd
 import geopandas as gpd
 from map2loop.topology import Topology
 from map2loop import m2l_utils
+from map2loop import m2l_geometry
 import map2model
 
 import networkx as nx
@@ -34,21 +35,21 @@ class Config(object):
 
         self.project_path = 'model-test'
 
-        self.graph_path = self.project_path+'/graph'
-        self.tmp_path = self.project_path+'/tmp'
-        self.data_path = self.project_path+'/data'
-        self.dtm_path = self.project_path+'/dtm'
-        self.output_path = self.project_path+'/output'
-        self.vtk_path = self.project_path+'/vtk'
+        self.graph_path = self.project_path+'/graph/'
+        self.tmp_path = self.project_path+'/tmp/'
+        self.data_path = self.project_path+'/data/'
+        self.dtm_path = self.project_path+'/dtm/'
+        self.output_path = self.project_path+'/output/'
+        self.vtk_path = self.project_path+'/vtk/'
 
-        self.fault_file_csv = self.tmp_path + "/faults.csv"
-        self.structure_file_csv = self.tmp_path + "/structure.csv"
-        self.geology_file_csv = self.tmp_path + "/geology.csv"
-        self.mindep_file_csv = self.tmp_path + "/mindep.csv"
+        self.fault_file_csv = self.tmp_path + "faults.csv"
+        self.structure_file_csv = self.tmp_path + "structure.csv"
+        self.geology_file_csv = self.tmp_path + "geology.csv"
+        self.mindep_file_csv = self.tmp_path + "mindep.csv"
 
-        self.strat_graph_file = self.graph_path + "/graph_strat_NONE.gml"
-        self.dtm_file = self.dtm_path+'/dtm.tif'
-        self.dtm_reproj_file = self.dtm_path+'/dtm_rp.tif'
+        self.strat_graph_file = self.graph_path + "graph_strat_NONE.gml"
+        self.dtm_file = self.dtm_path+'dtm.tif'
+        self.dtm_reproj_file = self.dtm_path+'dtm_rp.tif'
 
         if(not os.path.isdir(self.project_path)):
             os.mkdir(self.project_path)
@@ -67,6 +68,8 @@ class Config(object):
 
     def preprocess(self, command=""):
         geology = gpd.read_file(self.geology_file, bbox=self.bbox)
+        geology[self.c_l['g']].fillna(geology[self.c_l['g2']], inplace=True)
+        geology[self.c_l['g']].fillna(geology[self.c_l['c']], inplace=True)
         faults = gpd.read_file(self.fault_file, bbox=self.bbox)
         structures = gpd.read_file(self.structure_file, bbox=self.bbox)
         mindeps = gpd.read_file(self.mindep_file, bbox=self.bbox)
@@ -96,7 +99,7 @@ class Config(object):
                 fig.savefig(self.tmp_path+"/input-data.png")
 
                 print("Input graphic saved to: " +
-                      self.tmp_path + "/input-fig.png")
+                      self.tmp_path + "input-fig.png")
 
                 self.export_png()
                 plt.show()
@@ -106,8 +109,8 @@ class Config(object):
                 print(e)
 
     def export_png(self):
-        self.geology_figure.savefig(self.tmp_path+"/geology.png")
-        print("Geology graphic exported to: " + self.tmp_path+"/geology.png")
+        self.geology_figure.savefig(self.tmp_path+"geology.png")
+        print("Geology graphic exported to: " + self.tmp_path+"geology.png")
 
     def export_csv(self):
         # Save geology polygons
@@ -148,7 +151,7 @@ class Config(object):
         aus = True
         if aus:
             Topology.use_asud(self.strat_graph_file,  self.graph_path)
-            self.strat_graph_file = self.graph_path+'/ASUD_strat.gml'
+            self.strat_graph_file = self.graph_path+'ASUD_strat.gml'
         print("Done.")
 
         print("Generating topology graph display and unit groups...")
@@ -168,8 +171,8 @@ class Config(object):
                 print(node[0], " ", elem)
 
         plt.axis("off")
-        plt.savefig(self.tmp_path+"/topology-fig.png")
-        print("Topology figure saved to", self.tmp_path+"/topology-fig.png")
+        plt.savefig(self.tmp_path+"topology-fig.png")
+        print("Topology figure saved to", self.tmp_path+"topology-fig.png")
 
         # Save groups of stratigraphic units
         groups, self.glabels, G = Topology.get_series(
@@ -216,8 +219,10 @@ class Config(object):
 
     def join_features(self):
         # Geology
-        geol_clip = m2l_utils.explode(self.geology)
-        geol_clip.crs = self.dst_crs
+        self.geol_clip = m2l_utils.explode(self.geology)
+        self.geol_clip.crs = self.dst_crs
+        self.geol_clip.to_file(self.tmp_path + "self.geol_clip.shp")
+
         pd.set_option('display.max_columns', None)
         pd.set_option('display.max_rows', None)
 
@@ -226,7 +231,8 @@ class Config(object):
                  self.c_l['dd'], self.c_l['sf'], self.c_l['bo']]
         list2 = list(set(list1))
         sub_pts = self.structures[list2]
-        structure_code = gpd.sjoin(sub_pts, geol_clip, how="left", op="within")
+        structure_code = gpd.sjoin(
+            sub_pts, self.geol_clip, how="left", op="within")
 
         minx, miny, maxx, maxy = self.bbox
         y_point_list = [miny, miny, maxy, maxy, miny]
@@ -249,10 +255,59 @@ class Config(object):
             self.c_l['dd'] = 'azimuth2'
             self.c_l['otype'] = 'dip direction'
 
-        structure_clip = structure_clip[~structure_clip[self.c_l['o']].isnull(
+        self.structure_clip = structure_clip[~structure_clip[self.c_l['o']].isnull(
         )]
-        structure_clip.to_file(self.tmp_path+'/structure_clip.shp')
+        self.structure_clip.to_file(self.tmp_path+'structure_clip.shp')
 
         # Save geology clips
-        Topology.save_group(self.G, self.tmp_path,
-                            self.glabels, geol_clip, self.c_l)
+        Topology.save_group(Topology, self.G, self.tmp_path,
+                            self.glabels, self.geol_clip, self.c_l)
+
+    def calc_depth_grid(self):
+        dtm = self.dtm
+
+        self.dtb = 0
+        self.dtb_null = 0
+
+        print("dtb and dtb_null set to 0")
+        return
+
+        # TODO: Paths need to be defined
+        # dtb_grid=data_path+'young_cover_grid.tif' #obviously hard-wired for the moment
+        # dtb_null='-2147483648' #obviously hard-wired for the moment
+        # cover_map_path=data_path+'Young_Cover_FDS_MGA_clean.shp' #obviously hard-wired for the moment
+        # dtb_clip=output_path+'young_cover_grid_clip.tif' #obviously hard-wired for the moment
+        # cover_dip=10 # dip of cover away from contact
+        # cover_spacing=5000 # of contact grid in metres
+
+        dtb_raw = rasterio.open(dtb_grid)
+
+        cover = gpd.read_file(cover_map_path)
+
+        with fiona.open(cover_map_path, "r") as shapefile:
+            shapes = [feature["geometry"] for feature in shapefile]
+
+        with rasterio.open(dtb_grid) as src:
+            out_image, out_transform = rasterio.mask.mask(
+                src, shapes, crop=True)
+            out_meta = src.meta.copy()
+
+        out_meta.update({"driver": "GTiff",
+                         "height": out_image.shape[1],
+                         "width": out_image.shape[2],
+                         "transform": out_transform})
+
+        with rasterio.open(dtb_clip, "w", **out_meta) as dest:
+            dest.write(out_image)
+
+        dtb = rasterio.open(dtb_clip)
+
+        m2l_geometry.process_cover(output_path, dtm, dtb, dtb_null, cover,
+                                   workflow['cover_map'], cover_dip, bbox, dst_crs, cover_spacing, contact_decimate=3, use_vector=True, use_grid=True)
+
+    def export_orientations(self):
+        orientation_decimate = 0
+        m2l_geometry.save_orientations(
+            self.structure_clip, self.output_path, self.c_l, orientation_decimate, self.dtm, self.dtb, self.dtb_null, False)
+        m2l_utils.plot_points(self.output_path+'orientations.csv',
+                              self.geol_clip, 'formation', 'X', 'Y', False, 'alpha')
