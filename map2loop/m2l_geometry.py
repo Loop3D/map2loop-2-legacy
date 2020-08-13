@@ -35,7 +35,7 @@ import random
 
 def save_orientations(structures, path_out, c_l, orientation_decimate, dtm, dtb, dtb_null, cover_map):
     i = 0
-    f = open(path_out+'/orientations.csv', "w")
+    f = open(path_out+'orientations.csv', "w")
     f.write("X,Y,Z,azimuth,dip,polarity,formation\n")
     for indx, apoint in structures.iterrows():
         if(not str(apoint[c_l['r1']]) == 'None'):
@@ -86,7 +86,7 @@ def save_orientations(structures, path_out, c_l, orientation_decimate, dtm, dtb,
 
 def create_orientations(path_in, path_out, dtm, dtb, dtb_null, cover_map, geology, structures, c_l):
     """Create orientations if there is a series that does not have one."""
-    # f=open(path_in+'/groups.csv',"r")
+    # f=open(path_in+'groups.csv',"r")
     #contents =f.readlines()
     # f.close
 
@@ -133,7 +133,7 @@ def create_orientations(path_in, path_out, dtm, dtb, dtb_null, cover_map, geolog
 
     # print("Contacts----------\n",len(set(all_codes)),set(all_codes))
 
-    f = open(path_out+'/empty_series_orientations.csv', "w")
+    f = open(path_out+'empty_series_orientations.csv', "w")
     f.write("X,Y,Z,azimuth,dip,polarity,formation\n")
     # f.write("X,Y,Z,DipDirection,dip,dippolarity,formation\n")
 
@@ -162,7 +162,7 @@ def create_orientations(path_in, path_out, dtm, dtb, dtb_null, cover_map, geolog
 
     f.close()
     print('extra orientations saved as', path_out +
-          '/empty_series_orientations.csv')
+          'empty_series_orientations.csv')
 
 ####################################################
 # Convert polygons with holes into distinct poygons
@@ -242,8 +242,8 @@ def save_basal_contacts(path_in, dtm, dtb, dtb_null, cover_map, geol_clip, conta
                       ageol[c_l['ds']], ageol[c_l['g']], ageol[c_l['r1']], ageol[c_l['o']])
             i = i+1
 
-    #dtm = rasterio.open(path_in+'/dtm_rp.tif')
-    ag = open(path_in+'/all_sorts.csv', "r")
+    #dtm = rasterio.open(path_in+'dtm_rp.tif')
+    ag = open(path_in+'all_sorts.csv', "r")
     contents = ag.readlines()
     ag.close
     # print("surfaces:",len(contents))
@@ -255,9 +255,9 @@ def save_basal_contacts(path_in, dtm, dtb, dtb_null, cover_map, geol_clip, conta
         ulist.append([i, cont_list[4].replace("\n", "")])
     # print(ulist)
 
-    allc = open(path_in+'/all_contacts.csv', "w")
+    allc = open(path_in+'all_contacts.csv', "w")
     allc.write('GROUP_,id,x,y,z,code\n')
-    ac = open(path_in+'/contacts.csv', "w")
+    ac = open(path_in+'contacts.csv', "w")
     ac.write("X,Y,Z,formation\n")
     # print(dtm.bounds)
     j = 0
@@ -573,7 +573,7 @@ def save_contacts_with_faults_removed(path_fault, path_out, dist_buffer, ls_dict
 
     cnf_de_copy = contacts_decimate_nofaults.copy()
 
-    ac = open(path_out+'/contacts4.csv', "w")
+    ac = open(path_out+'contacts4.csv', "w")
     ac.write("X,Y,Z,formation\n")
     i = 0
     for indx, cdn in contacts_decimate_nofaults.iterrows():
@@ -591,7 +591,7 @@ def save_contacts_with_faults_removed(path_fault, path_out, dist_buffer, ls_dict
 
         i = i+1
     ac.close()
-    print(i, "decimated contact points saved as", path_out+'/contacts4.csv')
+    print(i, "decimated contact points saved as", path_out+'contacts4.csv')
 
 #########################################
 # Save faults as contact info and make vertical (for the moment)
@@ -611,12 +611,12 @@ def save_contacts_with_faults_removed(path_fault, path_out, dist_buffer, ls_dict
 
 
 def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fault_decimate, fault_min_len, fault_dip):
-    f = open(output_path+'/faults.csv', "w")
+    f = open(output_path+'faults.csv', "w")
     f.write("X,Y,Z,formation\n")
-    fo = open(output_path+'/fault_orientations.csv', "w")
+    fo = open(output_path+'fault_orientations.csv', "w")
     fo.write("X,Y,Z,DipDirection,dip,DipPolarity,formation\n")
     # fo.write("X,Y,Z,azimuth,dip,polarity,formation\n")
-    fd = open(output_path+'/fault_dimensions.csv', "w")
+    fd = open(output_path+'fault_dimensions.csv', "w")
     fd.write("Fault,HorizontalRadius,VerticalRadius,InfluenceDistance\n")
     # fd.write("Fault_ID,strike,dip_direction,down_dip\n")
     if(os.path.exists(path_faults)):
@@ -847,12 +847,12 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
 #########################################
 def old_save_faults(path_faults, path_fault_orientations, dtm, dtb, dtb_null, cover_map, c_l, fault_decimate, fault_min_len, fault_dip):
     faults_clip = gpd.read_file(path_faults)
-    f = open(path_fault_orientations+'/faults.csv', "w")
+    f = open(path_fault_orientations+'faults.csv', "w")
     f.write("X,Y,Z,formation\n")
-    fo = open(path_fault_orientations+'/fault_orientations.csv', "w")
+    fo = open(path_fault_orientations+'fault_orientations.csv', "w")
     fo.write("X,Y,Z,DipDirection,dip,DipPolarity,formation\n")
     # fo.write("X,Y,Z,azimuth,dip,polarity,formation\n")
-    fd = open(path_fault_orientations+'/fault_dimensions.csv', "w")
+    fd = open(path_fault_orientations+'fault_dimensions.csv', "w")
     fd.write("Fault,HorizontalRadius,VerticalRadius,InfluenceDistance\n")
     # fd.write("Fault_ID,strike,dip_direction,down_dip\n")
 
@@ -921,7 +921,7 @@ def old_save_faults(path_faults, path_fault_orientations, dtm, dtb, dtb_null, co
 
 def save_fold_axial_traces(path_folds, path_fold_orientations, dtm, dtb, dtb_null, cover_map, c_l, fold_decimate):
     folds_clip = gpd.read_file(path_folds)
-    fo = open(path_fold_orientations+'/fold_axial_traces.csv', "w")
+    fo = open(path_fold_orientations+'fold_axial_traces.csv', "w")
     fo.write("X,Y,Z,code,type\n")
 
     for indx, fold in folds_clip.iterrows():
@@ -1707,7 +1707,7 @@ def calc_thickness(tmp_path, output_path, buffer, max_thickness_allowed, c_l):
     contact_points_file = tmp_path+'raw_contacts.csv'
     interpolated_combo_file = tmp_path+'combo_full.csv'
     # load basal contacts as geopandas dataframe
-    contact_lines = gpd.read_file(tmp_path+'/basal_contacts.shp')
+    contact_lines = gpd.read_file(tmp_path+'basal_contacts.shp')
     all_sorts = pd.read_csv(tmp_path+'all_sorts.csv')
     contacts = pd.read_csv(contact_points_file)
     orientations = pd.read_csv(interpolated_combo_file)
@@ -1835,7 +1835,7 @@ def calc_thickness_with_grid(tmp_path, output_path, buffer, max_thickness_allowe
     contact_points_file = tmp_path+'raw_contacts.csv'
 
     # load basal contacts as geopandas dataframe
-    contact_lines = gpd.read_file(tmp_path+'/basal_contacts.shp')
+    contact_lines = gpd.read_file(tmp_path+'basal_contacts.shp')
     all_sorts = pd.read_csv(tmp_path+'all_sorts.csv')
     contacts = pd.read_csv(contact_points_file)
 
@@ -1934,7 +1934,7 @@ def calc_min_thickness_with_grid(tmp_path, output_path, buffer, max_thickness_al
     contact_points_file = tmp_path+'raw_contacts.csv'
 
     # load basal contacts as geopandas dataframe
-    contact_lines = gpd.read_file(tmp_path+'/basal_contacts.shp')
+    contact_lines = gpd.read_file(tmp_path+'basal_contacts.shp')
     all_sorts = pd.read_csv(tmp_path+'all_sorts.csv')
     contacts = pd.read_csv(contact_points_file)
 
@@ -2678,7 +2678,7 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
 
         actual_cover["index_right"] = actual_cover["index_right"].fillna(0)
 
-        allpts = open(output_path+'/cover_grid.csv', "w")
+        allpts = open(output_path+'cover_grid.csv', "w")
         allpts.write('X,Y,Z,formation\n')
 
         for indx, pt in actual_cover.iterrows():
@@ -2743,7 +2743,7 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
         cover_pts = gpd.GeoDataFrame(df, geometry='coords')
         cover_pts.crs = proj_crs
 
-        allpts = open(output_path+'/cover_grid.csv', "w")
+        allpts = open(output_path+'cover_grid.csv', "w")
         allpts.write('X,Y,Z,formation\n')
 
         for indx, pt in cover_pts.iterrows():

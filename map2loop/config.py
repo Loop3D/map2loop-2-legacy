@@ -1,5 +1,7 @@
 import os
 import time
+import re
+import csv
 
 import numpy as np
 import pandas as pd
@@ -8,6 +10,7 @@ from map2loop.topology import Topology
 from map2loop import m2l_utils
 from map2loop import m2l_geometry
 from map2loop import m2l_interpolation
+from map2loop import m2l_map_checker
 import map2model
 
 import networkx as nx
@@ -17,23 +20,9 @@ import shapely
 
 
 class Config(object):
-    def __init__(self, geology_file, fault_file, structure_file, mindep_file, bbox_3d, polygon, step_out, dtm_crs, proj_crs, c_l={}):
-        self.bbox_3d = bbox_3d
-        self.bbox = tuple([bbox_3d["minx"], bbox_3d["miny"],
-                           bbox_3d["maxx"], bbox_3d["maxy"]])
-        self.polygon = polygon
-        self.step_out = step_out
-        self.c_l = c_l
+    def __init__(self, geology_file, fault_file, fold_file, structure_file, mindep_file, bbox_3d, polygon, step_out, dtm_crs, proj_crs, c_l={}):
 
-        self.dtm_crs = dtm_crs
-        self.proj_crs = proj_crs
-
-        # Create file structure for model instance
-        self.geology_file = geology_file
-        self.structure_file = structure_file
-        self.fault_file = fault_file
-        self.mindep_file = mindep_file
-
+        # Create directory structure
         self.project_path = 'model-test'
 
         self.graph_path = self.project_path+'/graph/'
@@ -43,6 +32,7 @@ class Config(object):
         self.output_path = self.project_path+'/output/'
         self.vtk_path = self.project_path+'/vtk/'
 
+        # TODO: Use pandas to write to csvs
         self.fault_file_csv = self.tmp_path + "faults.csv"
         self.structure_file_csv = self.tmp_path + "structure.csv"
         self.geology_file_csv = self.tmp_path + "geology.csv"
@@ -67,13 +57,54 @@ class Config(object):
         if(not os.path.isdir(self.graph_path)):
             os.mkdir(self.graph_path)
 
+        self.bbox_3d = bbox_3d
+        self.bbox = tuple([bbox_3d["minx"], bbox_3d["miny"],
+                           bbox_3d["maxx"], bbox_3d["maxy"]])
+        self.polygon = polygon
+        self.step_out = step_out
+        self.c_l = c_l
+
+        self.dtm_crs = dtm_crs
+        self.proj_crs = proj_crs
+
+        # Check input maps for missing values
+        drift_prefix = ['None']
+        # TODO: Remote pathing
+        local_paths = True
+        # TODO: - Remove cfg.py
+        #       - Check if fold file is always the same as fault or needs to be seperated
+        structure_file, geology_file, fault_file, mindep_file, fold_file, c_l = m2l_map_checker.check_map(
+            structure_file, geology_file, fault_file, mindep_file, fold_file, self.tmp_path, self.bbox, c_l, proj_crs, local_paths, drift_prefix)
+
+        # Process and store workflow params
+        self.geology_file = geology_file
+        self.structure_file = structure_file
+        self.fault_file = fault_file
+        self.fold_file = fold_file
+        self.mindep_file = mindep_file
+
     def preprocess(self, command=""):
         geology = gpd.read_file(self.geology_file, bbox=self.bbox)
         geology[self.c_l['g']].fillna(geology[self.c_l['g2']], inplace=True)
         geology[self.c_l['g']].fillna(geology[self.c_l['c']], inplace=True)
         faults = gpd.read_file(self.fault_file, bbox=self.bbox)
+        folds = gpd.read_file(self.fold_file, bbox=self.bbox)
         structures = gpd.read_file(self.structure_file, bbox=self.bbox)
         mindeps = gpd.read_file(self.mindep_file, bbox=self.bbox)
+
+        # Fix crs to project default and overwrite source
+        # TODO: - Maybe do these checks in map_checker
+        geology.crs = self.proj_crs
+        faults.crs = self.proj_crs
+        folds.crs = self.proj_crs
+        structures.crs = self.proj_crs
+        mindeps.crs = self.proj_crs
+
+        geology.to_file(self.geology_file)
+        faults.to_file(self.fault_file)
+        folds.to_file(self.fold_file)
+        structures.to_file(self.structure_file)
+        mindeps.to_file(self.mindep_file)
 
         self.geology = geology
         self.faults = faults
@@ -134,8 +165,16 @@ class Config(object):
             sub_pts, self.structure_file_csv, self.c_l)
 
         # Save faults
+        # TODO: - Use pandas slicing instead of looping
+        #       - Move away from tab seperators (topology and map2model)
         sub_faults = self.faults[['geometry', self.c_l['o'], self.c_l['f']]]
-        Topology.save_faults_wkt(sub_faults, self.fault_file_csv, self.c_l)
+        sub_faults.columns = ["WKT",  self.c_l['o'], self.c_l['f']]
+        mask = sub_faults[self.c_l['f']].str.contains(
+            'fault', na=False, case=False, regex=True)
+        sub_faults = sub_faults[mask]
+        sub_faults.to_csv(self.fault_file_csv, sep='\t',
+                          index=False)
+        # Topology.save_faults_wkt(sub_faults, self.fault_file_csv, self.c_l)
 
     def update_parfile(self):
         Topology.save_parfile(self, self.c_l, self.output_path, self.geology_file_csv, self.fault_file_csv, self.structure_file_csv,
@@ -218,10 +257,16 @@ class Config(object):
         plt.show()
 
     def join_features(self):
+        # Faults
+        self.faults_clip = gpd.read_file(self.fault_file, bbox=self.bbox)
+        self.faults_clip.crs = self.proj_crs
+        self.faults_clip_file = self.tmp_path + "faults_clip.shp"
+        self.faults_clip.to_file(self.faults_clip_file)
+
         # Geology
         self.geol_clip = m2l_utils.explode(self.geology)
         self.geol_clip.crs = self.proj_crs
-        self.geol_clip_file = self.tmp_path + "self.geol_clip.shp"
+        self.geol_clip_file = self.tmp_path + "geol_clip.shp"
         self.geol_clip.to_file(self.geol_clip_file)
 
         pd.set_option('display.max_columns', None)
@@ -347,9 +392,9 @@ class Config(object):
         geology_file = self.geol_clip_file
         structure_file = self.structure_clip_file
         basal_contacts = self.tmp_path+'basal_contacts.shp'
-        spacing = 500  # grid spacing in meters
+        self.spacing = 500  # grid spacing in meters
         misorientation = 30
-        scheme = 'scipy_rbf'
+        self.scheme = 'scipy_rbf'
         orientations = self.structures
         group_girdle = m2l_utils.plot_bedding_stereonets(
             orientations, self.geology, self.c_l)
@@ -360,7 +405,7 @@ class Config(object):
         bbox = self.bbox
 
         orientation_interp, contact_interp, combo_interp = m2l_interpolation.interpolation_grids(
-            geology_file, structure_file, basal_contacts, bbox, spacing, self.proj_crs, scheme, super_groups, self.c_l)
+            geology_file, structure_file, basal_contacts, bbox, self.spacing, self.proj_crs, self.scheme, super_groups, self.c_l)
 
         with open(self.tmp_path+'interpolated_orientations.csv', 'w') as f:
             f.write('X,Y,l,m,n,dip,dip_dir\n')
@@ -381,10 +426,12 @@ class Config(object):
                     row[0], row[1], row[2], row[3], row[4], row[5], row[6])
                 f.write(ostr)
 
-        if(spacing < 0):
-            spacing = -(bbox[2]-bbox[0])/spacing
-        x = int((bbox[2]-bbox[0])/spacing)+1
-        y = int((bbox[3]-bbox[1])/spacing)+1
+        if(self.spacing < 0):
+            self.spacing = -(bbox[2]-bbox[0])/spacing
+        self.x = int((bbox[2]-bbox[0])/self.spacing)+1
+        self.y = int((bbox[3]-bbox[1])/self.spacing)+1
+        x = self.x
+        y = self.y
         print(x, y)
         dip_grid = np.ones((y, x))
         dip_grid = dip_grid*-999
@@ -393,25 +440,47 @@ class Config(object):
         contact_grid = np.ones((y, x))
         contact_grid = dip_dir_grid*-999
         for row in combo_interp:
-            r = int((row[1]-bbox[1])/spacing)
-            c = int((row[0]-bbox[0])/spacing)
+            r = int((row[1]-bbox[1])/self.spacing)
+            c = int((row[0]-bbox[0])/self.spacing)
             dip_grid[r, c] = float(row[5])
             dip_dir_grid[r, c] = float(row[6])
 
         for row in contact_interp:
-            r = int((row[1]-bbox[1])/spacing)
-            c = int((row[0]-bbox[0])/spacing)
+            r = int((row[1]-bbox[1])/self.spacing)
+            c = int((row[0]-bbox[0])/self.spacing)
             contact_grid[r, c] = float(row[4])
 
+        self.dip_grid = dip_grid
+        self.dip_dir_grid = dip_dir_grid
+
         print('interpolated dips')
-        plt.imshow(dip_grid, cmap="hsv", origin='lower', vmin=-90, vmax=90)
+        plt.imshow(self.dip_grid, cmap="hsv",
+                   origin='lower', vmin=-90, vmax=90)
         plt.show()
 
         print('interpolated dip directions')
-        plt.imshow(dip_dir_grid, cmap="hsv", origin='lower', vmin=0, vmax=360)
+        plt.imshow(self.dip_dir_grid, cmap="hsv",
+                   origin='lower', vmin=0, vmax=360)
         plt.show()
 
         print('interpolated contacts')
         plt.imshow(contact_grid, cmap="hsv",
                    origin='lower', vmin=-360, vmax=360)
         plt.show()
+
+    def export_faults(self):
+        fault_decimate = 5
+        min_fault_length = 5000
+        fault_dip = 90
+
+        m2l_geometry.save_faults(
+            self.tmp_path+'faults_clip.shp', self.output_path, self.dtm, self.dtb, self.dtb_null, False, self.c_l, fault_decimate, min_fault_length, fault_dip)
+
+        faults = pd.read_csv(self.fault_file_csv, sep='\t')
+        faults_len = len(faults)
+        if(faults_len > 0):
+            m2l_interpolation.process_fault_throw_and_near_faults_from_grid(self.tmp_path, self.output_path, self.dtm_reproj_file, self.dtb, self.dtb_null, False, self.c_l, self.proj_crs, self.bbox,
+                                                                            self.scheme, self.dip_grid, self.dip_dir_grid, self.x, self.y, self.spacing)
+
+    def process_plutons(self):
+        pass

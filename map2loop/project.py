@@ -14,6 +14,7 @@ class Project(object):
                  # TODO: Remove harcoding if local files ship with examples
                  geology_file,
                  fault_file,
+                 fold_file,
                  structure_file,
                  mindep_file,
                  workflow={'model_engine': 'geomodeller'},
@@ -21,6 +22,7 @@ class Project(object):
         # TODO: Create ways to get and set local files
         self.geology_file = geology_file
         self.fault_file = fault_file
+        self.fold_file = fold_file
         self.structure_file = structure_file
         self.mindep_file = mindep_file
         self.set_proj_defaults()
@@ -122,7 +124,7 @@ class Project(object):
         polygon = gpd.GeoDataFrame(
             index=[0], crs=proj_crs, geometry=[bbox_geom])
         self.config = Config(
-            self.geology_file, self.fault_file,
+            self.geology_file, self.fault_file, self.fold_file,
             self.structure_file, self.mindep_file,
             bbox_3d, polygon, step_out, dtm_crs, proj_crs, c_l
         )
@@ -148,3 +150,5 @@ class Project(object):
         self.config.export_contacts()
 
         self.config.test_interpolation()
+
+        self.config.export_faults()
