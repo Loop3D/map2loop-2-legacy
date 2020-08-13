@@ -53,7 +53,7 @@ class Project(object):
                              'stereonets': False,
                              'formation_thickness': True,
                              'polarity': False,
-                             'strat_offset': False,
+                             'strat_offset': True,
                              'contact_dips': True})
         elif(workflow['model_engine'] == 'gempy'):
             workflow.update({'seismic_section': False,
@@ -167,5 +167,21 @@ class Project(object):
         if(self.workflow['formation_thickness']):
             self.config.calc_thickness()
 
-        if(workflow['fold_axial_traces']):
-            pass
+        if(self.workflow['fold_axial_traces']):
+            self.config.create_fold_axial_trace_points()
+
+        # Prepocess model inputs
+        inputs = ('')
+        if(self.workflow['model_engine'] == 'geomodeller'):
+            inputs = ('invented_orientations', 'intrusive_orientations',
+                      'fat_orientations', 'fault_tip_contacts', 'contact_orientations')
+        elif(self.workflow['model_engine'] == 'loopstructural'):
+            inputs = ('invented_orientations',
+                      'fat_orientations', 'contact_orientations')
+        elif(self.workflow['model_engine'] == 'gempy'):
+            inputs = ('invented_orientations', 'interpolated_orientations',
+                      'fat_orientations', 'contact_orientations')
+        elif(self.workflow['model_engine'] == 'noddy'):
+            inputs = ('')
+
+        self.config.postprocess(inputs, self.workflow)

@@ -398,7 +398,7 @@ class Config(object):
         orientations = self.structures
         group_girdle = m2l_utils.plot_bedding_stereonets(
             orientations, self.geology, self.c_l)
-        super_groups, use_gcode3 = Topology.super_groups_and_groups(
+        super_groups, self.use_gcode3 = Topology.super_groups_and_groups(
             group_girdle, self.tmp_path, misorientation)
         # print(super_groups)
         # print(self.geology['GROUP_'].unique())
@@ -485,14 +485,14 @@ class Config(object):
     def process_plutons(self):
         pluton_dip = 45
         pluton_dip = str(pluton_dip)
-        pluton_form = 'domes'
+        self.pluton_form = 'domes'
 
         dist_buffer = 10
         local_paths = True
         contact_decimate = 5  # store every nth contact point (in object order)
 
         m2l_geometry.process_plutons(self.tmp_path, self.output_path, self.geol_clip, local_paths,
-                                     self.dtm, self.dtb, self.dtb_null, False, pluton_form, pluton_dip, contact_decimate, self.c_l)
+                                     self.dtm, self.dtb, self.dtb_null, False, self.pluton_form, pluton_dip, contact_decimate, self.c_l)
 
     def extract_section_features(self, seismic_line_file, seismic_bbox_file, seismic_interp_file):
         # Extract faults and basal contacts of groups from seismic section
@@ -546,20 +546,80 @@ class Config(object):
 
     def calc_thickness(self):
         # Estimate formation thickness and normalised formation thickness
-        geology_file=self.tmp_path+'basal_contacts.shp'
-        contact_decimate=5
-        null_scheme='null'
-        m2l_interpolation.save_contact_vectors(geology_file,self.tmp_path,self.dtm,self.dtb,self.dtb_null,False,self.bbox,self.c_l,null_scheme,contact_decimate)
-        
-        buffer =5000
-        max_thickness_allowed=10000
+        geology_file = self.tmp_path+'basal_contacts.shp'
+        contact_decimate = 5
+        null_scheme = 'null'
+        m2l_interpolation.save_contact_vectors(
+            geology_file, self.tmp_path, self.dtm, self.dtb, self.dtb_null, False, self.bbox, self.c_l, null_scheme, contact_decimate)
 
-        m2l_geometry.calc_thickness_with_grid(self.tmp_path,self.output_path,buffer,max_thickness_allowed,
-                                            self.c_l,self.bbox,self.dip_grid,self.dip_dir_grid,self.x,self.y,self.spacing)
+        buffer = 5000
+        max_thickness_allowed = 10000
 
-        m2l_geometry.calc_min_thickness_with_grid(self.tmp_path,self.output_path,buffer,max_thickness_allowed,
-                                            self.c_l,self.bbox,self.dip_grid,self.dip_dir_grid,self.x,self.y,self.spacing)
+        m2l_geometry.calc_thickness_with_grid(self.tmp_path, self.output_path, buffer, max_thickness_allowed,
+                                              self.c_l, self.bbox, self.dip_grid, self.dip_dir_grid, self.x, self.y, self.spacing)
+
+        m2l_geometry.calc_min_thickness_with_grid(self.tmp_path, self.output_path, buffer, max_thickness_allowed,
+                                                  self.c_l, self.bbox, self.dip_grid, self.dip_dir_grid, self.x, self.y, self.spacing)
 
         m2l_geometry.normalise_thickness(self.output_path)
-        
-        m2l_utils.plot_points(self.output_path+'formation_thicknesses_norm.csv',self.geol_clip,'norm_th','x','y',True,'numeric')
+
+        m2l_utils.plot_points(self.output_path+'formation_thicknesses_norm.csv',
+                              self.geol_clip, 'norm_th', 'x', 'y', True, 'numeric')
+
+    # TODO: This needs a shorter name
+
+    def create_fold_axial_trace_points(self):
+        fold_decimate = 5
+        folds_clip = gpd.read_file(self.fold_file)
+        if(len(folds_clip) > 0):
+
+            m2l_geometry.save_fold_axial_traces(
+                self.fold_file, self.output_path, self.dtm, self.dtb, self.dtb_null, False, self.c_l, fold_decimate)
+
+            # Save fold axial trace near-hinge orientations
+            fat_step = 750         # how much to step out normal to fold axial trace
+            # dip to assign to all new orientations (-999= use local interpolated dip)
+            close_dip = -999
+
+            m2l_geometry.save_fold_axial_traces_orientations(self.fold_file, self.output_path, self.tmp_path, self.dtm, self.dtb, self.dtb_null, False, self.c_l, self.proj_crs,
+                                                             fold_decimate, fat_step, close_dip, self.scheme, self.bbox, self.spacing, self.dip_grid, self.dip_dir_grid)
+
+    def postprocess(self, inputs, workflow):
+        clut_path = "https://gist.githubusercontent.com/yohanderose/8f7e2d57db9086fbe1a7c651b9e25996/raw/ac5062e68d251c21bbc24b811ee5b17cc2f98ce3/500kibg_colours.csv"
+        use_interpolations = True
+        use_fat = True
+
+        m2l_geometry.tidy_data(self.output_path, self.tmp_path, clut_path, self.use_gcode3,
+                               use_interpolations, use_fat, self.pluton_form, inputs, workflow, self.c_l)
+        model_top = round(np.amax(self.dtm.read(1)), -2)
+        self.dtm.close()
+        # if(workflow['cover_map']):
+        #     dtb.close()
+
+        # Calculate polarity of original bedding orientation data
+        if(workflow['polarity']):
+            m2l_geometry.save_orientations_with_polarity(
+                self.output_path+'orientations.csv', self.output_path, self.c_l, self.tmp_path+'basal_contacts.shp', self.tmp_path+'all_sorts.csv',)
+
+            m2l_utils.plot_points(self.output_path+'orientations_polarity.csv',
+                                  self.geol_clip, 'polarity', 'X', 'Y', True, 'alpha')
+
+        # Calculate minimum fault offset from stratigraphy and stratigraphic fault offset
+        if(workflow['strat_offset']):
+            fault_test = pd.read_csv(
+                self.output_path+'fault_dimensions.csv', ',')
+            if(len(fault_test) > 0):
+
+                m2l_geometry.fault_strat_offset(self.output_path, self.c_l, self.proj_crs, self.output_path+'formation_summary_thicknesses.csv', self.tmp_path +
+                                                'all_sorts.csv', self.tmp_path+'faults_clip.shp', self.tmp_path+'geol_clip.shp', self.output_path+'fault_dimensions.csv')
+
+                m2l_utils.plot_points(self.output_path+'fault_strat_offset3.csv',
+                                      self.geol_clip, 'min_offset', 'X', 'Y', True, 'numeric')
+                m2l_utils.plot_points(self.output_path+'fault_strat_offset3.csv',
+                                      self.geol_clip, 'strat_offset', 'X', 'Y', True, 'numeric')
+
+        # Analyse fault topologies
+        Topology.parse_fault_relationships(
+            self.graph_path, self.tmp_path, self.output_path)
+
+        # TODO: Figures look a bit squashed in notebooks
