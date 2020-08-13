@@ -483,4 +483,83 @@ class Config(object):
                                                                             self.scheme, self.dip_grid, self.dip_dir_grid, self.x, self.y, self.spacing)
 
     def process_plutons(self):
-        pass
+        pluton_dip = 45
+        pluton_dip = str(pluton_dip)
+        pluton_form = 'domes'
+
+        dist_buffer = 10
+        local_paths = True
+        contact_decimate = 5  # store every nth contact point (in object order)
+
+        m2l_geometry.process_plutons(self.tmp_path, self.output_path, self.geol_clip, local_paths,
+                                     self.dtm, self.dtb, self.dtb_null, False, pluton_form, pluton_dip, contact_decimate, self.c_l)
+
+    def extract_section_features(self, seismic_line_file, seismic_bbox_file, seismic_interp_file):
+        # Extract faults and basal contacts of groups from seismic section
+        # input geology file (if local)
+        seismic_line_file = seismic_line_file
+        seismic_line = gpd.read_file(seismic_line_file)  # import map
+        seismic_line.plot(figsize=(10, 10), edgecolor='#000000',
+                          linewidth=0.2)  # display map
+        display(seismic_line)
+
+        # input geology file (if local)
+        seismic_bbox_file = seismic_bbox_file
+        seismic_bbox = gpd.read_file(seismic_bbox_file)  # import map
+        seismic_bbox.set_index('POSITION', inplace=True)
+
+        # input geology file (if local)
+        seismic_interp_file = seismic_interp_file
+        seismic_interp = gpd.read_file(seismic_interp_file)  # import map
+        seismic_interp.plot(column='FEATURE', figsize=(
+            10, 10), edgecolor='#000000', linewidth=0.5)  # display map
+        display(seismic_interp)
+
+        surface_cut = 2000
+
+        m2l_geometry.extract_section(self.tmp_path, self.output_path, seismic_line, seismic_bbox,
+                                     seismic_interp, self.dtm, self.dtb, self.dtb_null, False, surface_cut)
+
+        contacts = pd.read_csv(self.output_path+'contacts4.csv', ",")
+        seismic_contacts = pd.read_csv(
+            self.output_path+'seismic_base.csv', ",")
+        all_contacts = pd.concat([contacts, seismic_contacts], sort=False)
+        all_contacts.to_csv(self.output_path+'contacts4.csv',
+                            index=None, header=True)
+
+        faults = pd.read_csv(self.output_path+'faults.csv', ",")
+        seismic_faults = pd.read_csv(
+            self.output_path+'seismic_faults.csv', ",")
+        all_faults = pd.concat([faults, seismic_faults], sort=False)
+        all_faults.to_csv(self.output_path+'faults.csv',
+                          index=None, header=True)
+
+    def propagate_contacts_dips(self):
+        print("Propagating dips along contacts...")
+        orientations = pd.read_csv(self.output_path+'orientations.csv', ",")
+        # This is supposed to be a csv but my csv doesn't have a geometry part
+        contacts = gpd.read_file(self.tmp_path + 'basal_contacts.shp')
+        contact_dip = -999
+        contact_orientation_decimate = 5
+        m2l_geometry.save_basal_contacts_orientations_csv(contacts, orientations, self.geol_clip, self.tmp_path, self.output_path, self.dtm, self.dtb,
+                                                          self.dtb_null, False, contact_orientation_decimate, self.c_l, contact_dip, self.dip_grid, self.spacing, self.bbox)
+
+    def calc_thickness(self):
+        # Estimate formation thickness and normalised formation thickness
+        geology_file=self.tmp_path+'basal_contacts.shp'
+        contact_decimate=5
+        null_scheme='null'
+        m2l_interpolation.save_contact_vectors(geology_file,self.tmp_path,self.dtm,self.dtb,self.dtb_null,False,self.bbox,self.c_l,null_scheme,contact_decimate)
+        
+        buffer =5000
+        max_thickness_allowed=10000
+
+        m2l_geometry.calc_thickness_with_grid(self.tmp_path,self.output_path,buffer,max_thickness_allowed,
+                                            self.c_l,self.bbox,self.dip_grid,self.dip_dir_grid,self.x,self.y,self.spacing)
+
+        m2l_geometry.calc_min_thickness_with_grid(self.tmp_path,self.output_path,buffer,max_thickness_allowed,
+                                            self.c_l,self.bbox,self.dip_grid,self.dip_dir_grid,self.x,self.y,self.spacing)
+
+        m2l_geometry.normalise_thickness(self.output_path)
+        
+        m2l_utils.plot_points(self.output_path+'formation_thicknesses_norm.csv',self.geol_clip,'norm_th','x','y',True,'numeric')

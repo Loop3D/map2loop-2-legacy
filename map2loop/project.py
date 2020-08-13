@@ -17,7 +17,7 @@ class Project(object):
                  fold_file,
                  structure_file,
                  mindep_file,
-                 workflow={'model_engine': 'geomodeller'},
+                 workflow={'model_engine': 'loopstructural'},
                  ):
         # TODO: Create ways to get and set local files
         self.geology_file = geology_file
@@ -54,7 +54,7 @@ class Project(object):
                              'formation_thickness': True,
                              'polarity': False,
                              'strat_offset': False,
-                             'contact_dips': False})
+                             'contact_dips': True})
         elif(workflow['model_engine'] == 'gempy'):
             workflow.update({'seismic_section': False,
                              'cover_map': False,
@@ -152,3 +152,20 @@ class Project(object):
         self.config.test_interpolation()
 
         self.config.export_faults()
+        self.config.process_plutons()
+
+        # Seismic section is in the hamersely model area
+        # TODO: Implement this option better and test with Turner
+        if (self.workflow['seismic_section']):
+            self.config.extract_section_features(seismic_line_file="",
+                                                 seismic_bbox_file="",
+                                                 seismic_interp_file="")
+
+        if(self.workflow['contact_dips']):
+            self.config.propagate_contacts_dips()
+
+        if(self.workflow['formation_thickness']):
+            self.config.calc_thickness()
+
+        if(workflow['fold_axial_traces']):
+            pass
