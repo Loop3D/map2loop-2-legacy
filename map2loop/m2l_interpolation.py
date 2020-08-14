@@ -1539,8 +1539,6 @@ def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spac
     #     structures_code, geology, how="left", op="within")
     # contacts = gpd.sjoin(contacts, geology, how="left", op="within")
 
-    # TODO: nodes_code has nan values to deal with properly
-    # nodes_code.dropna()
 
     first_supergroup = True
     for groups in super_groups:

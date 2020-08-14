@@ -614,6 +614,7 @@ class Topology(object):
     ####################################
     def save_geol_wkt(sub_geol, geology_file_csv, c_l, hint_flag):
         # hint_flag=False
+        # TODO: Serve this table remotely as well
         if(hint_flag == True):
             print("Using ENS age hints")
             code_hint_file = '../test_data3/data/code_age_hint.csv'  # input code_hint file
@@ -625,6 +626,11 @@ class Topology(object):
             for indx, row in code_hints.iterrows():
                 if(not indx in hint_list):
                     hint_list.append(indx)
+
+        # TODO: Figure out how the code replacment is happening
+        # sub_geol.columns = ['WKT'] + list(sub_geol.columns[1:])
+        # sub_geol.to_csv(geology_file_csv, sep='\t',
+        #                   index=False)
 
         f = open(geology_file_csv, "w+")
         f.write('WKT\t'+c_l['o'].replace("\n", "")+'\t'+c_l['u'].replace("\n", "")+'\t'+c_l['g'].replace("\n", "")+'\t'+c_l['min'].replace("\n", "")+'\t'+c_l['max'].replace(
@@ -668,23 +674,10 @@ class Topology(object):
     # Saves orientation layer as WKT format for use by map2model c++ code
     ####################################
     def save_structure_wkt(sub_pts, structure_file_csv, c_l):
-        f = open(structure_file_csv, "w+")
-        f.write('WKT\t'+c_l['gi']+'\t'+c_l['d']+'\t'+c_l['dd']+'\n')
 
-        print(len(sub_pts), " points")
-
-        # for i in range(0,len(sub_pts)):
-        #    for j in range(0,len(sub_geol)):
-        #        if(sub_pts.loc[i].geometry.within(sub_geol.loc[j].geometry)):
-        #            print(i,j)
-
-        for i in range(0, len(sub_pts)):
-            line = "\""+str(sub_pts.loc[i].geometry)+"\"\t\""+str(sub_pts.loc[i][c_l['gi']])+"\"\t\"" +\
-                str(sub_pts.loc[i][c_l['d']])+"\"\t\"" + \
-                str(sub_pts.loc[i][c_l['dd']])+"\"\n"
-            f.write(functools.reduce(operator.add, (line)))
-
-        f.close()
+        sub_pts.columns = ['WKT'] + list(sub_pts.columns[1:])
+        sub_pts.to_csv(structure_file_csv, sep='\t',
+                       index=False)
 
     ####################################
     # save out mineral deposit points in WKT format
@@ -697,20 +690,25 @@ class Topology(object):
     # Saves mineral deposit layer as WKT format for use by map2model c++ code
     ####################################
     def save_mindep_wkt(sub_mindep, mindep_file_csv, c_l):
-        f = open(mindep_file_csv, "w+")
-        f.write('WKT\t'+c_l['msc']+'\t'+c_l['msn']+'\t'+c_l['mst'] +
-                '\t'+c_l['mtc']+'\t'+c_l['mscm']+'\t'+c_l['mcom']+'\n')
 
-        print(len(sub_mindep), " points")
+        sub_mindep.columns = ['WKT'] + list(sub_mindep.columns[1:])
+        sub_mindep.to_csv(mindep_file_csv, sep='\t',
+                          index=False)
 
-        for i in range(0, len(sub_mindep)):
-            line = "\""+str(sub_mindep.loc[i].geometry)+"\"\t\""+str(sub_mindep.loc[i][c_l['msc']])+"\"\t\"" +\
-                str(sub_mindep.loc[i][c_l['msn']])+"\"\t\""+str(sub_mindep.loc[i][c_l['mst']])+"\"\t\"" +\
-                str(sub_mindep.loc[i][c_l['mtc']])+"\"\t\""+str(sub_mindep.loc[i][c_l['mscm']])+"\"\t\"" +\
-                str(sub_mindep.loc[i][c_l['mcom']])+"\"\n"
-            f.write(functools.reduce(operator.add, (line)))
+        # f = open(mindep_file_csv, "w+")
+        # f.write('WKT\t'+c_l['msc']+'\t'+c_l['msn']+'\t'+c_l['mst'] +
+        #         '\t'+c_l['mtc']+'\t'+c_l['mscm']+'\t'+c_l['mcom']+'\n')
 
-        f.close()
+        # print(len(sub_mindep), " points")
+
+        # for i in range(0, len(sub_mindep)):
+        #     line = "\""+str(sub_mindep.loc[i].geometry)+"\"\t\""+str(sub_mindep.loc[i][c_l['msc']])+"\"\t\"" +\
+        #         str(sub_mindep.loc[i][c_l['msn']])+"\"\t\""+str(sub_mindep.loc[i][c_l['mst']])+"\"\t\"" +\
+        #         str(sub_mindep.loc[i][c_l['mtc']])+"\"\t\""+str(sub_mindep.loc[i][c_l['mscm']])+"\"\t\"" +\
+        #         str(sub_mindep.loc[i][c_l['mcom']])+"\"\n"
+        #     f.write(functools.reduce(operator.add, (line)))
+
+        # f.close()
 
     ####################################
     # save out fault polylines in WKT format
@@ -722,18 +720,15 @@ class Topology(object):
     # Saves fault/fold axial trace layer as WKT format for use by map2model c++ code
     ####################################
     def save_faults_wkt(sub_lines, fault_file_csv, c_l):
-        f = open(fault_file_csv, "w+")
-        f.write('WKT\t'+c_l['o']+'\t'+c_l['f']+'\n')
 
-        print(len(sub_lines), " polylines")
-
-        for i in range(0, len(sub_lines)):
-            if(c_l['fault'] in sub_lines.loc[i][c_l['f']]):
-                f.write("\""+str(sub_lines.loc[i].geometry)+"\"\t")
-                f.write("\""+str(sub_lines.loc[i][c_l['o']])+"\"\t")
-                f.write("\""+str(sub_lines.loc[i][c_l['f']])+"\"\n")
-
-        f.close()
+        # Change geometry column name to WKT
+        sub_lines.columns = ['WKT'] + list(sub_lines.columns[1:])
+        # Filter cells with a feature description containing the word 'fault'
+        mask = sub_lines[c_l['f']].str.contains(
+            'fault', na=False, case=False, regex=True)
+        sub_faults = sub_lines[mask]
+        sub_faults.to_csv(fault_file_csv, sep='\t',
+                          index=False)
 
     def check_near_fault_contacts(path_faults, all_sorts_path, fault_dimensions_path, gp_fault_rel_path, contacts_path, c_l, proj_crs):
         faults_clip = gpd.read_file(path_faults)

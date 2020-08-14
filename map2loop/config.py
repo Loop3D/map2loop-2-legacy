@@ -145,6 +145,8 @@ class Config(object):
         print("Geology graphic exported to: " + self.tmp_path+"geology.png")
 
     def export_csv(self):
+        # TODO: - Move away from tab seperators entirely (topology and map2model)
+
         # Save geology polygons
         hint_flag = False  # use GSWA strat database to provide topology hints
         sub_geol = self.geology[['geometry', self.c_l['o'], self.c_l['c'], self.c_l['g'],
@@ -165,16 +167,8 @@ class Config(object):
             sub_pts, self.structure_file_csv, self.c_l)
 
         # Save faults
-        # TODO: - Use pandas slicing instead of looping
-        #       - Move away from tab seperators (topology and map2model)
-        sub_faults = self.faults[['geometry', self.c_l['o'], self.c_l['f']]]
-        sub_faults.columns = ["WKT",  self.c_l['o'], self.c_l['f']]
-        mask = sub_faults[self.c_l['f']].str.contains(
-            'fault', na=False, case=False, regex=True)
-        sub_faults = sub_faults[mask]
-        sub_faults.to_csv(self.fault_file_csv, sep='\t',
-                          index=False)
-        # Topology.save_faults_wkt(sub_faults, self.fault_file_csv, self.c_l)
+        sub_lines = self.faults[['geometry', self.c_l['o'], self.c_l['f']]]
+        Topology.save_faults_wkt(sub_lines, self.fault_file_csv, self.c_l)
 
     def update_parfile(self):
         Topology.save_parfile(self, self.c_l, self.output_path, self.geology_file_csv, self.fault_file_csv, self.structure_file_csv,
