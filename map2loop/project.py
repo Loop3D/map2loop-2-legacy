@@ -1,4 +1,6 @@
-from map2loop.cfg import *
+import hjson
+import sys
+
 import geopandas as gpd
 import pandas as pd
 import numpy as np
@@ -17,14 +19,30 @@ class Project(object):
                  fold_file,
                  structure_file,
                  mindep_file,
+                 metadata=None,
                  workflow={'model_engine': 'loopstructural'},
                  ):
+
         # TODO: Create ways to get and set local files
         self.geology_file = geology_file
         self.fault_file = fault_file
         self.fold_file = fold_file
         self.structure_file = structure_file
         self.mindep_file = mindep_file
+
+        if metadata is None:
+            print(
+                "Please pass the path to a valid metadata file (.json) to update_config(...) that describes your input data columns.")
+            print("You can find an example config here ")
+            sys.exit(1)
+        else:
+            try:
+                with open(metadata) as raw_data:
+                    self.c_l = hjson.load(raw_data)
+            except Exception as e:
+                print(e)
+                sys.exit(1)
+
         self.set_proj_defaults()
         self.update_workflow(workflow)
 
@@ -98,7 +116,7 @@ class Project(object):
                       },
                       dtm_crs={'init': 'EPSG:4326'},
                       proj_crs=None,
-                      step_out=None
+                      step_out=None,
                       ):
 
         if bbox_3d["minx"] == 0 and bbox_3d["maxx"] == 0:
@@ -126,7 +144,7 @@ class Project(object):
         self.config = Config(
             self.geology_file, self.fault_file, self.fold_file,
             self.structure_file, self.mindep_file,
-            bbox_3d, polygon, step_out, dtm_crs, proj_crs, c_l
+            bbox_3d, polygon, step_out, dtm_crs, proj_crs, self.c_l
         )
 
         # Store important data frames and display

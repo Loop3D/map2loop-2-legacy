@@ -32,7 +32,6 @@ class Config(object):
         self.output_path = self.project_path+'/output/'
         self.vtk_path = self.project_path+'/vtk/'
 
-        # TODO: Use pandas to write to csvs
         self.fault_file_csv = self.tmp_path + "faults.csv"
         self.structure_file_csv = self.tmp_path + "structure.csv"
         self.geology_file_csv = self.tmp_path + "geology.csv"
@@ -69,7 +68,7 @@ class Config(object):
 
         # Check input maps for missing values
         drift_prefix = ['None']
-        # TODO: Remote pathing
+        # TODO: Remote source files and local helper tables 
         local_paths = True
         # TODO: - Remove cfg.py
         #       - Check if fold file is always the same as fault or needs to be seperated
