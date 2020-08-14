@@ -31,6 +31,7 @@ class Project(object):
         self.mindep_file = mindep_file
 
         # Load in dictionary that describes the column names
+        # TODO: Ensure hjson works with regular json files too
         if metadata is None:
             print(
                 "Please pass the path to a valid metadata file (.json or .hjson) to update_config(...) that identifies your input table column names.")
@@ -120,6 +121,7 @@ class Project(object):
                       step_out=None,
                       ):
 
+        # TODO: Also check given bounds don't exceed proj_bounds
         if bbox_3d["minx"] == 0 and bbox_3d["maxx"] == 0:
             bbox_3d.update({
                 "minx": self.proj_bounds[0],
@@ -134,7 +136,6 @@ class Project(object):
         if step_out is None:
             step_out = self.step_out
 
-        # TODO: Make crs defaults and specifiable not from config
         minx, miny, maxx, maxy = tuple([bbox_3d["minx"], bbox_3d["miny"],
                                         bbox_3d["maxx"], bbox_3d["maxy"]])
         lat_point_list = [miny, miny, maxy, maxy, maxy]
