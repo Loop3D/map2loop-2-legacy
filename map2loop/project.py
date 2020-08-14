@@ -30,10 +30,11 @@ class Project(object):
         self.structure_file = structure_file
         self.mindep_file = mindep_file
 
+        # Load in dictionary that describes the column names
         if metadata is None:
             print(
-                "Please pass the path to a valid metadata file (.json) to update_config(...) that describes your input data columns.")
-            print("You can find an example config here ")
+                "Please pass the path to a valid metadata file (.json or .hjson) to update_config(...) that identifies your input table column names.")
+            print("You can find an example config here https://gist.github.com/yohanderose/a127c29cb88529f049a5bafc881bb1a0")
             sys.exit(1)
         else:
             try:
