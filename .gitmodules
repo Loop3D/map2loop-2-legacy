@@ -1,6 +1,3 @@
-[submodule "notebooks/Turner_Syncline"]
-	path = notebooks/Turner_Syncline
-	url = https://github.com/Loop3D/Turner_Syncline
-[submodule "notebooks/data"]
-	path = notebooks/data
-	url = https://github.com/yohanderose/data
+[submodule "notebooks"]
+	path = notebooks
+	url = https://github.com/yohanderose/map2loop2-notebooks
