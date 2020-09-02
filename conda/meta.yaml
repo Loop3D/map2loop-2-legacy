@@ -1,5 +1,5 @@
 {% set name = "map2loop" %}
-{% set version = "1.0.6" %}
+{% set version = "1.0.8" %}
 
 package:
   name: "{{ name|lower }}"
@@ -30,6 +30,7 @@ requirements:
     - shapely
     - rasterio
     - scipy
+    - owslib
 
 test:
   imports:

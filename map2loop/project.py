@@ -1,5 +1,7 @@
+import warnings
 import hjson
 import sys
+import urllib.request
 
 import geopandas as gpd
 import pandas as pd
@@ -14,16 +16,27 @@ class Project(object):
                  # region of interest coordinates in metre-based system (or non-degree system)
                  # (minx, miny, maxx, maxy, bottom, top)
                  # TODO: Remove harcoding if local files ship with examples
-                 geology_file,
-                 fault_file,
-                 fold_file,
-                 structure_file,
-                 mindep_file,
+                 remote=False,
+                 geology_file=None,
+                 fault_file=None,
+                 fold_file=None,
+                 structure_file=None,
+                 mindep_file=None,
                  metadata=None,
                  workflow={'model_engine': 'loopstructural'},
                  ):
 
-        # TODO: Create ways to get and set local files
+        warnings.filterwarnings('ignore')
+
+        # If local data files are expected and not given throw an error
+        self.local = not remote
+        if remote == False:
+            if any(source is None for source in [geology_file, fault_file, fold_file, structure_file, mindep_file]):
+                print(
+                    "Please pass local file paths as input params if you do not wish to use remote sources.")
+                sys.exit(1)
+
+        # If remote, these will be set to null for now, otherwise set to local paths
         self.geology_file = geology_file
         self.fault_file = fault_file
         self.fold_file = fold_file
@@ -39,8 +52,13 @@ class Project(object):
             sys.exit(1)
         else:
             try:
-                with open(metadata) as raw_data:
-                    self.c_l = hjson.load(raw_data)
+                if metadata.startswith("http"):
+                    with urllib.request.urlopen(metadata) as raw_data:
+                        self.c_l = hjson.load(raw_data)
+                        print(self.c_l)
+                else:
+                    with open(metadata) as raw_data:
+                        self.c_l = hjson.load(raw_data)
             except Exception as e:
                 print(e)
                 sys.exit(1)
@@ -49,9 +67,19 @@ class Project(object):
         self.update_workflow(workflow)
 
     def set_proj_defaults(self):
-        geology = gpd.read_file(self.geology_file)
-        self.proj_bounds = geology.total_bounds
-        self.proj_crs = geology.crs
+        # If local, set the maximum bounding box to the bounds of the input files
+        # If remote, set bounds to zeros, hopefully this gives the whole map...
+        if self.geology_file is not None:
+            print("not remote")
+            geology = gpd.read_file(self.geology_file)
+            self.proj_bounds = geology.total_bounds
+            self.proj_crs = geology.crs
+        else:
+            # TODO: doesn't like zeros
+            self.proj_bounds = (0, 0, 0, 0)
+            # TODO: If remote, make epsg required
+            self.proj_crs = {'init': 'EPSG:28350'}
+
         self.step_out = 0.1
 
     def update_workflow(self, workflow):
@@ -121,7 +149,6 @@ class Project(object):
                       step_out=None,
                       ):
 
-        # TODO: Also check given bounds don't exceed proj_bounds
         if bbox_3d["minx"] == 0 and bbox_3d["maxx"] == 0:
             bbox_3d.update({
                 "minx": self.proj_bounds[0],
@@ -136,17 +163,33 @@ class Project(object):
         if step_out is None:
             step_out = self.step_out
 
-        minx, miny, maxx, maxy = tuple([bbox_3d["minx"], bbox_3d["miny"],
-                                        bbox_3d["maxx"], bbox_3d["maxy"]])
+        bbox = tuple([bbox_3d["minx"], bbox_3d["miny"],
+                      bbox_3d["maxx"], bbox_3d["maxy"]])
+        minx, miny, maxx, maxy = bbox
+        bbox_str = "{},{},{},{}".format(minx, miny, maxx, maxy)
         lat_point_list = [miny, miny, maxy, maxy, maxy]
         lon_point_list = [minx, maxx, maxx, minx, minx]
         bbox_geom = Polygon(zip(lon_point_list, lat_point_list))
         polygon = gpd.GeoDataFrame(
             index=[0], crs=proj_crs, geometry=[bbox_geom])
+
+        # Define the url queries if remote flag is set
+        if self.geology_file is None:
+            self.geology_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:geol_500k&bbox={}&srs=EPSG:28350'.format(
+                bbox_str)
+            self.fault_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=linear_500k&bbox={}&srs=EPSG:28350'.format(
+                bbox_str)
+            self.fold_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=linear_500k&bbox={}&srs=EPSG:28350'.format(
+                bbox_str)
+            self.structure_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=waroxi_wa_28350_bed&bbox={}&srs=EPSG:28350'.format(
+                bbox_str)
+            self.mindep_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:mindeps_2018_28350&bbox={}&srs=EPSG:28350'.format(
+                bbox_str)
+
         self.config = Config(
             self.geology_file, self.fault_file, self.fold_file,
             self.structure_file, self.mindep_file,
-            bbox_3d, polygon, step_out, dtm_crs, proj_crs, self.c_l
+            bbox_3d, polygon, step_out, dtm_crs, proj_crs, self.local, self.c_l
         )
 
         # Store important data frames and display

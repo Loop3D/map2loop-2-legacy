@@ -1629,11 +1629,16 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
         if(c_l['c'] == 'CODE'):
             code = c_l['c'].lower()
         else:
-            code = c_l['c']
+            # code = c_l['c']
+            code = 'UNITNAME'
 
         asc2 = pd.merge(asc, colours, how='inner',
                         left_on='code', right_on=code)
-        asc2.drop(['UNITNAME'], axis=1, inplace=True)
+        try:
+            asc2.drop(['UNITNAME'], axis=1, inplace=True)
+        except Exception as e:
+            asc2.drop(['unitname'], axis=1, inplace=True)
+
         if(not c_l['c'] == 'code'):
             asc2.rename(columns={'code_x': 'code'}, inplace=True)
             if('code_y' in asc2.columns):

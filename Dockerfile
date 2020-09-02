@@ -19,26 +19,26 @@ ENV CONDA_DEFAULT_ENV m2l
 RUN /bin/bash -c "source activate m2l"
 
 # Install new package
-RUN pip install pybind11 pytest
+RUN pip install pybind11 pytest jupyter
 RUN pip install -e map2loop-2
 
-# Fetch and install model engines
+# # Fetch and install model engines
 # > Structural
 RUN pip install lavavu
 RUN git clone https://github.com/Loop3D/LoopStructural
 RUN pip install -r /LoopStructural/requirements.txt
 RUN pip install -e /LoopStructural 
-# > Gempy
-RUN pip install -r /map2loop-2/engines/gempy-requirements.txt
-RUN pip install gempy
-# > PyNoddy
-RUN git clone https://github.com/cgre-aachen/pynoddy
-RUN cp /map2loop-2/engines/noddy /usr/bin
-RUN pip install pynoddy
+# # > Gempy
+# RUN pip install -r /map2loop-2/engines/gempy-requirements.txt
+# RUN pip install gempy
+# # > PyNoddy
+# RUN git clone https://github.com/cgre-aachen/pynoddy
+# RUN cp /map2loop-2/engines/noddy /usr/bin
+# RUN pip install pynoddy
 
-# Fetch and install ensemble generator
-# RUN git clone --branch docker --single-branch https://Loop3D:2fae576a7fb2b205dddfc7a8004a694812623142@github.com/Loop3D/ensemble_generator
-# RUN pip install -e /ensemble_generator
+# # Fetch and install ensemble generator
+# # RUN git clone --branch docker --single-branch https://Loop3D:2fae576a7fb2b205dddfc7a8004a694812623142@github.com/Loop3D/ensemble_generator
+# # RUN pip install -e /ensemble_generator
 
 
 # Add Tini
