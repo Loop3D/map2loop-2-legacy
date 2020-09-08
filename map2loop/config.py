@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import re
 import csv
@@ -100,10 +101,9 @@ class Config(object):
 
         # Check input maps for missing values
         drift_prefix = ['None']
-        # TODO: Remote source files and local helper tables
         self.local = local
-        # TODO: - Remove cfg.py
         #       - Check if fold file is always the same as fault or needs to be seperated
+        # TODO: Allow for input as a polygon, not just a bounding box.
         structure_file, geology_file, fault_file, mindep_file, fold_file, c_l = m2l_map_checker.check_map(
             structure_file, geology_file, fault_file, mindep_file, fold_file, self.tmp_path, self.bbox, c_l, proj_crs, self.local, drift_prefix)
 
@@ -258,6 +258,7 @@ class Config(object):
         print("Done")
 
     def load_dtm(self):
+        
         polygon_ll = self.polygon.to_crs(self.dtm_crs)
 
         minlong = polygon_ll.total_bounds[0]-self.step_out
