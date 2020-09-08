@@ -16,6 +16,7 @@ class Project(object):
                  # region of interest coordinates in metre-based system (or non-degree system)
                  # (minx, miny, maxx, maxy, bottom, top)
                  # TODO: Remove harcoding if local files ship with examples
+                 state,
                  remote=False,
                  geology_file=None,
                  fault_file=None,
@@ -27,6 +28,13 @@ class Project(object):
                  ):
 
         warnings.filterwarnings('ignore')
+
+        if state in ['WA', 'NSW', 'VIC', 'SA', 'QLD', 'ACT', 'TAS']:
+            self.state = state
+        else:
+            print(
+                "Please provide the a string of the state code.")
+            sys.exit(1)
 
         # If local data files are expected and not given throw an error
         self.local = not remote
@@ -166,7 +174,6 @@ class Project(object):
         bbox = tuple([bbox_3d["minx"], bbox_3d["miny"],
                       bbox_3d["maxx"], bbox_3d["maxy"]])
         minx, miny, maxx, maxy = bbox
-        bbox_str = "{},{},{},{}".format(minx, miny, maxx, maxy)
         lat_point_list = [miny, miny, maxy, maxy, maxy]
         lon_point_list = [minx, maxx, maxx, minx, minx]
         bbox_geom = Polygon(zip(lon_point_list, lat_point_list))
@@ -175,6 +182,20 @@ class Project(object):
 
         # Define the url queries if remote flag is set
         if self.geology_file is None:
+            self.fetch_sources(bbox)
+
+        self.config = Config(
+            self.geology_file, self.fault_file, self.fold_file,
+            self.structure_file, self.mindep_file,
+            bbox_3d, polygon, step_out, dtm_crs, proj_crs, self.local, self.c_l
+        )
+
+        # Store important data frames and display
+        self.config.preprocess("plot")
+
+    def fetch_sources(self, bbox):
+        if self.state == "WA":
+            bbox_str = "{},{},{},{}".format(bbox[0], bbox[1], bbox[2], bbox[3])
             self.geology_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:geol_500k&bbox={}&srs=EPSG:28350'.format(
                 bbox_str)
             self.fault_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=linear_500k&bbox={}&srs=EPSG:28350'.format(
@@ -186,19 +207,10 @@ class Project(object):
             self.mindep_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:mindeps_2018_28350&bbox={}&srs=EPSG:28350'.format(
                 bbox_str)
 
-        self.config = Config(
-            self.geology_file, self.fault_file, self.fold_file,
-            self.structure_file, self.mindep_file,
-            bbox_3d, polygon, step_out, dtm_crs, proj_crs, self.local, self.c_l
-        )
-
-        # Store important data frames and display
-        self.config.preprocess("plot")
-
     def run(self):
         print("Generating topology analyser input...")
         self.config.export_csv()
-        self.config.runMap2Model()
+        self.config.run_map2model()
         self.config.load_dtm()
         self.config.join_features()
 
