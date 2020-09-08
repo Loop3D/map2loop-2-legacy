@@ -12,6 +12,8 @@ from map2loop.config import Config
 
 
 class Project(object):
+    """A high level object implementation of the map2loop workflow.
+    """
     def __init__(self,
                  # region of interest coordinates in metre-based system (or non-degree system)
                  # (minx, miny, maxx, maxy, bottom, top)

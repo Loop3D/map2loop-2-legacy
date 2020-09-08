@@ -1,0 +1,11 @@
+map2model
+numpy
+pandas
+geopandas
+matplotlib
+hjson    
+networkx
+shapely
+rasterio
+scipy
+owslib
