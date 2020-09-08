@@ -617,7 +617,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
     fo.write("X,Y,Z,DipDirection,dip,DipPolarity,formation\n")
     # fo.write("X,Y,Z,azimuth,dip,polarity,formation\n")
     fd = open(output_path+'fault_dimensions.csv', "w")
-    fd.write("Fault,HorizontalRadius,VerticalRadius,InfluenceDistance\n")
+    fd.write("Fault,HorizontalRadius,VerticalRadius,InfluenceDistance,colour\n")
     # fd.write("Fault_ID,strike,dip_direction,down_dip\n")
     if(os.path.exists(path_faults)):
         faults_clip = gpd.read_file(path_faults)
@@ -734,8 +734,13 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                         # ostr=str(flt_ls.coords[int((len(flt_ls.coords)-1)/2)][0])+","+str(flt_ls.coords[int((len(flt_ls.coords)-1)/2)][1])+","+height+","+str(azimuth)+","+str(fault_dip)+",1,"+fault_name+"\n"
                         fo.write(ostr)
                         strike = strike*1.25
-                        ostr = "{},{},{},{}\n"\
-                            .format(fault_name, strike/2, strike, strike/4.0)
+                        r = random.randint(1, 256)-1
+                        g = random.randint(1, 256)-1
+                        b = random.randint(1, 256)-1
+                        hex_rgb = m2l_utils.intstohex((r, g, b))
+
+                        ostr = "{},{},{},{},{}\n"\
+                            .format(fault_name, strike/2, strike/2, strike/4.0,hex_rgb)
                         # ostr=fault_name+","+str(strike/2)+","+str(strike)+","+str(strike/4.0)+"\n"
                         fd.write(ostr)
                 # shouldn't happen any more
@@ -853,8 +858,9 @@ def old_save_faults(path_faults, path_fault_orientations, dtm, dtb, dtb_null, co
     fo.write("X,Y,Z,DipDirection,dip,DipPolarity,formation\n")
     # fo.write("X,Y,Z,azimuth,dip,polarity,formation\n")
     fd = open(path_fault_orientations+'fault_dimensions.csv', "w")
-    fd.write("Fault,HorizontalRadius,VerticalRadius,InfluenceDistance\n")
+    fd.write("Fault,HorizontalRadius,VerticalRadius,InfluenceDistance,colour\n")
     # fd.write("Fault_ID,strike,dip_direction,down_dip\n")
+
 
     for indx, flt in faults_clip.iterrows():
         if(c_l['fault'] in flt[c_l['f']]):
@@ -890,8 +896,13 @@ def old_save_faults(path_faults, path_fault_orientations, dtm, dtb, dtb_null, co
                     .format(flt_ls.coords[int((len(flt_ls.coords)-1)/2)][0], flt_ls.coords[int((len(flt_ls.coords)-1)/2)][1], height, azimuth, fault_dip, 1, fault_name)
                 # ostr=str(flt_ls.coords[int((len(flt_ls.coords)-1)/2)][0])+","+str(flt_ls.coords[int((len(flt_ls.coords)-1)/2)][1])+","+height+","+str(azimuth)+","+str(fault_dip)+",1,"+fault_name+"\n"
                 fo.write(ostr)
-                ostr = "{},{},{},{}\n"\
-                    .format(fault_name, strike/2, strike/2, strike/4.0)
+                r = random.randint(1, 256)-1
+                g = random.randint(1, 256)-1
+                b = random.randint(1, 256)-1
+                hex_rgb = m2l_utils.intstohex((r, g, b))
+
+                ostr = "{},{},{},{},{}\n"\
+                    .format(fault_name, strike/2, strike/2, strike/4.0,hex_rgb)
                 # ostr=fault_name+","+str(strike/2)+","+str(strike/2)+","+str(strike/4.0)+"\n"
                 fd.write(ostr)
 
