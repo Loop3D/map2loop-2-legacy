@@ -1,4 +1,4 @@
-# Map2Loop 2.0
+# Map2Loop 2.0 
 
 Generate model input data from geological maps. Revision of objectives in [https://github.com/Loop3D/map2loop](https://github.com/Loop3D/map2loop)
 
