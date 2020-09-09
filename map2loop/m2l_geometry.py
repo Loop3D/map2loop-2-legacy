@@ -630,7 +630,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                     'North': (0.0, 1.0), 'Northeast': (.707, .707), 'East': (1.0, 0.0), 'Southeast': (.707, -.707),
                     'South': (0.0, -1.0), 'Southwest': (-.707, -.707), 'West': (-1.0, 0.0), 'Northwest': (-.707, .707),
                     'Unknown': (0.0, 1.0), 'Vertical': (.707, .707)}
-
+        random.seed(1)
         for indx, flt in faults_clip.iterrows():
             if(c_l['fault'] in flt[c_l['f']]):
                 fault_name = 'Fault_'+str(flt[c_l['o']])
@@ -844,7 +844,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
     print("fault orientations saved as", output_path+'fault_orientations.csv')
     print("fault positions saved as", output_path+'faults.csv')
     print("fault dimensions saved as", output_path+'fault_dimensions.csv')
-
+    random.seed()
 
 #########################################
 # Save faults as contact info and make vertical (for the moment)
