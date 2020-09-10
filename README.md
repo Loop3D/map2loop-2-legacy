@@ -1,6 +1,10 @@
 # Map2Loop 2.0
 
 Generate model input data from geological maps. High-level implementation and expansion of [https://github.com/Loop3D/map2loop](https://github.com/Loop3D/map2loop)
+Clone this repo with the following command, omit the --recurse-submodules flag if you do not want the notebooks.
+```bash
+git clone https://github.com/Loop3D/map2loop-2.git --recurse-submodules 
+```
 
 ## Build with Conda
 

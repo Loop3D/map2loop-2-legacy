@@ -1,8 +1,8 @@
 map2model
 numpy
 pandas
-geopandas
-pyproj=2.6.0
+geopandas>=0.6.1
+pyproj
 descartes
 mplstereonet
 matplotlib
