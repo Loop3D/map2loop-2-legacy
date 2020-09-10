@@ -1,12 +1,12 @@
 map2model
 numpy
 pandas
-geopandas>=0.6.1
-pyproj
+geopandas
+pyproj>=2.6.0
 descartes
 mplstereonet
 matplotlib
-hjson    
+hjson
 networkx
 shapely
 rasterio

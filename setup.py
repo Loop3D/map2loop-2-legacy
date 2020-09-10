@@ -1,36 +1,24 @@
-import sys
 import setuptools
 from setuptools.command.install import install
+import sys
+from distutils.command.sdist import sdist as sdist_orig
+from distutils.errors import DistutilsExecError
 
-
-class CondaDependencies(install):
-    user_options = install.user_options + [
-        ('conda', None, None),  # a 'flag' option
-        # ('someval=', None, None) # an option that takes a value
-    ]
-
-    def initialize_options(self):
-        install.initialize_options(self)
-        self.conda = None
-        #self.someval = None
-
-    def finalize_options(self):
-        print("Using conda for installing dependencies =", self.conda)
-        if self.conda:
-            import subprocess
-
+class CondaDependencies(sdist_orig):
+    def run(self):
+        try:
+            print("Installing dependencies with conda...")
+            deplist_path = "./dependencies.txt"
             deps = []
-            with open('./dependencies.txt', 'r') as f:
+            with open(deplist_path, 'r') as f:
                 for line in f:
                     deps.append(line.strip())
-            
-            command = 'conda install -c loop3d -y python=3.7'.split() + deps
-            subprocess.run(command)
 
-        install.finalize_options(self)
-
-    def run(self):
-        install.run(self)
+            command = 'conda install -c loop3d -c conda-forge -y python=3.7'.split() + deps
+            self.spawn(command)
+        except DistutilsExecError:
+            self.warn('WARNING: Could not install dependencies using conda!')
+        super().run()
 
 
 long_description = ""
@@ -43,7 +31,7 @@ setuptools.setup(
     version="1.0.8",
     author="Yohan de Rose",
     author_email="contact@loop3d.org",
-    description="Generate 3D model data using 2D maps.",
+    description="Generate 3D model data from 2D maps.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Loop3D/map2loop-2",
@@ -54,7 +42,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     cmdclass={
-        'install': CondaDependencies,
+        'sdist': CondaDependencies,
     },
     # install_requires=[
     #     'map2model-loop3d',
