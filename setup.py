@@ -1,13 +1,10 @@
 import setuptools
-from setuptools.command.install import install
-import sys
-from distutils.command.sdist import sdist as sdist_orig
-from distutils.errors import DistutilsExecError
+from setuptools.command.develop import develop
+import subprocess
 
-class CondaDependencies(sdist_orig):
+class CondaDependencies(develop):
     def run(self):
         try:
-            print("Installing dependencies with conda...")
             deplist_path = "./dependencies.txt"
             deps = []
             with open(deplist_path, 'r') as f:
@@ -15,10 +12,11 @@ class CondaDependencies(sdist_orig):
                     deps.append(line.strip())
 
             command = 'conda install -c loop3d -c conda-forge -y python=3.7'.split() + deps
-            self.spawn(command)
-        except DistutilsExecError:
+            subprocess.call(command)
+        except Exception as e:
             self.warn('WARNING: Could not install dependencies using conda!')
-        super().run()
+
+        develop.run(self)
 
 
 long_description = ""
@@ -42,7 +40,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     cmdclass={
-        'sdist': CondaDependencies,
+        'develop': CondaDependencies,
     },
     # install_requires=[
     #     'map2model-loop3d',

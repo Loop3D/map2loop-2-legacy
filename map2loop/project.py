@@ -208,7 +208,8 @@ class Project(object):
                 bbox_str)
             self.mindep_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:mindeps_2018_28350&bbox={}&srs=EPSG:28350'.format(
                 bbox_str)
-
+    
+    # TODO: Create notebooks for lower level use
     def run(self):
         print("Generating topology analyser input...")
         self.config.export_csv()
