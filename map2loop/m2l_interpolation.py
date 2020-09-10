@@ -1725,11 +1725,11 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                                     (indl.geometry.x, indl.geometry.y)]
                                 last_height_l = m2l_utils.value_from_dtm_dtb(
                                     dtm, dtb, dtb_null, cover_map, locations)
-                                if(not indl[c_l['c']]==lastl):
+                                if(not indl[c_l['g']]==lastl):
                                     ostr = "{},{},{},{}\n"\
                                         .format(indl.geometry.x, indl.geometry.y, last_height_l, indl[c_l['c']].replace(" ", "_").replace("-", "_"))
                                     fftc.write(ostr)
-                                lastl=indl[c_l['c']]
+                                lastl=indl[c_l['g']]
                 lastr=''
                 for ind, indr in rcode.iterrows():
                     if(not str(indr[c_l['c']]) == 'nan' and not str(indr[c_l['r1']]) == 'nan'):
@@ -1739,11 +1739,11 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                                     (indr.geometry.x, indr.geometry.y)]
                                 last_height_r = m2l_utils.value_from_dtm_dtb(
                                     dtm, dtb, dtb_null, cover_map, locations)
-                                if(not indr[c_l['c']]==lastr):
+                                if(not indr[c_l['g']]==lastr):
                                     ostr = "{},{},{},{}\n"\
                                         .format(indr.geometry.x, indr.geometry.y, last_height_r, indr[c_l['c']].replace(" ", "_").replace("-", "_"))
                                     fftc.write(ostr)
-                                lastr=indr[c_l['c']]
+                                lastr=indr[c_l['g']]
                 # add points to list if they have different geology code than previous node on left side
 
                 first = True
