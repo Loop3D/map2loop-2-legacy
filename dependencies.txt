@@ -12,3 +12,4 @@ shapely
 rasterio
 scipy
 owslib
+tqdm

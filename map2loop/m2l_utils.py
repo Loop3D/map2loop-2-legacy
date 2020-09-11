@@ -1,3 +1,4 @@
+import os
 import sys
 import geopandas as gpd
 import pandas as pd
@@ -914,11 +915,20 @@ def intstohex(rgb):
     '''Takes an RGB tuple or list and returns a hex RGB string.'''
     return f'#{int(rgb[0]):02x}{int(rgb[1]):02x}{int(rgb[2]):02x}'
 
+
 def display(element):
     if 'IPython' in sys.modules:
         try:
             from IPython import get_ipython
-            from IPython.display import display,Image,HTML
+            from IPython.display import display, Image, HTML
             IPython.display(element)
         except Exception as e:
             return False
+
+
+def enable_quiet_mode():
+    sys.stdout = open(os.devnull, 'w')
+
+
+def disable_quiet_mode():
+    sys.stdout = sys.__stdout__

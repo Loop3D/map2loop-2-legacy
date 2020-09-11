@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import shutil
 import re
 import csv
 
@@ -12,7 +13,7 @@ from map2loop import m2l_utils
 from map2loop import m2l_geometry
 from map2loop import m2l_interpolation
 from map2loop import m2l_map_checker
-from map2loop.m2l_utils import display
+from map2loop.m2l_utils import display, enable_quiet_mode, disable_quiet_mode
 import map2model
 
 import networkx as nx
@@ -26,7 +27,7 @@ class Config(object):
     a region of interest (bounding box or polygon) and some execution flags.
     """
 
-    def __init__(self, project_path, geology_file, fault_file, fold_file, structure_file, mindep_file, bbox_3d, polygon, step_out, dtm_crs, proj_crs, local, quiet, c_l={}):
+    def __init__(self, project_path, overwrite, geology_file, fault_file, fold_file, structure_file, mindep_file, bbox_3d, polygon, step_out, dtm_crs, proj_crs, local, quiet, c_l={}):
         """Creates the config object.
 
         :param geology_file: Path to local file or remote database containing stratigraphic information.
@@ -55,13 +56,22 @@ class Config(object):
         :type c_l: dict, optional
         """
 
-        # Create directory structure
-        self.project_path = project_path
-        if(not os.path.isdir(self.project_path)):
-            os.mkdir(self.project_path)
+        # Create directory structure if possible
+        if (not os.path.exists(project_path)):
+            os.mkdir(project_path)
         else:
-            print("Please provide a output path that doesn't exist")
-            sys.exit(1)
+            if overwrite:
+                shutil.rmtree(project_path)
+                os.mkdir(project_path)
+            else:
+                allow = input("Directory exists, overwrite? (y/[n])")
+                if allow == "y":
+                    shutil.rmtree(project_path)
+                    os.mkdir(project_path)
+                else:
+                    sys.exit(0)
+
+        self.project_path = project_path
 
         self.graph_path = self.project_path+'/graph/'
         self.tmp_path = self.project_path+'/tmp/'
@@ -92,6 +102,9 @@ class Config(object):
         if(not os.path.isdir(self.graph_path)):
             os.mkdir(self.graph_path)
 
+        if quiet:
+            enable_quiet_mode()
+
         self.bbox_3d = bbox_3d
         self.bbox = tuple([bbox_3d["minx"], bbox_3d["miny"],
                            bbox_3d["maxx"], bbox_3d["maxy"]])
@@ -120,12 +133,18 @@ class Config(object):
         self.fold_file = fold_file
         self.mindep_file = mindep_file
 
+        disable_quiet_mode()
+
     def preprocess(self):
         """[summary]
 
         :param command: [description], defaults to ""
         :type command: str, optional
         """
+
+        if self.quiet:
+            enable_quiet_mode()
+
         geology = gpd.read_file(self.geology_file, bbox=self.bbox)
         geology[self.c_l['g']].fillna(geology[self.c_l['g2']], inplace=True)
         geology[self.c_l['g']].fillna(geology[self.c_l['c']], inplace=True)
@@ -179,7 +198,7 @@ class Config(object):
             fig.savefig(self.tmp_path+"/input-data.png")
 
             print("Input graphic saved to: " +
-                    self.tmp_path + "input-fig.png")
+                  self.tmp_path + "input-fig.png")
 
             self.export_png()
             if not self.quiet:
@@ -188,6 +207,8 @@ class Config(object):
             return
         except Exception as e:
             print(e)
+
+        disable_quiet_mode()
 
     def export_png(self):
         self.geology_figure.savefig(self.tmp_path+"geology.png")
@@ -225,11 +246,12 @@ class Config(object):
 
     def run_map2model(self):
         run_log = map2model.run(self.graph_path, self.geology_file_csv,
-                            self.fault_file_csv, self.mindep_file_csv,
-                            self.bbox_3d,
-                            self.c_l,
-                            "Fe,Cu,Au,NONE")
-        
+                                self.fault_file_csv, self.mindep_file_csv,
+                                self.bbox_3d,
+                                self.c_l,
+                                self.quiet,
+                                "Fe,Cu,Au,NONE")
+
         print(run_log)
 
         print("Resolving ambiguities using ASUD...", end='\toutput_dir:')
@@ -264,7 +286,7 @@ class Config(object):
             self.strat_graph_file, 'id')
         Topology.save_units(G, self.tmp_path, self.glabels,
                             Australia=True, asud_strat_file="https://gist.githubusercontent.com/yohanderose/3b257dc768fafe5aaf70e64ae55e4c42/raw/8598c7563c1eea5c0cd1080f2c418dc975cc5433/ASUD.csv",
-                            quiet=self.quiet )
+                            quiet=self.quiet)
 
         print("Done")
 
@@ -301,7 +323,7 @@ class Config(object):
         self.dtm = rasterio.open(self.dtm_reproj_file)
         if not self.quiet:
             plt.imshow(self.dtm.read(1), cmap='terrain',
-                    vmin=0, vmax=1000)
+                       vmin=0, vmax=1000)
 
             plt.title('DTM')
             plt.show()
@@ -408,10 +430,10 @@ class Config(object):
         orientation_decimate = 0
         m2l_geometry.save_orientations(
             self.structure_clip, self.output_path, self.c_l, orientation_decimate, self.dtm, self.dtb, self.dtb_null, False)
-        
+
         if not self.quiet:
             m2l_utils.plot_points(self.output_path+'orientations.csv',
-                              self.geol_clip, 'formation', 'X', 'Y', False, 'alpha')
+                                  self.geol_clip, 'formation', 'X', 'Y', False, 'alpha')
 
         # Create arbitrary points for series without orientation data
         m2l_geometry.create_orientations(
@@ -435,7 +457,7 @@ class Config(object):
         # False in this call was already false and isn't the cover flag
         if not self.quiet:
             m2l_utils.plot_points(self.output_path+'contacts4.csv',
-                              self.geol_clip, 'formation', 'X', 'Y', False, 'alpha')
+                                  self.geol_clip, 'formation', 'X', 'Y', False, 'alpha')
 
     # Interpolates a regular grid of orientations from an shapefile of
     # arbitrarily-located points and saves out four csv files of l, m & n
@@ -509,17 +531,17 @@ class Config(object):
         if not self.quiet:
             print('interpolated dips')
             plt.imshow(self.dip_grid, cmap="hsv",
-                    origin='lower', vmin=-90, vmax=90)
+                       origin='lower', vmin=-90, vmax=90)
             plt.show()
 
             print('interpolated dip directions')
             plt.imshow(self.dip_dir_grid, cmap="hsv",
-                    origin='lower', vmin=0, vmax=360)
+                       origin='lower', vmin=0, vmax=360)
             plt.show()
 
             print('interpolated contacts')
             plt.imshow(contact_grid, cmap="hsv",
-                    origin='lower', vmin=-360, vmax=360)
+                       origin='lower', vmin=-360, vmax=360)
             plt.show()
 
     def export_faults(self):
@@ -618,7 +640,7 @@ class Config(object):
 
         if not self.quiet:
             m2l_utils.plot_points(self.output_path+'formation_thicknesses_norm.csv',
-                              self.geol_clip, 'norm_th', 'x', 'y', True, 'numeric')
+                                  self.geol_clip, 'norm_th', 'x', 'y', True, 'numeric')
 
     # TODO: This needs a shorter name
     def create_fold_axial_trace_points(self):

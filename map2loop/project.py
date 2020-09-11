@@ -4,6 +4,8 @@ import logging
 import urllib.request
 import warnings
 import hjson
+from tqdm import tqdm
+
 
 import geopandas as gpd
 import pandas as pd
@@ -11,11 +13,13 @@ import numpy as np
 from shapely.geometry import Polygon
 
 from map2loop.config import Config
+from map2loop.m2l_utils import display, enable_quiet_mode, disable_quiet_mode
 
 
 class Project(object):
     """A high level object implementation of the map2loop workflow.
     """
+
     def __init__(self,
                  # region of interest coordinates in metre-based system (or non-degree system)
                  # (minx, miny, maxx, maxy, bottom, top)
@@ -148,6 +152,7 @@ class Project(object):
 
     def update_config(self,
                       out_dir,
+                      overwrite=False,
                       bbox_3d={
                           "minx": 0,
                           "maxx": 0,
@@ -159,7 +164,7 @@ class Project(object):
                       dtm_crs={'init': 'EPSG:4326'},
                       proj_crs=None,
                       step_out=None,
-                      quiet = False
+                      quiet=False
                       ):
 
         if bbox_3d["minx"] == 0 and bbox_3d["maxx"] == 0:
@@ -176,8 +181,7 @@ class Project(object):
         if step_out is None:
             step_out = self.step_out
 
-        if quiet:
-            self.quiet_mode()
+        self.quiet = quiet
 
         bbox = tuple([bbox_3d["minx"], bbox_3d["miny"],
                       bbox_3d["maxx"], bbox_3d["maxy"]])
@@ -192,14 +196,13 @@ class Project(object):
         if self.geology_file is None:
             self.fetch_sources(bbox)
 
-        self.config = Config( out_dir,
-            self.geology_file, self.fault_file, self.fold_file,
-            self.structure_file, self.mindep_file,
-            bbox_3d, polygon, step_out, dtm_crs, proj_crs, self.local, quiet, self.c_l
-        )
+        self.config = Config(out_dir, overwrite,
+                             self.geology_file, self.fault_file, self.fold_file,
+                             self.structure_file, self.mindep_file,
+                             bbox_3d, polygon, step_out, dtm_crs, proj_crs, self.local, self.quiet, self.c_l
+                             )
 
         self.config.preprocess()
-
 
     def fetch_sources(self, bbox):
         if self.state == "WA":
@@ -214,63 +217,76 @@ class Project(object):
                 bbox_str)
             self.mindep_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:mindeps_2018_28350&bbox={}&srs=EPSG:28350'.format(
                 bbox_str)
-    
-    
-    def quiet_mode(self):
-        sys.stdout = open(os.devnull, 'w')
-    
+
     # TODO: Create notebooks for lower level use
+    # TODO: Run flags that affect the config object functions
     def run(self):
-        
-        print("Generating topology analyser input...")
-        self.config.export_csv()
-        self.config.run_map2model()
-        self.config.load_dtm()
-        self.config.join_features()
 
-        if(self.workflow['cover_map']):
-            # Depth to basement calculation
-            self.config.calc_depth_grid()
-        else:
-            # FOr now this function just zeros dtb and exits prematurely
-            self.config.calc_depth_grid()
+        if self.quiet:
+            enable_quiet_mode()
 
-        self.config.export_orientations()
-        self.config.export_contacts()
+        with tqdm(total=100, position=0) as pbar:
+            pbar.update(0)
 
-        self.config.test_interpolation()
+            print("Generating topology analyser input...")
+            self.config.export_csv()
+            self.config.run_map2model()
+            pbar.update(10)
 
-        self.config.export_faults()
-        self.config.process_plutons()
+            self.config.load_dtm()
+            pbar.update(10)
 
-        # Seismic section is in the hamersely model area
-        # TODO: Implement this option better and test with Turner
-        if (self.workflow['seismic_section']):
-            self.config.extract_section_features(seismic_line_file="",
-                                                 seismic_bbox_file="",
-                                                 seismic_interp_file="")
+            self.config.join_features()
+            pbar.update(10)
 
-        if(self.workflow['contact_dips']):
-            self.config.propagate_contacts_dips()
+            if(self.workflow['cover_map']):
+                # Depth to basement calculation
+                self.config.calc_depth_grid()
+            else:
+                # FOr now this function just zeros dtb and exits prematurely
+                self.config.calc_depth_grid()
+            pbar.update(10)
 
-        if(self.workflow['formation_thickness']):
-            self.config.calc_thickness()
+            self.config.export_orientations()
+            self.config.export_contacts()
+            self.config.test_interpolation()
+            pbar.update(20)
 
-        if(self.workflow['fold_axial_traces']):
-            self.config.create_fold_axial_trace_points()
+            self.config.export_faults()
+            self.config.process_plutons()
+            pbar.update(20)
 
-        # Prepocess model inputs
-        inputs = ('')
-        if(self.workflow['model_engine'] == 'geomodeller'):
-            inputs = ('invented_orientations', 'intrusive_orientations',
-                      'fat_orientations', 'fault_tip_contacts', 'contact_orientations')
-        elif(self.workflow['model_engine'] == 'loopstructural'):
-            inputs = ('invented_orientations',
-                      'fat_orientations', 'contact_orientations')
-        elif(self.workflow['model_engine'] == 'gempy'):
-            inputs = ('invented_orientations', 'interpolated_orientations',
-                      'fat_orientations', 'contact_orientations')
-        elif(self.workflow['model_engine'] == 'noddy'):
+            # Seismic section is in the hamersely model area
+            # TODO: Implement this option better and test with Turner
+            if (self.workflow['seismic_section']):
+                self.config.extract_section_features(seismic_line_file="",
+                                                     seismic_bbox_file="",
+                                                     seismic_interp_file="")
+
+            if(self.workflow['contact_dips']):
+                self.config.propagate_contacts_dips()
+
+            if(self.workflow['formation_thickness']):
+                self.config.calc_thickness()
+
+            if(self.workflow['fold_axial_traces']):
+                self.config.create_fold_axial_trace_points()
+
+            # Prepocess model inputs
             inputs = ('')
+            if(self.workflow['model_engine'] == 'geomodeller'):
+                inputs = ('invented_orientations', 'intrusive_orientations',
+                          'fat_orientations', 'fault_tip_contacts', 'contact_orientations')
+            elif(self.workflow['model_engine'] == 'loopstructural'):
+                inputs = ('invented_orientations',
+                          'fat_orientations', 'contact_orientations')
+            elif(self.workflow['model_engine'] == 'gempy'):
+                inputs = ('invented_orientations', 'interpolated_orientations',
+                          'fat_orientations', 'contact_orientations')
+            elif(self.workflow['model_engine'] == 'noddy'):
+                inputs = ('')
 
-        self.config.postprocess(inputs, self.workflow)
+            self.config.postprocess(inputs, self.workflow)
+            pbar.update(10)
+
+        disable_quiet_mode()
