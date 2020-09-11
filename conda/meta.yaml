@@ -19,18 +19,21 @@ requirements:
     - pybind11
     - setuptools
   run:
-    - python
-    - map2model
     - numpy
     - pandas
     - geopandas
-    - matplotlib
-    - hjson    
-    - networkx
+    - pyproj=2.6.0
     - shapely
     - rasterio
+    - descartes
+    - matplotlib
+    - networkx
     - scipy
     - owslib
+    - tqdm
+    - map2model
+    - mplstereonet
+    - hjson
 
 test:
   imports:

@@ -2,6 +2,7 @@ import setuptools
 from setuptools.command.develop import develop
 import subprocess
 
+
 class CondaDependencies(develop):
     def run(self):
         try:
@@ -11,10 +12,16 @@ class CondaDependencies(develop):
                 for line in f:
                     deps.append(line.strip())
 
-            command = 'conda install -c loop3d -c conda-forge -y python=3.7'.split() + deps
+            command = 'conda install -c conda-forge -y python=3.7'.split() + \
+                deps[:-3]
+            print(command)
+            subprocess.call(command)
+            command = 'conda install -c loop3d -y'.split() + \
+                deps[-3:]
+            print(command)
             subprocess.call(command)
         except Exception as e:
-            self.warn('WARNING: Could not install dependencies using conda!')
+            self.error('Could not install dependencies using conda!')
 
         develop.run(self)
 

@@ -248,9 +248,11 @@ class Project(object):
             pbar.update(10)
 
             self.config.export_orientations()
+            pbar.update(10)
             self.config.export_contacts()
+            pbar.update(10)
             self.config.test_interpolation()
-            pbar.update(20)
+            pbar.update(10)
 
             self.config.export_faults()
             self.config.process_plutons()
