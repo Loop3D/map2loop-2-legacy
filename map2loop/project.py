@@ -1,7 +1,9 @@
+import os
+import sys
+import logging
+import urllib.request
 import warnings
 import hjson
-import sys
-import urllib.request
 
 import geopandas as gpd
 import pandas as pd
@@ -65,7 +67,6 @@ class Project(object):
                 if metadata.startswith("http"):
                     with urllib.request.urlopen(metadata) as raw_data:
                         self.c_l = hjson.load(raw_data)
-                        print(self.c_l)
                 else:
                     with open(metadata) as raw_data:
                         self.c_l = hjson.load(raw_data)
@@ -146,6 +147,7 @@ class Project(object):
         self.workflow = workflow
 
     def update_config(self,
+                      out_dir,
                       bbox_3d={
                           "minx": 0,
                           "maxx": 0,
@@ -157,6 +159,7 @@ class Project(object):
                       dtm_crs={'init': 'EPSG:4326'},
                       proj_crs=None,
                       step_out=None,
+                      quiet = False
                       ):
 
         if bbox_3d["minx"] == 0 and bbox_3d["maxx"] == 0:
@@ -173,6 +176,9 @@ class Project(object):
         if step_out is None:
             step_out = self.step_out
 
+        if quiet:
+            self.quiet_mode()
+
         bbox = tuple([bbox_3d["minx"], bbox_3d["miny"],
                       bbox_3d["maxx"], bbox_3d["maxy"]])
         minx, miny, maxx, maxy = bbox
@@ -186,14 +192,14 @@ class Project(object):
         if self.geology_file is None:
             self.fetch_sources(bbox)
 
-        self.config = Config(
+        self.config = Config( out_dir,
             self.geology_file, self.fault_file, self.fold_file,
             self.structure_file, self.mindep_file,
-            bbox_3d, polygon, step_out, dtm_crs, proj_crs, self.local, self.c_l
+            bbox_3d, polygon, step_out, dtm_crs, proj_crs, self.local, quiet, self.c_l
         )
 
-        # Store important data frames and display
-        self.config.preprocess("plot")
+        self.config.preprocess()
+
 
     def fetch_sources(self, bbox):
         if self.state == "WA":
@@ -209,8 +215,13 @@ class Project(object):
             self.mindep_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:mindeps_2018_28350&bbox={}&srs=EPSG:28350'.format(
                 bbox_str)
     
+    
+    def quiet_mode(self):
+        sys.stdout = open(os.devnull, 'w')
+    
     # TODO: Create notebooks for lower level use
     def run(self):
+        
         print("Generating topology analyser input...")
         self.config.export_csv()
         self.config.run_map2model()

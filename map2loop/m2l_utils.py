@@ -1,3 +1,4 @@
+import sys
 import geopandas as gpd
 import pandas as pd
 from shapely.geometry.polygon import Polygon
@@ -702,7 +703,7 @@ def plot_points(point_source, geol_clip, colour_code, x_code, y_code, legend, dt
 ###########################################
 
 
-def plot_bedding_stereonets(orientations_clean, geology, c_l):
+def plot_bedding_stereonets(orientations_clean, geology, c_l, quiet):
     import mplstereonet
     import matplotlib.pyplot as plt
 
@@ -725,7 +726,9 @@ def plot_bedding_stereonets(orientations_clean, geology, c_l):
     ax.pole(strikes, dips, markersize=5, color='w')
     ax.grid(True)
     text = ax.text(2.2, 1.37, "All data", color='b')
-    plt.show()
+
+    if not quiet:
+        plt.show()
     group_girdle = {}
 
     for gp in groups:
@@ -755,7 +758,8 @@ def plot_bedding_stereonets(orientations_clean, geology, c_l):
                 fit_strike, fit_dip)
             group_girdle[gp] = (plunge, bearing, len(all_orientations))
             print('strike/dip of girdle', fit_strike, '/', fit_dip)
-            plt.show()
+            if not quiet:
+                plt.show()
         else:
             print("----------------------------------------------------------------------------------------------------------------------")
             print(gp, "observations has no observations")
@@ -798,12 +802,12 @@ def plot_bedding_stereonets(orientations_clean, geology, c_l):
                         strikes, dips)
                     print('strike/dip of girdle', fit_strike, '/', fit_dip)
 
-                    if(ind2 == 2):
+                    if(ind2 == 2) and not quiet:
                         plt.show()
 
                     ind = ind+1
 
-            if(ind > 0 and not ind2 == 2):
+            if(ind > 0 and not ind2 == 2) and not quiet:
                 plt.show()
     return(group_girdle)
 
@@ -909,3 +913,12 @@ def hextoints(h):
 def intstohex(rgb):
     '''Takes an RGB tuple or list and returns a hex RGB string.'''
     return f'#{int(rgb[0]):02x}{int(rgb[1]):02x}{int(rgb[2]):02x}'
+
+def display(element):
+    if 'IPython' in sys.modules:
+        try:
+            from IPython import get_ipython
+            from IPython.display import display,Image,HTML
+            IPython.display(element)
+        except Exception as e:
+            return False
