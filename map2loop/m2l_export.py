@@ -174,18 +174,16 @@ def loop2geomodeller(model_name,test_data_path,tmp_path,output_path,dtm_file,bbo
         for i in range(0,n_allfaults):
             f.write('GeomodellerTask {\n')
             f.write('CreateFault {\n')
- 
-            r,g,b=m2l_utils.hextoints(str(faults_len.iloc[i]["colour"]))
             ostr='    name: "'+faults_len.iloc[i]["Fault"]+'"\n'
             f.write(ostr)
 
-            ostr='    red: '+str(r)+'\n'
+            ostr='    red: '+str(random.randint(1,256)-1)+'\n'
             f.write(ostr)
 
-            ostr='    green: '+str(g)+'\n'
+            ostr='    green: '+str(random.randint(1,256)-1)+'\n'
             f.write(ostr)
 
-            ostr='    blue: '+str(b)+'\n'
+            ostr='    blue: '+str(random.randint(1,256)-1)+'\n'
             f.write(ostr)
 
             f.write('    }\n')
