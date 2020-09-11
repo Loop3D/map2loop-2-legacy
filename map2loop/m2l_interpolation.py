@@ -1716,7 +1716,7 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                 rcode = gpd.sjoin(rgdf, geology, how="left", op="within")
                 # display(lcode)
                 # add lots of points left and right of fault to make sure ellipse range is happy in geomodeller
-                lastl=''
+                lgroups=[]
                 for ind, indl in lcode.iterrows():
                     if(not str(indl[c_l['c']]) == 'nan' and not str(indl[c_l['r1']]) == 'nan'):
                         if(m2l_utils.mod_safe(ind, decimate_near) == 0 or ind == len(lcode)-1):
@@ -1725,12 +1725,12 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                                     (indl.geometry.x, indl.geometry.y)]
                                 last_height_l = m2l_utils.value_from_dtm_dtb(
                                     dtm, dtb, dtb_null, cover_map, locations)
-                                if(not indl[c_l['g']]==lastl):
+                                if(not indl[c_l['g']] in lgroups):
                                     ostr = "{},{},{},{}\n"\
                                         .format(indl.geometry.x, indl.geometry.y, last_height_l, indl[c_l['c']].replace(" ", "_").replace("-", "_"))
                                     fftc.write(ostr)
-                                lastl=indl[c_l['g']]
-                lastr=''
+                                    lgroups.append[indl[c_l['g']]]
+                rgroups=[]
                 for ind, indr in rcode.iterrows():
                     if(not str(indr[c_l['c']]) == 'nan' and not str(indr[c_l['r1']]) == 'nan'):
                         if((not c_l['sill'] in indr[c_l['ds']]) or (not c_l['intrusive'] in indr[c_l['r1']])):
@@ -1739,12 +1739,12 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                                     (indr.geometry.x, indr.geometry.y)]
                                 last_height_r = m2l_utils.value_from_dtm_dtb(
                                     dtm, dtb, dtb_null, cover_map, locations)
-                                if(not indr[c_l['g']]==lastr):
+                                if(not indr[c_l['g']] in rgroups):
                                     ostr = "{},{},{},{}\n"\
                                         .format(indr.geometry.x, indr.geometry.y, last_height_r, indr[c_l['c']].replace(" ", "_").replace("-", "_"))
                                     fftc.write(ostr)
-                                lastr=indr[c_l['g']]
-                # add points to list if they have different geology code than previous node on left side
+                                    rgroups.append[indl[c_l['g']]]
+# add points to list if they have different geology code than previous node on left side
 
                 first = True
                 lcontact = []
