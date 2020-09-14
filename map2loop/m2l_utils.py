@@ -909,3 +909,24 @@ def hextoints(h):
 def intstohex(rgb):
     '''Takes an RGB tuple or list and returns a hex RGB string.'''
     return f'#{int(rgb[0]):02x}{int(rgb[1]):02x}{int(rgb[2]):02x}'
+
+
+def plot_arrows(point_source,geol_clip, colour_code,x_code,y_code,legend,dtype):
+    from shapely.geometry import Point
+    thick=pd.read_csv(point_source,encoding = "ISO-8859-1", dtype='object')
+    if(dtype=='numeric'):
+        thick['cc']=pd.to_numeric(thick[colour_code])
+    else:
+        thick['cc']=thick[colour_code].str.zfill(5)
+    thick[x_code]=thick[x_code].astype('float64')
+    thick[y_code]=thick[y_code].astype('float64')
+    thick=gpd.GeoDataFrame(thick, geometry=[Point(xy) for xy in zip(thick[x_code], thick[y_code])])
+    base=geol_clip.plot(column='colour_index',figsize=(15,15),edgecolor='#000000',linewidth=0.2,cmap=cmap)
+    plot2 =faults_clip.plot(ax=base,color='red',figsize=(15,15),edgecolor='#ff0000',linewidth=0.4)
+    plot2 = thick.plot(ax=base, column='cc', markersize=1000,cmap='rainbow', legend=legend)
+    for ind,pt in thick.iterrows():
+        dx=math.sin(math.radians(float(pt['downthrow_dir'])))*300
+        dy=math.cos(math.radians(float(pt['downthrow_dir'])))*300
+        plot2 = plt.arrow(int(pt['X'])-(dx/1.2), int(pt['Y'])-(dy/1.2), dx, dy,width=50,head_width=200)
+    
+    plot2 = plot2.figure; plot2.tight_layout()
