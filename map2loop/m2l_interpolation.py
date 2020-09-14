@@ -1729,7 +1729,7 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                                     ostr = "{},{},{},{}\n"\
                                         .format(indl.geometry.x, indl.geometry.y, last_height_l, indl[c_l['c']].replace(" ", "_").replace("-", "_"))
                                     fftc.write(ostr)
-                                    lgroups.append[indl[c_l['g']]]
+                                    lgroups.append(indl[c_l['g']])
                 rgroups=[]
                 for ind, indr in rcode.iterrows():
                     if(not str(indr[c_l['c']]) == 'nan' and not str(indr[c_l['r1']]) == 'nan'):
@@ -1743,7 +1743,7 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                                     ostr = "{},{},{},{}\n"\
                                         .format(indr.geometry.x, indr.geometry.y, last_height_r, indr[c_l['c']].replace(" ", "_").replace("-", "_"))
                                     fftc.write(ostr)
-                                    rgroups.append[indl[c_l['g']]]
+                                    rgroups.append(indr[c_l['g']])
 # add points to list if they have different geology code than previous node on left side
 
                 first = True
