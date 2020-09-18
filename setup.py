@@ -12,12 +12,12 @@ class CondaDependencies(develop):
                 for line in f:
                     deps.append(line.strip())
 
-            command = 'conda install -c conda-forge -y python=3.7'.split() + \
-                deps[:-3]
+            command = 'conda install -c loop3d -y python=3.7'.split() + \
+                deps[:3]
             print(command)
             subprocess.call(command)
-            command = 'conda install -c loop3d -y'.split() + \
-                deps[-3:]
+            command = 'conda install -c defaults -c conda-forge -y'.split() + \
+                deps[3:]
             print(command)
             subprocess.call(command)
         except Exception as e:
