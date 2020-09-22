@@ -1,6 +1,3 @@
-map2model 
-mplstereonet
-hjson
 numpy
 pandas
 geopandas
