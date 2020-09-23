@@ -222,8 +222,6 @@ class Project(object):
     # TODO: Run flags that affect the config object functions
     def run(self):
 
-        print("print, hi this is Roy")
-
         if self.quiet:
             enable_quiet_mode()
 
