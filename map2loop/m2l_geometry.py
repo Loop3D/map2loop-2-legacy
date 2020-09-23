@@ -14,6 +14,8 @@ import numpy as np
 import os
 import random
 
+from map2loop.m2l_utils import print
+
 ####################################################
 # Export orientation data in csv format with heights and strat code added
 #

@@ -13,7 +13,7 @@ import numpy as np
 from shapely.geometry import Polygon
 
 from map2loop.config import Config
-from map2loop.m2l_utils import display, enable_quiet_mode, disable_quiet_mode
+from map2loop.m2l_utils import display, enable_quiet_mode, disable_quiet_mode, print
 
 
 class Project(object):
@@ -217,12 +217,25 @@ class Project(object):
                 bbox_str)
             self.mindep_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:mindeps_2018_28350&bbox={}&srs=EPSG:28350'.format(
                 bbox_str)
+        if self.state == "QLD":
+            bbox_str = "{},{},{},{}".format(bbox[0], bbox[1], bbox[2], bbox[3])
+            self.structure_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=outcrops_28355&bbox={}&srsName=EPSG:28355'.format(
+                bbox_str)
+            self.geology_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_geol_dissolved_join_fix_mii_clip_wgs84&bbox={}&srsName=EPSG:28355'.format(
+                bbox_str)
+            self.mindep_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_mindeps_28355&bbox={}&srsName=EPSG:28355'.format(
+                bbox_str)
+            self.fault_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_faults_folds_28355&bbox={}&srsName=EPSG:28355'.format(
+                bbox_str)
+            self.fold_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_faults_folds_28355&bbox={}&srsName=EPSG:28355'.format(
+                bbox_str)
 
     # TODO: Create notebooks for lower level use
     # TODO: Run flags that affect the config object functions
     def run(self):
 
         if self.quiet:
+            print("enabling quiet mode")
             enable_quiet_mode()
 
         with tqdm(total=100, position=0) as pbar:

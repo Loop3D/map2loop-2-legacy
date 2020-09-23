@@ -13,7 +13,7 @@ from map2loop import m2l_utils
 from map2loop import m2l_geometry
 from map2loop import m2l_interpolation
 from map2loop import m2l_map_checker
-from map2loop.m2l_utils import display, enable_quiet_mode, disable_quiet_mode
+from map2loop.m2l_utils import display, enable_quiet_mode, disable_quiet_mode, print
 import map2model
 
 import networkx as nx
@@ -64,7 +64,8 @@ class Config(object):
                 shutil.rmtree(project_path)
                 os.mkdir(project_path)
             else:
-                allow = input("Directory exists, overwrite? (y/[n])")
+                allow = input(
+                    "Directory \"{}\" exists, overwrite? (y/[n])".format(project_path))
                 if allow == "y":
                     shutil.rmtree(project_path)
                     os.mkdir(project_path)

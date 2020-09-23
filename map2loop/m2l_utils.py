@@ -1,3 +1,4 @@
+import builtins
 import os
 import sys
 import geopandas as gpd
@@ -15,6 +16,10 @@ from urllib.request import urlopen
 from math import sin, cos, atan, atan2, asin, radians, degrees, sqrt, pow, acos, fmod, fabs, isnan
 from owslib.wcs import WebCoverageService
 import matplotlib.pyplot as plt
+
+quiet = False
+
+
 ############################################
 # output version number
 ############################################
@@ -926,9 +931,17 @@ def display(element):
             return False
 
 
+def print(*args, **kwargs):
+    global quiet
+    if not quiet:
+        return builtins.print(*args, **kwargs)
+        
+    
 def enable_quiet_mode():
-    sys.stdout = open(os.devnull, 'w')
+    global quiet
+    quiet = True
 
 
 def disable_quiet_mode():
     sys.stdout = sys.__stdout__
+    quiet = False 

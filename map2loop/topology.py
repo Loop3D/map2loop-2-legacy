@@ -12,7 +12,7 @@ from math import degrees, atan2, acos, degrees
 import warnings
 
 from map2loop import m2l_utils
-from map2loop.m2l_utils import display
+from map2loop.m2l_utils import display, print
 
 class Topology(object):
 

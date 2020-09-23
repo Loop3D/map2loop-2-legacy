@@ -12,6 +12,8 @@ from shapely.geometry import Polygon, LineString, Point
 from map2loop import m2l_utils
 import rasterio
 
+from map2loop.m2l_utils import print
+
 ######################################
 # inspired by https://stackoverflow.com/questions/3104781/inverse-distance-weighted-idw-interpolation-with-python
 #
