@@ -1749,7 +1749,7 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                                         .format(indr.geometry.x, indr.geometry.y, last_height_r, indr[c_l['c']].replace(" ", "_").replace("-", "_"))
                                     fftc.write(ostr)
                                     rgroups.append(indr[c_l['g']])
-                print("mark was here")
+                print("mark was here ")
 # add points to list if they have different geology code than previous node on left side
 
                 first = True
