@@ -8,6 +8,7 @@ import pandas as pd
 
 # explodes polylines and modifies objectid for exploded parts
 
+from map2loop.m2l_utils import print
 
 def explode_polylines(indf, c_l, dst_crs):
     #indf = gpd.GeoDataFrame.from_file(indata)

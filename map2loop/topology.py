@@ -12,7 +12,7 @@ from math import degrees, atan2, acos, degrees
 import warnings
 
 from map2loop import m2l_utils
-
+from map2loop.m2l_utils import display, print
 
 class Topology(object):
 
@@ -117,7 +117,7 @@ class Topology(object):
     #
     # The choice of what constitutes basic unit and what a group of units is defined in the c_l codes. Not even sure we need two levels but it seemed like a good idea at the time. Text outputs list alternate topologies for series and surfaces, which if confirmed by comapring max-min ages will be a nice source of uncertainty.
     ####################################
-    def save_units(G, path_out, glabels, Australia, asud_strat_file):
+    def save_units(G, path_out, glabels, Australia, asud_strat_file, quiet):
         if Australia:
             ASUD = pd.read_csv(asud_strat_file, ',')
         for p in glabels:  # process each group, removing nodes that are not part of that group, and other groups
@@ -187,13 +187,14 @@ class Topology(object):
                     warnings.warn(warning_msg)
                     GD.remove_edge(cy[0], cy[1])
 
-            plt.figure(p+1)  # display strat graph for one group
-            plt.title(glabels[p])
-            plt.tight_layout()
-            nx.draw_networkx(GD, pos=nx.kamada_kawai_layout(
-                GD), arrows=True, with_labels=False)
-            nx.draw_networkx_labels(GD, pos=nx.kamada_kawai_layout(
-                GD), labels=labels, font_size=12, font_family='sans-serif')
+            if not quiet:
+                plt.figure(p+1)  # display strat graph for one group
+                plt.title(glabels[p])
+                plt.tight_layout()
+                nx.draw_networkx(GD, pos=nx.kamada_kawai_layout(
+                    GD), arrows=True, with_labels=False)
+                nx.draw_networkx_labels(GD, pos=nx.kamada_kawai_layout(
+                    GD), labels=labels, font_size=12, font_family='sans-serif')
 
             one = True
             if(one):
@@ -280,6 +281,7 @@ class Topology(object):
                     ','+str(slist[j][2])+','+str(slist[j][3])+'\n')
         f.close()
 
+        
     ####################################
     # save out tables of groups and sorted formation data
     #
@@ -291,7 +293,7 @@ class Topology(object):
     # Takes stratigraphy graph created by map2model c++ code to generate list of groups found in the region of interest
     # Uses first of each possible set of toplogies per unit and per group, which is arbitrary. On the other hand we are not checking relative ages again to see if this helps reduce ambiguity, which I think it would.
     ####################################
-    def save_group(self, G, path_out, glabels, geol, c_l):
+    def save_group(self, G, path_out, glabels, geol, c_l, quiet):
         Gp = nx.Graph().to_directed()  # New Group graph
 
         geology_file = gpd.read_file(path_out+'geol_clip.shp')
@@ -306,14 +308,16 @@ class Topology(object):
         # display(gp_ages)
         gp_ages.set_index('group_',  inplace=True)
 
-        display(gp_ages)
+        if not quiet:
+            display(gp_ages)
         gp_ids = []
         nlist = list(G.nodes)
         for n in nlist:  # Find out total number of groups and their names groups
             if('isGroup' in G.nodes[n]):
                 Gp.add_nodes_from([n])
 
-        display(gp_ids)
+        if not quiet:
+            display(gp_ids)
         for e in G.edges:
             if(G.nodes[e[0]]['gid'] != G.nodes[e[1]]['gid']):
                 glabel_0 = G.nodes[e[0]]['LabelGraphics']['text']
@@ -345,14 +349,15 @@ class Topology(object):
                 # arbitrary choice to ensure edge is not completely removed
                 if(e[0] == f[1] and e[1] == f[0] and e[0] < f[0]):
                     Gp.remove_edge(e[0], e[1])
-        display(glabels)
-        plt.figure(1)  # display strat graph for one group
-        plt.title("groups")
-        if(len(glabels) > 1):
-            nx.draw_networkx(Gp, pos=nx.kamada_kawai_layout(
-                Gp), arrows=True, with_labels=False)
-            nx.draw_networkx_labels(Gp, pos=nx.kamada_kawai_layout(
-                Gp),  font_size=12, font_family='sans-serif')
+        if not quiet:
+            display(glabels)
+            plt.figure(1)  # display strat graph for one group
+            plt.title("groups")
+            if(len(glabels) > 1):
+                nx.draw_networkx(Gp, pos=nx.kamada_kawai_layout(
+                    Gp), arrows=True, with_labels=False)
+                nx.draw_networkx_labels(Gp, pos=nx.kamada_kawai_layout(
+                    Gp),  font_size=12, font_family='sans-serif')
 
         # when lots of groups very large number of possibilities so short cut to first choice.
         if(len(gp_ages) > 10):

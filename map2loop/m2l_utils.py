@@ -1,3 +1,6 @@
+import builtins
+import os
+import sys
 import geopandas as gpd
 import pandas as pd
 from shapely.geometry.polygon import Polygon
@@ -13,6 +16,10 @@ from urllib.request import urlopen
 from math import sin, cos, atan, atan2, asin, radians, degrees, sqrt, pow, acos, fmod, fabs, isnan
 from owslib.wcs import WebCoverageService
 import matplotlib.pyplot as plt
+
+quiet = False
+
+
 ############################################
 # output version number
 ############################################
@@ -717,7 +724,7 @@ def plot_points(point_source, geol_clip, colour_code, x_code, y_code, legend, dt
 ###########################################
 
 
-def plot_bedding_stereonets(orientations_clean, geology, c_l):
+def plot_bedding_stereonets(orientations_clean, geology, c_l, quiet):
     import mplstereonet
     import matplotlib.pyplot as plt
 
@@ -740,7 +747,9 @@ def plot_bedding_stereonets(orientations_clean, geology, c_l):
     ax.pole(strikes, dips, markersize=5, color='w')
     ax.grid(True)
     text = ax.text(2.2, 1.37, "All data", color='b')
-    plt.show()
+
+    if not quiet:
+        plt.show()
     group_girdle = {}
 
     for gp in groups:
@@ -770,7 +779,8 @@ def plot_bedding_stereonets(orientations_clean, geology, c_l):
                 fit_strike, fit_dip)
             group_girdle[gp] = (plunge, bearing, len(all_orientations))
             print('strike/dip of girdle', fit_strike, '/', fit_dip)
-            plt.show()
+            if not quiet:
+                plt.show()
         else:
             print("----------------------------------------------------------------------------------------------------------------------")
             print(gp, "observations has no observations")
@@ -813,12 +823,12 @@ def plot_bedding_stereonets(orientations_clean, geology, c_l):
                         strikes, dips)
                     print('strike/dip of girdle', fit_strike, '/', fit_dip)
 
-                    if(ind2 == 2):
+                    if(ind2 == 2) and not quiet:
                         plt.show()
 
                     ind = ind+1
 
-            if(ind > 0 and not ind2 == 2):
+            if(ind > 0 and not ind2 == 2) and not quiet:
                 plt.show()
     return(group_girdle)
 
@@ -945,3 +955,28 @@ def plot_arrows(point_source,geol_clip, colour_code,x_code,y_code,legend,dtype):
         plot2 = plt.arrow(int(pt['X'])-(dx/1.2), int(pt['Y'])-(dy/1.2), dx, dy,width=50,head_width=200)
     
     plot2 = plot2.figure; plot2.tight_layout()
+
+def display(element):
+    if 'IPython' in sys.modules:
+        try:
+            from IPython import get_ipython
+            from IPython.display import display, Image, HTML
+            IPython.display(element)
+        except Exception as e:
+            return False
+
+
+def print(*args, **kwargs):
+    global quiet
+    if not quiet:
+        return builtins.print(*args, **kwargs)
+        
+    
+def enable_quiet_mode():
+    global quiet
+    quiet = True
+
+
+def disable_quiet_mode():
+    sys.stdout = sys.__stdout__
+    quiet = False 

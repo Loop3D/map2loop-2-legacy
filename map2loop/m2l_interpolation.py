@@ -12,6 +12,8 @@ from shapely.geometry import Polygon, LineString, Point
 from map2loop import m2l_utils
 import rasterio
 
+from map2loop.m2l_utils import print
+
 ######################################
 # inspired by https://stackoverflow.com/questions/3104781/inverse-distance-weighted-idw-interpolation-with-python
 #
@@ -1653,6 +1655,7 @@ def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spac
 
     return(orientation_interp, contact_interp, combo_interp)
 
+                             
 
 def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_reproj_file, dtb, dtb_null, cover_map, c_l, proj_crs, bbox, scheme, dip_grid, dip_dir_grid, xgrid, ygrid, spacing):
     fault_file = tmp_path+'faults_clip.shp'
@@ -2089,3 +2092,6 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                 f.write(ostr)
 
         f.close()
+  
+  
+             

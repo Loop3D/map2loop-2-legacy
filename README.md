@@ -1,6 +1,10 @@
 # Map2Loop 2.0 
 
 Generate model input data from geological maps. High-level implementation and expansion of [https://github.com/Loop3D/map2loop](https://github.com/Loop3D/map2loop)
+Clone this repo with the following command, omit the --recurse-submodules flag if you do not want the notebooks.
+```bash
+git clone https://github.com/Loop3D/map2loop-2.git --recurse-submodules 
+```
 
 ## Build with Conda
 
@@ -14,10 +18,10 @@ conda install -c loop3d map2loop -y
 
 ### Development
 
-If you want to develop or contribute, clone this repo and navigate into it. Issue the following command and all dependencies, as well as map2loop, will be installed in the currently active conda environment.
+If you want to develop and contribute, clone this repo and navigate into it. Issue the following command and map2loop and its dependencies will be installed in the currently active conda environment. Installing with the 'develop' command means local changes you make will take effect automatically, so you do not need to install repeatedly.
 
 ```bash
-python dependencies.py && pip install -e .
+python setup.py develop
 ```
 
 ## Build with Docker
