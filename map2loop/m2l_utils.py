@@ -643,6 +643,21 @@ def ptsdist(p1x, p1y, p2x, p2y):
     dist = sqrt(pow(p1x-p2x, 2)+pow(p1y-p2y, 2))
     return(dist)
 
+####################################################
+# calculate distance between two points
+# duplicated in m2l_geometry, don't know why!
+#
+# Args:
+# p1x,p1y a point
+# p2x,p2y another point
+# Calculates distance between two points
+####################################################
+
+
+def pts3Ddist(p1x, p1y, p1z, p2x,p2y,p2z):
+    dist = sqrt(pow(p1x-p2x, 2)+pow(p1y-p2y, 2)+pow(p1z-p2z, 2))
+    return(dist)
+
 ###########################################
 # Apical angle between three points, first point is at apex
 #

@@ -1659,6 +1659,8 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
     geology_file = tmp_path+'geol_clip.shp'
 
     faults = gpd.read_file(fault_file)
+    faults=faults.dropna(subset=['geometry'])
+
     geology = gpd.read_file(geology_file)
     dtm = rasterio.open(dtm_reproj_file)
 
