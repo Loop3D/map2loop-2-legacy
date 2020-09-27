@@ -305,5 +305,6 @@ class Project(object):
             pbar.update(10)
 
         self.config.create_projectfile()
+        self.config.export_png()
 
         disable_quiet_mode()

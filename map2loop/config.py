@@ -182,11 +182,13 @@ class Config(object):
         self.mindeps = mindeps
 
         try:
+            self.geology_figure = geology.copy().plot(column=self.c_l['c'], figsize=(
+                10, 10), edgecolor='#000000', linewidth=0.2).get_figure()
+
             base = geology.plot(column=self.c_l['c'], figsize=(
                 10, 10), edgecolor='#000000', linewidth=0.2, legend=True)
             leg = base.get_legend()
             leg.set_bbox_to_anchor((1.04, 1))
-            self.geology_figure = base.get_figure()
 
             structures.plot(ax=base, color='none', edgecolor='black')
 
@@ -202,7 +204,6 @@ class Config(object):
             print("Input graphic saved to: " +
                   self.tmp_path + "input-fig.png")
 
-            self.export_png()
             if not self.quiet:
                 plt.show()
 
@@ -211,10 +212,6 @@ class Config(object):
             print(e)
 
         disable_quiet_mode()
-
-    def export_png(self):
-        self.geology_figure.savefig(self.tmp_path+"geology.png")
-        print("Geology graphic exported to: " + self.tmp_path+"geology.png")
 
     def export_csv(self):
         # TODO: - Move away from tab seperators entirely (topology and map2model)
@@ -706,3 +703,8 @@ class Config(object):
             self.project_path, self.output_path, self.bbox_3d, self.proj_crs)
 
         print("PROJECTFILE FOUND AT", self.loop_projectfile)
+
+
+    def export_png(self):
+        self.geology_figure.savefig("{}.png".format(self.loop_projectfile))
+        print("Geology graphic exported to: " + self.tmp_path+"geology.png")
