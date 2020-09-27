@@ -10,3 +10,4 @@ networkx
 scipy
 owslib
 tqdm
+utm

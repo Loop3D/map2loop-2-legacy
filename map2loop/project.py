@@ -304,4 +304,6 @@ class Project(object):
             self.config.postprocess(inputs, self.workflow)
             pbar.update(10)
 
+        self.config.create_projectfile()
+
         disable_quiet_mode()

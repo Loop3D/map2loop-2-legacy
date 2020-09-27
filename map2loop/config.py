@@ -14,6 +14,7 @@ from map2loop import m2l_geometry
 from map2loop import m2l_interpolation
 from map2loop import m2l_map_checker
 from map2loop.m2l_utils import display, enable_quiet_mode, disable_quiet_mode, print
+from map2loop.m2l_export import export_to_projectfile
 import map2model
 
 import networkx as nx
@@ -698,4 +699,10 @@ class Config(object):
         Topology.parse_fault_relationships(
             self.graph_path, self.tmp_path, self.output_path)
 
-        # TODO: Figures look a bit squashed in notebooks
+        # TODO: Figures sometimes look a bit squashed in notebooks
+
+    def create_projectfile(self):
+        self.loop_projectfile = export_to_projectfile(
+            self.project_path, self.output_path, self.bbox_3d, self.proj_crs)
+
+        print("PROJECTFILE FOUND AT", self.loop_projectfile)
