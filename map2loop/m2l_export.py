@@ -1397,17 +1397,18 @@ def display_LS_map(model, dtm, geol_clip, faults_clip, dst_crs, use_cmap, cmap, 
                          edgecolor='red', linewidth=0.7)
 
 
-def export_to_projectfile(project_path, output_path, bbox, proj_crs):
+def export_to_projectfile(loopFilename, output_path, bbox, proj_crs):
 
-    project_path = re.sub(r'\W+', '', project_path)
-    loopFilename = project_path + '.loop3d'
+    # project_path = re.sub(r'\W+', '', project_path)
+    # loopFilename = project_path + '.loop3d'
 
-    LoopProjectFile.CreateBasic(loopFilename)
+    # LoopProjectFile.CreateBasic(loopFilename, overwrite=True)
+    # TODO: Check if file does not exist in working dir, create if not
 
     # TODO: Convert input coordinates from any projection to utm
     # Send bounding box to project file
-    LoopProjectFile.Set(loopFilename, "extents", geodesic=[bbox['minx'], bbox['maxx'], bbox['miny'], bbox['maxy']],
-                        utm=[0, 0, 0, 0, 0, 0], depth=[bbox['base'], bbox['top']],
+    LoopProjectFile.Set(loopFilename, "extents", geodesic=[bbox['miny'], bbox['maxy'], bbox['minx'], bbox['maxx']],
+                         depth=[bbox['base'], bbox['top']],
                         spacing=[1000, 1000, 10], preference="geodesic")
 
     stratigraphicLayers = pd.read_csv(

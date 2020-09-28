@@ -698,12 +698,11 @@ class Config(object):
 
         # TODO: Figures sometimes look a bit squashed in notebooks
 
-    def create_projectfile(self):
+    def update_projectfile(self, loopFilename):
         self.loop_projectfile = export_to_projectfile(
-            self.project_path, self.output_path, self.bbox_3d, self.proj_crs)
+            loopFilename, self.output_path, self.bbox_3d, self.proj_crs)
 
         print("PROJECTFILE FOUND AT", self.loop_projectfile)
-
 
     def export_png(self):
         self.geology_figure.savefig("{}.png".format(self.loop_projectfile))

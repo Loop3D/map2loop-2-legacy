@@ -31,6 +31,7 @@ class Project(object):
                  fold_file=None,
                  structure_file=None,
                  mindep_file=None,
+                 # TODO: Abstract metadata away from user when using loop remote files
                  metadata=None,
                  workflow={'model_engine': 'loopstructural'},
                  ):
@@ -304,7 +305,7 @@ class Project(object):
             self.config.postprocess(inputs, self.workflow)
             pbar.update(10)
 
-        self.config.create_projectfile()
-        self.config.export_png()
+        # self.config.update_projectfile()
+        # self.config.export_png()
 
         disable_quiet_mode()

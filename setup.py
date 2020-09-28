@@ -15,16 +15,16 @@ class CondaDependencies(develop):
             command = 'conda install -c defaults -c conda-forge -y python=3.7'.split() + \
                 deps
             print(command)
-            subprocess.call(command)
+            subprocess.call(command, shell=True)
             command = 'conda install -c loop3d -y mplstereonet'.split()
             print(command)
-            subprocess.call(command)
+            subprocess.call(command, shell=True)
             command = 'conda install -c loop3d -y hjson'.split()
             print(command)
-            subprocess.call(command)
+            subprocess.call(command, shell=True)
             command = 'conda install -c loop3d -y map2model'.split()
             print(command)
-            subprocess.call(command)
+            subprocess.call(command, shell=True)
         except Exception as e:
             self.error('Could not install dependencies using conda!')
 
