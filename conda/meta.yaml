@@ -1,5 +1,5 @@
 {% set name = "map2loop" %}
-{% set version = "1.0.8" %}
+{% set version = "1.0.9" %}
 
 package:
   name: "{{ name|lower }}"
@@ -34,6 +34,7 @@ requirements:
     - map2model
     - mplstereonet
     - hjson
+    - loopprojectfile
 
 test:
   imports:
