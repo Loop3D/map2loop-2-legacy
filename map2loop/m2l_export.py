@@ -1407,9 +1407,9 @@ def export_to_projectfile(loopFilename, output_path, bbox, proj_crs):
 
     # TODO: Convert input coordinates from any projection to utm
     # Send bounding box to project file
-    LoopProjectFile.Set(loopFilename, "extents", geodesic=[bbox['miny'], bbox['maxy'], bbox['minx'], bbox['maxx']],
-                         depth=[bbox['base'], bbox['top']],
-                        spacing=[1000, 1000, 10], preference="geodesic")
+    # LoopProjectFile.Set(loopFilename, "extents", geodesic=[bbox['miny'], bbox['maxy'], bbox['minx'], bbox['maxx']],
+    #                      depth=[bbox['base'], bbox['top']],
+    #                     spacing=[1000, 1000, 10], preference="geodesic")
 
     stratigraphicLayers = pd.read_csv(
         output_path + "formation_thicknesses.csv")
