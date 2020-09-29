@@ -12,7 +12,6 @@ from rasterio.transform import from_origin
 from rasterio import features
 import re  # typo? check
 from urllib.request import urlopen
-from IPython.display import Image
 from math import sin, cos, atan, atan2, asin, radians, degrees, sqrt, pow, acos, fmod, fabs, isnan
 from owslib.wcs import WebCoverageService
 #from osgeo import gdal
@@ -594,12 +593,10 @@ def have_access(url):
     try:
         conn.request("HEAD", "/")
         conn.close()
-        Image(url='../graphics/yes.png')
         print("available: "+url)
         return(True)
     except:
         conn.close()
-        Image(url='../graphics/no.png')
         print("NOT available: "+url)
         return(False)
 
