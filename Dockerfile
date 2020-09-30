@@ -10,7 +10,7 @@ RUN updatedb
 RUN git clone https://gist.github.com/yohanderose/083a04767328de71128b542d300e75dc vimstuff
 RUN cp vimstuff/.vimrc /etc/vim/vimrc
 
-RUN git clone --recurse-submodules https://github.com/Loop3D/map2loop-2
+RUN git clone https://github.com/Loop3D/map2loop-2
 
 # Create m2l conda environment:
 RUN conda env create -f /map2loop-2/environment.yml

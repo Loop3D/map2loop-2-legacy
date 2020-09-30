@@ -14,6 +14,7 @@ import warnings
 from map2loop import m2l_utils
 from map2loop.m2l_utils import display, print
 
+
 class Topology(object):
 
     def __init__(self):
@@ -281,7 +282,6 @@ class Topology(object):
                     ','+str(slist[j][2])+','+str(slist[j][3])+'\n')
         f.close()
 
-        
     ####################################
     # save out tables of groups and sorted formation data
     #
@@ -293,6 +293,7 @@ class Topology(object):
     # Takes stratigraphy graph created by map2model c++ code to generate list of groups found in the region of interest
     # Uses first of each possible set of toplogies per unit and per group, which is arbitrary. On the other hand we are not checking relative ages again to see if this helps reduce ambiguity, which I think it would.
     ####################################
+
     def save_group(self, G, path_out, glabels, geol, c_l, quiet):
         Gp = nx.Graph().to_directed()  # New Group graph
 
@@ -619,28 +620,21 @@ class Topology(object):
     ####################################
     def save_geol_wkt(sub_geol, geology_file_csv, c_l, hint_flag):
         # hint_flag=False
-        # TODO: Serve this table remotely as well
         if(hint_flag == True):
             print("Using ENS age hints")
             code_hint_file = '../test_data3/data/code_age_hint.csv'  # input code_hint file
             code_hints = pd.read_csv(code_hint_file, sep=',')
             code_hints.drop_duplicates(inplace=True)
             code_hints.set_index('code',  inplace=True)
-
             hint_list = []
             for indx, row in code_hints.iterrows():
                 if(not indx in hint_list):
                     hint_list.append(indx)
-
-        # TODO: Figure out how the code replacment is happening
-        # sub_geol.columns = ['WKT'] + list(sub_geol.columns[1:])
-        # sub_geol.to_csv(geology_file_csv, sep='\t',
-        #                   index=False)
-
         f = open(geology_file_csv, "w+")
         f.write('WKT\t'+c_l['o'].replace("\n", "")+'\t'+c_l['u'].replace("\n", "")+'\t'+c_l['g'].replace("\n", "")+'\t'+c_l['min'].replace("\n", "")+'\t'+c_l['max'].replace(
             "\n", "")+'\t'+c_l['c'].replace("\n", "")+'\t'+c_l['r1'].replace("\n", "")+'\t'+c_l['r2'].replace("\n", "")+'\t'+c_l['ds'].replace("\n", "")+'\n')
         # display(sub_geol)
+        print("HOW MANY COLUMNS IN GEOL", len(sub_geol.columns))
         print(len(sub_geol), " polygons")
         # print(sub_geol)
         for i in range(0, len(sub_geol)):
@@ -651,7 +645,6 @@ class Topology(object):
             # since map2model is looking for "" not "None"
             f.write(
                 "\""+str(sub_geol.loc[i][c_l['g']]).replace("None", "")+"\"\t")
-
             if(hint_flag == True and sub_geol.loc[i][c_l['c']] in hint_list):
                 hint = code_hints.loc[sub_geol.loc[i][c_l['c']]]['hint']
             else:

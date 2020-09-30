@@ -1,6 +1,7 @@
 import setuptools
 from setuptools.command.develop import develop
 import subprocess
+import platform
 
 
 class CondaDependencies(develop):
@@ -12,22 +13,27 @@ class CondaDependencies(develop):
                 for line in f:
                     deps.append(line.strip())
 
+            if platform == "Windows":
+                _shell = True
+            else:  # Linux or Mac
+                _shell = False
+
             command = 'conda install -c defaults -c conda-forge -y python=3.7'.split() + \
                 deps
             print(command)
-            subprocess.call(command, shell=True)
+            subprocess.call(command, shell=_shell)
             command = 'conda install -c loop3d -y mplstereonet'.split()
             print(command)
-            subprocess.call(command, shell=True)
+            subprocess.call(command, shell=_shell)
             command = 'conda install -c loop3d -y hjson'.split()
             print(command)
-            subprocess.call(command, shell=True)
+            subprocess.call(command, shell=_shell)
             command = 'conda install -c loop3d -y loopprojectfile'.split()
             print(command)
-            subprocess.call(command, shell=True)
+            subprocess.call(command, shell=_shell)
             command = 'conda install -c loop3d -y map2model'.split()
             print(command)
-            subprocess.call(command, shell=True)
+            subprocess.call(command, shell=_shell)
         except Exception as e:
             self.error('Could not install dependencies using conda!')
 
