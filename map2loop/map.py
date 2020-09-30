@@ -29,7 +29,7 @@ class MapUtil:
         is colour index
         """
         nodes = geopandas.GeoDataFrame(
-            xyz[:,:1], geometry=[Point(xy) for xy in zip(xyz[:,0], xyz[:,1])])
+            xy[:,:1], geometry=[Point(xy) for xy in zip(xy[:,0], xy[:,1])])
         points_geology = geopandas.sjoin(nodes, proj.config.geol_clip, how="left", op="within")
         return points_geology[column].to_numpy()
     

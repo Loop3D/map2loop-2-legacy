@@ -304,6 +304,8 @@ class Project(object):
 
             self.config.postprocess(inputs, self.workflow)
             pbar.update(10)
+            self.config.create_map_cmap()
+
 
         # self.config.update_projectfile()
         # self.config.export_png()
