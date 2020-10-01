@@ -1602,6 +1602,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
         if(a_sort[1]['group_'] not in no_contacts):
             for old_sort in all_sorts.iterrows():
                 if(a_sort[1]['group_'] == old_sort[1]['group']):
+                    
                     ostr = "{},{},{},{},{},{},{}\n"\
                         .format(newdx, gpdx, old_sort[1]['index in group'], old_sort[1]['number in group'], old_sort[0], old_sort[1]['group'], 'erode')
                     #ostr=str(newdx)+","+str(gpdx)+","+str(old_sort[1]['index in group'])+","+str(old_sort[1]['number in group'])+","+old_sort[0]+","+old_sort[1]['group']+",erode\n"

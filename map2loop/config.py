@@ -30,7 +30,24 @@ class Config(object):
     a region of interest (bounding box or polygon) and some execution flags.
     """
 
-    def __init__(self, project_path, overwrite, geology_file, fault_file, fold_file, structure_file, mindep_file, bbox_3d, polygon, step_out, dtm_crs, proj_crs, local, quiet, c_l={}):
+    def __init__(self, 
+                project_path, 
+                overwrite, 
+                geology_file, 
+                fault_file, 
+                fold_file, 
+                structure_file, 
+                mindep_file, 
+                bbox_3d, 
+                polygon, 
+                step_out, 
+                dtm_crs, 
+                proj_crs, 
+                local, 
+                quiet, 
+                c_l={},
+
+):
         """Creates the config object.
 
         :param geology_file: Path to local file or remote database containing stratigraphic information.
@@ -58,7 +75,7 @@ class Config(object):
         :param c_l: Map of configuration flags that dictate the flow of execution, defaults to {}
         :type c_l: dict, optional
         """
-
+        self.clut_path = "https://gist.githubusercontent.com/yohanderose/8f7e2d57db9086fbe1a7c651b9e25996/raw/ac5062e68d251c21bbc24b811ee5b17cc2f98ce3/500kibg_colours.csv"
         # Create directory structure if possible
         if (not os.path.exists(project_path)):
             os.mkdir(project_path)
@@ -168,7 +185,8 @@ class Config(object):
         geology.to_file(self.geology_file)
         faults.to_file(self.fault_file)
         folds.to_file(self.fold_file)
-        mindeps.to_file(self.mindep_file)
+        if len(mindeps)> 0:
+            mindeps.to_file(self.mindep_file)
 
         # Check if bedding data uses the strike convention instead of dip direction
         if(self.c_l['otype'] == 'strike'):
@@ -549,7 +567,7 @@ class Config(object):
         """
         asc=pd.read_csv(self.tmp_path+'all_sorts_clean.csv',",")
         #display(asc)
-        colours=pd.read_csv(_clut_path,",")
+        colours=pd.read_csv(self.clut_path,",")
         if self.c_l['c']=='CODE':
             code=self.c_l['c'].lower()
         else:
@@ -680,7 +698,7 @@ class Config(object):
                                                              fold_decimate, fat_step, close_dip, self.scheme, self.bbox, self.spacing, self.dip_grid, self.dip_dir_grid)
 
     def postprocess(self, inputs, workflow):
-        clut_path = _clut_path
+        clut_path = self.clut_path
         use_interpolations = True
         use_fat = True
 
