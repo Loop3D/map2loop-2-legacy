@@ -63,6 +63,7 @@ class Config(object):
         else:
             if overwrite:
                 shutil.rmtree(project_path)
+                time.sleep(1) 
                 os.mkdir(project_path)
             else:
                 allow = input(

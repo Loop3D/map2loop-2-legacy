@@ -634,7 +634,6 @@ class Topology(object):
         f.write('WKT\t'+c_l['o'].replace("\n", "")+'\t'+c_l['u'].replace("\n", "")+'\t'+c_l['g'].replace("\n", "")+'\t'+c_l['min'].replace("\n", "")+'\t'+c_l['max'].replace(
             "\n", "")+'\t'+c_l['c'].replace("\n", "")+'\t'+c_l['r1'].replace("\n", "")+'\t'+c_l['r2'].replace("\n", "")+'\t'+c_l['ds'].replace("\n", "")+'\n')
         # display(sub_geol)
-        print("HOW MANY COLUMNS IN GEOL", len(sub_geol.columns))
         print(len(sub_geol), " polygons")
         # print(sub_geol)
         for i in range(0, len(sub_geol)):

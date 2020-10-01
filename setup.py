@@ -13,7 +13,9 @@ class CondaDependencies(develop):
                 for line in f:
                     deps.append(line.strip())
 
-            if platform == "Windows":
+            _platform = platform.platform()
+
+            if _platform.startswith("Windows"):
                 _shell = True
             else:  # Linux or Mac
                 _shell = False
