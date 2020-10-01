@@ -46,7 +46,7 @@ class Config(object):
                 local, 
                 quiet, 
                 c_l={},
-
+                **kwargs
 ):
         """Creates the config object.
 
@@ -140,7 +140,7 @@ class Config(object):
         self.proj_crs = proj_crs
 
         # Check input maps for missing values
-        drift_prefix = ['None']
+        drift_prefix = kwargs.get('drift_prefix',['None'])
         self.local = local
         #       - Check if fold file is always the same as fault or needs to be seperated
         # TODO: Allow for input as a polygon, not just a bounding box.

@@ -165,7 +165,8 @@ class Project(object):
                       dtm_crs={'init': 'EPSG:4326'},
                       proj_crs=None,
                       step_out=None,
-                      quiet=False
+                      quiet=False,
+                      **kwargs
                       ):
 
         if bbox_3d["minx"] == 0 and bbox_3d["maxx"] == 0:
@@ -200,7 +201,8 @@ class Project(object):
         self.config = Config(out_dir, overwrite,
                              self.geology_file, self.fault_file, self.fold_file,
                              self.structure_file, self.mindep_file,
-                             bbox_3d, polygon, step_out, dtm_crs, proj_crs, self.local, self.quiet, self.c_l
+                             bbox_3d, polygon, step_out, dtm_crs, proj_crs, self.local, self.quiet, self.c_l,
+                             **kwargs
                              )
 
         self.config.preprocess()
