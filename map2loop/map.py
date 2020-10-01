@@ -1,6 +1,7 @@
 from scipy.interpolate import RegularGridInterpolator
 import numpy as np
 import geopandas
+from shapely.geometry import Point
 
 class MapUtil:
     
@@ -30,7 +31,7 @@ class MapUtil:
         """
         nodes = geopandas.GeoDataFrame(
             xy[:,:1], geometry=[Point(xy) for xy in zip(xy[:,0], xy[:,1])])
-        points_geology = geopandas.sjoin(nodes, proj.config.geol_clip, how="left", op="within")
+        points_geology = geopandas.sjoin(nodes, self.geology, how="left", op="within")
         return points_geology[column].to_numpy()
     
     def _is_inside(self,xy):
