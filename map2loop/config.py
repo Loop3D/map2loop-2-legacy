@@ -8,6 +8,7 @@ import csv
 import numpy as np
 import pandas as pd
 import geopandas as gpd
+from map2loop import _clut_path
 from map2loop.topology import Topology
 from map2loop import m2l_utils
 from map2loop import m2l_geometry
@@ -19,6 +20,7 @@ import map2model
 
 import networkx as nx
 import matplotlib.pyplot as plt
+import matplotlib.colors as colors
 import rasterio
 import shapely
 
@@ -28,7 +30,24 @@ class Config(object):
     a region of interest (bounding box or polygon) and some execution flags.
     """
 
-    def __init__(self, project_path, overwrite, geology_file, fault_file, fold_file, structure_file, mindep_file, bbox_3d, polygon, step_out, dtm_crs, proj_crs, local, quiet, c_l={}):
+    def __init__(self, 
+                project_path, 
+                overwrite, 
+                geology_file, 
+                fault_file, 
+                fold_file, 
+                structure_file, 
+                mindep_file, 
+                bbox_3d, 
+                polygon, 
+                step_out, 
+                dtm_crs, 
+                proj_crs, 
+                local, 
+                quiet, 
+                c_l={},
+                **kwargs
+):
         """Creates the config object.
 
         :param geology_file: Path to local file or remote database containing stratigraphic information.
@@ -56,7 +75,7 @@ class Config(object):
         :param c_l: Map of configuration flags that dictate the flow of execution, defaults to {}
         :type c_l: dict, optional
         """
-
+        self.clut_path = "https://gist.githubusercontent.com/yohanderose/8f7e2d57db9086fbe1a7c651b9e25996/raw/ac5062e68d251c21bbc24b811ee5b17cc2f98ce3/500kibg_colours.csv"
         # Create directory structure if possible
         if (not os.path.exists(project_path)):
             os.mkdir(project_path)
@@ -122,7 +141,7 @@ class Config(object):
         self.proj_crs = proj_crs
 
         # Check input maps for missing values
-        drift_prefix = ['None']
+        drift_prefix = kwargs.get('drift_prefix',['None'])
         self.local = local
         #       - Check if fold file is always the same as fault or needs to be seperated
         # TODO: Allow for input as a polygon, not just a bounding box.
@@ -167,7 +186,8 @@ class Config(object):
         geology.to_file(self.geology_file)
         faults.to_file(self.fault_file)
         folds.to_file(self.fold_file)
-        mindeps.to_file(self.mindep_file)
+        if len(mindeps)> 0:
+            mindeps.to_file(self.mindep_file)
 
         # Check if bedding data uses the strike convention instead of dip direction
         if(self.c_l['otype'] == 'strike'):
@@ -543,7 +563,26 @@ class Config(object):
             plt.imshow(contact_grid, cmap="hsv",
                        origin='lower', vmin=-360, vmax=360)
             plt.show()
+    def create_map_cmap(self):
+        """Create a colourmap for the model using the colour code
+        """
+        asc=pd.read_csv(self.tmp_path+'all_sorts_clean.csv',",")
+        #display(asc)
+        colours=pd.read_csv(self.clut_path,",")
+        if self.c_l['c']=='CODE':
+            code=self.c_l['c'].lower()
+        else:
+            code=self.c_l['c']
 
+        colours = [] #container for the discrete colours we are using
+        i=0
+        self.geol_clip['colour_index'] = np.nan #initialise a colour index attribute column
+        for ind,strat in asc.iterrows():
+            self.geol_clip[self.c_l['c']].str.replace(" ","_")
+            self.geol_clip.loc[self.geol_clip[self.c_l['c']]==strat['code'].replace("_"," "),'colour_index'] = i
+            colours.append(strat['colour'])
+            i=i+1
+        self.cmap = colors.ListedColormap(colours)
     def export_faults(self):
         fault_decimate = 5
         min_fault_length = 5000
@@ -660,7 +699,7 @@ class Config(object):
                                                              fold_decimate, fat_step, close_dip, self.scheme, self.bbox, self.spacing, self.dip_grid, self.dip_dir_grid)
 
     def postprocess(self, inputs, workflow):
-        clut_path = "https://gist.githubusercontent.com/yohanderose/8f7e2d57db9086fbe1a7c651b9e25996/raw/ac5062e68d251c21bbc24b811ee5b17cc2f98ce3/500kibg_colours.csv"
+        clut_path = self.clut_path
         use_interpolations = True
         use_fat = True
 
