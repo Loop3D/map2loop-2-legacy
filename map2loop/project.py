@@ -245,7 +245,33 @@ class Project(object):
 
     # TODO: Create notebooks for lower level use
     # TODO: Run flags that affect the config object functions
-    def run(self):
+    def run(self,
+            aus=True,
+            deposits="Fe,Cu,Au,NONE",
+            dtb='',
+            orientation_decimate=0,
+            contact_decimate=5,
+            intrusion_mode=0,
+            interpolation_spacing=500,
+            misorientation=30,
+            interpolation_scheme='scipy_rbf',
+            fault_decimate=5,
+            min_fault_length=5000,
+            fault_dip=90,
+            pluton_dip=45,
+            pluton_form='domes',
+            dist_buffer=10,
+            contact_dip=-999,
+            contact_orientation_decimate=5,
+            null_scheme='null',
+            thickness_buffer=5000,
+            max_thickness_allowed=10000,
+            fold_decimate=5,
+            fat_step=750,
+            close_dip=-999,
+            use_interpolations=True,
+            use_fat=True
+            ):
 
         if self.quiet:
             print("enabling quiet mode")
@@ -256,7 +282,7 @@ class Project(object):
 
             print("Generating topology analyser input...")
             self.config.export_csv()
-            self.config.run_map2model()
+            self.config.run_map2model(deposits, aus)
             pbar.update(10)
 
             self.config.load_dtm()
@@ -265,23 +291,21 @@ class Project(object):
             self.config.join_features()
             pbar.update(10)
 
-            if(self.workflow['cover_map']):
-                # Depth to basement calculation
-                self.config.calc_depth_grid()
-            else:
-                # FOr now this function just zeros dtb and exits prematurely
-                self.config.calc_depth_grid()
+            self.config.calc_depth_grid(dtb)
             pbar.update(10)
 
-            self.config.export_orientations()
+            self.config.export_orientations(orientation_decimate)
             pbar.update(10)
-            self.config.export_contacts()
+            self.config.export_contacts(contact_decimate, intrusion_mode)
             pbar.update(10)
-            self.config.test_interpolation()
+            self.config.test_interpolation(
+                interpolation_spacing, misorientation, interpolation_scheme)
             pbar.update(10)
 
-            self.config.export_faults()
-            self.config.process_plutons()
+            self.config.export_faults(
+                fault_decimate, min_fault_length, fault_dip)
+            self.config.process_plutons(
+                pluton_dip, pluton_form, dist_buffer, contact_decimate)
             pbar.update(20)
 
             # Seismic section is in the hamersely model area
@@ -292,13 +316,16 @@ class Project(object):
                                                      seismic_interp_file="")
 
             if(self.workflow['contact_dips']):
-                self.config.propagate_contacts_dips()
+                self.config.propagate_contact_dips(
+                    contact_dip, contact_orientation_decimate)
 
             if(self.workflow['formation_thickness']):
-                self.config.calc_thickness()
+                self.config.calc_thickness(
+                    contact_decimate, null_scheme, thickness_buffer, max_thickness_allowed)
 
             if(self.workflow['fold_axial_traces']):
-                self.config.create_fold_axial_trace_points()
+                self.config.create_fold_axial_trace_points(
+                    fold_decimate, fat_step, close_dip)
 
             # Prepocess model inputs
             inputs = ('')
@@ -314,7 +341,8 @@ class Project(object):
             elif(self.workflow['model_engine'] == 'noddy'):
                 inputs = ('')
 
-            self.config.postprocess(inputs, self.workflow)
+            self.config.postprocess(
+                inputs, self.workflow, use_interpolations, use_fat)
             pbar.update(10)
             self.config.create_map_cmap()
 
