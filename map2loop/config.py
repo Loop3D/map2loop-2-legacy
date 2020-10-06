@@ -48,47 +48,29 @@ class Config(object):
                  c_l={},
                  **kwargs
                  ):
-        """Creates the config object.
 
-        :param geology_file: Path to local file or remote database containing stratigraphic information.
-        :type geology_file: string
-        :param fault_file: Path to local file or remote database containing fault information.
-        :type fault_file: string
-        :param fold_file: Path to local file or remote database containing fold information.
-        :type fold_file: string
-        :param structure_file: Path to local file or remote database containing structure information.
-        :type structure_file: string
-        :param mindep_file: Path to local file or remote database containing mindep information.
-        :type mindep_file: string
-        :param bbox_3d: Bounding box region of interest with x, y and z bounds.
-        :type bbox_3d: dict
-        :param polygon: Region of interest dataframe for creating figures and preprocessing.
-        :type polygon: geopandas.GeoDataFrame
-        :param step_out: Buffer to ensure DTM covers entire expected area on conversion.
-        :type step_out: float
-        :param dtm_crs: Projection the DTM is in.
-        :type dtm_crs: dict
-        :param proj_crs: Projection the project sources are in.
-        :type proj_crs: dict
-        :param local: Flag to indicate if remote or local data is being used.
-        :type local: bool
-        :param c_l: Map of configuration flags that dictate the flow of execution, defaults to {}
-        :type c_l: dict, optional
-        """
         self.clut_path = "https://gist.githubusercontent.com/yohanderose/8f7e2d57db9086fbe1a7c651b9e25996/raw/ac5062e68d251c21bbc24b811ee5b17cc2f98ce3/500kibg_colours.csv"
-        # Create directory structure if possible
+
         if (not os.path.exists(project_path)):
+            # Create proj root dir if doesn't exist
             os.mkdir(project_path)
+        elif overwrite == "in-place":
+            # Pass if proj root exists and complete overwrite not wanted
+            pass
         else:
-            if overwrite:
+            # Remove if exists and accept user's direction
+            if overwrite == "true":
                 shutil.rmtree(project_path)
-                time.sleep(1)
+                while os.path.exists(project_path):
+                    pass
                 os.mkdir(project_path)
             else:
                 allow = input(
                     "Directory \"{}\" exists, overwrite? (y/[n])".format(project_path))
                 if allow == "y":
                     shutil.rmtree(project_path)
+                    while os.path.exists(project_path):
+                        pass
                     os.mkdir(project_path)
                 else:
                     sys.exit(0)

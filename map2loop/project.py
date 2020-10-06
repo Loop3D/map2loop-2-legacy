@@ -162,7 +162,7 @@ class Project(object):
 
     def update_config(self,
                       out_dir,
-                      overwrite=False,
+                      overwrite='false',
                       bbox_3d={
                           "minx": 0,
                           "maxx": 0,
@@ -181,8 +181,8 @@ class Project(object):
 
         :param out_dir: Path to write output files to.
         :type out_dir: string
-        :param overwrite: Allow overwriting the given out_dir if it exists, defaults to False
-        :type overwrite: bool, optional
+        :param overwrite: Allow overwriting the given out_dir if it exists, false, true or in-place, defaults to false
+        :type overwrite: string, optional
         :param bbox_3d: 3D bounding box of coordinates and base/top values defining the area, defaults to { "minx": 0, "maxx": 0, "maxx": 0, "maxy": 0, "base": -10000, "top": 1200, }
         :type bbox_3d: dict, optional
         :param dtm_crs: Set the projection of the dtm, defaults to {'init': 'EPSG:4326'}
