@@ -17,40 +17,49 @@ from map2loop.m2l_utils import display, enable_quiet_mode, disable_quiet_mode, p
 
 
 class Project(object):
-    """A high level object implementation of the map2loop workflow.
-    """
+    """A high level object implementation of the map2loop workflow."""
 
     def __init__(self,
-                 # region of interest coordinates in metre-based system (or non-degree system)
-                 # (minx, miny, maxx, maxy, bottom, top)
-                 # TODO: Remove harcoding if local files ship with examples
-                 state,
-                 remote=False,
+                 loopdata_state=None,
                  geology_file=None,
                  fault_file=None,
                  fold_file=None,
                  structure_file=None,
                  mindep_file=None,
-                 # TODO: Abstract metadata away from user when using loop remote files
                  metadata=None,
-                 workflow={'model_engine': 'loopstructural'},
                  ):
+        """Creates project that defines the shared source data.
+
+        :param loopdata_state: Indicates use of loop remote sources and which Australian state to use, defaults to None
+        :type loopdata_state: string, optional
+        :param geology_file: Local path or URL to stratigraphic source data, defaults to None
+        :type geology_file: string, optional
+        :param fault_file:  Local path or URL to fault source data[description], defaults to None
+        :type fault_file: string, optional
+        :param fold_file:  Local path or URL to fold source data[description], defaults to None
+        :type fold_file: string, optional
+        :param structure_file:  Local path or URL to orientation source data, defaults to None
+        :type structure_file: string, optional
+        :param mindep_file: Local path or URL to mineral deposit source data, defaults to None
+        :type mindep_file: string, optional
+        :param metadata: File that describes the attributes (column names) in given local or remote sources, defaults to None
+        :type metadata: string, optional
+        """
 
         warnings.filterwarnings('ignore')
 
-        if state in ['WA', 'NSW', 'VIC', 'SA', 'QLD', 'ACT', 'TAS']:
-            self.state = state
-        else:
-            print(
-                "Please provide the a string of the state code.")
-            sys.exit(1)
-
-        # If local data files are expected and not given throw an error
-        self.local = not remote
-        if remote == False:
-            if any(source is None for source in [geology_file, fault_file, fold_file, structure_file, mindep_file]):
+        if loopdata_state is None:
+            self.local = True
+            if any(source is None for source in [geology_file, fault_file, fold_file, structure_file, metadata]):
                 sys.exit(
-                    "Please pass local file paths as input params if you do not wish to use remote sources.")
+                    "Please pass local file paths or urls and a metadata file as input params if you do not wish to use Loop's remote sources.")
+        else:
+            self.local = False
+            if loopdata_state in ['WA', 'NSW', 'VIC', 'SA', 'QLD', 'ACT', 'TAS']:
+                self.state = loopdata_state
+            else:
+                sys.exit(
+                    "Valid state code not found, expected 'WA', 'NSW', 'VIC', 'SA', 'QLD', 'ACT' or 'TAS'")
 
         # If remote, these will be set to null for now, otherwise set to local paths
         self.geology_file = geology_file
@@ -62,21 +71,21 @@ class Project(object):
         meta_error = "When using your own local files or remote data, pass the path or url to a valid metadata file (.json or .hjson) that describes your input column names.\n"
         meta_error += "You can find an example config here https://gist.github.com/yohanderose/a127c29cb88529f049a5bafc881bb1a0"
         # Load in dictionary that describes the column names
-        # TODO: Ensure hjson works with regular json files too
         if (metadata is None) and (geology_file is not None):
             # Check metadata is provided if non loop sources are given
             sys.exit(meta_error)
-        elif remote:
-            # Pass if using loop sources
+        elif not self.local:
+            # Pass if using loop sources that will be set further down when bounding box is set
             pass
         else:
             # Try to read metadata if given
             self.read_metadata(metadata)
 
         self.set_proj_defaults()
-        self.update_workflow(workflow)
+        self.update_workflow()
 
     def set_proj_defaults(self):
+        """Set the bounds and projection of the input data to use if not explicitly provided."""
         # If local, set the maximum bounding box to the bounds of the input files
         # If remote, set bounds to zeros, hopefully this gives the whole map...
         if self.geology_file is not None:
@@ -92,7 +101,13 @@ class Project(object):
 
         self.step_out = 0.1
 
-    def update_workflow(self, workflow):
+    def update_workflow(self, workflow={'model_engine': 'loopstructural'}):
+        """Set unique run flags depending on model engine to tailor outputs.
+
+        :param workflow: Dict containing desired engine to be updated with flags, defaults to {'model_engine': 'loopstructural'}
+        :type workflow: dict
+
+        """
         if(workflow['model_engine'] == 'geomodeller'):
             workflow.update({'seismic_section': False,
                              'cover_map': False,
@@ -162,6 +177,25 @@ class Project(object):
                       quiet=False,
                       **kwargs
                       ):
+        """Creates a sub-project Config object and preprocesses input data for some area.
+
+        :param out_dir: Path to write output files to.
+        :type out_dir: string
+        :param overwrite: Allow overwriting the given out_dir if it exists, defaults to False
+        :type overwrite: bool, optional
+        :param bbox_3d: 3D bounding box of coordinates and base/top values defining the area, defaults to { "minx": 0, "maxx": 0, "maxx": 0, "maxy": 0, "base": -10000, "top": 1200, }
+        :type bbox_3d: dict, optional
+        :param dtm_crs: Set the projection of the dtm, defaults to {'init': 'EPSG:4326'}
+        :type dtm_crs: dict, optional
+        :param proj_crs: Set the projection of the input data, defaults to None
+        :type proj_crs: dict, optional
+        :param step_out: How far to consider outside the reprojected dtm, defaults to None
+        :type step_out: int, optional
+        :param quiet: Allow or block print statements and matplotlib figures, defaults to False
+        :type quiet: bool, optional
+        :param **kwargs: 
+        """
+        # TODO: Proj crs probably doesn't need to be here
 
         if bbox_3d["minx"] == 0 and bbox_3d["maxx"] == 0:
             bbox_3d.update({
@@ -202,6 +236,12 @@ class Project(object):
         self.config.preprocess()
 
     def read_metadata(self, filename):
+        """Helper function that turns json and hjson files into usable configuration dictionaries.
+
+        :param filename: Path or url to metadata file.
+        :type filename: string
+
+        """
         try:
             if filename.startswith("http"):
                 with urllib.request.urlopen(filename) as raw_data:
@@ -214,6 +254,12 @@ class Project(object):
             sys.exit("ERROR: Unable to read provided filename file")
 
     def fetch_sources(self, bbox):
+        """Fetch remote loop geospatial data and metadata.
+
+        :param bbox: 2D list of ints or floats describing the area of interest.
+        :type bbox: list
+
+        """
         if self.state == "WA":
             bbox_str = "{},{},{},{}".format(bbox[0], bbox[1], bbox[2], bbox[3])
             self.geology_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:geol_500k&bbox={}&srs=EPSG:28350'.format(
@@ -272,6 +318,59 @@ class Project(object):
             use_interpolations=True,
             use_fat=True
             ):
+        """Performs the data processing steps of the map2loop workflow.
+
+        :param aus: Indicates if area is in Australia for using ASUD. Defaults to True.
+        :type aus: bool
+        :param deposits: Mineral deposit names for focused topology extraction. Defaults to "Fe,Cu,Au,NONE".
+        :type deposits: str
+        :param dtb: Path to depth to basement grid. Defaults to ''.
+        :type dtb: str
+        :param orientation_decimate: Save every nth orientation data point. Defaults to 0.
+        :type orientation_decimate: int
+        :param contact_decimate: Save every nth contact data point. Defaults to 5.
+        :type contact_decimate: int
+        :param intrusion_mode: 1 to exclude all intrusions from basal contacts, 0 to only exclude sills. Defaults to 0.
+        :type intrusion_mode: intrusion_mode: int
+        :param interpolation_spacing: Interpolation grid spacing in meters. Defaults to 500.
+        :type interpolation_spacing: interpolation_spacing: int
+        :param misorientation: Defaults to 30.
+        :type misorientation: int
+        :param interpolation_scheme: What interpolation function to use of scipy_rbf (radial basis) or scipy_idw (inverse distance weighted). Defaults to 'scipy_rbf'.
+        :type interpolation_scheme: str
+        :param fault_decimate: Save every nth fault data point. Defaults to 5.
+        :type fault_decimate: int
+        :param min_fault_length: Min fault length to be considered. Defaults to 5000.
+        :type min_fault_length: int
+        :param fault_dip: Defaults to 90.
+        :type fault_dip: int
+        :param pluton_dip: Defaults to 45.
+        :type pluton_dip: int
+        :param pluton_form: Possible forms from domes, saucers or pendant. Defaults to 'domes'.
+        :type pluton_form: str
+        :param dist_buffer: Buffer for processing plutons. Defaults to 10.
+        :type dist_buffer: int
+        :param contact_dip: Defaults to -999.
+        :type contact_dip: int
+        :param contact_orientation_decimate: Save every nth contact orientation point. Defaults to 5.
+        :type contact_orientation_decimate: int
+        :param null_scheme: How null values present in the dtb. Defaults to 'null'.
+        :type null_scheme: str
+        :param thickness_buffer: Defaults to 5000.
+        :type thickness_buffer: int
+        :param max_thickness_allowed: Defaults to 10000.
+        :type max_thickness_allowed: int
+        :param fold_decimate: Save every nth fold data point. Defaults to 5.
+        :type fold_decimate: int
+        :param fat_step: How much to step out normal to the fold axial trace. Defaults to 750.
+        :type fat_step: int
+        :param close_dip: Dip to assign to all new orientations. Defaults to -999.
+        :type close_dip: int
+        :param use_interpolations: Defaults to True.
+        :type use_interpolations: bool
+        :param use_fat: Defaults to True.
+        :type use_fat: bool
+        """
 
         if self.quiet:
             print("enabling quiet mode")

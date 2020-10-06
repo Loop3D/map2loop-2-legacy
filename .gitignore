@@ -1,6 +1,6 @@
 
 ### M2L stuff ###
-model-test
+/model-test*
 .ipynb_checkpoints
 notebooks/Testing.ipynb
 

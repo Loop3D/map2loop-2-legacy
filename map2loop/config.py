@@ -459,8 +459,6 @@ class Config(object):
             self.tmp_path, self.output_path, self.dtm, self.dtb, self.dtb_null, False, self.geol_clip, self.structure_clip, self.c_l)
 
     def export_contacts(self, contact_decimate, intrusion_mode):
-        # contact_decimate = 5  # store every nth contact point (in object order)
-        # intrusion_mode = 0      # 1 all intrusions exluded from basal contacts, 0 only sills
 
         ls_dict, ls_dict_decimate = m2l_geometry.save_basal_contacts(
             self.tmp_path, self.dtm, self.dtb, self.dtb_null, False, self.geol_clip, contact_decimate, self.c_l, intrusion_mode)
@@ -694,11 +692,6 @@ class Config(object):
 
             m2l_geometry.save_fold_axial_traces(
                 self.fold_file, self.output_path, self.dtm, self.dtb, self.dtb_null, False, self.c_l, fold_decimate)
-
-            # Save fold axial trace near-hinge orientations
-            # fat_step = 750         # how much to step out normal to fold axial trace
-            # dip to assign to all new orientations (-999 = use local interpolated dip)
-            # close_dip = -999
 
             m2l_geometry.save_fold_axial_traces_orientations(self.fold_file, self.output_path, self.tmp_path, self.dtm, self.dtb, self.dtb_null, False, self.c_l, self.proj_crs,
                                                              fold_decimate, fat_step, close_dip, self.scheme, self.bbox, self.spacing, self.dip_grid, self.dip_dir_grid)
