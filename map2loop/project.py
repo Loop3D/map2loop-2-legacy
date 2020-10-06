@@ -49,9 +49,8 @@ class Project(object):
         self.local = not remote
         if remote == False:
             if any(source is None for source in [geology_file, fault_file, fold_file, structure_file, mindep_file]):
-                print(
+                sys.exit(
                     "Please pass local file paths as input params if you do not wish to use remote sources.")
-                sys.exit(1)
 
         # If remote, these will be set to null for now, otherwise set to local paths
         self.geology_file = geology_file
@@ -60,24 +59,19 @@ class Project(object):
         self.structure_file = structure_file
         self.mindep_file = mindep_file
 
+        meta_error = "When using your own local files or remote data, pass the path or url to a valid metadata file (.json or .hjson) that describes your input column names.\n"
+        meta_error += "You can find an example config here https://gist.github.com/yohanderose/a127c29cb88529f049a5bafc881bb1a0"
         # Load in dictionary that describes the column names
         # TODO: Ensure hjson works with regular json files too
-        if metadata is None:
-            print(
-                "Please pass the path to a valid metadata file (.json or .hjson) to update_config(...) that identifies your input table column names.")
-            print("You can find an example config here https://gist.github.com/yohanderose/a127c29cb88529f049a5bafc881bb1a0")
-            sys.exit(1)
+        if (metadata is None) and (geology_file is not None):
+            # Check metadata is provided if non loop sources are given
+            sys.exit(meta_error)
+        elif remote:
+            # Pass if using loop sources
+            pass
         else:
-            try:
-                if metadata.startswith("http"):
-                    with urllib.request.urlopen(metadata) as raw_data:
-                        self.c_l = hjson.load(raw_data)
-                else:
-                    with open(metadata) as raw_data:
-                        self.c_l = hjson.load(raw_data)
-            except Exception as e:
-                print(e)
-                sys.exit(1)
+            # Try to read metadata if given
+            self.read_metadata(metadata)
 
         self.set_proj_defaults()
         self.update_workflow(workflow)
@@ -207,6 +201,18 @@ class Project(object):
 
         self.config.preprocess()
 
+    def read_metadata(self, filename):
+        try:
+            if filename.startswith("http"):
+                with urllib.request.urlopen(filename) as raw_data:
+                    self.c_l = hjson.load(raw_data)
+            else:
+                with open(filename) as raw_data:
+                    self.c_l = hjson.load(raw_data)
+        except Exception as e:
+            print(e)
+            sys.exit("ERROR: Unable to read provided filename file")
+
     def fetch_sources(self, bbox):
         if self.state == "WA":
             bbox_str = "{},{},{},{}".format(bbox[0], bbox[1], bbox[2], bbox[3])
@@ -220,6 +226,8 @@ class Project(object):
                 bbox_str)
             self.mindep_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:mindeps_2018_28350&bbox={}&srs=EPSG:28350'.format(
                 bbox_str)
+            self.metadata = 'https://gist.githubusercontent.com/yohanderose/8f843de0dde531f009a3973cbdadcc9f/raw/918f412ae488ce1a6bca188306f7730061ecf551/meta_remote.hjson'
+            self.read_metadata(self.metadata)
         if self.state == "QLD":
             bbox_str = "{},{},{},{}".format(bbox[0], bbox[1], bbox[2], bbox[3])
             self.structure_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=outcrops_28355&bbox={}&srsName=EPSG:28355'.format(
@@ -232,6 +240,8 @@ class Project(object):
                 bbox_str)
             self.fold_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_faults_folds_28355&bbox={}&srsName=EPSG:28355'.format(
                 bbox_str)
+            self.metadata = "https://gist.githubusercontent.com/yohanderose/7ad2ae1b36e4e0b3f27dff17eeae0cc2/raw/82c2120a9a554d470ab28199d9ee9d6bb41f9d0f/QLD_meta.hjson"
+            self.read_metadata(self.metadata)
 
     # TODO: Create notebooks for lower level use
     # TODO: Run flags that affect the config object functions
@@ -307,7 +317,6 @@ class Project(object):
             self.config.postprocess(inputs, self.workflow)
             pbar.update(10)
             self.config.create_map_cmap()
-
 
         # self.config.update_projectfile()
         # self.config.export_png()
