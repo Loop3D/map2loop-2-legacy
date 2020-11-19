@@ -1642,7 +1642,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     else:
         asc = pd.read_csv(tmp_path+'all_sorts_clean.csv', ",")
         colours = pd.read_csv(clut_path, ",")
-        if(c_l['c'] == 'CODE'):
+        if(c_l['c'] == 'CODE' or c_l['c'] == 'code'):
             code = c_l['c'].lower()
         else:
             code = 'UNITNAME'
@@ -1651,7 +1651,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
         asc2 = pd.merge(asc, colours, how='inner',
                         left_on='code', right_on=code)
         asc2.drop(['UNITNAME'], axis=1, inplace=True)
-        if(not c_l['c'] == 'code'):
+        if('code_x' in list(asc2) or not c_l['c'] == 'code'):
             asc2.rename(columns={'code_x': 'code'}, inplace=True)
             if('code_y' in asc2.columns):
                 asc2.drop(['code_y'], axis=1, inplace=True)

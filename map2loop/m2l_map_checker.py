@@ -43,12 +43,12 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
     m2l_warnings = []
     if(local_paths):
         for file_name in (structure_file, geology_file, fault_file, mindep_file, fold_file):
-            if not os.path.isfile(file_name):
+            if not file_name.startswith("http") and not os.path.isfile(file_name):
                 m2l_errors.append('file '+file_name+' not found')
 
     # Process orientation points
 
-    if (os.path.isfile(structure_file) or not local_paths):
+    if (os.path.isfile(structure_file) or structure_file.startswith("http") or not local_paths):
         orientations2 = gpd.read_file(structure_file, bbox=bbox)
         if(c_l['sf'] == c_l['ds']):
             new_code = 'NEW_'+c_l['sf']
@@ -96,7 +96,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
         show_metadata(orientations, "orientations layer")
     # Process geology polygons
 
-    if (os.path.isfile(geology_file) or not local_paths):
+    if (os.path.isfile(geology_file) or geology_file.startswith("http") or not local_paths):
         geology = gpd.read_file(geology_file, bbox=bbox)
 
         if not c_l['o'] in geology.columns:
@@ -167,7 +167,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
     # Process fold polylines
 
-    if (os.path.isfile(fold_file) or not local_paths):
+    if (os.path.isfile(fold_file) or fold_file.startswith("http") or not local_paths):
         folds = gpd.read_file(fold_file, bbox=bbox)
         if(len(folds) > 0):
             if not c_l['o'] in folds.columns:
@@ -208,7 +208,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
     # Process fault polylines
 
-    if (os.path.isfile(fault_file) or not local_paths):
+    if (os.path.isfile(fault_file) or fault_file.startswith("http") or not local_paths):
         faults_folds = gpd.read_file(fault_file, bbox=bbox)
 
         faults = faults_folds[faults_folds[c_l['f']
@@ -289,7 +289,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
     # Process mindep points
 
-    if (os.path.isfile(mindep_file) or not local_paths):
+    if (os.path.isfile(mindep_file) or mindep_file.startswith("http") or not local_paths):
         mindeps = gpd.read_file(mindep_file, bbox=bbox)
         if(len(mindeps) == 0):
             m2l_warnings.append('no mindeps for analysis')

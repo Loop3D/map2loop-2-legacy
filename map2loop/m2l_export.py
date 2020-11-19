@@ -1447,7 +1447,7 @@ def export_to_projectfile(loopFilename, output_path, bbox, proj_crs):
     faultEvents['avgDisplacement'] = 0
     for i in range(faultEvents.size):
         faults.loc[i, 'formation'] = re.sub('.*_', '', faults['formation'][i])
-    tmp = faults['formation']
+    tmp = [str.replace(".","_") for str in faults['formation']]
     faultEvents['eventId'] = tmp
 
     resp = LoopProjectFile.Set(
@@ -1457,7 +1457,7 @@ def export_to_projectfile(loopFilename, output_path, bbox, proj_crs):
 
     faultsData = np.zeros(
         faults.shape[0], LoopProjectFile.faultObservationType)
-    faultsData['eventId'] = faults['formation']
+    faultsData['eventId'] = tmp
     faultsData['easting'] = faults['X']
     faultsData['northing'] = faults['Y']
     faultsData['altitude'] = faults['Z']
