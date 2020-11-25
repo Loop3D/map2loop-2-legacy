@@ -115,8 +115,6 @@ class Config(object):
         self.polygon = polygon
         self.step_out = step_out
 
-        if not self.quiet == "None":
-            plt.ioff()
         self.quiet = quiet
         self.c_l = c_l
 
@@ -207,6 +205,8 @@ class Config(object):
 
             print("Input graphic saved to: " +
                   self.tmp_path + "input-fig.png")
+            
+            self.export_png()
 
             if self.quiet == 'None':
                 plt.show()
@@ -214,6 +214,9 @@ class Config(object):
             return
         except Exception as e:
             print(e)
+
+        if not self.quiet == "None":
+            plt.ioff()
 
         disable_quiet_mode()
 
