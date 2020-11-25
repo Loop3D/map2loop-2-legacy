@@ -44,6 +44,7 @@ class Config(object):
                  proj_crs,
                  local,
                  quiet,
+                 loopFilename,
                  c_l={},
                  **kwargs
                  ):
@@ -121,6 +122,8 @@ class Config(object):
         self.dtm_crs = dtm_crs
         self.proj_crs = proj_crs
 
+        self.loop_projectfile = loopFilename
+
         # Check input maps for missing values
         drift_prefix = kwargs.get('drift_prefix', ['None'])
         self.local = local
@@ -184,11 +187,15 @@ class Config(object):
         self.mindeps = mindeps
 
         try:
-            self.geology_figure = geology.copy().plot(column=self.c_l['c'], figsize=(
+            fig, ax = plt.subplots()
+
+            self.geology_figure = geology.copy().plot(column=self.c_l['c'], ax=ax, figsize=(
                 10, 10), edgecolor='#000000', linewidth=0.2).get_figure()
 
+            self.export_png()
+
             base = geology.plot(column=self.c_l['c'], figsize=(
-                10, 10), edgecolor='#000000', linewidth=0.2, legend=True)
+                10, 10), ax=ax, edgecolor='#000000', linewidth=0.2, legend=True)
             leg = base.get_legend()
             leg.set_bbox_to_anchor((1.04, 1))
 
@@ -205,8 +212,6 @@ class Config(object):
 
             print("Input graphic saved to: " +
                   self.tmp_path + "input-fig.png")
-            
-            self.export_png()
 
             if self.quiet == 'None':
                 plt.show()
@@ -214,9 +219,6 @@ class Config(object):
             return
         except Exception as e:
             print(e)
-
-        if not self.quiet == "None":
-            plt.ioff()
 
         disable_quiet_mode()
 
@@ -748,12 +750,14 @@ class Config(object):
 
         # TODO: Figures sometimes look a bit squashed in notebooks
 
-    def update_projectfile(self, loopFilename):
+    def update_projectfile(self):
         self.loop_projectfile = export_to_projectfile(
-            loopFilename, self.output_path, self.bbox_3d, self.proj_crs)
-
+            self.loop_projectfile, self.output_path, self.bbox_3d, self.proj_crs)
         print("PROJECTFILE FOUND AT", self.loop_projectfile)
 
     def export_png(self):
+        filename = self.loop_projectfile
+        if self.loop_projectfile is None:
+            filename = 'GEOLOGY_CLIP'
         self.geology_figure.savefig("{}.png".format(self.loop_projectfile))
         print("Geology graphic exported to: " + self.tmp_path+"geology.png")
