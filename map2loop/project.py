@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 import logging
 import urllib.request
 import warnings
@@ -11,6 +12,7 @@ import geopandas as gpd
 import pandas as pd
 import numpy as np
 from shapely.geometry import Polygon
+from matplotlib import pyplot as plt
 
 from map2loop.config import Config
 from map2loop.m2l_utils import display, enable_quiet_mode, disable_quiet_mode, print
@@ -163,6 +165,7 @@ class Project(object):
     def update_config(self,
                       out_dir,
                       overwrite='false',
+                      loopFilename=None,
                       bbox_3d={
                           "minx": 0,
                           "maxx": 0,
@@ -197,6 +200,11 @@ class Project(object):
         """
         # TODO: Proj crs probably doesn't need to be here
 
+        self.loopFilename = loopFilename
+        if self.loopFilename is not None:
+            if not os.path.exists(loopFilename):
+                sys.exit("That project file path does not exist.")
+
         if bbox_3d["minx"] == 0 and bbox_3d["maxx"] == 0:
             bbox_3d.update({
                 "minx": self.proj_bounds[0],
@@ -229,7 +237,7 @@ class Project(object):
         self.config = Config(out_dir, overwrite,
                              self.geology_file, self.fault_file, self.fold_file,
                              self.structure_file, self.mindep_file,
-                             bbox_3d, polygon, step_out, dtm_crs, proj_crs, self.local, self.quiet, self.c_l,
+                             bbox_3d, polygon, step_out, dtm_crs, proj_crs, self.local, self.quiet, self.loopFilename, self.c_l,
                              **kwargs
                              )
 
@@ -377,6 +385,10 @@ class Project(object):
             # print("enabling quiet all mode")
             enable_quiet_mode()
 
+        # TODO: Remove plt.show() conditionals in config.py and see if just this plt.ioff() is sufficient
+        if self.quiet == 'no-figures':
+            plt.ioff()
+
         with tqdm(total=100, position=0) as pbar:
             pbar.update(0)
 
@@ -444,9 +456,11 @@ class Project(object):
             self.config.postprocess(
                 inputs, self.workflow, use_interpolations, use_fat)
             pbar.update(10)
+
             self.config.create_map_cmap()
 
-        # self.config.update_projectfile()
-        # self.config.export_png()
+            if self.loopFilename is not None:
+                self.config.update_projectfile()
 
         disable_quiet_mode()
+        plt.ion()
