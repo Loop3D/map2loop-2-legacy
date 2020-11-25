@@ -12,6 +12,7 @@ from map2loop import m2l_utils
 from map2loop import m2l_interpolation
 import numpy as np
 import os
+import sys
 import random
 
 from map2loop.m2l_utils import print
@@ -1602,7 +1603,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
         if(a_sort[1]['group_'] not in no_contacts):
             for old_sort in all_sorts.iterrows():
                 if(a_sort[1]['group_'] == old_sort[1]['group']):
-                    
+
                     ostr = "{},{},{},{},{},{},{}\n"\
                         .format(newdx, gpdx, old_sort[1]['index in group'], old_sort[1]['number in group'], old_sort[0], old_sort[1]['group'], 'erode')
                     #ostr=str(newdx)+","+str(gpdx)+","+str(old_sort[1]['index in group'])+","+str(old_sort[1]['number in group'])+","+old_sort[0]+","+old_sort[1]['group']+",erode\n"
@@ -1630,6 +1631,8 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     # add colours (hardwired to GSWA or the moment
     if(clut_path == ''):
         asc = pd.read_csv(tmp_path+'all_sorts_clean.csv', ",")
+        print(asc)
+        sys.exit("HEYO")
         colours = []
         for i in range(len(asc)):
             r = random.randint(1, 256)-1

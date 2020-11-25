@@ -1,3 +1,4 @@
+import sys
 import geopandas as gpd
 from shapely.geometry import LineString, Polygon, MultiLineString
 import os.path
@@ -33,6 +34,11 @@ def explode_polylines(indf, c_l, dst_crs):
 
 
 def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, tmp_path, bbox, c_l, dst_crs, local_paths, drift_prefix):
+
+    # print(gpd.read_file(geology_file).columns)
+    # print(gpd.read_file(fault_file).columns)
+    # print(gpd.read_file(fold_file).columns)
+    # print(gpd.read_file(mindep_file).columns)
 
     y_point_list = [bbox[1], bbox[1], bbox[3], bbox[3], bbox[1]]
     x_point_list = [bbox[0], bbox[2], bbox[2], bbox[0], bbox[0]]
@@ -100,6 +106,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
         geology = gpd.read_file(geology_file, bbox=bbox)
 
         if not c_l['o'] in geology.columns:
+            # print(geology.columns)
             geology = geology.reset_index()
             geology[c_l['o']] = geology.index
 

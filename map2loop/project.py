@@ -89,7 +89,7 @@ class Project(object):
         # If local, set the maximum bounding box to the bounds of the input files
         # If remote, set bounds to zeros, hopefully this gives the whole map...
         if self.geology_file is not None:
-            print("not remote")
+            # print("not remote")
             geology = gpd.read_file(self.geology_file)
             self.proj_bounds = geology.total_bounds
             self.proj_crs = geology.crs
@@ -174,7 +174,7 @@ class Project(object):
                       dtm_crs={'init': 'EPSG:4326'},
                       proj_crs=None,
                       step_out=None,
-                      quiet=False,
+                      quiet='None',
                       **kwargs
                       ):
         """Creates a sub-project Config object and preprocesses input data for some area.
@@ -191,8 +191,8 @@ class Project(object):
         :type proj_crs: dict, optional
         :param step_out: How far to consider outside the reprojected dtm, defaults to None
         :type step_out: int, optional
-        :param quiet: Allow or block print statements and matplotlib figures, defaults to False
-        :type quiet: bool, optional
+        :param quiet: Allow or block print statements and matplotlib figures, 'None' to quiet nothing, 'all' to quiet everything, 'no-figures' to disable plots and allow text output. Defaults to 'None'
+        :type quiet: string, optional
         :param **kwargs: 
         """
         # TODO: Proj crs probably doesn't need to be here
@@ -286,11 +286,12 @@ class Project(object):
                 bbox_str)
             self.fold_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_faults_folds_28355&bbox={}&srsName=EPSG:28355'.format(
                 bbox_str)
-            self.metadata = "https://gist.githubusercontent.com/yohanderose/7ad2ae1b36e4e0b3f27dff17eeae0cc2/raw/82c2120a9a554d470ab28199d9ee9d6bb41f9d0f/QLD_meta.hjson"
+            self.metadata = "https://gist.githubusercontent.com/yohanderose/7ad2ae1b36e4e0b3f27dff17eeae0cc2/raw/ec8d33e52d913e2df4658ca94e7eb467e35adccd/QLD_meta.hjson"
             self.read_metadata(self.metadata)
 
     # TODO: Create notebooks for lower level use
     # TODO: Run flags that affect the config object functions
+
     def run(self,
             aus=True,
             deposits="Fe,Cu,Au,NONE",
@@ -372,8 +373,8 @@ class Project(object):
         :type use_fat: bool
         """
 
-        if self.quiet:
-            print("enabling quiet mode")
+        if self.quiet == 'all':
+            # print("enabling quiet all mode")
             enable_quiet_mode()
 
         with tqdm(total=100, position=0) as pbar:

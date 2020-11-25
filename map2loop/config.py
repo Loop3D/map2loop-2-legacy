@@ -2,8 +2,7 @@ import os
 import sys
 import time
 import shutil
-import re
-import csv
+import random
 
 import numpy as np
 import pandas as pd
@@ -106,7 +105,8 @@ class Config(object):
         if(not os.path.isdir(self.graph_path)):
             os.mkdir(self.graph_path)
 
-        if quiet:
+        self.quiet = quiet
+        if self.quiet == 'all':
             enable_quiet_mode()
 
         self.bbox_3d = bbox_3d
@@ -114,7 +114,8 @@ class Config(object):
                            bbox_3d["maxx"], bbox_3d["maxy"]])
         self.polygon = polygon
         self.step_out = step_out
-        if quiet:
+
+        if not self.quiet == "None":
             plt.ioff()
         self.quiet = quiet
         self.c_l = c_l
@@ -146,7 +147,7 @@ class Config(object):
         :type command: str, optional
         """
 
-        if self.quiet:
+        if self.quiet == 'all':
             enable_quiet_mode()
 
         geology = gpd.read_file(self.geology_file, bbox=self.bbox)
@@ -207,7 +208,7 @@ class Config(object):
             print("Input graphic saved to: " +
                   self.tmp_path + "input-fig.png")
 
-            if not self.quiet:
+            if self.quiet == 'None':
                 plt.show()
 
             return
@@ -247,11 +248,14 @@ class Config(object):
                               self.mindep_file_csv, self.bbox[0], self.bbox[1], self.bbox[2], self.bbox[3], 500.0, 'Fe,Cu,Au,NONE')
 
     def run_map2model(self, deposits, aus):
+        quiet_m2m = False
+        if self.quiet == 'all':
+            quiet_m2m = True
         run_log = map2model.run(self.graph_path, self.geology_file_csv,
                                 self.fault_file_csv, self.mindep_file_csv,
                                 self.bbox_3d,
                                 self.c_l,
-                                self.quiet,
+                                quiet_m2m,
                                 deposits
                                 )
 
@@ -267,7 +271,7 @@ class Config(object):
         self.G = nx.read_gml(self.strat_graph_file, label='id')
         selected_nodes = [n for n, v in self.G.nodes(data=True) if n >= 0]
 
-        if not self.quiet:
+        if self.quiet == 'all':
             nx.draw_networkx(self.G, pos=nx.kamada_kawai_layout(
                 self.G), arrows=True, nodelist=selected_nodes)
 
@@ -286,9 +290,13 @@ class Config(object):
         # Save groups of stratigraphic units
         groups, self.glabels, G = Topology.get_series(
             self.strat_graph_file, 'id')
+
+        quiet_topology = False
+        if self.quiet == 'None':
+            quiet_topology = True
         Topology.save_units(G, self.tmp_path, self.glabels,
                             Australia=True, asud_strat_file="https://gist.githubusercontent.com/yohanderose/3b257dc768fafe5aaf70e64ae55e4c42/raw/8598c7563c1eea5c0cd1080f2c418dc975cc5433/ASUD.csv",
-                            quiet=self.quiet)
+                            quiet=quiet_topology)
 
         print("Done")
 
@@ -324,7 +332,7 @@ class Config(object):
             self.dtm_file, self.dtm_reproj_file, self.dtm_crs, self.proj_crs)
         self.dtm = rasterio.open(self.dtm_reproj_file)
 
-        if not self.quiet:
+        if self.quiet == 'None':
             plt.imshow(self.dtm.read(1), cmap='terrain',
                        vmin=0, vmax=1000)
 
@@ -382,8 +390,11 @@ class Config(object):
         self.structure_clip.to_file(self.structure_clip_file)
 
         # Save geology clips
+        quiet_topology = False
+        if self.quiet == "None":
+            quiet_topology = True
         Topology.save_group(Topology, self.G, self.tmp_path,
-                            self.glabels, self.geol_clip, self.c_l, self.quiet)
+                            self.glabels, self.geol_clip, self.c_l, quiet_topology)
 
     def calc_depth_grid(self, dtb):
         dtm = self.dtm
@@ -432,7 +443,7 @@ class Config(object):
         m2l_geometry.save_orientations(
             self.structure_clip, self.output_path, self.c_l, orientation_decimate, self.dtm, self.dtb, self.dtb_null, False)
 
-        if not self.quiet:
+        if self.quiet == 'None':
             m2l_utils.plot_points(self.output_path+'orientations.csv',
                                   self.geol_clip, 'formation', 'X', 'Y', False, 'alpha')
 
@@ -454,7 +465,7 @@ class Config(object):
         m2l_geometry.save_basal_contacts_csv(
             contacts, self.output_path, self.dtm, self.dtb, self.dtb_null, False, contact_decimate, self.c_l)
         # False in this call was already false and isn't the cover flag
-        if not self.quiet:
+        if self.quiet == "None":
             m2l_utils.plot_points(self.output_path+'contacts4.csv',
                                   self.geol_clip, 'formation', 'X', 'Y', False, 'alpha')
 
@@ -471,8 +482,12 @@ class Config(object):
         self.scheme = interpolation_scheme
         orientations = self.structures
 
+        quiet_interp = True
+        if quiet_interp == "None":
+            quiet_interp = False
+
         group_girdle = m2l_utils.plot_bedding_stereonets(
-            orientations, self.geology, self.c_l, self.quiet)
+            orientations, self.geology, self.c_l, quiet_interp)
         super_groups, self.use_gcode3 = Topology.super_groups_and_groups(
             group_girdle, self.tmp_path, misorientation)
         # print(super_groups)
@@ -528,7 +543,7 @@ class Config(object):
         self.dip_grid = dip_grid
         self.dip_dir_grid = dip_dir_grid
 
-        if not self.quiet:
+        if self.quiet == 'None':
             print('interpolated dips')
             plt.imshow(self.dip_grid, cmap="hsv",
                        origin='lower', vmin=-90, vmax=90)
@@ -547,8 +562,19 @@ class Config(object):
     def create_map_cmap(self):
         """Create a colourmap for the model using the colour code
         """
-        asc = pd.read_csv(self.tmp_path+'all_sorts_clean.csv', ",")
-        # display(asc)
+        # asc = pd.read_csv(self.tmp_path+'all_sorts_clean.csv', ",")
+        all_sorts = pd.read_csv(self.tmp_path + 'all_sorts.csv')
+
+        colours = ['#%02X%02X%02X' % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                   for i in range(len(all_sorts))]
+        uctypes = ['erode'] * len(all_sorts)
+        data = list(zip(uctypes, colours))
+        expected_extra_cols = pd.DataFrame(
+            columns=['uctype', 'colour'], data=data)
+        all_sorts = pd.concat([all_sorts, expected_extra_cols], axis=1)
+        asc = all_sorts
+        all_sorts.to_csv(self.tmp_path+'all_sorts_clean.csv', ",")
+
         colours = pd.read_csv(self.clut_path, ",")
         if self.c_l['c'] == 'CODE':
             code = self.c_l['c'].lower()
@@ -662,7 +688,7 @@ class Config(object):
 
         m2l_geometry.normalise_thickness(self.output_path)
 
-        if not self.quiet:
+        if self.quiet == "None":
             m2l_utils.plot_points(self.output_path+'formation_thicknesses_norm.csv',
                                   self.geol_clip, 'norm_th', 'x', 'y', True, 'numeric')
 
