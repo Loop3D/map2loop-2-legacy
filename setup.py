@@ -64,6 +64,7 @@ setuptools.setup(
     ],
     cmdclass={
         'develop': CondaDependencies,
+        'install': CondaDependencies,
     },
     # install_requires=[
     #     'map2model-loop3d',
