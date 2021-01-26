@@ -19,6 +19,7 @@ requirements:
     - pybind11
     - setuptools
   run:
+    - python >=3.6
     - numpy
     - pandas
     - geopandas
