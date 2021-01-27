@@ -20,22 +20,10 @@ class CondaDependencies(develop):
             else:  # Linux or Mac
                 _shell = False
 
-            command = 'conda install -c defaults -c conda-forge -y python=3.7'.split() + \
+            command = 'conda install -c conda-forge -c loop3d -y python=3.7'.split() + \
                 deps
             print(command)
-            subprocess.call(command, shell=_shell)
-            command = 'conda install -c loop3d -y mplstereonet'.split()
-            print(command)
-            subprocess.call(command, shell=_shell)
-            command = 'conda install -c loop3d -y hjson'.split()
-            print(command)
-            subprocess.call(command, shell=_shell)
-            command = 'conda install -c loop3d -y loopprojectfile'.split()
-            print(command)
-            subprocess.call(command, shell=_shell)
-            command = 'conda install -c loop3d -y map2model'.split()
-            print(command)
-            subprocess.call(command, shell=_shell)
+            subprocess.run(command, shell=_shell)
         except Exception as e:
             self.error('Could not install dependencies using conda!')
 
@@ -49,7 +37,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="map2loop",
-    version="1.0.8",
+    version="1.1.0",
     author="Yohan de Rose",
     author_email="contact@loop3d.org",
     description="Generate 3D model data from 2D maps.",

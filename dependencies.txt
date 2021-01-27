@@ -10,3 +10,7 @@ networkx
 scipy
 owslib
 tqdm
+hjson
+mplstereonet
+loopprojectfile
+map2model

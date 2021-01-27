@@ -1,5 +1,5 @@
 {% set name = "map2loop" %}
-{% set version = "1.0.9" %}
+{% set version = "1.1.0" %}
 
 package:
   name: "{{ name|lower }}"
@@ -19,6 +19,7 @@ requirements:
     - pybind11
     - setuptools
   run:
+    - python >=3.6
     - numpy
     - pandas
     - geopandas
