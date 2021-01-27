@@ -1,9 +1,10 @@
-# Map2Loop 2.0 
+# Map2Loop 2.0
 
 Generate model input data from geological maps. High-level implementation and expansion of [https://github.com/Loop3D/map2loop](https://github.com/Loop3D/map2loop)
 Clone this repo with the following command, omit the --recurse-submodules flag if you do not want the notebooks.
+
 ```bash
-git clone https://github.com/Loop3D/map2loop-2.git --recurse-submodules 
+git clone https://github.com/Loop3D/map2loop-2.git --recurse-submodules
 ```
 
 ## Build with Conda
@@ -13,7 +14,7 @@ git clone https://github.com/Loop3D/map2loop-2.git --recurse-submodules
 If you just want to use map2loop, issue the following command.
 
 ```bash
-conda install -c loop3d map2loop -y
+conda install -c conda-forge -c loop3d map2loop -y
 ```
 
 ### Development
@@ -39,23 +40,23 @@ docker run -it -p 8888:8888 yohanderose/map2loop-2_dev:0.0.2
 
 ### Development
 
-1. Clone this repo and navigate inside using the recurse submodules flag to fetch the example data. 
+1. Clone this repo and navigate inside using the recurse submodules flag to fetch the example data.
 
-    ```bash
-    git clone --recurse-submodules https://github.com/Loop3D/map2loop-2
-    ```
+   ```bash
+   git clone --recurse-submodules https://github.com/Loop3D/map2loop-2
+   ```
 
 2. Run the following command and click on the link Jupyter outputs to access the original [map2loop](https://github.com/Loop3D/map2loop) notebooks.
 
-    ```bash
-    docker-compose up
-    ```
+   ```bash
+   docker-compose up
+   ```
 
-3. To jump into a bash shell in the container itself, open a new terminal and issue the following command. 
+3. To jump into a bash shell in the container itself, open a new terminal and issue the following command.
 
-    ```bash
-    docker exec -it map2loop-2_dev_1 bash
-    ```
+   ```bash
+   docker exec -it map2loop-2_dev_1 bash
+   ```
 
 ### Known Issues
 
