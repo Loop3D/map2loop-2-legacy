@@ -85,6 +85,7 @@ class Config(object):
         self.vtk_path = self.project_path+'/vtk/'
 
         self.fault_file_csv = self.tmp_path + "faults.csv"
+        self.fault_output_file_csv = self.output_path + "faults.csv"
         self.structure_file_csv = self.tmp_path + "structure.csv"
         self.geology_file_csv = self.tmp_path + "geology.csv"
         self.mindep_file_csv = self.tmp_path + "mindep.csv"
@@ -606,7 +607,7 @@ class Config(object):
         m2l_geometry.save_faults(
             self.tmp_path+'faults_clip.shp', self.output_path, self.dtm, self.dtb, self.dtb_null, False, self.c_l, fault_decimate, min_fault_length, fault_dip)
 
-        faults = pd.read_csv(self.fault_file_csv, sep='\t')
+        faults = pd.read_csv(self.fault_output_file_csv, sep=",")
         faults_len = len(faults)
         if(faults_len > 0):
             m2l_interpolation.process_fault_throw_and_near_faults_from_grid(self.tmp_path, self.output_path, self.dtm_reproj_file, self.dtb, self.dtb_null, False, self.c_l, self.proj_crs, self.bbox,

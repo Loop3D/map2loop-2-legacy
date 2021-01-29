@@ -331,7 +331,8 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             'The errors listed above must be fixed prior to rerunning map2loop')
         for e in m2l_errors:
             print("    ", e)
-        raise NameError('map2loop error: Fix errors before running again')
+        sep = '\12'
+        raise NameError(sep.join(m2l_errors) + '\n map2loop error: Fix errors before running again')
 
     if(len(m2l_errors) == 0):
 

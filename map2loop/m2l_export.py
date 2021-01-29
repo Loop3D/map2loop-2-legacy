@@ -1436,38 +1436,39 @@ def export_to_projectfile(loopFilename, output_path, bbox, proj_crs):
         print(resp["errorString"])
 
     faults = pd.read_csv(output_path + "fault_orientations.csv")
-    faultEvents = np.zeros(faults.shape[0], LoopProjectFile.faultEventType)
-    # The fault eventId is called formation for some reason
-    faultEvents['name'] = faults['formation']
-    faultEvents['enabled'] = 0
-    faultEvents['rank'] = 0
-    faultEvents['type'] = 0
-    faultEvents['minAge'] = np.arange(1.0, 7.0, 6.0/faults.shape[0])
-    faultEvents['maxAge'] = faultEvents['minAge']
-    faultEvents['avgDisplacement'] = 0
-    for i in range(faultEvents.size):
-        faults.loc[i, 'formation'] = re.sub('.*_', '', faults['formation'][i])
-    tmp = [str.replace(".","_") for str in faults['formation']]
-    faultEvents['eventId'] = tmp
+    if (len(faults) > 0):
+        faultEvents = np.zeros(faults.shape[0], LoopProjectFile.faultEventType)
+        # The fault eventId is called formation for some reason
+        faultEvents['name'] = faults['formation']
+        faultEvents['enabled'] = 0
+        faultEvents['rank'] = 0
+        faultEvents['type'] = 0
+        faultEvents['minAge'] = np.arange(1.0, 7.0, 6.0/faults.shape[0])
+        faultEvents['maxAge'] = faultEvents['minAge']
+        faultEvents['avgDisplacement'] = 0
+        for i in range(faultEvents.size):
+            faults.loc[i, 'formation'] = re.sub('.*_', '', faults['formation'][i])
+        tmp = [str.replace(".","_") for str in faults['formation']]
+        faultEvents['eventId'] = tmp
 
-    resp = LoopProjectFile.Set(
-        loopFilename, "faultLog", data=faultEvents, verbose=False)
-    if resp["errorFlag"]:
-        print(resp["errorString"])
+        resp = LoopProjectFile.Set(
+            loopFilename, "faultLog", data=faultEvents, verbose=False)
+        if resp["errorFlag"]:
+            print(resp["errorString"])
 
-    faultsData = np.zeros(
-        faults.shape[0], LoopProjectFile.faultObservationType)
-    faultsData['eventId'] = tmp
-    faultsData['easting'] = faults['X']
-    faultsData['northing'] = faults['Y']
-    faultsData['altitude'] = faults['Z']
-    faultsData['dipDir'] = faults['DipDirection']
-    faultsData['dip'] = faults['dip']
-    faultsData['dipPolarity'] = faults['DipPolarity']
-    resp = LoopProjectFile.Set(
-        loopFilename, "faultObservations", data=faultsData, verbose=True)
-    if resp["errorFlag"]:
-        print(resp["errorString"])
+        faultsData = np.zeros(
+            faults.shape[0], LoopProjectFile.faultObservationType)
+        faultsData['eventId'] = tmp
+        faultsData['easting'] = faults['X']
+        faultsData['northing'] = faults['Y']
+        faultsData['altitude'] = faults['Z']
+        faultsData['dipDir'] = faults['DipDirection']
+        faultsData['dip'] = faults['dip']
+        faultsData['dipPolarity'] = faults['DipPolarity']
+        resp = LoopProjectFile.Set(
+            loopFilename, "faultObservations", data=faultsData, verbose=True)
+        if resp["errorFlag"]:
+            print(resp["errorString"])
 
     # each contact contains a location and which formation it is on
     contacts = pd.read_csv(output_path + "contacts4.csv")
