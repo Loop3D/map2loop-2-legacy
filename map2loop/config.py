@@ -690,7 +690,7 @@ class Config(object):
                                               self.c_l, self.bbox, self.dip_grid, self.dip_dir_grid, self.x, self.y, self.spacing)
 
         m2l_geometry.calc_min_thickness_with_grid(self.tmp_path, self.output_path, thickness_buffer, max_thickness_allowed,
-                                                  self.c_l, self.bbox, self.dip_grid, self.dip_dir_grid, self.x, self.y, self.spacing)
+                                                  self.c_l, self.bbox, self.dip_grid, self.dip_dir_grid, self.x, self.y, self.spacing, self.dtm)
 
         m2l_geometry.normalise_thickness(self.output_path)
 
