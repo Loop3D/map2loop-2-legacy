@@ -687,7 +687,7 @@ class Config(object):
         # max_thickness_allowed = 10000
 
         m2l_geometry.calc_thickness_with_grid(self.tmp_path, self.output_path, thickness_buffer, max_thickness_allowed,
-                                              self.c_l, self.bbox, self.dip_grid, self.dip_dir_grid, self.x, self.y, self.spacing)
+                                              self.c_l, self.bbox, self.dip_grid, self.dip_dir_grid, self.x, self.y, self.spacing, self.dtm)
 
         m2l_geometry.calc_min_thickness_with_grid(self.tmp_path, self.output_path, thickness_buffer, max_thickness_allowed,
                                                   self.c_l, self.bbox, self.dip_grid, self.dip_dir_grid, self.x, self.y, self.spacing, self.dtm)
