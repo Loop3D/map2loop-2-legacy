@@ -675,7 +675,7 @@ class Config(object):
         m2l_geometry.save_basal_contacts_orientations_csv(contacts, orientations, self.geol_clip, self.tmp_path, self.output_path, self.dtm, self.dtb,
                                                           self.dtb_null, False, contact_orientation_decimate, self.c_l, contact_dip, self.dip_grid, self.spacing, self.bbox)
 
-    def calc_thickness(self, contact_decimate, null_scheme, thickness_buffer, max_thickness_allowed,self.cl):
+    def calc_thickness(self, contact_decimate, null_scheme, thickness_buffer, max_thickness_allowed,cl):
         # Estimate formation thickness and normalised formation thickness
         geology_file = self.tmp_path+'basal_contacts.shp'
         # contact_decimate = 5

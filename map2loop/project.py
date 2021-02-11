@@ -433,7 +433,7 @@ class Project(object):
 
             if(self.workflow['formation_thickness']):
                 self.config.calc_thickness(
-                    contact_decimate, null_scheme, thickness_buffer, max_thickness_allowed)
+                    contact_decimate, null_scheme, thickness_buffer, max_thickness_allowed,self.c_l)
 
             if(self.workflow['fold_axial_traces']):
                 self.config.create_fold_axial_trace_points(
