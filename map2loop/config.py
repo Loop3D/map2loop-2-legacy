@@ -579,7 +579,7 @@ class Config(object):
             columns=['uctype', 'colour'], data=data)
         all_sorts = pd.concat([all_sorts, expected_extra_cols], axis=1)
         asc = all_sorts
-        all_sorts.to_csv(self.tmp_path+'all_sorts_clean.csv', ",")
+        all_sorts.to_csv(self.tmp_path+'all_sorts_clean.csv', ",",index = None)
 
         colours = pd.read_csv(self.clut_path, ",")
         if self.c_l['c'] == 'CODE':
