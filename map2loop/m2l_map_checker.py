@@ -174,45 +174,52 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
     # Process fold polylines
 
-    if (os.path.isfile(fold_file) or fold_file.startswith("http") or not local_paths):
-        folds = gpd.read_file(fold_file, bbox=bbox)
-        if(len(folds) > 0):
+    if (os.path.isfile(fold_file) or not local_paths):
+        folds = gpd.read_file(fold_file,bbox=bbox)
+        if(len(folds)>0):
             if not c_l['o'] in folds.columns:
                 folds = folds.reset_index()
-                folds[c_l['o']] = folds.index
-            unique_g = set(folds[c_l['o']])
+                folds[c_l['o']]=folds.index
+            unique_g=set(folds[c_l['o']])
 
             if(not len(unique_g) == len(folds)):
                 m2l_warnings.append('duplicate fold polyline unique IDs')
-            
+
             folds = folds[folds[c_l['ff']].str.contains(c_l['fold'])]        
 
             folds = folds.replace(r'^\s+$', np.nan, regex=True)
+            
+                
 
-            for code in ('ff', 't'):
-                if(c_l['ff'] == 'No_col' or not c_l['ff'] in folds.columns):
+            for code in ('ff','t'):
+                if(c_l['ff']=='No_col'  or not c_l['ff'] in folds.columns):
                     m2l_warnings.append('No fold code for fold polylines')
-                    c_l['ff'] = 'ff'
-                    folds[c_l['ff']] = c_l['fold']
-
-                if(c_l['t'] == 'No_col' or not c_l['t'] in folds.columns):
+                    c_l['ff']='ff'
+                    folds[c_l['ff']]=c_l['fold']
+                    
+                if(c_l['t']=='No_col'  or not c_l['t'] in folds.columns):
                     m2l_warnings.append('No fold polarity for fold polylines')
-                    c_l['t'] = 't'
-                    folds[c_l['t']] = 'None'
-
+                    c_l['t']='t'
+                    folds[c_l['t']]='None'
+                    
                 if(c_l[code] in folds.columns):
-                    folds[c_l[code]].str.replace(",", " ")
+                    folds[c_l[code]].str.replace(","," ")        
 
-                    nans = folds[c_l[code]].isnull().sum()
-                    if(nans > 0):
-                        m2l_warnings.append(''+str(nans)+' NaN/blank found in column "'+str(
-                            c_l[code])+'" of folds file, replacing with 0')
-                        folds[c_l[code]].fillna("0", inplace=True)
+                    nans=folds[c_l[code]].isnull().sum() 
+                    if(nans>0):
+                        m2l_warnings.append(''+str(nans)+' NaN/blank found in column "'+str(c_l[code])+'" of folds file, replacing with 0')
+                        folds[c_l[code]].fillna("0", inplace = True)
 
-            folds_clip = m2l_utils.clip_shp(folds, polygo)
+            folds_clip=m2l_utils.clip_shp(folds,polygo)
+            if(len(folds_clip) > 0):
+                folds_explode = explode_polylines(folds_clip, c_l, dst_crs)
+                if(len(folds_explode) > len(folds_clip)):
+                    m2l_warnings.append(
+                        'some folds are MultiPolyLines, and have been split')
+                folds_explode.crs = dst_crs
 
-            show_metadata(folds_clip, "fold layer")
-        else:
+            show_metadata(folds_clip,"fold layer")    
+        else: 
             print('No folds in area')
 
     # Process fault polylines
