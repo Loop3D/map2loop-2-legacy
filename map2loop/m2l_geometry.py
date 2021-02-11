@@ -1586,15 +1586,15 @@ def xxxpt_dist(x1,y1,x2,y2):
 ####################################################
 
 def bboxes_intersect(bbox1,bbox2):
-        if(bbox1[0]< = bbox2[2] and bbox1[0]> = bbox2[0] and bbox1[1]< = bbox2[3] and bbox1[1]< = bbox2[1]):
+        if(bbox1[0]<= bbox2[2] and bbox1[0]>= bbox2[0] and bbox1[1]<= bbox2[3] and bbox1[1]<= bbox2[1]):
             return(True)
-        elif(bbox1[0]< = bbox2[2] and bbox1[0]> = bbox2[0] and bbox1[3]< = bbox2[3] and bbox1[3]< = bbox2[1]):
+        elif(bbox1[0]<= bbox2[2] and bbox1[0]>= bbox2[0] and bbox1[3]<= bbox2[3] and bbox1[3]<= bbox2[1]):
             return(True)
-        elif(bbox1[2]< = bbox2[2] and bbox1[2]> = bbox2[0] and bbox1[1]< = bbox2[3] and bbox1[1]< = bbox2[1]):
+        elif(bbox1[2]<= bbox2[2] and bbox1[2]>= bbox2[0] and bbox1[1]<= bbox2[3] and bbox1[1]<= bbox2[1]):
             return(True)
-        elif(bbox1[2]< = bbox2[2] and bbox1[2]> = bbox2[0] and bbox1[3]< = bbox2[3] and bbox1[3]< = bbox2[1]):
+        elif(bbox1[2]<= bbox2[2] and bbox1[2]>= bbox2[0] and bbox1[3]<= bbox2[3] and bbox1[3]<= bbox2[1]):
             return(True)
-        elif(bbox2[0]< = bbox1[2] and bbox2[0]> = bbox1[0] and bbox2[3]< = bbox1[3] and bbox2[3]< = bbox1[1]):
+        elif(bbox2[0]<= bbox1[2] and bbox2[0]>= bbox1[0] and bbox2[3]<= bbox1[3] and bbox2[3]<= bbox1[1]):
             return(True)
         else:
             return(False)
@@ -2377,7 +2377,7 @@ def save_orientations_with_polarity(orientations_path,path_out,c_l,basal_path,al
         if(not close_fm  == ''):
             #print(sign,anori["formation"],close_fm,int(all_sorts.loc[anori["formation"]]["index"]),int(all_sorts.loc[close_fm]["index"]))
             if(sign == 1):
-                if(int(all_sorts.loc[anori["formation"]]["index"])< = int(all_sorts.loc[close_fm]["index"]) and close_dist < buffer*2):
+                if(int(all_sorts.loc[anori["formation"]]["index"])<= int(all_sorts.loc[close_fm]["index"]) and close_dist < buffer*2):
                     polarity = 1
                 else:
                     polarity = 0
