@@ -12,7 +12,7 @@ from rasterio.transform import from_origin
 from rasterio import features
 import re  # typo? check
 from urllib.request import urlopen
-from math import sin, cos, atan, atan2, asin, radians, degrees, sqrt, pow, acos, fmod, fabs, isnan
+from math import sin, cos, atan, atan2, asin, radians, degrees, sqrt, pow, acos, fmod, fabs, isnan, floor
 from owslib.wcs import WebCoverageService
 from scipy.interpolate import griddata
 #from osgeo import gdal
