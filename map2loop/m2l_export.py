@@ -1361,6 +1361,133 @@ def display_LS_map(model,dtm,geol_clip,faults_clip,dst_crs,use_cmap,cmap,use_top
     geol_clip.plot(ax=ax, facecolor='none', edgecolor='black',linewidth=0.4)
     if(use_faults):
         faults_clip.plot(ax=ax, facecolor='none', edgecolor='red',linewidth=0.7)
+
+
+def export_to_projectfile(loopFilename, output_path, bbox, proj_crs):
+
+    # project_path = re.sub(r'\W+', '', project_path)
+    # loopFilename = project_path + '.loop3d'
+
+    # LoopProjectFile.CreateBasic(loopFilename, overwrite=True)
+    # TODO: Check if file does not exist in working dir, create if not
+
+    # TODO: Convert input coordinates from any projection to utm
+    # Send bounding box to project file
+    # LoopProjectFile.Set(loopFilename, "extents", geodesic=[bbox['miny'], bbox['maxy'], bbox['minx'], bbox['maxx']],
+    #                      depth=[bbox['base'], bbox['top']],
+    #                     spacing=[1000, 1000, 10], preference="geodesic")
+
+    stratigraphicLayers = pd.read_csv(
+        output_path + "formation_thicknesses.csv")
+    thickness = {}
+    uniqueLayers = stratigraphicLayers['formation'].unique()
+    for f in uniqueLayers:
+        thickness[f] = np.mean(
+            stratigraphicLayers[stratigraphicLayers['formation'] == f]['thickness'])
+    stratigraphicLogData = np.zeros(
+        uniqueLayers.shape[0], LoopProjectFile.stratigraphicLayerType)
+    stratigraphicLogData['layerId'] = range(uniqueLayers.shape[0])
+    stratigraphicLogData['layerId'] += 1
+    stratigraphicLogData['minAge'] = range(uniqueLayers.shape[0])
+    stratigraphicLogData['maxAge'] = range(uniqueLayers.shape[0])
+    stratigraphicLogData['maxAge'] += 0.5
+    stratigraphicLogData['name'] = uniqueLayers
+    stratigraphicLogData['enabled'] = 1
+    stratigraphicLogData['rank'] = 0
+    stratigraphicLogData['type'] = 4
+    stratigraphicLogData['thickness'] = list(thickness.values())
+    resp = LoopProjectFile.Set(
+        loopFilename, "stratigraphicLog", data=stratigraphicLogData, verbose=True)
+    if resp["errorFlag"]:
+        print(resp["errorString"])
+
+    faults = pd.read_csv(output_path + "fault_orientations.csv")
+    faultEvents = np.zeros(faults.shape[0], LoopProjectFile.faultEventType)
+    # The fault eventId is called formation for some reason
+    faultEvents['name'] = faults['formation']
+    faultEvents['enabled'] = 0
+    faultEvents['rank'] = 0
+    faultEvents['type'] = 0
+    faultEvents['minAge'] = np.arange(1.0, 7.0, 6.0/faults.shape[0])
+    faultEvents['maxAge'] = faultEvents['minAge']
+    faultEvents['avgDisplacement'] = 0
+    for i in range(faultEvents.size):
+        faults.loc[i, 'formation'] = re.sub('.*_', '', faults['formation'][i])
+    tmp = faults['formation']
+    faultEvents['eventId'] = tmp
+
+    resp = LoopProjectFile.Set(
+        loopFilename, "faultLog", data=faultEvents, verbose=False)
+    if resp["errorFlag"]:
+        print(resp["errorString"])
+
+    faultsData = np.zeros(
+        faults.shape[0], LoopProjectFile.faultObservationType)
+    faultsData['eventId'] = faults['formation']
+    faultsData['easting'] = faults['X']
+    faultsData['northing'] = faults['Y']
+    faultsData['altitude'] = faults['Z']
+    faultsData['dipDir'] = faults['DipDirection']
+    faultsData['dip'] = faults['dip']
+    faultsData['dipPolarity'] = faults['DipPolarity']
+    resp = LoopProjectFile.Set(
+        loopFilename, "faultObservations", data=faultsData, verbose=True)
+    if resp["errorFlag"]:
+        print(resp["errorString"])
+
+    # each contact contains a location and which formation it is on
+    contacts = pd.read_csv(output_path + "contacts4.csv")
+    layerIds = []
+    for form in contacts['formation']:
+        a = bytes(form, 'ascii')
+        if a in stratigraphicLogData['name']:
+            layerIds.append(
+                int(stratigraphicLogData[stratigraphicLogData['name'] == a]['layerId']))
+        else:
+            layerIds.append(0)
+    contactsData = np.zeros(
+        contacts.shape[0], LoopProjectFile.contactObservationType)
+    contactsData['layerId'] = layerIds
+    contactsData['easting'] = contacts['X']
+    contactsData['northing'] = contacts['Y']
+    contactsData['altitude'] = contacts['Z']
+    # contactsData['dipdir'] = contacts['']
+    # contactsData['dip'] = contacts['']
+    resp = LoopProjectFile.Set(
+        loopFilename, "contacts", data=contactsData, verbose=True)
+    if resp["errorFlag"]:
+        print(resp["errorString"])
+
+    observations = pd.read_csv(output_path + "orientations.csv")
+    layerIds = []
+    for form in observations['formation']:
+        a = bytes(form, 'ascii')
+        if a in stratigraphicLogData['name']:
+            layerIds.append(
+                int(stratigraphicLogData[stratigraphicLogData['name'] == a]['layerId']))
+        else:
+            layerIds.append(0)
+    observations['layer'] = "s0"
+    observationsData = np.zeros(
+        observations.shape[0], LoopProjectFile.stratigraphicObservationType)
+    observationsData['layerId'] = layerIds
+    observationsData['easting'] = observations['X']
+    observationsData['northing'] = observations['Y']
+    observationsData['altitude'] = observations['Z']
+    observationsData['dipDir'] = observations['azimuth']
+    observationsData['dip'] = observations['dip']
+    observationsData['dipPolarity'] = observations['polarity']
+    observationsData['layer'] = observations['layer']
+    resp = LoopProjectFile.Set(
+        loopFilename, "stratigraphicObservations", data=observationsData, verbose=True)
+    if resp["errorFlag"]:
+        print(resp["errorString"])
+
+    # Check created file is valid
+    if LoopProjectFile.CheckFileValid(loopFilename):
+        return loopFilename
+    else:
+        return None
         
 ##########################################################################
 # Import outputs from map2loop to gempy and view with pyvtk
