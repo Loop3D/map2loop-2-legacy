@@ -40,7 +40,7 @@ def save_orientations(structures,path_out,c_l,orientation_decimate,dtm,dtb,dtb_n
             if(not str(apoint[c_l['r1']]) == 'nan'):
 
                 if(not c_l['intrusive'] in apoint[c_l['r1']]):
-                    if(apoint[c_l['d']]! = 0 and m2l_utils.mod_safe(i,orientation_decimate) == 0):
+                    if(apoint[c_l['d']]!= 0 and m2l_utils.mod_safe(i,orientation_decimate) == 0):
                         locations = [(apoint['geometry'].x, apoint['geometry'].y)]
                         if(apoint['geometry'].x > dtm.bounds[0] and apoint['geometry'].x < dtm.bounds[2] and  
                             apoint['geometry'].y > dtm.bounds[1] and apoint['geometry'].y < dtm.bounds[3]):       
@@ -49,7 +49,7 @@ def save_orientations(structures,path_out,c_l,orientation_decimate,dtm,dtb,dtb_n
                                 dipdir = apoint[c_l['dd']]+90
                             else:
                                 dipdir = apoint[c_l['dd']]
-                            if(apoint[c_l['bo']]! = c_l['btype']):
+                            if(apoint[c_l['bo']]!= c_l['btype']):
                                 polarity = 1
                             else:
                                 polarity = 0
@@ -176,7 +176,7 @@ def extract_poly_coords(geom,i):
         exterior_coords  =  geom.exterior.coords[:]
         interior_coords  =  []
         for interior in geom.interiors:
-            interior_coords + =  (i,interior.coords[:])
+            interior_coords +=  (i,interior.coords[:])
             i = i+1
 
     elif geom.type  ==  'MultiPolygon':
@@ -184,8 +184,8 @@ def extract_poly_coords(geom,i):
         interior_coords  =  []
         for part in geom:
             epc  =  extract_poly_coords(part,i)  # Recursive call
-            exterior_coords + =  epc['exterior_coords']
-            interior_coords + =  epc['interior_coords']
+            exterior_coords +=  epc['exterior_coords']
+            interior_coords +=  epc['interior_coords']
             i = i+1
     else:
         raise ValueError('Unhandled geometry type: ' + repr(geom.type))
@@ -224,10 +224,10 @@ def save_basal_contacts(path_in,dtm,dtb,dtb_null,cover_map,geol_clip,contact_dec
 
     for indx,ageol in all_geom.iterrows(): # central polygon
         all_coords = extract_poly_coords(ageol.geometry,0)
-        plist+ = (i,list(all_coords['exterior_coords']),ageol[c_l['c']],ageol[c_l['ds']],ageol[c_l['g']],ageol[c_l['r1']],ageol[c_l['o']])
+        plist+= (i,list(all_coords['exterior_coords']),ageol[c_l['c']],ageol[c_l['ds']],ageol[c_l['g']],ageol[c_l['r1']],ageol[c_l['o']])
         i = i+1
         for j in range(0,len(all_coords['interior_coords']),2):
-            plist+ = (i,list(all_coords['interior_coords'][j+1]),ageol[c_l['c']],ageol[c_l['ds']],ageol[c_l['g']],ageol[c_l['r1']],ageol[c_l['o']])
+            plist+= (i,list(all_coords['interior_coords'][j+1]),ageol[c_l['c']],ageol[c_l['ds']],ageol[c_l['g']],ageol[c_l['r1']],ageol[c_l['o']])
             i = i+1
                
     #dtm  =  rasterio.open(path_in+'/dtm_rp.tif')
@@ -266,7 +266,7 @@ def save_basal_contacts(path_in,dtm,dtb,dtb_null,cover_map,geol_clip,contact_dec
                     agp = plist[a_poly+2].replace(" ","_").replace("-","_")
 
                 neighbours = []
-                j+ = 1
+                j+= 1
                 out = [item for item in ulist if plist[a_poly+2].replace(" ","_").replace("-","_") in item]
                 if(len(out)>0):
                     central = out[0][0]    #relative age of central polygon
@@ -277,7 +277,7 @@ def save_basal_contacts(path_in,dtm,dtb,dtb_null,cover_map,geol_clip,contact_dec
                         ntest2 = str(plist[b_poly+3])
                         if(not ntest1  ==  'None' and not ntest2  ==  'None' ):
 
-                            if(plist[a_poly] ! =  plist[b_poly]): #do not compare with self
+                            if(plist[a_poly] !=  plist[b_poly]): #do not compare with self
 
                                 if (a_polygon.intersects(b_polygon)) : # is a neighbour, but not a sill
                                     if(  (not c_l['sill'] in plist[b_poly+3] or not c_l['intrusive'] in plist[b_poly+5]) and intrusion_mode == 0): #intrusion_mode = 0 (sills only excluded)
@@ -332,7 +332,7 @@ def save_basal_contacts(path_in,dtm,dtb,dtb_null,cover_map,geol_clip,contact_dec
                                                             ls_dict_decimate[deci_points]  =  {"id": allpts,c_l['c']:plist[a_poly+2].replace(" ","_").replace("-","_"),c_l['g']:plist[a_poly+2].replace(" ","_").replace("-","_"), "geometry": Point(lineC.coords[0][0],lineC.coords[0][1])}
                                                         else:
                                                             ls_dict_decimate[deci_points]  =  {"id": allpts,c_l['c']:plist[a_poly+2].replace(" ","_").replace("-","_"),c_l['g']:plist[a_poly+4].replace(" ","_").replace("-","_"), "geometry": Point(lineC.coords[0][0],lineC.coords[0][1])}
-                                                        allpts+ = 1 
+                                                        allpts+= 1 
                                                         deci_points = deci_points+1
                                                 else:
                                                     continue
@@ -346,19 +346,19 @@ def save_basal_contacts(path_in,dtm,dtb,dtb_null,cover_map,geol_clip,contact_dec
                                                             .format(lineC.coords[0][0],lineC.coords[0][1],height,plist[a_poly+2].replace(" ","_").replace("-","_"))
                                                     #ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+str(plist[a_poly+2].replace(" ","_").replace("-","_"))+"\n"
                                                     allc.write(agp+","+str(ageol[c_l['o']])+","+ostr)
-                                                    allpts+ = 1    
-                                            k+ = 1
+                                                    allpts+= 1    
+                                            k+= 1
                                     elif(LineStringC.wkt.split(" ")[0] == 'LINESTRING'): # apparently this is not needed
                                         k = 0
                                         for pt in LineStringC.coords: #process one linestring
-                                            k+ = 1
+                                            k+= 1
                                     elif(LineStringC.wkt.split(" ")[0] == 'POINT'): # apparently this is not needed
                                         #print("debug:POINT")
                                         k = 0
-                                        k+ = 1
+                                        k+= 1
                                     else:
                                         k = 0
-                                        k+ = 1
+                                        k+= 1
 
 
     ac.close()
@@ -1098,11 +1098,11 @@ def process_plutons(tmp_path,output_path,geol_clip,local_paths,dtm,dtb,dtb_null,
                 ngroups = ngroups+1
                 
             neighbours = []
-            j+ = 1
+            j+= 1
             central_age = ageol[c_l['min']]    #absolute age of central polygon
             central_poly = ageol.geometry
             for ind,bgeol in geol_clip.iterrows(): #potential neighbouring polygons  
-                if(ageol.geometry! = bgeol.geometry): #do not compare with self
+                if(ageol.geometry!= bgeol.geometry): #do not compare with self
                     if (ageol.geometry.intersects(bgeol.geometry)): # is a neighbour
                         neighbours.append([(bgeol[c_l['c']],bgeol[c_l['min']],bgeol[c_l['r1']],bgeol[c_l['ds']],bgeol.geometry)])  
             #display(neighbours)
@@ -1139,7 +1139,7 @@ def process_plutons(tmp_path,output_path,geol_clip,local_paths,dtm,dtb,dtb_null,
                                                 ac.write(ostr)
                                                 allc.write(agp+","+str(ageol[c_l['o']])+","+ostr)
                                                 ls_dict_decimate[allpts]  =  {"id": allpts,c_l['c']:newgp,c_l['g']:newgp, "geometry": Point(lineC.coords[0][0],lineC.coords[0][1])}
-                                                allpts+ = 1 
+                                                allpts+= 1 
                                         else:
                                             continue
                                     else:
@@ -1151,7 +1151,7 @@ def process_plutons(tmp_path,output_path,geol_clip,local_paths,dtm,dtb,dtb_null,
                                             #ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
                                             #ls_dict_decimate[allpts]  =  {"id": id,"CODE":ageol['CODE'],"GROUP_":ageol['GROUP_'], "geometry": Point(lineC.coords[0][0],lineC.coords[0][1])}
                                             allc.write(agp+","+str(ageol[c_l['o']])+","+ostr)
-                                            allpts+ = 1
+                                            allpts+= 1
 
                                     if(m2l_utils.mod_safe(k,contact_decimate) == 0 or k == int((len(LineStringC)-1)/2) or k == len(LineStringC)-1): #decimate to reduce number of points, but also take second and third point of a series to keep gempy happy
                                         dlsx = lineC.coords[0][0]-lineC.coords[1][0]
@@ -1190,7 +1190,7 @@ def process_plutons(tmp_path,output_path,geol_clip,local_paths,dtm,dtb,dtb_null,
                                                   .format(lineC.coords[0][0],lineC.coords[0][1],height,azimuth,pluton_dip,polarity,newgp.replace(" ","_").replace("-","_"))
                                         ao.write(ostr)
 
-                                    k+ = 1
+                                    k+= 1
                         elif(LineStringC.wkt.split(" ")[0] == 'LINESTRING'): # apparently this is not needed
                             k = 0
                             lineC = LineString(LineStringC)
@@ -1205,7 +1205,7 @@ def process_plutons(tmp_path,output_path,geol_clip,local_paths,dtm,dtb,dtb_null,
                                         ac.write(ostr)
                                         allc.write(agp+","+str(ageol[c_l['o']])+","+ostr)
                                         ls_dict_decimate[allpts]  =  {"id": allpts,c_l['c']:newgp,c_l['g']:newgp, "geometry": Point(lineC.coords[0][0],lineC.coords[0][1])}
-                                        allpts+ = 1 
+                                        allpts+= 1 
                                 else:
                                     continue
                             else:
@@ -1217,7 +1217,7 @@ def process_plutons(tmp_path,output_path,geol_clip,local_paths,dtm,dtb,dtb_null,
                                     #ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
                                     #ls_dict_decimate[allpts]  =  {"id": id,"CODE":ageol['CODE'],"GROUP_":ageol['GROUP_'], "geometry": Point(lineC.coords[0][0],lineC.coords[0][1])}
                                     allc.write(agp+","+str(ageol[c_l['o']])+","+ostr)
-                                    allpts+ = 1
+                                    allpts+= 1
                             
                             if(m2l_utils.mod_safe(k,contact_decimate) == 0 or k == int((len(LineStringC)-1)/2) or k == len(LineStringC)-1): #decimate to reduce number of points, but also take second and third point of a series to keep gempy happy
                                 dlsx = lineC.coords[0][0]-lineC.coords[1][0]
@@ -1255,15 +1255,15 @@ def process_plutons(tmp_path,output_path,geol_clip,local_paths,dtm,dtb,dtb_null,
                                 ostr = "{},{},{},{},{},{},{}\n"\
                                           .format(lineC.coords[0][0],lineC.coords[0][1],height,azimuth,pluton_dip,polarity,newgp.replace(" ","_").replace("-","_"))
                                 ao.write(ostr)
-                            k+ = 1                                
+                            k+= 1                                
                         elif(LineStringC.wkt.split(" ")[0] == 'POINT'): # apparently this is not needed
                             k = 0
                             #print("debug:POINT")
-                            k+ = 1
+                            k+= 1
                         else:
                             k = 0
                             #print(LineStringC.wkt.split(" ")[0]) # apparently this is not needed
-                            k+ = 1
+                            k+= 1
     ac.close()
     ao.close()
     allc.close()
@@ -1812,7 +1812,7 @@ def calc_thickness_with_grid(tmp_path,output_path,buffer,max_thickness_allowed,c
                                         min_pt = f
                                         crossx = crossings[f,3]
                                         crossy = crossings[f,4] 
-                                if(min_dist<max_thickness_allowed): #if not too far, add to output
+                                if(min_dist<max_thickness_allowed and min_dist>0): #if not too far, add to output
                                     locations = [(cx[k],cy[k])]
                                     zbase = float(m2l_utils.value_from_dtm_dtb(dtm,'','',False,locations))
                                     locations = [(crossx,crossy)]
@@ -1891,7 +1891,7 @@ def calc_min_thickness_with_grid(tmp_path,output_path,buffer,max_thickness_allow
 
                 if(ctextcode[k] == apair['code']):
 
-                    is_contacta = contact_lines[c_l['c']] ! =  all_sorts.iloc[g-1]['code'] # subset contacts to just those with 'a' code
+                    is_contacta = contact_lines[c_l['c']] !=  all_sorts.iloc[g-1]['code'] # subset contacts to just those with 'a' code
                     acontacts  =  contact_lines[is_contacta]
                     i = 0 
                     for ind,acontact in acontacts.iterrows():   #loop through distinct linestrings for upper contact
@@ -1985,7 +1985,7 @@ def normalise_thickness(output_path):
     for code in codes:
         is_code = thickness.formation.str.contains(code, regex = False)
         all_thick  =  thickness[is_code]
-        all_thick2 = all_thick[all_thick["thickness"]! = 0]
+        all_thick2 = all_thick[all_thick["thickness"]!= 0]
         if((len(all_thick2)>0)):
             print(code,all_thick2.loc[:,"thickness"].median(),all_thick2.loc[:,"thickness"].std())
             ostr = "{},{},{},{}\n"\
@@ -2239,7 +2239,7 @@ def extract_section(tmp_path,output_path,seismic_line,seismic_bbox,seismic_inter
         i_ls = LineString(interps.geometry)
         for seg in i_ls.coords:
             mx,my = section2model(seismic_line,seismic_bbox,seg[0],seg[1])
-            if( mx ! =  -999 and  my ! =  -999):
+            if( mx !=  -999 and  my !=  -999):
                 mz = seismic_bbox.loc['BR']['DEPTH']*(seismic_bbox.loc['TR'].geometry.y-seg[1])/(seismic_bbox.loc['TR'].geometry.y-seismic_bbox.loc['BR'].geometry.y)
                 locations = [(mx,my)]
                 height =  m2l_utils.value_from_dtm_dtb(dtm,dtb,dtb_null,cover_map,locations)
@@ -2426,12 +2426,12 @@ def fault_strat_offset(path_out,c_l,dst_crs,fm_thick_file, all_sorts_file,fault_
         found = False
         for ifm,fm in fm_thick.iterrows():
             if (als["code"] == fm["formation"]):
-                als_thick+ = [[index,als["group number"],als["index in group"],als["number in group"],als["code"],als["group"],"erode",fm["thickness median"]]]
+                als_thick+= [[index,als["group number"],als["index in group"],als["number in group"],als["code"],als["group"],"erode",fm["thickness median"]]]
                 index = index+1
                 found = True
                 break
         if(not found):
-            als_thick+ = [[index,als["group number"],als["index in group"],als["number in group"],als["code"],als["group"],"erode",0]]
+            als_thick+= [[index,als["group number"],als["index in group"],als["number in group"],als["code"],als["group"],"erode",0]]
             index = index+1
             
     column_names  =  als_thick.pop(0)
@@ -2783,7 +2783,7 @@ def save_basal_contacts_orientations_csv(contacts,orientations,geol_clip,tmp_pat
                                 dip = dip_grid[r,c]
                             else:
                                 dip = contact_dip
-                            if(dip! = -999):
+                            if(dip!= -999):
                                 ostr = "{},{},{},{},{},{},{}\n"\
                                   .format(midx,midy,height,dipdir,str(dip),'1',str(contact[c_l['c']]).replace(" ","_").replace("-","_"))
                                 #ostr = str(midx)+','+str(midy)+','+str(height)+','+str(dipdir)+','+str(contact_dip)+',1,'+str(contact[c_l['c']]).replace(" ","_").replace("-","_")+'\n'
@@ -2806,7 +2806,7 @@ def process_sills(output_path,geol_clip,dtm,dtb,dtb_null,cover_map,contact_decim
     i = 0
     for ind,sill in sills.iterrows():
         for ind2,geol in geol_clip.iterrows():
-            if(geol[c_l['o']] ! =  sill[c_l['o']]):
+            if(geol[c_l['o']] !=  sill[c_l['o']]):
                 if (geol.geometry.intersects(sill.geometry)):
                     LineStringC  =  geol.geometry.intersection(sill.geometry)
                     if(LineStringC.wkt.split(" ")[0]  ==  'MULTIPOLYGON' or
@@ -2894,7 +2894,7 @@ def process_sills(output_path,geol_clip,dtm,dtb,dtb_null,cover_map,contact_decim
                                         continue
 
 
-                                k + =  1
+                                k +=  1
 
     sills_df = pd.DataFrame.from_dict(sill_dict,orient = 'index')
     sills_df.to_csv(output_path+'sills.csv')
