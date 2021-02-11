@@ -340,7 +340,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             fold_file = tmp_path+'folds_clip.shp'
             folds_clip.to_file(fold_file)
         else:
-            fold_file = tmp_path+'fold_clip.shp'
+            fold_file = tmp_path+'folds_clip.shp'
             print("\nFold layer metadata\n--------------------")
             print("No folds found")
 
