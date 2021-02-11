@@ -14,6 +14,7 @@ import re  # typo? check
 from urllib.request import urlopen
 from math import sin, cos, atan, atan2, asin, radians, degrees, sqrt, pow, acos, fmod, fabs, isnan
 from owslib.wcs import WebCoverageService
+from scipy.interpolate import griddata
 #from osgeo import gdal
 
 quiet = False
@@ -76,6 +77,15 @@ def value_from_raster(dataset, locations):
     else:
         return(-999)
 
+
+def bilinear_interpolation(x, y, z01, z11, z00, z10):
+
+    def linear_interpolation(x, z0, z1):
+        return z0 * (1-x) + z1 * x
+
+    return linear_interpolation(y, linear_interpolation(x, z00, z10),
+                                linear_interpolation(x, z01, z11))
+
 #################################
 #  Maybe use https://portal.opentopography.org/otr/getdem?demtype=SRTMGL3&west=-120.168457&south=36.738884&east=-118.465576&north=38.091337&outputFormat=GTiff as univeral solution?
 # or SRTMGL1 for higher res probs not needed
@@ -97,33 +107,82 @@ def value_from_raster(dataset, locations):
 ############################################
 
 
-def value_from_dtm_dtb(dtm, dtb, dtb_null, cover_map, locations):
+def value_from_dtm_dtb(dtm,dtb,dtb_null,cover_map,locations):
+    dtm_arr=dtm.read(1)
+    bounds  = dtm.bounds
+    minlong=bounds.left 
+    minlat=bounds.bottom 
+    maxlong=bounds.right 
+    maxlat=bounds.top
+    xscale=(maxlong-minlong)/dtm_arr.shape[1]
+    yscale=(maxlat-minlat)/dtm_arr.shape[0]    
+    corners=np.zeros((4,4))
+    zvals=np.zeros((4))
+    corners[0][0]=minlong+(floor((locations[0][0]-minlong-(xscale/2))/xscale)*xscale)+(xscale/2)
+    corners[0][1]=minlat+(floor((locations[0][1]-minlat-(yscale/2))/yscale)*yscale)+(yscale/2)
+    corners[1][0]=corners[0][0]+xscale
+    corners[1][1]=corners[0][1]
+    corners[2][0]=corners[0][0]
+    corners[2][1]=corners[0][1]+yscale
+    corners[3][0]=corners[0][0]+xscale
+    corners[3][1]=corners[0][1]+yscale
+    delx=(locations[0][0]-corners[0][0])/xscale
+    dely=(locations[0][1]-corners[0][1])/yscale
+
+    for i in range(4):
+        corner=[(corners[i][0],corners[i][1])]
+        #print(corner[0][0],dtm.bounds[0],dtm.bounds[2],corner[0][1],dtm.bounds[1],dtm.bounds[3])
+        if(corner[0][0] > dtm.bounds[0] and corner[0][0] < dtm.bounds[2] and  
+        corner[0][1] > dtm.bounds[1] and corner[0][1] < dtm.bounds[3]):       
+            for val in dtm.sample(corner):
+                zvals[i]=float(str(val).replace("[","").replace("]",""))
+        else:
+            return(-999)
+    value_dtm=bilinear_interpolation(delx, dely, zvals[2], zvals[3], zvals[0], zvals[1])
+    
     if(cover_map):
-        if(locations[0][0] > dtm.bounds[0] and locations[0][0] < dtm.bounds[2] and
-           locations[0][1] > dtm.bounds[1] and locations[0][1] < dtm.bounds[3] and
-           locations[0][0] > dtb.bounds[0] and locations[0][0] < dtb.bounds[2] and
-           locations[0][1] > dtb.bounds[1] and locations[0][1] < dtb.bounds[3]):
-            for val in dtm.sample(locations):
-                value_dtm = float(str(val).replace("[", "").replace("]", ""))
+        if(locations[0][0] > dtm.bounds[0] and locations[0][0] < dtm.bounds[2] and  
+        locations[0][1] > dtm.bounds[1] and locations[0][1] < dtm.bounds[3] and
+        locations[0][0] > dtb.bounds[0] and locations[0][0] < dtb.bounds[2] and  
+        locations[0][1] > dtb.bounds[1] and locations[0][1] < dtb.bounds[3]):   
+            dtb_arr=dtb.read(1)
+            bounds  = dtb.bounds
+            minlong=bounds.left 
+            minlat=bounds.bottom 
+            maxlong=bounds.right 
+            maxlat=bounds.top
+            xscale=(maxlong-minlong)/dtb_arr.shape[1]
+            yscale=(maxlat-minlat)/dtb_arr.shape[0]    
+            corners=np.zeros((4,4))
+            zvals=np.zeros((4))
+            corners[0][0]=minlong+(floor((locations[0][0]-minlong-(xscale/2))/xscale)*xscale)+(xscale/2)
+            corners[0][1]=minlat+(floor((locations[0][1]-minlat-(yscale/2))/yscale)*yscale)+(yscale/2)
+            corners[1][0]=corners[0][0]+xscale
+            corners[1][1]=corners[0][1]
+            corners[2][0]=corners[0][0]
+            corners[2][1]=corners[0][1]+yscale
+            corners[3][0]=corners[0][0]+xscale
+            corners[3][1]=corners[0][1]+yscale
+            delx=(locations[0][0]-corners[0][0])/xscale
+            dely=(locations[0][1]-corners[0][1])/yscale
 
-            for val in dtb.sample(locations):
-                value_dtb = float(str(val).replace("[", "").replace("]", ""))
 
-            if(value_dtb == float(dtb_null) or value_dtb == -999999):
-                value_dtb = 0
+            for i in range(4):
+                corner=[(corners[i][0],corners[i][1])]
+                #print(corner[0][0],dtm.bounds[0],dtm.bounds[2],corner[0][1],dtm.bounds[1],dtm.bounds[3])
+                if(corner[0][0] > dtb.bounds[0] and corner[0][0] < dtb.bounds[2] and  
+                corner[0][1] > dtb.bounds[1] and corner[0][1] < dtb.bounds[3]):       
+                    for val in dtb.sample(corner):
+                        zvals[i]=float(str(val).replace("[","").replace("]",""))
+                else:
+                    return(-999)
+            value_dtb=bilinear_interpolation(delx, dely, zvals[2], zvals[3], zvals[0], zvals[1])
 
             return(str(value_dtm-value_dtb))
         else:
             return(-999)
-    else:
-        if(locations[0][0] > dtm.bounds[0] and locations[0][0] < dtm.bounds[2] and
-           locations[0][1] > dtm.bounds[1] and locations[0][1] < dtm.bounds[3]):
-            for val in dtm.sample(locations):
-                value_dtm = str(val).replace("[", "").replace("]", "")
-
-            return(value_dtm)
-        else:
-            return(-999)
+    else: 
+         return(str(value_dtm))
 
 
 ############################################
