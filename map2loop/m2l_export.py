@@ -160,34 +160,6 @@ def loop2geomodeller(model_name,test_data_path,tmp_path,output_path,dtm_file,bbo
     f.write('#-----------------------Set Stratigraphic Pile------------------\n')
     f.write('#---------------------------------------------------------------\n')
 
-    if(True): #Basal series/formation if only one supergroup
-        f.write('GeomodellerTask {\n')
-        f.write('SetSeries {\n')
-
-        ostr='    name: "Basal_Series"\n'
-        f.write(ostr)
-
-        ostr='    position: 1\n'
-        f.write(ostr)
-
-        ostr='    relation: "erode"\n'
-        f.write(ostr)
-
-        f.write('    }\n')
-        f.write('}\n')
-
-        f.write('GeomodellerTask {\n')
-        f.write('AddFormationToSeries {\n')
-
-        ostr='    series: "Basal_Series"\n'
-        f.write(ostr)
-
-        ostr='    formation: "Basal_Formation"\n'
-        f.write(ostr)
-
-        f.write('    }\n')
-        f.write('}\n')               
-    
     for sg in sg_set:
     #for i in range (nformations-1,0,-1):
         f.write('GeomodellerTask {\n')
@@ -221,6 +193,34 @@ def loop2geomodeller(model_name,test_data_path,tmp_path,output_path,dtm_file,bbo
                     f.write('    }\n')
                     f.write('}\n')    
 
+    if(True): #Basal series/formation if only one supergroup
+        f.write('GeomodellerTask {\n')
+        f.write('SetSeries {\n')
+
+        ostr='    name: "Basal_Series"\n'
+        f.write(ostr)
+
+        ostr='    position: 1\n'
+        f.write(ostr)
+
+        ostr='    relation: "erode"\n'
+        f.write(ostr)
+
+        f.write('    }\n')
+        f.write('}\n')
+
+        f.write('GeomodellerTask {\n')
+        f.write('AddFormationToSeries {\n')
+
+        ostr='    series: "Basal_Series"\n'
+        f.write(ostr)
+
+        ostr='    formation: "Basal_Formation"\n'
+        f.write(ostr)
+
+        f.write('    }\n')
+        f.write('}\n')               
+    
     if(save_faults):
         output_path=test_data_path+'output/'
 
