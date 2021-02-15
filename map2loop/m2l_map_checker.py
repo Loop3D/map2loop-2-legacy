@@ -127,6 +127,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             geology[c_l['g']] = "Top"
 
         geology = geology.replace(r'^\s+$', np.nan, regex=True)
+        geology = geology.replace(',', ' ')
         geology[c_l['g']].fillna(geology[c_l['g2']], inplace=True)
         geology[c_l['g']].fillna(geology[c_l['c']], inplace=True)
 
