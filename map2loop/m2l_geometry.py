@@ -1253,7 +1253,7 @@ def process_plutons(tmp_path,output_path,geol_clip,local_paths,dtm,dtb,dtb_null,
                                     azimuth = (azimuth-180)%360
                                     #ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",1,"+newgp.replace(" ","_").replace("-","_")+"\n"
                                 ostr = "{},{},{},{},{},{},{}\n"\
-                                          .format(lineC.coords[0][0],lineC.coords[0][1],height,azimuth,pluton_dip,polarity,newgp.replace(" ","_").replace("-","_"))
+                                          .format(lineC.coords[0][0],lineC.coords[0][1],height,azimuth,pluton_dip,polarity,newgp.replace(" ","_").replace("-","_").replace(",","_"))
                                 ao.write(ostr)
                             k+= 1                                
                         elif(LineStringC.wkt.split(" ")[0] == 'POINT'): # apparently this is not needed
