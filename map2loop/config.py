@@ -276,7 +276,7 @@ class Config(object):
         self.G = nx.read_gml(self.strat_graph_file, label='id')
         selected_nodes = [n for n, v in self.G.nodes(data=True) if n >= 0]
 
-        if self.quiet == 'all':
+        if self.quiet == 'None':
             nx.draw_networkx(self.G, pos=nx.kamada_kawai_layout(
                 self.G), arrows=True, nodelist=selected_nodes)
 
@@ -296,9 +296,9 @@ class Config(object):
         groups, self.glabels, G = Topology.get_series(
             self.strat_graph_file, 'id')
 
-        quiet_topology = False
+        quiet_topology = True
         if self.quiet == 'None':
-            quiet_topology = True
+            quiet_topology = False
         Topology.save_units(G, self.tmp_path, self.glabels,
                             Australia=True, asud_strat_file="https://gist.githubusercontent.com/yohanderose/3b257dc768fafe5aaf70e64ae55e4c42/raw/8598c7563c1eea5c0cd1080f2c418dc975cc5433/ASUD.csv",
                             quiet=quiet_topology)
@@ -395,9 +395,9 @@ class Config(object):
         self.structure_clip.to_file(self.structure_clip_file)
 
         # Save geology clips
-        quiet_topology = False
+        quiet_topology = True
         if self.quiet == "None":
-            quiet_topology = True
+            quiet_topology = False
         Topology.save_group(Topology, self.G, self.tmp_path,
                             self.glabels, self.geol_clip, self.c_l, quiet_topology)
 
@@ -488,7 +488,7 @@ class Config(object):
         orientations = self.structures
 
         quiet_interp = True
-        if quiet_interp == "None":
+        if self.quiet == "None":
             quiet_interp = False
 
         group_girdle = m2l_utils.plot_bedding_stereonets(
@@ -727,7 +727,8 @@ class Config(object):
             m2l_geometry.save_orientations_with_polarity(
                 self.output_path+'orientations.csv', self.output_path, self.c_l, self.tmp_path+'basal_contacts.shp', self.tmp_path+'all_sorts.csv', )
 
-            m2l_utils.plot_points(self.output_path+'orientations_polarity.csv',
+            if self.quiet == "None":
+                m2l_utils.plot_points(self.output_path+'orientations_polarity.csv',
                                   self.geol_clip, 'polarity', 'X', 'Y', True, 'alpha')
 
         # Calculate minimum fault offset from stratigraphy and stratigraphic fault offset
@@ -739,14 +740,18 @@ class Config(object):
                 m2l_geometry.fault_strat_offset(self.output_path, self.c_l, self.proj_crs, self.output_path+'formation_summary_thicknesses.csv', self.tmp_path +
                                                 'all_sorts.csv', self.tmp_path+'faults_clip.shp', self.tmp_path+'geol_clip.shp', self.output_path+'fault_dimensions.csv')
 
-                m2l_utils.plot_points(self.output_path+'fault_strat_offset3.csv',
-                                      self.geol_clip, 'min_offset', 'X', 'Y', True, 'numeric')
-                m2l_utils.plot_points(self.output_path+'fault_strat_offset3.csv',
-                                      self.geol_clip, 'strat_offset', 'X', 'Y', True, 'numeric')
+                if self.quiet == "None":
+                    m2l_utils.plot_points(self.output_path+'fault_strat_offset3.csv',
+                                        self.geol_clip, 'min_offset', 'X', 'Y', True, 'numeric')
+                    m2l_utils.plot_points(self.output_path+'fault_strat_offset3.csv',
+                                        self.geol_clip, 'strat_offset', 'X', 'Y', True, 'numeric')
 
         # Analyse fault topologies
+        fault_parse = True
+        if self.quiet == "None":
+            fault_parse = False
         Topology.parse_fault_relationships(
-            self.graph_path, self.tmp_path, self.output_path)
+            self.graph_path, self.tmp_path, self.output_path, fault_parse )
 
         # TODO: Figures sometimes look a bit squashed in notebooks
 

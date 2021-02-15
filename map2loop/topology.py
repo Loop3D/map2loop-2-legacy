@@ -452,7 +452,7 @@ class Topology(object):
     #
     # Saves fault vs unit, group and fault relationship tables using outputs from map2model c++ code
     ####################################
-    def parse_fault_relationships(graph_path, tmp_path, output_path):
+    def parse_fault_relationships(graph_path, tmp_path, output_path, quiet):
         uf = open(graph_path+'unit-fault-intersection.txt', 'r')
         contents = uf.readlines()
         uf.close()
@@ -601,7 +601,8 @@ class Topology(object):
 
         ff.close()
 
-        nx.draw(G, with_labels=True, font_weight='bold')
+        if not quiet:
+            nx.draw(G, with_labels=True, font_weight='bold')
         nx.write_gml(G, tmp_path+"fault_network.gml")
 
         try:
