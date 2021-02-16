@@ -75,6 +75,15 @@ def scipy_rbf(x, y, z, xi, yi):
     interp = Rbf(x, y, z, function='multiquadric', smooth=.15)
     return interp(xi, yi)
 
+def scipy_LNDI(x, y, z, xi, yi): # actually LinearNDInterpolator
+    from scipy.interpolate import LinearNDInterpolator
+    interp = LinearNDInterpolator(list(zip(x, y)), z)
+    return interp(xi, yi)
+
+def scipy_CT(x, y, z, xi, yi): # actually CloughTocher2DInterpolator
+    from scipy.interpolate import CloughTocher2DInterpolator
+    interp = CloughTocher2DInterpolator(list(zip(x, y)), z,rescale=True)
+    return interp(xi, yi)
 ######################################
 # calculate all distances between to arrays of points
 # Make a distance matrix between pairwise observations
@@ -130,29 +139,41 @@ def call_interpolator(calc, x, y, l, m, n, xi, yi, nx, ny, fault_flag):
 
     if(calc == 'simple_idw'):
         ZIl = simple_idw(x, y, l, xi, yi)
-    if(calc == 'scipy_rbf'):
-        ZIl = scipy_rbf(x, y, l, xi, yi)
-    if(calc == 'scipy_idw'):
+    elif(calc == 'scipy_idw'):
         ZIl = scipy_idw(x, y, l, xi, yi)
+    elif(calc == 'scipy_LNDI'):
+        ZIl = scipy_LNDI(x, y, l, xi, yi)
+    elif(calc == 'scipy_CT'):
+        ZIl = scipy_CT(x, y, l, xi, yi)
+    else:
+        ZIl = scipy_rbf(x, y, l, xi, yi)
     if(not fault_flag):
         ZIl = ZIl.reshape((ny, nx))
 
     if(calc == 'simple_idw'):
         ZIm = simple_idw(x, y, m, xi, yi)
-    if(calc == 'scipy_rbf'):
-        ZIm = scipy_rbf(x, y, m, xi, yi)
-    if(calc == 'scipy_idw'):
+    elif(calc == 'scipy_idw'):
         ZIm = scipy_idw(x, y, m, xi, yi)
+    elif(calc == 'scipy_LNDI'):
+        ZIm = scipy_LNDI(x, y, m, xi, yi)
+    elif(calc == 'scipy_CT'):
+        ZIm = scipy_CT(x, y, m, xi, yi)
+    else:
+        ZIm = scipy_rbf(x, y, m, xi, yi)
     if(not fault_flag):
         ZIm = ZIm.reshape((ny, nx))
 
     if(type(n) is not int):
         if(calc == 'simple_idw'):
             ZIn = simple_idw(x, y, n, xi, yi)
-        if(calc == 'scipy_rbf'):
-            ZIn = scipy_rbf(x, y, n, xi, yi)
-        if(calc == 'scipy_idw'):
+        elif(calc == 'scipy_idw'):
             ZIn = scipy_idw(x, y, n, xi, yi)
+        elif(calc == 'scipy_LNDI'):
+            ZIn = scipy_LNDI(x, y, n, xi, yi)
+        elif(calc == 'scipy_CT'):
+            ZIn = scipy_CT(x, y, n, xi, yi)
+        else:
+            ZIn = scipy_rbf(x, y, n, xi, yi)
         if(not fault_flag):
             ZIn = ZIn.reshape((ny, nx))
     else:
@@ -1373,30 +1394,41 @@ def call_interpolator_grid(calc, x, y, l, m, n, xi, yi):
 
     if(calc == 'simple_idw'):
         ZIl = simple_idw(x, y, l, xi, yi)
-    if(calc == 'scipy_rbf'):
-        ZIl = scipy_rbf(x, y, l, xi, yi)
-    if(calc == 'scipy_idw'):
+    elif(calc == 'scipy_idw'):
         ZIl = scipy_idw(x, y, l, xi, yi)
+    elif(calc == 'scipy_LNDI'):
+        ZIl = scipy_LNDI(x, y, l, xi, yi)
+    elif(calc == 'scipy_CT'):
+        ZIl = scipy_CT(x, y, l, xi, yi)
+    else:
+        ZIl = scipy_rbf(x, y, l, xi, yi)
 
     if(calc == 'simple_idw'):
         ZIm = simple_idw(x, y, m, xi, yi)
-    if(calc == 'scipy_rbf'):
-        ZIm = scipy_rbf(x, y, m, xi, yi)
-    if(calc == 'scipy_idw'):
+    elif(calc == 'scipy_idw'):
         ZIm = scipy_idw(x, y, m, xi, yi)
+    elif(calc == 'scipy_LNDI'):
+        ZIm = scipy_LNDI(x, y, m, xi, yi)
+    elif(calc == 'scipy_CT'):
+        ZIm = scipy_CT(x, y, m, xi, yi)
+    else:
+        ZIm = scipy_rbf(x, y, m, xi, yi)
 
     if(type(n) is not int):
         if(calc == 'simple_idw'):
             ZIn = simple_idw(x, y, n, xi, yi)
-        if(calc == 'scipy_rbf'):
-            ZIn = scipy_rbf(x, y, n, xi, yi)
-        if(calc == 'scipy_idw'):
+        elif(calc == 'scipy_idw'):
             ZIn = scipy_idw(x, y, n, xi, yi)
-
+        elif(calc == 'scipy_LNDI'):
+            ZIn = scipy_LNDI(x, y, n, xi, yi)
+        elif(calc == 'scipy_CT'):
+            ZIn = scipy_CT(x, y, n, xi, yi)
+        else:
+            ZIn = scipy_rbf(x, y, n, xi, yi)
     else:
         ZIn = 0
+        
     return(ZIl, ZIm, ZIn)
-
 
 def interpolate_orientation_grid(structures, calc, xcoords, ycoords, c_l):
 
@@ -1408,8 +1440,8 @@ def interpolate_orientation_grid(structures, calc, xcoords, ycoords, c_l):
 
     i = 0
     for a_pt in structures.iterrows():
-        x[i] = a_pt[1]['geometry'].x+(np.random.ranf()*0.01)
-        y[i] = a_pt[1]['geometry'].y+(np.random.ranf()*0.01)
+        x[i] = a_pt[1]['geometry'].x+(np.random.ranf())
+        y[i] = a_pt[1]['geometry'].y+(np.random.ranf())
         dip[i] = a_pt[1][c_l['d']]
 
         if(c_l['otype'] == 'strike'):
