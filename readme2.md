@@ -45,6 +45,8 @@ may need  `conda install jupyter`
 
 may need `conda install ipywidgets`
 
+may need `conda install ipyleaflet`
+
 may need `conda install -c conda-forge gdal`
 
 
