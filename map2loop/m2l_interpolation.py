@@ -1573,9 +1573,10 @@ def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spac
     x = (bbox[2]-bbox[0])/spacing
     y = (bbox[3]-bbox[1])/spacing
 
-    xcoords = np.arange(bbox[0], bbox[2], spacing)+(np.random.ranf())
-    ycoords = np.arange(bbox[1], bbox[3], spacing)+(np.random.ranf())
+    xcoords = np.arange(bbox[0], bbox[2], spacing)
+    ycoords = np.arange(bbox[1], bbox[3], spacing)
     xcoords, ycoords = np.meshgrid(xcoords, ycoords)
+    bsh=xcoords.shape
     xcoords, ycoords = xcoords.flatten(), ycoords.flatten()
 
     xycoords = np.vstack((xcoords, ycoords)).transpose()
@@ -1588,19 +1589,27 @@ def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spac
     #structures_code = gpd.sjoin(structures, geology, how="left", op="within")
 
     first_supergroup = True
-    for groups in super_groups:
-        first = True
-        for group in groups:
+    split=10000000000 # avoids massive memory rbf calcs by splitting calc into (non-threaded) chunks, maybe try dask + masks??
+    for i in np.arange(0,bsh[0]*bsh[1],split):
+        min=i
+        max=i+split
+        if(max>bsh[0]*bsh[1]):
+            max=bsh[0]*bsh[1]+1
+        print('rbf_split',min,max)        
+        nodes_code_row=nodes_code[min:max]
+        for groups in super_groups:
+            first = True
+            for group in groups:
 
-            if(first):
-                all_nodes = nodes_code[nodes_code[c_l['g']] == group]
-                all_structures = structures_code[structures_code[c_l['g']] == group]
-                all_contacts = contacts[contacts[c_l['g']] ==
-                                        group.replace(' ', '_').replace('-', '_')]
-                first = False
-            else:
-                another_node = nodes_code[nodes_code[c_l['g']] == group]
-                all_nodes = pd.concat([all_nodes, another_node], sort=False)
+                if(first):
+                    all_nodes = nodes_code_row[nodes_code_row[c_l['g']] == group]
+                    all_structures = structures_code[structures_code[c_l['g']] == group]
+                    all_contacts = contacts[contacts[c_l['g']] ==
+                                            group.replace(' ', '_').replace('-', '_')]
+                    first = False
+                else:
+                    another_node = nodes_code_row[nodes_code_row[c_l['g']] == group]
+                    all_nodes = pd.concat([all_nodes, another_node], sort=False)
 
                 another_contact = contacts[contacts[c_l['g']] == group.replace(
                     ' ', '_').replace('-', '_')]
@@ -1611,53 +1620,53 @@ def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spac
                 all_structures = pd.concat(
                     [all_structures, another_structure], sort=False)
 
-        xcoords_group = all_nodes.geometry.x
-        ycoords_group = all_nodes.geometry.y
+            xcoords_group = all_nodes.geometry.x
+            ycoords_group = all_nodes.geometry.y
 
-        if(len(xcoords_group) > 0):
-            if(len(all_structures) > 2):
-                l, m, n, d, dd = interpolate_orientation_grid(
-                    all_structures, scheme, xcoords_group, ycoords_group, c_l)
-                xy_lmn = np.vstack(
-                    (xcoords_group, ycoords_group, l, m, n, d, dd)).transpose()
-                xy_lmn = xy_lmn.reshape(len(l), 7)
-            else:
-                print(groups, 'has no structures')
-
-                xy_lmn = np.zeros((5, len(xcoords_group)))
-                xy_lmn = np.vstack(
-                    (xcoords_group, ycoords_group, xy_lmn)).transpose()
-                xy_lmn = xy_lmn.reshape(len(xcoords_group), 7)
-
-            if(len(all_contacts) > 0):
-                l, m, S = interpolate_contacts_grid(
-                    all_contacts, scheme, xcoords_group, ycoords_group)
-                if(type(l) is not int):
-                    xy_lm_contacts = np.vstack(
-                        (xcoords_group, ycoords_group, l, m, S)).transpose()
-                    xy_lm_contacts = xy_lm_contacts.reshape(len(l), 5)
+            if(len(xcoords_group) > 0):
+                if(len(all_structures) > 2):
+                    l, m, n, d, dd = interpolate_orientation_grid(
+                        all_structures, scheme, xcoords_group, ycoords_group, c_l)
+                    xy_lmn = np.vstack(
+                        (xcoords_group, ycoords_group, l, m, n, d, dd)).transpose()
+                    xy_lmn = xy_lmn.reshape(len(l), 7)
                 else:
+                    print(groups, 'has no structures')
+
+                    xy_lmn = np.zeros((5, len(xcoords_group)))
+                    xy_lmn = np.vstack(
+                        (xcoords_group, ycoords_group, xy_lmn)).transpose()
+                    xy_lmn = xy_lmn.reshape(len(xcoords_group), 7)
+
+                if(len(all_contacts) > 0):
+                    l, m, S = interpolate_contacts_grid(
+                        all_contacts, scheme, xcoords_group, ycoords_group)
+                    if(type(l) is not int):
+                        xy_lm_contacts = np.vstack(
+                            (xcoords_group, ycoords_group, l, m, S)).transpose()
+                        xy_lm_contacts = xy_lm_contacts.reshape(len(l), 5)
+                    else:
+                        xy_lm_contacts = np.zeros((3, len(xcoords_group)))
+                        xy_lm_contacts = np.vstack(
+                            (xcoords_group, ycoords_group, xy_lm_contacts)).transpose()
+                        xy_lm_contacts = xy_lm_contacts.reshape(
+                            len(xcoords_group), 5)
+                else:
+                    print(groups, 'has no contacts')
+
                     xy_lm_contacts = np.zeros((3, len(xcoords_group)))
                     xy_lm_contacts = np.vstack(
                         (xcoords_group, ycoords_group, xy_lm_contacts)).transpose()
-                    xy_lm_contacts = xy_lm_contacts.reshape(
-                        len(xcoords_group), 5)
-            else:
-                print(groups, 'has no contacts')
+                    xy_lm_contacts = xy_lm_contacts.reshape(len(xcoords_group), 5)
 
-                xy_lm_contacts = np.zeros((3, len(xcoords_group)))
-                xy_lm_contacts = np.vstack(
-                    (xcoords_group, ycoords_group, xy_lm_contacts)).transpose()
-                xy_lm_contacts = xy_lm_contacts.reshape(len(xcoords_group), 5)
-
-            if(first_supergroup):
-                first_supergroup = False
-                xy_lmn_all = np.copy(xy_lmn)
-                xy_lm_contacts_all = np.copy(xy_lm_contacts)
-            else:
-                xy_lmn_all = np.vstack((xy_lmn_all, xy_lmn))
-                xy_lm_contacts_all = np.vstack(
-                    (xy_lm_contacts_all, xy_lm_contacts))
+                if(first_supergroup):
+                    first_supergroup = False
+                    xy_lmn_all = np.copy(xy_lmn)
+                    xy_lm_contacts_all = np.copy(xy_lm_contacts)
+                else:
+                    xy_lmn_all = np.vstack((xy_lmn_all, xy_lmn))
+                    xy_lm_contacts_all = np.vstack(
+                        (xy_lm_contacts_all, xy_lm_contacts))
 
     # sort to get back to x,y grid ordering
     dt = [('x', xy_lmn_all.dtype), ('y', xy_lmn_all.dtype), ('l', xy_lmn_all.dtype), ('m',
