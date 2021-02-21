@@ -69,10 +69,26 @@ def scipy_idw(x, y, z, xi, yi):
 #
 # sci_py version of Radial Basis Function interpolation of observations z at x,y locations returned at locations defined by xi,yi arraysplot(x,y,z,grid)
 ######################################
+import dask.array as da
 
+
+def euclidean_norm_numpy(x1, x2):
+    return np.linalg.norm(x1 - x2, axis=0)
+
+def scipy_rbf_dask(x, y, z, xi, yi):
+    rbf = Rbf(x, y, z, function='multiquadric', smooth=.15, norm=euclidean_norm_numpy)
+    n1 = len(xi)
+    xi=xi[np.newaxis,:]
+    yi=yi[np.newaxis,:]
+    ix = da.from_array(xi, chunks=(1, n1))
+    iy = da.from_array(yi, chunks=(1, n1))
+    iz = da.map_blocks(rbf, ix, iy)
+    zz = iz.compute()
+    print(zz)
+    return zz
 
 def scipy_rbf(x, y, z, xi, yi):
-    interp = Rbf(x, y, z, function='multiquadric', smooth=.15)
+    interp = Rbf(x, y, z, function='multiquadric', smooth=.15, norm=euclidean_norm_numpy)
     return interp(xi, yi)
 
 def scipy_LNDI(x, y, z, xi, yi): # actually LinearNDInterpolator
@@ -1557,8 +1573,8 @@ def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spac
     x = (bbox[2]-bbox[0])/spacing
     y = (bbox[3]-bbox[1])/spacing
 
-    xcoords = np.arange(bbox[0], bbox[2], spacing)
-    ycoords = np.arange(bbox[1], bbox[3], spacing)
+    xcoords = np.arange(bbox[0], bbox[2], spacing)+(np.random.ranf())
+    ycoords = np.arange(bbox[1], bbox[3], spacing)+(np.random.ranf())
     xcoords, ycoords = np.meshgrid(xcoords, ycoords)
     xcoords, ycoords = xcoords.flatten(), ycoords.flatten()
 
