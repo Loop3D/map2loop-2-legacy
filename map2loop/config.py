@@ -24,6 +24,7 @@ import rasterio
 import shapely
 
 
+
 class Config(object):
     """Object that represents a sub-project. It is defined by some source data, 
     a region of interest (bounding box or polygon) and some execution flags.
@@ -193,8 +194,6 @@ class Config(object):
             self.geology_figure = geology.copy().plot(column=self.c_l['c'], ax=ax, figsize=(
                 10, 10), edgecolor='#000000', linewidth=0.2).get_figure()
 
-            self.export_png()
-
             base = geology.plot(column=self.c_l['c'], figsize=(
                 10, 10), ax=ax, edgecolor='#000000', linewidth=0.2, legend=True)
             leg = base.get_legend()
@@ -210,9 +209,6 @@ class Config(object):
             fig = self.polygon.plot(ax=base, color='none', edgecolor='black').set_title(
                 "Input {}".format(self.bbox)).get_figure()
             fig.savefig(self.tmp_path+"/input-data.png")
-
-            print("Input graphic saved to: " +
-                  self.tmp_path + "input-fig.png")
 
             if self.quiet == 'None':
                 plt.show()
@@ -277,7 +273,7 @@ class Config(object):
         self.G = nx.read_gml(self.strat_graph_file, label='id')
         selected_nodes = [n for n, v in self.G.nodes(data=True) if n >= 0]
 
-        if self.quiet == 'all':
+        if self.quiet == 'None':
             nx.draw_networkx(self.G, pos=nx.kamada_kawai_layout(
                 self.G), arrows=True, nodelist=selected_nodes)
 
@@ -297,9 +293,9 @@ class Config(object):
         groups, self.glabels, G = Topology.get_series(
             self.strat_graph_file, 'id')
 
-        quiet_topology = False
+        quiet_topology = True
         if self.quiet == 'None':
-            quiet_topology = True
+            quiet_topology = False
         Topology.save_units(G, self.tmp_path, self.glabels,
                             Australia=True, asud_strat_file="https://gist.githubusercontent.com/yohanderose/3b257dc768fafe5aaf70e64ae55e4c42/raw/8598c7563c1eea5c0cd1080f2c418dc975cc5433/ASUD.csv",
                             quiet=quiet_topology)
@@ -396,9 +392,9 @@ class Config(object):
         self.structure_clip.to_file(self.structure_clip_file)
 
         # Save geology clips
-        quiet_topology = False
+        quiet_topology = True
         if self.quiet == "None":
-            quiet_topology = True
+            quiet_topology = False
         Topology.save_group(Topology, self.G, self.tmp_path,
                             self.glabels, self.geol_clip, self.c_l, quiet_topology)
 
@@ -489,7 +485,7 @@ class Config(object):
         orientations = self.structures
 
         quiet_interp = True
-        if quiet_interp == "None":
+        if self.quiet == "None":
             quiet_interp = False
 
         group_girdle = m2l_utils.plot_bedding_stereonets(
@@ -728,7 +724,8 @@ class Config(object):
             m2l_geometry.save_orientations_with_polarity(
                 self.output_path+'orientations.csv', self.output_path, self.c_l, self.tmp_path+'basal_contacts.shp', self.tmp_path+'all_sorts.csv', )
 
-            m2l_utils.plot_points(self.output_path+'orientations_polarity.csv',
+            if self.quiet == "None":
+                m2l_utils.plot_points(self.output_path+'orientations_polarity.csv',
                                   self.geol_clip, 'polarity', 'X', 'Y', True, 'alpha')
 
         # Calculate minimum fault offset from stratigraphy and stratigraphic fault offset
@@ -740,14 +737,18 @@ class Config(object):
                 m2l_geometry.fault_strat_offset(self.output_path, self.c_l, self.proj_crs, self.output_path+'formation_summary_thicknesses.csv', self.tmp_path +
                                                 'all_sorts.csv', self.tmp_path+'faults_clip.shp', self.tmp_path+'geol_clip.shp', self.output_path+'fault_dimensions.csv')
 
-                m2l_utils.plot_points(self.output_path+'fault_strat_offset3.csv',
-                                      self.geol_clip, 'min_offset', 'X', 'Y', True, 'numeric')
-                m2l_utils.plot_points(self.output_path+'fault_strat_offset3.csv',
-                                      self.geol_clip, 'strat_offset', 'X', 'Y', True, 'numeric')
+                if self.quiet == "None":
+                    m2l_utils.plot_points(self.output_path+'fault_strat_offset3.csv',
+                                        self.geol_clip, 'min_offset', 'X', 'Y', True, 'numeric')
+                    m2l_utils.plot_points(self.output_path+'fault_strat_offset3.csv',
+                                        self.geol_clip, 'strat_offset', 'X', 'Y', True, 'numeric')
 
         # Analyse fault topologies
+        fault_parse_figs = True
+        if self.quiet == "None":
+            fault_parse = False
         Topology.parse_fault_relationships(
-            self.graph_path, self.tmp_path, self.output_path)
+            self.graph_path, self.tmp_path, self.output_path, fault_parse_figs)
 
         # TODO: Figures sometimes look a bit squashed in notebooks
 
@@ -760,5 +761,6 @@ class Config(object):
         filename = self.loop_projectfile
         if self.loop_projectfile is None:
             filename = 'GEOLOGY_CLIP'
-        self.geology_figure.savefig("{}.png".format(self.loop_projectfile))
-        print("Geology graphic exported to: " + self.tmp_path+"geology.png")
+        self.geology.copy().plot(column=self.c_l['c'], figsize=(
+                10, 10), edgecolor='#000000', linewidth=0.2).get_figure().savefig("{}.png".format(filename))
+        print("Geology graphic exported to: ", filename)

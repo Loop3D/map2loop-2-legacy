@@ -747,18 +747,19 @@ def plot_bedding_stereonets(orientations_clean, geology, c_l, quiet):
     print("All observations n=", len(orientations_clean))
     print('groups', groups, '\ncodes', codes)
 
-    fig, ax = mplstereonet.subplots(figsize=(7, 7))
+    if not quiet:
+        fig, ax = mplstereonet.subplots(figsize=(7, 7))
     if(c_l['otype'] == 'dip direction'):
         strikes = orientations[c_l['dd']].values - 90
     else:
         strikes = orientations[c_l['dd']].values
 
-    dips = orientations[c_l['d']].values
-    cax = ax.density_contourf(strikes, dips, measurement='poles')
-    ax.pole(strikes, dips, markersize=5, color='w')
-    ax.grid(True)
-    text = ax.text(2.2, 1.37, "All data", color='b')
     if not quiet:
+        dips = orientations[c_l['d']].values
+        cax = ax.density_contourf(strikes, dips, measurement='poles')
+        ax.pole(strikes, dips, markersize=5, color='w')
+        ax.grid(True)
+        text = ax.text(2.2, 1.37, "All data", color='b')
         plt.show()
     group_girdle = {}
 
@@ -773,17 +774,21 @@ def plot_bedding_stereonets(orientations_clean, geology, c_l, quiet):
         elif(len(all_orientations) > 0):
             print("----------------------------------------------------------------------------------------------------------------------")
             print(gp, "observations n=", len(all_orientations))
-            fig, ax = mplstereonet.subplots(figsize=(5, 5))
+
+            ax = None
+            if not quiet:
+                fig, ax = mplstereonet.subplots(figsize=(5, 5))
             if(c_l['otype'] == 'dip direction'):
                 strikes = all_orientations[c_l['dd']].values - 90
             else:
                 strikes = all_orientations[c_l['dd']].values
 
             dips = all_orientations[c_l['d']].values
-            cax = ax.density_contourf(strikes, dips, measurement='poles')
-            ax.pole(strikes, dips, markersize=5, color='w')
-            ax.grid(True)
-            text = ax.text(2.2, 1.37, gp, color='b')
+            if not quiet:
+                cax = ax.density_contourf(strikes, dips, measurement='poles')
+                ax.pole(strikes, dips, markersize=5, color='w')
+                ax.grid(True)
+                text = ax.text(2.2, 1.37, gp, color='b')
             fit_strike, fit_dip = mplstereonet.fit_girdle(strikes, dips)
             (plunge,), (bearing,) = mplstereonet.pole2plunge_bearing(
                 fit_strike, fit_dip)
