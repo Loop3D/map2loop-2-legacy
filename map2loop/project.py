@@ -7,7 +7,6 @@ import warnings
 import hjson
 from tqdm import tqdm
 
-
 import geopandas as gpd
 import pandas as pd
 import numpy as np
@@ -16,6 +15,9 @@ from matplotlib import pyplot as plt
 
 from map2loop.config import Config
 from map2loop.m2l_utils import display, enable_quiet_mode, disable_quiet_mode, print
+
+# Disable plots until show  is called
+# matplotlib.use('Agg')
 
 
 class Project(object):
@@ -382,12 +384,7 @@ class Project(object):
         """
 
         if self.quiet == 'all':
-            # print("enabling quiet all mode")
             enable_quiet_mode()
-
-        # TODO: Remove plt.show() conditionals in config.py and see if just this plt.ioff() is sufficient
-        if self.quiet == 'no-figures':
-            plt.ioff()
 
         with tqdm(total=100, position=0) as pbar:
             pbar.update(0)
@@ -461,6 +458,7 @@ class Project(object):
 
             if self.loopFilename is not None:
                 self.config.update_projectfile()
+                self.config.export_png()
+
 
         disable_quiet_mode()
-        plt.ion()

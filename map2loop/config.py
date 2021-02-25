@@ -24,6 +24,7 @@ import rasterio
 import shapely
 
 
+
 class Config(object):
     """Object that represents a sub-project. It is defined by some source data, 
     a region of interest (bounding box or polygon) and some execution flags.
@@ -192,8 +193,6 @@ class Config(object):
             self.geology_figure = geology.copy().plot(column=self.c_l['c'], ax=ax, figsize=(
                 10, 10), edgecolor='#000000', linewidth=0.2).get_figure()
 
-            self.export_png()
-
             base = geology.plot(column=self.c_l['c'], figsize=(
                 10, 10), ax=ax, edgecolor='#000000', linewidth=0.2, legend=True)
             leg = base.get_legend()
@@ -209,9 +208,6 @@ class Config(object):
             fig = self.polygon.plot(ax=base, color='none', edgecolor='black').set_title(
                 "Input {}".format(self.bbox)).get_figure()
             fig.savefig(self.tmp_path+"/input-data.png")
-
-            print("Input graphic saved to: " +
-                  self.tmp_path + "input-fig.png")
 
             if self.quiet == 'None':
                 plt.show()
@@ -747,11 +743,11 @@ class Config(object):
                                         self.geol_clip, 'strat_offset', 'X', 'Y', True, 'numeric')
 
         # Analyse fault topologies
-        fault_parse = True
+        fault_parse_figs = True
         if self.quiet == "None":
             fault_parse = False
         Topology.parse_fault_relationships(
-            self.graph_path, self.tmp_path, self.output_path, fault_parse )
+            self.graph_path, self.tmp_path, self.output_path, fault_parse_figs)
 
         # TODO: Figures sometimes look a bit squashed in notebooks
 
@@ -764,5 +760,6 @@ class Config(object):
         filename = self.loop_projectfile
         if self.loop_projectfile is None:
             filename = 'GEOLOGY_CLIP'
-        self.geology_figure.savefig("{}.png".format(self.loop_projectfile))
-        print("Geology graphic exported to: " + self.tmp_path+"geology.png")
+        self.geology.copy().plot(column=self.c_l['c'], figsize=(
+                10, 10), edgecolor='#000000', linewidth=0.2).get_figure().savefig("{}.png".format(filename))
+        print("Geology graphic exported to: ", filename)
