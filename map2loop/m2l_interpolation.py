@@ -69,13 +69,13 @@ def scipy_idw(x, y, z, xi, yi):
 #
 # sci_py version of Radial Basis Function interpolation of observations z at x,y locations returned at locations defined by xi,yi arraysplot(x,y,z,grid)
 ######################################
-import dask.array as da
 
 
 def euclidean_norm_numpy(x1, x2):
     return np.linalg.norm(x1 - x2, axis=0)
 
 def scipy_rbf_dask(x, y, z, xi, yi):
+    # import dask.array as da
     rbf = Rbf(x, y, z, function='multiquadric', smooth=.15, norm=euclidean_norm_numpy)
     n1 = len(xi)
     xi=xi[np.newaxis,:]
@@ -88,7 +88,7 @@ def scipy_rbf_dask(x, y, z, xi, yi):
     return zz
 
 def scipy_rbf(x, y, z, xi, yi):
-    interp = Rbf(x, y, z, function='multiquadric', smooth=.15, norm=euclidean_norm_numpy)
+    interp = Rbf(x, y, z, function='multiquadric', smooth=.15)
     return interp(xi, yi)
 
 def scipy_LNDI(x, y, z, xi, yi): # actually LinearNDInterpolator
@@ -1589,7 +1589,7 @@ def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spac
     #structures_code = gpd.sjoin(structures, geology, how="left", op="within")
 
     first_supergroup = True
-    split=10000000000 # avoids massive memory rbf calcs by splitting calc into (non-threaded) chunks, maybe try dask + masks??
+    split=100000 # avoids massive memory rbf calcs by splitting calc into (non-threaded) chunks, maybe try dask + masks??
     for i in np.arange(0,bsh[0]*bsh[1],split):
         min=i
         max=i+split
@@ -1598,6 +1598,7 @@ def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spac
         print('rbf_split',min,max)        
         nodes_code_row=nodes_code[min:max]
         for groups in super_groups:
+            print(groups)
             first = True
             for group in groups:
 

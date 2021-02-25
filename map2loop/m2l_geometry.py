@@ -9,6 +9,7 @@ import geopandas as gpd
 import pandas as pd
 from math import acos, sqrt, cos, sin, degrees, radians, fabs, atan2, fmod, isnan, atan
 from map2loop import m2l_utils
+from map2loop.m2l_utils import print
 from map2loop import m2l_interpolation
 import numpy as np
 import os
