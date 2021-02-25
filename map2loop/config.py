@@ -575,7 +575,7 @@ class Config(object):
             columns=['uctype', 'colour'], data=data)
         all_sorts = pd.concat([all_sorts, expected_extra_cols], axis=1)
         asc = all_sorts
-        all_sorts.to_csv(self.tmp_path+'all_sorts_clean.csv', ",")
+        all_sorts.to_csv(self.tmp_path+'all_sorts_clean.csv', ",",index = None)
 
         colours = pd.read_csv(self.clut_path, ",")
         if self.c_l['c'] == 'CODE':
@@ -671,7 +671,7 @@ class Config(object):
         m2l_geometry.save_basal_contacts_orientations_csv(contacts, orientations, self.geol_clip, self.tmp_path, self.output_path, self.dtm, self.dtb,
                                                           self.dtb_null, False, contact_orientation_decimate, self.c_l, contact_dip, self.dip_grid, self.spacing, self.bbox)
 
-    def calc_thickness(self, contact_decimate, null_scheme, thickness_buffer, max_thickness_allowed):
+    def calc_thickness(self, contact_decimate, null_scheme, thickness_buffer, max_thickness_allowed,cl):
         # Estimate formation thickness and normalised formation thickness
         geology_file = self.tmp_path+'basal_contacts.shp'
         # contact_decimate = 5
@@ -683,10 +683,10 @@ class Config(object):
         # max_thickness_allowed = 10000
 
         m2l_geometry.calc_thickness_with_grid(self.tmp_path, self.output_path, thickness_buffer, max_thickness_allowed,
-                                              self.c_l, self.bbox, self.dip_grid, self.dip_dir_grid, self.x, self.y, self.spacing)
+                                              self.c_l, self.bbox, self.dip_grid, self.dip_dir_grid, self.x, self.y, self.spacing, self.dtm)
 
         m2l_geometry.calc_min_thickness_with_grid(self.tmp_path, self.output_path, thickness_buffer, max_thickness_allowed,
-                                                  self.c_l, self.bbox, self.dip_grid, self.dip_dir_grid, self.x, self.y, self.spacing)
+                                                  self.c_l, self.bbox, self.dip_grid, self.dip_dir_grid, self.x, self.y, self.spacing, self.dtm)
 
         m2l_geometry.normalise_thickness(self.output_path)
 
