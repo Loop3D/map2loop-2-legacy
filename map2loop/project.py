@@ -16,8 +16,6 @@ from matplotlib import pyplot as plt
 from map2loop.config import Config
 from map2loop.m2l_utils import display, enable_quiet_mode, disable_quiet_mode, print
 
-# Disable plots until show  is called
-# matplotlib.use('Agg')
 
 
 class Project(object):
@@ -104,6 +102,20 @@ class Project(object):
             self.proj_crs = {'init': 'EPSG:28350'}
 
         self.step_out = 0.1
+        
+        # Make matplotlib comply with interface/cmd line window managers
+        import matplotlib
+        gui_env = ['Qt4Agg','TkAgg','GTK3Agg','WXAgg']
+        all_backends = list(set([*gui_env, *matplotlib.rcsetup.all_backends]))
+
+        for gui in all_backends:
+            try:
+                matplotlib.use(gui,warn=False, force=True)
+                from matplotlib import pyplot as plt
+                break
+            except:
+                continue
+        print("Using:", matplotlib.get_backend())
 
     def update_workflow(self, workflow={'model_engine': 'loopstructural'}):
         """Set unique run flags depending on model engine to tailor outputs.
@@ -458,7 +470,7 @@ class Project(object):
 
             if self.loopFilename is not None:
                 self.config.update_projectfile()
-                self.config.export_png()
+                # self.config.export_png()
 
 
         disable_quiet_mode()
