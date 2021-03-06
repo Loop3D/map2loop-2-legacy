@@ -1734,6 +1734,7 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path,output_path,dtm_repro
     
     # loop through all faults
     
+    # Looping through each fault
     for index,fault in faults.iterrows():
         #if(fault[c_l['o']]!=1071):
             #continue
@@ -1897,6 +1898,8 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path,output_path,dtm_repro
                                     if(not (l==0.0 and m==0.0)):
                                         fdc.append((l,m,'Fault_'+str(fault[c_l['o']])))
                                         all_coordsdist.append((dist))
+            ##############################################################################################
+            # Between these dividers shouldn't be neccessary anymore.
             else:
                 if('Fault_'+str(fault[c_l['o']]) in fault_names): # in is dangerous as Fault_1 is in Fault_10
                     for fls in fault.geometry:              
@@ -2053,6 +2056,7 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path,output_path,dtm_repro
                                             all_coordsdist.append((dist))
                                             
             
+                ##############################################################################################
                 
                             
     fftc.close()

@@ -175,6 +175,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
     # Process fold polylines
 
+    folds = None
     if (os.path.isfile(fold_file) or not local_paths):
         folds = gpd.read_file(fold_file,bbox=bbox)
         if(len(folds)>0):
@@ -346,15 +347,16 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
     if(len(m2l_errors) == 0):
 
-        if(len(folds)>0):
-            if(len(folds_clip)>0):
-                fold_file=tmp_path+'folds_clip.shp'
-                folds_explode=folds_explode.dropna(subset=['geometry'])
-                folds_explode.to_file(fold_file)         
-            else:
-                fold_file=tmp_path+'folds_clip.shp'
-                print("\nFold layer metadata\n--------------------")             
-                print("No folds found")
+        if folds is not None:
+            if(len(folds)>0):
+                if(len(folds_clip)>0):
+                    fold_file=tmp_path+'folds_clip.shp'
+                    folds_explode=folds_explode.dropna(subset=['geometry'])
+                    folds_explode.to_file(fold_file)         
+                else:
+                    fold_file=tmp_path+'folds_clip.shp'
+                    print("\nFold layer metadata\n--------------------")             
+                    print("No folds found")
 
 
         if(len(faults_clip) > 0):

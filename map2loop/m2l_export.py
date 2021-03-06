@@ -13,6 +13,8 @@ from rasterio.transform import from_origin
 from rasterio.io import MemoryFile
 import matplotlib
 from map2loop import m2l_utils
+import LoopProjectFile
+import re
 
 ##########################################################################
 # Save out and compile taskfile needed to generate geomodeller model using the geomodellerbatch engine

@@ -194,6 +194,8 @@ class Config(object):
             self.geology_figure = geology.copy().plot(column=self.c_l['c'], ax=ax, figsize=(
                 10, 10), edgecolor='#000000', linewidth=0.2).get_figure()
 
+            self.export_png()
+
             base = geology.plot(column=self.c_l['c'], figsize=(
                 10, 10), ax=ax, edgecolor='#000000', linewidth=0.2, legend=True)
             leg = base.get_legend()
@@ -761,6 +763,10 @@ class Config(object):
         filename = self.loop_projectfile
         if self.loop_projectfile is None:
             filename = 'GEOLOGY_CLIP'
-        self.geology.copy().plot(column=self.c_l['c'], figsize=(
-                10, 10), edgecolor='#000000', linewidth=0.2).get_figure().savefig("{}.png".format(filename))
-        print("Geology graphic exported to: ", filename)
+        print("Exporting graphical map...")
+        try:
+            self.geology_figure.savefig("{}.png".format(filename))
+            print("Geology graphic exported to: ", filename)
+        except Exception as e:
+            print(e)
+            print("WARNING: Could not save geology graphic")
