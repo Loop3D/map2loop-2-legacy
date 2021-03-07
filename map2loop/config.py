@@ -18,6 +18,8 @@ from map2loop.m2l_export import export_to_projectfile
 import map2model
 
 import networkx as nx
+import matplotlib
+matplotlib.use('PS')
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import rasterio
@@ -189,6 +191,9 @@ class Config(object):
 
         try:
             fig, ax = plt.subplots()
+            ax.ticklabel_format(axis='both', useOffset=False, style='plain')
+            ax.margins(0.0)
+            fig.set_facecolor("#ffffff00")
 
             self.geology_figure = geology.copy().plot(column=self.c_l['c'], ax=ax, figsize=(
                 10, 10), edgecolor='#000000', linewidth=0.2).get_figure()
@@ -753,7 +758,7 @@ class Config(object):
 
     def update_projectfile(self):
         self.loop_projectfile = export_to_projectfile(
-            self.loop_projectfile, self.output_path, self.bbox_3d, self.proj_crs)
+            self.loop_projectfile, self.tmp_path, self.output_path, self.bbox_3d, self.proj_crs)
         print("PROJECTFILE FOUND AT", self.loop_projectfile)
 
     def export_png(self):
