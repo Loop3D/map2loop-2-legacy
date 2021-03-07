@@ -1365,7 +1365,7 @@ def display_LS_map(model,dtm,geol_clip,faults_clip,dst_crs,use_cmap,cmap,use_top
         faults_clip.plot(ax=ax, facecolor='none', edgecolor='red',linewidth=0.7)
 
 
-def export_to_projectfile(loopFilename, output_path, bbox, proj_crs):
+def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs):
 
     # project_path = re.sub(r'\W+', '', project_path)
     # loopFilename = project_path + '.loop3d'
@@ -1379,63 +1379,104 @@ def export_to_projectfile(loopFilename, output_path, bbox, proj_crs):
     #                      depth=[bbox['base'], bbox['top']],
     #                     spacing=[1000, 1000, 10], preference="geodesic")
 
-    stratigraphicLayers = pd.read_csv(
-        output_path + "formation_thicknesses.csv")
+    form2supergroup = pd.read_csv(tmp_path + 'all_sorts_clean.csv', ',')[['code','group','colour']].rename(columns={'code':'formation','group':'supergroup'})
+
+    stratigraphicLayers = pd.read_csv(output_path + "formation_thicknesses.csv")
+
+    stratLayers = pd.merge(form2supergroup,stratigraphicLayers,on=['formation'])
+    stratLayers['colour1Red']   = [ int(a[1:3],16) for a in stratLayers['colour'] ]
+    stratLayers['colour1Green'] = [ int(a[3:5],16) for a in stratLayers['colour'] ]
+    stratLayers['colour1Blue']  = [ int(a[5:7],16) for a in stratLayers['colour'] ]
     thickness = {}
-    uniqueLayers = stratigraphicLayers['formation'].unique()
-    for f in uniqueLayers:
+    uniqueLayers = stratLayers[['formation','supergroup','colour1Red','colour1Green','colour1Blue']].drop_duplicates(subset="formation")
+    for f in uniqueLayers['formation']:
         thickness[f] = np.mean(
             stratigraphicLayers[stratigraphicLayers['formation'] == f]['thickness'])
+    # print(thickness)
     stratigraphicLogData = np.zeros(
         uniqueLayers.shape[0], LoopProjectFile.stratigraphicLayerType)
     stratigraphicLogData['layerId'] = range(uniqueLayers.shape[0])
     stratigraphicLogData['layerId'] += 1
     stratigraphicLogData['minAge'] = range(uniqueLayers.shape[0])
     stratigraphicLogData['maxAge'] = range(uniqueLayers.shape[0])
-    stratigraphicLogData['maxAge'] += 0.5
-    stratigraphicLogData['name'] = uniqueLayers
+    stratigraphicLogData['maxAge'] += 0.9999
+    stratigraphicLogData['minAge'] *= 0.25
+    stratigraphicLogData['maxAge'] *= 0.25
+    stratigraphicLogData['name'] = uniqueLayers['formation']
+    stratigraphicLogData['supergroup'] = uniqueLayers['supergroup']
     stratigraphicLogData['enabled'] = 1
     stratigraphicLogData['rank'] = 0
     stratigraphicLogData['type'] = 4
     stratigraphicLogData['thickness'] = list(thickness.values())
+
+    # Should check format of colour first for "#ffffff" perhaps with regex
+    stratigraphicLogData['colour1Red']   = uniqueLayers['colour1Red']
+    stratigraphicLogData['colour1Green'] = uniqueLayers['colour1Green']
+    stratigraphicLogData['colour1Blue']  = uniqueLayers['colour1Blue']
+    stratigraphicLogData['colour2Red']   = [ int (a * 0.95) for a in stratigraphicLogData['colour1Red'] ] 
+    stratigraphicLogData['colour2Green'] = [ int (a * 0.95) for a in stratigraphicLogData['colour1Green'] ] 
+    stratigraphicLogData['colour2Blue']  = [ int (a * 0.95) for a in stratigraphicLogData['colour1Blue'] ] 
     resp = LoopProjectFile.Set(
         loopFilename, "stratigraphicLog", data=stratigraphicLogData, verbose=True)
     if resp["errorFlag"]:
         print(resp["errorString"])
 
     faults = pd.read_csv(output_path + "fault_orientations.csv")
-    faultEvents = np.zeros(faults.shape[0], LoopProjectFile.faultEventType)
-    # The fault eventId is called formation for some reason
-    faultEvents['name'] = faults['formation']
-    faultEvents['enabled'] = 0
-    faultEvents['rank'] = 0
-    faultEvents['type'] = 0
-    faultEvents['minAge'] = np.arange(1.0, 7.0, 6.0/faults.shape[0])
-    faultEvents['maxAge'] = faultEvents['minAge']
-    faultEvents['avgDisplacement'] = 0
-    for i in range(faultEvents.size):
-        faults.loc[i, 'formation'] = re.sub('.*_', '', faults['formation'][i])
-    tmp = faults['formation']
-    faultEvents['eventId'] = tmp
+    faultDims = pd.read_csv(output_path + "fault_dimensions.csv")
+    faultDims.rename(columns={'Fault':'formation'},inplace=True)
+    faultDisplacements = pd.read_csv(output_path + "fault_displacements3.csv")
+    faults = faults.merge(faultDims,on='formation')
+    faults['formation'] = [ re.sub("\.0","",s) for s in faults['formation']]
 
-    resp = LoopProjectFile.Set(
-        loopFilename, "faultLog", data=faultEvents, verbose=False)
-    if resp["errorFlag"]:
-        print(resp["errorString"])
+    faultObs = pd.read_csv(output_path + "faults.csv")
+    # faultObs.rename(columns={'X':'easting','Y':'northing','Z':'altitude'},inplace=True)
+    faultObs['formation'] = [ re.sub("\.0","",s) for s in faultObs['formation']]
+    # faultObs['eventId'] = [ re.sub('.*_','',s) for s in faultObs['formation'] ]
+    faultObs['posOnly'] = 1
+    faultsJoined = pd.concat([faults,faultObs])
+    if (len(faults) > 0):
+        faultEvents = np.zeros(faults.shape[0], LoopProjectFile.faultEventType)
+        # The fault eventId is called formation for some reason
+        faultEvents['name'] = faults['formation']
+        faultEvents['enabled'] = 0
+        faultEvents['rank'] = 0
+        faultEvents['type'] = 0
+        faultEvents['minAge'] = np.arange(1.0, 7.0, 6.0/faults.shape[0])
+        faultEvents['maxAge'] = faultEvents['minAge']
+        avgDisplacements = []
+        avgDownthrowDir = []
+        for formationName in faultDisplacements['fname'].unique():
+            avgDisplacements.append(np.average(faultDisplacements[faultDisplacements['fname']==formationName]['vertical_displacement']))
+            avgDownthrowDir.append(np.average(faultDisplacements[faultDisplacements['fname']==formationName]['downthrow_dir']))
+        faultEvents['avgDisplacement'] = avgDisplacements
+        faultEvents['avgDownthrowDir'] = avgDownthrowDir
+        faultEvents['influenceDistance'] = faults['InfluenceDistance']
+        faultEvents['verticalRadius'] = faults['VerticalRadius']
+        faultEvents['horizontalRadius'] = faults['HorizontalRadius']
+        faultEvents['colour'] = faults['colour']
 
-    faultsData = np.zeros(
-        faults.shape[0], LoopProjectFile.faultObservationType)
-    faultsData['eventId'] = faults['formation']
-    faultsData['easting'] = faults['X']
-    faultsData['northing'] = faults['Y']
-    faultsData['altitude'] = faults['Z']
-    faultsData['dipDir'] = faults['DipDirection']
-    faultsData['dip'] = faults['dip']
-    faultsData['dipPolarity'] = faults['DipPolarity']
-    resp = LoopProjectFile.Set(
-        loopFilename, "faultObservations", data=faultsData, verbose=True)
-    if resp["errorFlag"]:
-        print(resp["errorString"])
+        faultEvents['eventId'] = [ re.sub('.*_','',s) for s in faults['formation'] ]
+
+        resp = LoopProjectFile.Set(
+            loopFilename, "faultLog", data=faultEvents, verbose=False)
+        if resp["errorFlag"]:
+            print(resp["errorString"])
+
+        faultsData = np.zeros(
+            faultsJoined.shape[0], LoopProjectFile.faultObservationType)
+        faultsData['eventId'] =  [ re.sub('.*_','',s) for s in faultsJoined['formation'] ]
+        faultsData['easting'] = faultsJoined['X']
+        faultsData['northing'] = faultsJoined['Y']
+        faultsData['altitude'] = faultsJoined['Z']
+        faultsData['dipDir'] = faultsJoined['DipDirection']
+        faultsData['dip'] = faultsJoined['dip']
+        faultsData['dipPolarity'] = faultsJoined['DipPolarity']
+        faultsData['displacement'] = 0
+        faultsData['posOnly'] = faultsJoined['posOnly']
+        resp = LoopProjectFile.Set(
+            loopFilename, "faultObservations", data=faultsData, verbose=True)
+        if resp["errorFlag"]:
+            print(resp["errorString"])
 
     # each contact contains a location and which formation it is on
     contacts = pd.read_csv(output_path + "contacts4.csv")
