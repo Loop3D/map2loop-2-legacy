@@ -209,7 +209,7 @@ class Config(object):
 
         except Exception as e:
             # Otherwise, just append a random set
-            self.clut_path = None
+            self.clut_path = ""
             random_colours = ['#%02X%02X%02X' % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
                               for i in range(len(formations))]
             i = 0
@@ -601,37 +601,17 @@ class Config(object):
     def save_cmap(self):
         """Create a colourmap for the model using the colour code
         """
-        # asc = pd.read_csv(self.tmp_path+'all_sorts_clean.csv', ",")
-        all_sorts = pd.read_csv(self.tmp_path + 'all_sorts.csv')
+        all_sorts = pd.read_csv(self.tmp_path + 'all_sorts_clean.csv')
 
-        uctypes = ['erode'] * len(all_sorts)
-        data = {self.c_l['u']: self.colour_dict.keys(
-        ), 'colour': self.colour_dict.values(), 'uctype': uctypes}
-        all_sorts = all_sorts.merge(pd.DataFrame.from_dict(
-            data), how='inner', on=self.c_l['u'])
-        # data = list(zip(uctypes, self.colour_dict.values()))
-        # expected_extra_cols = pd.DataFrame(
-        # columns=['uctype', 'colour'], data=data)
-        # all_sorts = pd.concat([all_sorts, expected_extra_cols], axis=1)
+        colours = []
+        for code in all_sorts[self.c_l['u']]:
+            colours.append([self.colour_dict[code]])
+
+        data = colours
+        expected_extra_cols = pd.DataFrame(
+            columns=['colour'], data=data)
+        all_sorts = pd.concat([all_sorts, expected_extra_cols], axis=1)
         all_sorts.to_csv(self.tmp_path+'all_sorts_clean.csv', ",", index=None)
-
-        # asc = all_sorts
-        # colours = pd.read_csv(self.clut_path, ",")
-        # if self.c_l['c'] == 'CODE':
-        # code = self.c_l['c'].lower()
-        # else:
-        # code = self.c_l['c']
-        # colours = []  # container for the discrete colours we are using
-        # i = 0
-        # # initialise a colour index attribute column
-        # self.geol_clip['colour_index'] = np.nan
-        # for ind, strat in asc.iterrows():
-        # self.geol_clip[self.c_l['c']].str.replace(" ", "_")
-        # self.geol_clip.loc[self.geol_clip[self.c_l['c']] ==
-        # strat['code'].replace("_", " "), 'colour_index'] = i
-        # colours.append(strat['colour'])
-        # i = i+1
-        # self.cmap = colors.ListedColormap(colours)
 
     def export_faults(self, fault_decimate, min_fault_length, fault_dip):
         # fault_decimate = 5
@@ -748,9 +728,8 @@ class Config(object):
         # use_interpolations = True
         # use_fat = True
 
-        if self.clut_path is not None:
-            m2l_geometry.tidy_data(self.output_path, self.tmp_path, self.clut_path, self.use_gcode3,
-                                   use_interpolations, use_fat, self.pluton_form, inputs, workflow, self.c_l)
+        m2l_geometry.tidy_data(self.output_path, self.tmp_path, self.clut_path, self.use_gcode3,
+                               use_interpolations, use_fat, self.pluton_form, inputs, workflow, self.c_l)
         model_top = round(np.amax(self.dtm.read(1)), -2)
 
         # self.dtm.close()
