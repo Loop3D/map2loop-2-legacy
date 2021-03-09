@@ -24,7 +24,6 @@ import rasterio
 import shapely
 
 
-
 class Config(object):
     """Object that represents a sub-project. It is defined by some source data, 
     a region of interest (bounding box or polygon) and some execution flags.
@@ -50,7 +49,7 @@ class Config(object):
                  **kwargs
                  ):
 
-        self.clut_path = "https://gist.githubusercontent.com/yohanderose/8f7e2d57db9086fbe1a7c651b9e25996/raw/ac5062e68d251c21bbc24b811ee5b17cc2f98ce3/500kibg_colours.csv"
+        self.clut_path = _clut_path
 
         if (not os.path.exists(project_path)):
             # Create proj root dir if doesn't exist
@@ -188,16 +187,52 @@ class Config(object):
         self.structures = structures
         self.mindeps = mindeps
 
+        # Make colours consistent from map to model
+        formations = sorted([formation.replace(" ", "_") for formation in list(
+            set(geology[self.c_l['c']].to_numpy()))])
+        temp_colours = [""] * len(formations)
+        self.colour_dict = dict(zip(formations, temp_colours))
+        try:
+            # Try to retrieve the clut reference
+            colour_ref = pd.read_csv(self.clut_path)
+            for formation in formations:
+                key = formation
+                colour = None
+                try:
+                    colour = colour_ref[colour_ref['UNITNAME'] == key]['colour'].to_numpy()[
+                        0]
+                except Exception as e:
+                    colour = ('#%02X%02X%02X' % (random.randint(
+                        0, 255), random.randint(0, 255), random.randint(0, 255)))
+
+                self.colour_dict[key] = colour
+
+        except Exception as e:
+            # Otherwise, just append a random set
+            self.clut_path = None
+            random_colours = ['#%02X%02X%02X' % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                              for i in range(len(formations))]
+            i = 0
+            for key in self.colour_dict.keys():
+                self.colour_dict[key] = random_colours[i]
+
+        self.cmap = colors.ListedColormap(
+            self.colour_dict.values(), name='geol_key')
+
         try:
             fig, ax = plt.subplots()
+            ax.ticklabel_format(axis='both', useOffset=False, style='plain')
+            ax.margins(0.0)
+            fig.set_facecolor("#ffffff00")
 
             self.geology_figure = geology.copy().plot(column=self.c_l['c'], ax=ax, figsize=(
-                10, 10), edgecolor='#000000', linewidth=0.2).get_figure()
+                10, 10), edgecolor='#000000', linewidth=0.2, cmap=self.cmap).get_figure()
 
             self.export_png()
+            fig, ax = plt.subplots()
 
             base = geology.plot(column=self.c_l['c'], figsize=(
-                10, 10), ax=ax, edgecolor='#000000', linewidth=0.2, legend=True)
+                10, 10), ax=ax, edgecolor='#000000', linewidth=0.2, legend=True, cmap=self.cmap)
             leg = base.get_legend()
             leg.set_bbox_to_anchor((1.04, 1))
 
@@ -563,39 +598,40 @@ class Config(object):
                        origin='lower', vmin=-360, vmax=360)
             plt.show()
 
-    def create_map_cmap(self):
+    def save_cmap(self):
         """Create a colourmap for the model using the colour code
         """
         # asc = pd.read_csv(self.tmp_path+'all_sorts_clean.csv', ",")
         all_sorts = pd.read_csv(self.tmp_path + 'all_sorts.csv')
 
-        colours = ['#%02X%02X%02X' % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-                   for i in range(len(all_sorts))]
         uctypes = ['erode'] * len(all_sorts)
-        data = list(zip(uctypes, colours))
-        expected_extra_cols = pd.DataFrame(
-            columns=['uctype', 'colour'], data=data)
-        all_sorts = pd.concat([all_sorts, expected_extra_cols], axis=1)
-        asc = all_sorts
-        all_sorts.to_csv(self.tmp_path+'all_sorts_clean.csv', ",",index = None)
+        data = {self.c_l['u']: self.colour_dict.keys(
+        ), 'colour': self.colour_dict.values(), 'uctype': uctypes}
+        all_sorts = all_sorts.merge(pd.DataFrame.from_dict(
+            data), how='inner', on=self.c_l['u'])
+        # data = list(zip(uctypes, self.colour_dict.values()))
+        # expected_extra_cols = pd.DataFrame(
+        # columns=['uctype', 'colour'], data=data)
+        # all_sorts = pd.concat([all_sorts, expected_extra_cols], axis=1)
+        all_sorts.to_csv(self.tmp_path+'all_sorts_clean.csv', ",", index=None)
 
-        colours = pd.read_csv(self.clut_path, ",")
-        if self.c_l['c'] == 'CODE':
-            code = self.c_l['c'].lower()
-        else:
-            code = self.c_l['c']
-
-        colours = []  # container for the discrete colours we are using
-        i = 0
-        # initialise a colour index attribute column
-        self.geol_clip['colour_index'] = np.nan
-        for ind, strat in asc.iterrows():
-            self.geol_clip[self.c_l['c']].str.replace(" ", "_")
-            self.geol_clip.loc[self.geol_clip[self.c_l['c']] ==
-                               strat['code'].replace("_", " "), 'colour_index'] = i
-            colours.append(strat['colour'])
-            i = i+1
-        self.cmap = colors.ListedColormap(colours)
+        # asc = all_sorts
+        # colours = pd.read_csv(self.clut_path, ",")
+        # if self.c_l['c'] == 'CODE':
+        # code = self.c_l['c'].lower()
+        # else:
+        # code = self.c_l['c']
+        # colours = []  # container for the discrete colours we are using
+        # i = 0
+        # # initialise a colour index attribute column
+        # self.geol_clip['colour_index'] = np.nan
+        # for ind, strat in asc.iterrows():
+        # self.geol_clip[self.c_l['c']].str.replace(" ", "_")
+        # self.geol_clip.loc[self.geol_clip[self.c_l['c']] ==
+        # strat['code'].replace("_", " "), 'colour_index'] = i
+        # colours.append(strat['colour'])
+        # i = i+1
+        # self.cmap = colors.ListedColormap(colours)
 
     def export_faults(self, fault_decimate, min_fault_length, fault_dip):
         # fault_decimate = 5
@@ -673,7 +709,7 @@ class Config(object):
         m2l_geometry.save_basal_contacts_orientations_csv(contacts, orientations, self.geol_clip, self.tmp_path, self.output_path, self.dtm, self.dtb,
                                                           self.dtb_null, False, contact_orientation_decimate, self.c_l, contact_dip, self.dip_grid, self.spacing, self.bbox)
 
-    def calc_thickness(self, contact_decimate, null_scheme, thickness_buffer, max_thickness_allowed,cl):
+    def calc_thickness(self, contact_decimate, null_scheme, thickness_buffer, max_thickness_allowed, cl):
         # Estimate formation thickness and normalised formation thickness
         geology_file = self.tmp_path+'basal_contacts.shp'
         # contact_decimate = 5
@@ -709,12 +745,12 @@ class Config(object):
                                                              fold_decimate, fat_step, close_dip, self.scheme, self.bbox, self.spacing, self.dip_grid, self.dip_dir_grid)
 
     def postprocess(self, inputs, workflow, use_interpolations, use_fat):
-        clut_path = self.clut_path
         # use_interpolations = True
         # use_fat = True
 
-        m2l_geometry.tidy_data(self.output_path, self.tmp_path, clut_path, self.use_gcode3,
-                               use_interpolations, use_fat, self.pluton_form, inputs, workflow, self.c_l)
+        if self.clut_path is not None:
+            m2l_geometry.tidy_data(self.output_path, self.tmp_path, self.clut_path, self.use_gcode3,
+                                   use_interpolations, use_fat, self.pluton_form, inputs, workflow, self.c_l)
         model_top = round(np.amax(self.dtm.read(1)), -2)
 
         # self.dtm.close()
@@ -728,7 +764,7 @@ class Config(object):
 
             if self.quiet == "None":
                 m2l_utils.plot_points(self.output_path+'orientations_polarity.csv',
-                                  self.geol_clip, 'polarity', 'X', 'Y', True, 'alpha')
+                                      self.geol_clip, 'polarity', 'X', 'Y', True, 'alpha')
 
         # Calculate minimum fault offset from stratigraphy and stratigraphic fault offset
         if(workflow['strat_offset']):
@@ -741,9 +777,9 @@ class Config(object):
 
                 if self.quiet == "None":
                     m2l_utils.plot_points(self.output_path+'fault_strat_offset3.csv',
-                                        self.geol_clip, 'min_offset', 'X', 'Y', True, 'numeric')
+                                          self.geol_clip, 'min_offset', 'X', 'Y', True, 'numeric')
                     m2l_utils.plot_points(self.output_path+'fault_strat_offset3.csv',
-                                        self.geol_clip, 'strat_offset', 'X', 'Y', True, 'numeric')
+                                          self.geol_clip, 'strat_offset', 'X', 'Y', True, 'numeric')
 
         # Analyse fault topologies
         fault_parse_figs = True
@@ -765,6 +801,7 @@ class Config(object):
             filename = 'GEOLOGY_CLIP'
         print("Exporting graphical map...")
         try:
+
             self.geology_figure.savefig("{}.png".format(filename))
             print("Geology graphic exported to: ", filename)
         except Exception as e:
