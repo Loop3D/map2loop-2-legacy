@@ -115,7 +115,7 @@ class Project(object):
                 break
             except:
                 continue
-        print("Using:", matplotlib.get_backend())
+        # print("Using:", matplotlib.get_backend())
 
     def update_workflow(self, workflow={'model_engine': 'loopstructural'}):
         """Set unique run flags depending on model engine to tailor outputs.
@@ -226,6 +226,9 @@ class Project(object):
                 "minx": self.proj_bounds[2],
                 "minx": self.proj_bounds[3],
             })
+
+        # for key in bbox_3d.keys():
+            # bbox_3d[key] = int(bbox_3d[key])
 
         if proj_crs is None:
             proj_crs = self.proj_crs
@@ -466,7 +469,7 @@ class Project(object):
                 inputs, self.workflow, use_interpolations, use_fat)
             pbar.update(10)
 
-            self.config.create_map_cmap()
+            self.config.save_cmap()
 
             if self.loopFilename is not None:
                 self.config.update_projectfile()
