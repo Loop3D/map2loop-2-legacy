@@ -1,7 +1,7 @@
+import os
 import sys
 import geopandas as gpd
 from shapely.geometry import LineString, Polygon, MultiLineString
-import os.path
 from map2loop import m2l_utils
 import warnings
 import numpy as np
@@ -350,32 +350,32 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
         if folds is not None:
             if(len(folds)>0):
                 if(len(folds_clip)>0):
-                    fold_file=tmp_path+'folds_clip.shp'
+                    fold_file=os.path.join(tmp_path,'folds_clip.shp')
                     folds_explode=folds_explode.dropna(subset=['geometry'])
                     folds_explode.to_file(fold_file)         
                 else:
-                    fold_file=tmp_path+'folds_clip.shp'
+                    fold_file=os.path.join(tmp_path,'folds_clip.shp')
                     print("\nFold layer metadata\n--------------------")             
                     print("No folds found")
 
 
         if(len(faults_clip) > 0):
-            fault_file = tmp_path+'faults_clip.shp'
+            fault_file = os.path.join(tmp_path,'faults_clip.shp')
             faults_explode.crs = dst_crs
             faults_explode.to_file(fault_file)
         else:
-            fault_file = tmp_path+'faults_clip.shp'
+            fault_file = os.path.join(tmp_path,'faults_clip.shp')
             print("\nFault layer metadata\n--------------------")
             print("No faults found")
 
         geol_clip = gpd.overlay(geology, polygo, how='intersection')
         if(len(geol_clip) > 0):
             geol_clip.crs = dst_crs
-            geol_file = tmp_path+'geol_clip.shp'
+            geol_file = os.path.join(tmp_path,'geol_clip.shp')
             geol_clip.to_file(geol_file)
 
         if(len(orientations) > 0):
-            structure_file = tmp_path+'structure_clip.shp'
+            structure_file = os.path.join(tmp_path,'structure_clip.shp')
             orientations.crs = dst_crs
             orientations[c_l['dd']] = pd.to_numeric(orientations[c_l['dd']])
             orientations[c_l['d']] = pd.to_numeric(orientations[c_l['d']])
@@ -383,7 +383,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             orientations.to_file(structure_file)
 
         if(len(mindeps) > 0):
-            mindep_file = tmp_path+'mindeps_clip.shp'
+            mindep_file = os.path.join(tmp_path,'mindeps_clip.shp')
             mindeps.crs = dst_crs
             mindeps.to_file(mindep_file)
         print('\nNo errors found, clipped and updated files saved to tmp')
