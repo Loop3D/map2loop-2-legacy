@@ -1383,25 +1383,24 @@ def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs):
 
     stratigraphicLayers = pd.read_csv(os.path.join(output_path , "formation_thicknesses.csv"))
 
+    stratAges = pd.read_csv(tmp_path + 'age_sorted_groups.csv')[['group_','min','max']]
+    stratAges.rename(columns={'group_':'supergroup','min':'minAge','max':'maxAge'},inplace=True)
     stratLayers = pd.merge(form2supergroup,stratigraphicLayers,on=['formation'])
+    stratLayers = pd.merge(stratLayers,stratAges,on=['supergroup'])
     stratLayers['colour1Red']   = [ int(a[1:3],16) for a in stratLayers['colour'] ]
     stratLayers['colour1Green'] = [ int(a[3:5],16) for a in stratLayers['colour'] ]
     stratLayers['colour1Blue']  = [ int(a[5:7],16) for a in stratLayers['colour'] ]
     thickness = {}
-    uniqueLayers = stratLayers[['formation','supergroup','colour1Red','colour1Green','colour1Blue']].drop_duplicates(subset="formation")
+    uniqueLayers = stratLayers[['formation','supergroup','colour1Red','colour1Green','colour1Blue','minAge','maxAge']].drop_duplicates(subset="formation")
     for f in uniqueLayers['formation']:
         thickness[f] = np.mean(
             stratigraphicLayers[stratigraphicLayers['formation'] == f]['thickness'])
-    # print(thickness)
     stratigraphicLogData = np.zeros(
         uniqueLayers.shape[0], LoopProjectFile.stratigraphicLayerType)
     stratigraphicLogData['layerId'] = range(uniqueLayers.shape[0])
     stratigraphicLogData['layerId'] += 1
-    stratigraphicLogData['minAge'] = range(uniqueLayers.shape[0])
-    stratigraphicLogData['maxAge'] = range(uniqueLayers.shape[0])
-    stratigraphicLogData['maxAge'] += 0.9999
-    stratigraphicLogData['minAge'] *= 0.25
-    stratigraphicLogData['maxAge'] *= 0.25
+    stratigraphicLogData['minAge'] = uniqueLayers['minAge']
+    stratigraphicLogData['maxAge'] = uniqueLayers['maxAge']
     stratigraphicLogData['name'] = uniqueLayers['formation']
     stratigraphicLogData['supergroup'] = uniqueLayers['supergroup']
     stratigraphicLogData['enabled'] = 1
@@ -1422,40 +1421,43 @@ def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs):
         print(resp["errorString"])
 
     faults = pd.read_csv(os.path.join(output_path, "fault_orientations.csv"))
+    faults['formation'] = [ re.sub("\.0","",s) for s in faults['formation']]
     faultDims = pd.read_csv(os.path.join(output_path, "fault_dimensions.csv"))
     faultDims.rename(columns={'Fault':'formation'},inplace=True)
+    faultDims['formation'] = [ re.sub("\.0","",s) for s in faultDims['formation']]
     faultDisplacements = pd.read_csv(os.path.join(output_path, "fault_displacements3.csv"))
+    faultDisplacements.rename(columns={'fname':'formation'},inplace=True)
+    faultDisplacements['formation'] = [ re.sub("\.0","",s) for s in faultDisplacements['formation']]
     faults = faults.merge(faultDims,on='formation')
-    faults['formation'] = [ re.sub("\.0","",s) for s in faults['formation']]
 
+    minStratAge = np.nanmin(uniqueLayers['minAge'])
+    maxStratAge = np.nanmax(uniqueLayers['maxAge'])
     faultObs = pd.read_csv(os.path.join(output_path, "faults.csv"))
-    # faultObs.rename(columns={'X':'easting','Y':'northing','Z':'altitude'},inplace=True)
     faultObs['formation'] = [ re.sub("\.0","",s) for s in faultObs['formation']]
-    # faultObs['eventId'] = [ re.sub('.*_','',s) for s in faultObs['formation'] ]
     faultObs['posOnly'] = 1
     faultsJoined = pd.concat([faults,faultObs])
-    if (len(faults) > 0):
-        faultEvents = np.zeros(faults.shape[0], LoopProjectFile.faultEventType)
+    if (len(faultDims) > 0):
+        faultEvents = np.zeros(faultDims.shape[0], LoopProjectFile.faultEventType)
         # The fault eventId is called formation for some reason
-        faultEvents['name'] = faults['formation']
-        faultEvents['enabled'] = 0
+        faultEvents['name'] = faultDims['formation']
+        faultEvents['enabled'] = 1
         faultEvents['rank'] = 0
         faultEvents['type'] = 0
-        faultEvents['minAge'] = np.arange(1.0, 7.0, 6.0/faults.shape[0])
+        faultEvents['minAge'] = np.arange(minStratAge, maxStratAge, (maxStratAge-minStratAge)/faultDims.shape[0])
         faultEvents['maxAge'] = faultEvents['minAge']
         avgDisplacements = []
         avgDownthrowDir = []
-        for formationName in faultDisplacements['fname'].unique():
-            avgDisplacements.append(np.average(faultDisplacements[faultDisplacements['fname']==formationName]['vertical_displacement']))
-            avgDownthrowDir.append(np.average(faultDisplacements[faultDisplacements['fname']==formationName]['downthrow_dir']))
+        for formationName in faultDims['formation'].unique():
+            avgDisplacements.append(np.average(faultDisplacements[faultDisplacements['formation']==formationName]['vertical_displacement']))
+            avgDownthrowDir.append(np.average(faultDisplacements[faultDisplacements['formation']==formationName]['downthrow_dir']))
         faultEvents['avgDisplacement'] = avgDisplacements
         faultEvents['avgDownthrowDir'] = avgDownthrowDir
-        faultEvents['influenceDistance'] = faults['InfluenceDistance']
-        faultEvents['verticalRadius'] = faults['VerticalRadius']
-        faultEvents['horizontalRadius'] = faults['HorizontalRadius']
-        faultEvents['colour'] = faults['colour']
+        faultEvents['influenceDistance'] = faultDims['InfluenceDistance']
+        faultEvents['verticalRadius'] = faultDims['VerticalRadius']
+        faultEvents['horizontalRadius'] = faultDims['HorizontalRadius']
+        faultEvents['colour'] = faultDims['colour']
 
-        faultEvents['eventId'] = [ re.sub('.*_','',s) for s in faults['formation'] ]
+        faultEvents['eventId'] = [ re.sub('.*_','',s) for s in faultDims['formation'] ]
 
         resp = LoopProjectFile.Set(
             loopFilename, "faultLog", data=faultEvents, verbose=False)

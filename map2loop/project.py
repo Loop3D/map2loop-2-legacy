@@ -137,7 +137,7 @@ class Project(object):
             workflow.update({'seismic_section': False,
                              'cover_map': False,
                              'near_fault_interpolations': False,
-                             'fold_axial_traces': True,
+                             'fold_axial_traces': False,
                              'stereonets': False,
                              'formation_thickness': True,
                              'polarity': False,
