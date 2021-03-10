@@ -202,6 +202,7 @@ class Config(object):
                         0, 255), random.randint(0, 255), random.randint(0, 255)))
 
                 self.colour_dict[key] = colour
+                print(key, colour)
 
         except Exception as e:
             # Otherwise, just append a random set
@@ -338,7 +339,7 @@ class Config(object):
 
         print("Done")
 
-    def load_dtm(self,aus):
+    def load_dtm(self, aus):
 
         polygon_ll = self.polygon.to_crs(self.dtm_crs)
 
@@ -356,11 +357,11 @@ class Config(object):
             try:
                 if(aus):
                     m2l_utils.get_dtm(self.dtm_file, minlong,
-                                  maxlong, minlat, maxlat)
+                                      maxlong, minlat, maxlat)
                 else:
                     m2l_utils.get_dtm_hawaii(self.dtm_file, minlong,
-                                  maxlong, minlat, maxlat)
-                   
+                                             maxlong, minlat, maxlat)
+
                 downloaded = True
             except:
                 time.sleep(10)
@@ -611,7 +612,7 @@ class Config(object):
             self.tmp_path, 'all_sorts_clean.csv'))
 
         colours = []
-        for code in all_sorts[self.c_l['u']]:
+        for code in all_sorts['code']:
             colours.append([self.colour_dict[code]])
 
         data = colours
