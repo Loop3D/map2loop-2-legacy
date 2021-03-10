@@ -203,5 +203,7 @@ dmypy.json
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
 .history
+.vscode/
+
 
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,c++,cmake

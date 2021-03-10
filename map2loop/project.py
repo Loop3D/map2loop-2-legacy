@@ -17,7 +17,6 @@ from map2loop.config import Config
 from map2loop.m2l_utils import display, enable_quiet_mode, disable_quiet_mode, print
 
 
-
 class Project(object):
     """A high level object implementation of the map2loop workflow."""
 
@@ -102,20 +101,20 @@ class Project(object):
             self.proj_crs = {'init': 'EPSG:28350'}
 
         self.step_out = 0.1
-        
+
         # Make matplotlib comply with interface/cmd line window managers
         import matplotlib
-        gui_env = ['Qt4Agg','TkAgg','GTK3Agg','WXAgg']
+        gui_env = ['Qt4Agg', 'TkAgg', 'GTK3Agg', 'WXAgg']
         all_backends = list(set([*gui_env, *matplotlib.rcsetup.all_backends]))
 
         for gui in all_backends:
             try:
-                matplotlib.use(gui,warn=False, force=True)
+                matplotlib.use(gui, warn=False, force=True)
                 from matplotlib import pyplot as plt
                 break
             except:
                 continue
-        print("Using:", matplotlib.get_backend())
+        # print("Using:", matplotlib.get_backend())
 
     def update_workflow(self, workflow={'model_engine': 'loopstructural'}):
         """Set unique run flags depending on model engine to tailor outputs.
@@ -227,6 +226,9 @@ class Project(object):
                 "minx": self.proj_bounds[3],
             })
 
+        # for key in bbox_3d.keys():
+            # bbox_3d[key] = int(bbox_3d[key])
+
         if proj_crs is None:
             proj_crs = self.proj_crs
 
@@ -296,6 +298,7 @@ class Project(object):
                 bbox_str)
             self.metadata = 'https://gist.githubusercontent.com/yohanderose/8f843de0dde531f009a3973cbdadcc9f/raw/918f412ae488ce1a6bca188306f7730061ecf551/meta_remote.hjson'
             self.read_metadata(self.metadata)
+
         if self.state == "QLD":
             bbox_str = "{},{},{},{}".format(bbox[0], bbox[1], bbox[2], bbox[3])
             self.structure_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=outcrops_28355&bbox={}&srsName=EPSG:28355'.format(
@@ -406,7 +409,7 @@ class Project(object):
             self.config.run_map2model(deposits, aus)
             pbar.update(10)
 
-            self.config.load_dtm()
+            self.config.load_dtm(aus)
             pbar.update(10)
 
             self.config.join_features()
@@ -442,7 +445,7 @@ class Project(object):
 
             if(self.workflow['formation_thickness']):
                 self.config.calc_thickness(
-                    contact_decimate, null_scheme, thickness_buffer, max_thickness_allowed,self.c_l)
+                    contact_decimate, null_scheme, thickness_buffer, max_thickness_allowed, self.c_l)
 
             if(self.workflow['fold_axial_traces']):
                 self.config.create_fold_axial_trace_points(
@@ -466,11 +469,10 @@ class Project(object):
                 inputs, self.workflow, use_interpolations, use_fat)
             pbar.update(10)
 
-            self.config.create_map_cmap()
+            self.config.save_cmap()
 
             if self.loopFilename is not None:
                 self.config.update_projectfile()
                 # self.config.export_png()
-
 
         disable_quiet_mode()
