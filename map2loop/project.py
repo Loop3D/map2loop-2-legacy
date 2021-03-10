@@ -409,7 +409,7 @@ class Project(object):
             self.config.run_map2model(deposits, aus)
             pbar.update(10)
 
-            self.config.load_dtm()
+            self.config.load_dtm(aus)
             pbar.update(10)
 
             self.config.join_features()

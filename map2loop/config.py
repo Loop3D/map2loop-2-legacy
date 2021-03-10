@@ -338,7 +338,7 @@ class Config(object):
 
         print("Done")
 
-    def load_dtm(self):
+    def load_dtm(self,aus):
 
         polygon_ll = self.polygon.to_crs(self.dtm_crs)
 
@@ -354,8 +354,13 @@ class Config(object):
         print('Attempt: 0 ', end='')
         while downloaded == False:
             try:
-                m2l_utils.get_dtm(self.dtm_file, minlong,
+                if(aus):
+                    m2l_utils.get_dtm(self.dtm_file, minlong,
                                   maxlong, minlat, maxlat)
+                else:
+                    m2l_utils.get_dtm_hawaii(self.dtm_file, minlong,
+                                  maxlong, minlat, maxlat)
+                   
                 downloaded = True
             except:
                 time.sleep(10)
