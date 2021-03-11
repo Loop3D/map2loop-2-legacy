@@ -1,3 +1,4 @@
+import os
 import networkx as nx
 import matplotlib.pyplot as plt
 import geopandas as gpd
@@ -179,7 +180,7 @@ class Topology(object):
                                 str(GD.nodes[cy[0]]['LabelGraphics']['text'])+' overlies '+str(
                                     GD.nodes[cy[1]]['LabelGraphics']['text'])+' removed to prevent cycle'
                             warnings.warn(warning_msg)
-                            if( GD.has_edge(cy[len_cy-1],cy[0])):
+                            if(GD.has_edge(cy[len_cy-1], cy[0])):
                                 GD.remove_edge(cy[0], cy[1])
 
                 else:
@@ -207,7 +208,7 @@ class Topology(object):
                 nlist = list(nx.all_topological_sorts(GD))
 
             f = open(
-                path_out+"/"+glabels[p].replace(" ", "_").replace("-", "_")+'.csv', 'w')
+                os.path.join(path_out, glabels[p].replace(" ", "_").replace("-", "_")+'.csv'), 'w')
 
             if(one):
                 f.write('Choice '+str(0))
@@ -276,7 +277,7 @@ class Topology(object):
     #    print()
 
         slist = sorted(ages, key=lambda l: l[3])
-        f = open(tmp_path+'age_sorted_groups.csv', 'w')
+        f = open(os.path.join(tmp_path, 'age_sorted_groups.csv'), 'w')
         f.write('index,group_,min,max,ave\n')
         for j in range(0, len(slist)):
             f.write(str(j)+','+slist[j][0]+','+str(slist[j][1]) +
@@ -298,7 +299,7 @@ class Topology(object):
     def save_group(self, G, path_out, glabels, geol, c_l, quiet):
         Gp = nx.Graph().to_directed()  # New Group graph
 
-        geology_file = gpd.read_file(path_out+'geol_clip.shp')
+        geology_file = gpd.read_file(os.path.join(path_out, 'geol_clip.shp'))
 
         self.abs_age_groups(geol, path_out, c_l)
         geology_file.drop_duplicates(subset=c_l['c'],  inplace=True)
@@ -306,7 +307,7 @@ class Topology(object):
         geology_file.set_index(c_l['c'],  inplace=True)
         # display(geology_file)
 
-        gp_ages = pd.read_csv(path_out+'age_sorted_groups.csv')
+        gp_ages = pd.read_csv(os.path.join(path_out, 'age_sorted_groups.csv'))
         # display(gp_ages)
         gp_ages.set_index('group_',  inplace=True)
 
@@ -367,7 +368,7 @@ class Topology(object):
             glist = list(nx.topological_sort(Gp))
             print("group choices: 1 (more than 10 groups)")
 
-            f = open(path_out+'groups.csv', 'w')
+            f = open(os.path.join(path_out, 'groups.csv'), 'w')
             glen = len(glist)
             f.write('Choice 0')
             for n in range(0, glen):
@@ -379,7 +380,7 @@ class Topology(object):
             glist = list(nx.all_topological_sorts(Gp))
             print("group choices:", len(glist))
 
-            f = open(path_out+'groups.csv', 'w')
+            f = open(os.path.join(path_out, 'groups.csv'), 'w')
             glen = len(glist)
             if(glen > 100):
                 glen = 100
@@ -391,25 +392,25 @@ class Topology(object):
             f.close()
 
         # display(glist)
-        nx.write_gml(Gp, path_out+'groups.gml')
+        nx.write_gml(Gp, os.path.join(path_out, 'groups.gml'))
         # plt.show()
 
-        # g=open(path_out+'groups.csv',"r")
+        # g=open(os.path.join(path_out,'groups.csv'),"r")
         #contents =g.readlines()
         # g.close
         #hdr=contents[0].split(" ")
         contents = np.genfromtxt(
-            path_out+'groups.csv', delimiter=',', dtype='U100')
+            os.path.join(path_out, 'groups.csv'), delimiter=',', dtype='U100')
 
         # display('lencon',len(contents[0]))
         k = 0
-        ag = open(path_out+'all_sorts.csv', "w")
+        ag = open(os.path.join(path_out, 'all_sorts.csv'), "w")
         ag.write("index,group number,index in group,number in group,code,group\n")
         if(len(contents.shape) == 1):
             for i in range(1, len(contents)):
-                ucontents = np.genfromtxt(path_out+"/"+contents[i].replace(
-                    "\n", "").replace(" ", "_")+".csv", delimiter=',', dtype='U100')
-                # f=open(path_out+"/"+contents[i].replace("\n","").replace(" ","_")+".csv","r")#check underscore
+                ucontents = np.genfromtxt(os.path.join(path_out, contents[i].replace(
+                    "\n", "").replace(" ", "_")+".csv"), delimiter=',', dtype='U100')
+                # f=open(os.path.join(path_out, contents[i].replace("\n","").replace(" ","_")+".csv"),"r")#check underscore
                 #ucontents =f.readlines()
                 # f.close
                 # print(len(ucontents.shape),ucontents)
@@ -425,9 +426,9 @@ class Topology(object):
                         k = k+1
         else:
             for i in range(1, len(contents[0])):
-                ucontents = np.genfromtxt(path_out+"/"+contents[0][i].replace(
-                    "\n", "").replace(" ", "_")+".csv", delimiter=',', dtype='U100')
-                # f=open(path_out+"/"+contents[i].replace("\n","").replace(" ","_")+".csv","r")#check underscore
+                ucontents = np.genfromtxt(os.path.join(path_out, contents[0][i].replace(
+                    "\n", "").replace(" ", "_")+".csv"), delimiter=',', dtype='U100')
+                # f=open(os.path.join(path_out,contents[i].replace("\n","").replace(" ","_")+".csv"),"r")#check underscore
                 #ucontents =f.readlines()
                 # f.close
                 # print(len(ucontents.shape),ucontents)
@@ -454,12 +455,12 @@ class Topology(object):
     # Saves fault vs unit, group and fault relationship tables using outputs from map2model c++ code
     ####################################
     def parse_fault_relationships(graph_path, tmp_path, output_path, quiet):
-        uf = open(graph_path+'unit-fault-intersection.txt', 'r')
+        uf = open(os.path.join(graph_path, 'unit-fault-intersection.txt'), 'r')
         contents = uf.readlines()
         uf.close()
 
         all_long_faults = np.genfromtxt(
-            output_path+'fault_dimensions.csv', delimiter=',', dtype='U100')
+            os.path.join(output_path, 'fault_dimensions.csv'), delimiter=',', dtype='U100')
         n_faults = len(all_long_faults)
         # print(n_faults)
         all_faults = {}
@@ -473,7 +474,7 @@ class Topology(object):
 
         #display('Long Faults',unique_list)
 
-        uf = open(output_path+'unit-fault-relationships.csv', 'w')
+        uf = open(os.path.join(output_path, 'unit-fault-relationships.csv'), 'w')
         uf.write('code,'+str(unique_list).replace("[", "Fault_").replace(
             ",", ",Fault_").replace("'", "").replace("]", "").replace(" ", "")+'\n')
         for row in contents:
@@ -490,10 +491,11 @@ class Topology(object):
             uf.write(ostr+"\n")
         uf.close()
 
-        summary = pd.read_csv(tmp_path+'all_sorts_clean.csv')
+        summary = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'))
         summary.set_index("code", inplace=True)
         # display('summary',summary)
-        uf_rel = pd.read_csv(output_path+'unit-fault-relationships.csv')
+        uf_rel = pd.read_csv(os.path.join(
+            output_path, 'unit-fault-relationships.csv'))
 
         groups = summary.group.unique()
         ngroups = len(summary.group.unique())
@@ -516,7 +518,7 @@ class Topology(object):
                 else:
                     continue
 
-        ug = open(output_path+'group-fault-relationships.csv', 'w')
+        ug = open(os.path.join(output_path, 'group-fault-relationships.csv'), 'w')
         ug.write('group')
         for k in range(1, len(uf_rel.iloc[0])):
             ug.write(','+uf_rel.columns[k])
@@ -532,7 +534,7 @@ class Topology(object):
 
         ug.close()
 
-        uf = open(graph_path+'fault-fault-intersection.txt', 'r')
+        uf = open(os.path.join(graph_path, 'fault-fault-intersection.txt'), 'r')
         contents = uf.readlines()
         uf.close()
         # display(unique_list)
@@ -554,7 +556,7 @@ class Topology(object):
         # display(unique_list)
 
         G = nx.DiGraph()
-        ff = open(output_path+'fault-fault-relationships.csv', 'w')
+        ff = open(os.path.join(output_path, 'fault-fault-relationships.csv'), 'w')
         ff.write('fault_id')
         for i in range(0, len(unique_list_ff)):
             ff.write(','+'Fault_'+unique_list_ff[i])
@@ -604,7 +606,7 @@ class Topology(object):
 
         if not quiet:
             nx.draw(G, with_labels=True, font_weight='bold')
-        nx.write_gml(G, tmp_path+"fault_network.gml")
+        nx.write_gml(G, os.path.join(tmp_path, "fault_network.gml"))
 
         try:
             print('cycles', list(nx.simple_cycles(G)))
@@ -649,16 +651,16 @@ class Topology(object):
             if(hint_flag == True and sub_geol.loc[i][c_l['c']] in hint_list):
                 hint = code_hints.loc[sub_geol.loc[i][c_l['c']]]['hint']
             else:
-                hint=0.0
-            if(str(sub_geol.loc[i][c_l['min']])=='None'):
-                min=0.0
+                hint = 0.0
+            if(str(sub_geol.loc[i][c_l['min']]) == 'None'):
+                min = 0.0
             else:
-                min=float(sub_geol.loc[i][c_l['min']])+float(hint)
-            #print(str(sub_geol.loc[i][c_l['max']]))
-            if(str(sub_geol.loc[i][c_l['max']])=='None'):
-                max=4500000000
+                min = float(sub_geol.loc[i][c_l['min']])+float(hint)
+            # print(str(sub_geol.loc[i][c_l['max']]))
+            if(str(sub_geol.loc[i][c_l['max']]) == 'None'):
+                max = 4500000000
             else:
-                max=float(sub_geol.loc[i][c_l['max']])+float(hint)
+                max = float(sub_geol.loc[i][c_l['max']])+float(hint)
             # f.write("\""+str(sub_geol.loc[i][c_l['min']])+"\"\t")
             # f.write("\""+str(sub_geol.loc[i][c_l['max']])+"\"\t")
             f.write("\""+str(min)+"\"\t")
@@ -936,7 +938,7 @@ class Topology(object):
                     temp.append(ind)
             super_groups.append(temp)
 
-        f = open(tmp_path+'super_groups.csv', 'w')
+        f = open(os.path.join(tmp_path, 'super_groups.csv'), 'w')
         for sg in super_groups:
             for s in sg:
                 f.write(str(s)+',')
@@ -946,7 +948,6 @@ class Topology(object):
 
     def use_asud(strat_graph_file, graph_path):
         asud_strat_file = "https://gist.githubusercontent.com/yohanderose/3b257dc768fafe5aaf70e64ae55e4c42/raw/8598c7563c1eea5c0cd1080f2c418dc975cc5433/ASUD.csv"
-        print(graph_path)
 
         G = nx.read_gml(strat_graph_file, label='id')
         Gp = G.copy().to_directed()
@@ -1002,4 +1003,4 @@ class Topology(object):
         except:
             print('no cycles')
 
-        nx.write_gml(Gp, graph_path+'ASUD_strat.gml')
+        nx.write_gml(Gp, os.path.join(graph_path, 'ASUD_strat.gml'))

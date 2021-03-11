@@ -77,22 +77,24 @@ class Config(object):
 
         self.project_path = project_path
 
-        self.graph_path = self.project_path+'/graph/'
-        self.tmp_path = self.project_path+'/tmp/'
-        self.data_path = self.project_path+'/data/'
-        self.dtm_path = self.project_path+'/dtm/'
-        self.output_path = self.project_path+'/output/'
-        self.vtk_path = self.project_path+'/vtk/'
+        self.graph_path = os.path.join(self.project_path, 'graph')
+        self.tmp_path = os.path.join(self.project_path, 'tmp')
+        self.data_path = os.path.join(self.project_path, 'data')
+        self.dtm_path = os.path.join(self.project_path, 'dtm')
+        self.output_path = os.path.join(self.project_path, 'output')
+        self.vtk_path = os.path.join(self.project_path, 'vtk')
 
-        self.fault_file_csv = self.tmp_path + "faults.csv"
-        self.fault_output_file_csv = self.output_path + "faults.csv"
-        self.structure_file_csv = self.tmp_path + "structure.csv"
-        self.geology_file_csv = self.tmp_path + "geology.csv"
-        self.mindep_file_csv = self.tmp_path + "mindep.csv"
+        self.fault_file_csv = os.path.join(self.tmp_path, "faults.csv")
+        self.fault_output_file_csv = os.path.join(
+            self.output_path, "faults.csv")
+        self.structure_file_csv = os.path.join(self.tmp_path, "structure.csv")
+        self.geology_file_csv = os.path.join(self.tmp_path, "geology.csv")
+        self.mindep_file_csv = os.path.join(self.tmp_path, "mindep.csv")
 
-        self.strat_graph_file = self.graph_path + "graph_strat_NONE.gml"
-        self.dtm_file = self.dtm_path+'dtm.tif'
-        self.dtm_reproj_file = self.dtm_path+'dtm_rp.tif'
+        self.strat_graph_file = os.path.join(
+            self.graph_path, "graph_strat_NONE.gml")
+        self.dtm_file = os.path.join(self.dtm_path, 'dtm.tif')
+        self.dtm_reproj_file = os.path.join(self.dtm_path, 'dtm_rp.tif')
 
         if(not os.path.isdir(self.tmp_path)):
             os.mkdir(self.tmp_path)
@@ -168,12 +170,6 @@ class Config(object):
         structures.crs = self.proj_crs
         mindeps.crs = self.proj_crs
 
-        geology.to_file(self.geology_file)
-        faults.to_file(self.fault_file)
-        folds.to_file(self.fold_file)
-        if len(mindeps) > 0:
-            mindeps.to_file(self.mindep_file)
-
         # Check if bedding data uses the strike convention instead of dip direction
         if(self.c_l['otype'] == 'strike'):
             structures['azimuth2'] = structures.apply(
@@ -206,6 +202,7 @@ class Config(object):
                         0, 255), random.randint(0, 255), random.randint(0, 255)))
 
                 self.colour_dict[key] = colour
+                print(key, colour)
 
         except Exception as e:
             # Otherwise, just append a random set
@@ -221,6 +218,7 @@ class Config(object):
 
         try:
             fig, ax = plt.subplots()
+            plt.tight_layout()
             ax.ticklabel_format(axis='both', useOffset=False, style='plain')
             ax.margins(0.0)
             fig.set_facecolor("#ffffff00")
@@ -243,9 +241,9 @@ class Config(object):
             structures[['geometry', self.c_l['gi'],
                         self.c_l['d'], self.c_l['dd']]].plot(ax=base)
 
-            fig = self.polygon.plot(ax=base, color='none', edgecolor='black').set_title(
-                "Input {}".format(self.bbox)).get_figure()
-            fig.savefig(self.tmp_path+"/input-data.png")
+            fig = self.polygon.plot(
+                ax=base, color='none', edgecolor='black').get_figure()
+            fig.savefig(os.path.join(self.tmp_path, "input-data.png"))
 
             if self.quiet == 'None':
                 plt.show()
@@ -303,7 +301,8 @@ class Config(object):
         print("Resolving ambiguities using ASUD...", end='\toutput_dir:')
         if aus:
             Topology.use_asud(self.strat_graph_file,  self.graph_path)
-            self.strat_graph_file = self.graph_path+'ASUD_strat.gml'
+            self.strat_graph_file = os.path.join(
+                self.graph_path, 'ASUD_strat.gml')
         print("Done.")
 
         print("Generating topology graph display and unit groups...")
@@ -323,8 +322,9 @@ class Config(object):
                 # second = elem.split(":").replace("'", "")
                 print(node[0], " ", elem)
 
-        # plt.savefig(self.tmp_path+"topology-fig.png")
-        print("Topology figure saved to", self.tmp_path+"topology-fig.png")
+        # plt.savefig(os.path.join(self.tmp_path,"topology-fig.png"))
+        print("Topology figure saved to", os.path.join(
+            self.tmp_path, "topology-fig.png"))
 
         # Save groups of stratigraphic units
         groups, self.glabels, G = Topology.get_series(
@@ -339,7 +339,7 @@ class Config(object):
 
         print("Done")
 
-    def load_dtm(self,aus):
+    def load_dtm(self, aus):
 
         polygon_ll = self.polygon.to_crs(self.dtm_crs)
 
@@ -357,11 +357,11 @@ class Config(object):
             try:
                 if(aus):
                     m2l_utils.get_dtm(self.dtm_file, minlong,
-                                  maxlong, minlat, maxlat)
+                                      maxlong, minlat, maxlat)
                 else:
                     m2l_utils.get_dtm_hawaii(self.dtm_file, minlong,
-                                  maxlong, minlat, maxlat)
-                   
+                                             maxlong, minlat, maxlat)
+
                 downloaded = True
             except:
                 time.sleep(10)
@@ -387,13 +387,13 @@ class Config(object):
         # Faults
         self.faults_clip = gpd.read_file(self.fault_file, bbox=self.bbox)
         self.faults_clip.crs = self.proj_crs
-        self.faults_clip_file = self.tmp_path + "faults_clip.shp"
+        self.faults_clip_file = os.path.join(self.tmp_path, "faults_clip.shp")
         self.faults_clip.to_file(self.faults_clip_file)
 
         # Geology
         self.geol_clip = m2l_utils.explode(self.geology)
         self.geol_clip.crs = self.proj_crs
-        self.geol_clip_file = self.tmp_path + "geol_clip.shp"
+        self.geol_clip_file = os.path.join(self.tmp_path, "geol_clip.shp")
         self.geol_clip.to_file(self.geol_clip_file)
 
         pd.set_option('display.max_columns', None)
@@ -430,7 +430,8 @@ class Config(object):
 
         self.structure_clip = structure_clip[~structure_clip[self.c_l['o']].isnull(
         )]
-        self.structure_clip_file = self.tmp_path+'structure_clip.shp'
+        self.structure_clip_file = os.path.join(
+            self.tmp_path, 'structure_clip.shp')
         self.structure_clip.to_file(self.structure_clip_file)
 
         # Save geology clips
@@ -451,10 +452,10 @@ class Config(object):
             return
 
         # TODO: DTB need to be defined, every function call bellow here that has a False boolean is referencing to the workflow['cover_map'] flag
-        # dtb_grid = data_path+'young_cover_grid.tif' #obviously hard-wired for the moment
+        # dtb_grid = os.path.join(data_path,'young_cover_grid.tif') #obviously hard-wired for the moment
         # dtb_null = '-2147483648' #obviously hard-wired for the moment
-        # cover_map_path = data_path+'Young_Cover_FDS_MGA_clean.shp' #obviously hard-wired for the moment
-        # dtb_clip = output_path+'young_cover_grid_clip.tif' #obviously hard-wired for the moment
+        # cover_map_path = os.path.join(data_path,'Young_Cover_FDS_MGA_clean.shp') #obviously hard-wired for the moment
+        # dtb_clip = os.path.join(output_path,'young_cover_grid_clip.tif') #obviously hard-wired for the moment
         # cover_dip = 10 # dip of cover away from contact
         # cover_spacing = 5000 # of contact grid in metres
 
@@ -488,7 +489,7 @@ class Config(object):
             self.structure_clip, self.output_path, self.c_l, orientation_decimate, self.dtm, self.dtb, self.dtb_null, False)
 
         if self.quiet == 'None':
-            m2l_utils.plot_points(self.output_path+'orientations.csv',
+            m2l_utils.plot_points(os.path.join(self.output_path, 'orientations.csv'),
                                   self.geol_clip, 'formation', 'X', 'Y', False, 'alpha')
 
         # Create arbitrary points for series without orientation data
@@ -502,15 +503,16 @@ class Config(object):
 
         # Remove basal contacts defined by faults, no decimation
         m2l_geometry.save_basal_no_faults(
-            self.tmp_path+'basal_contacts.shp', self.tmp_path+'faults_clip.shp', ls_dict, 10, self.c_l, self.proj_crs)
+            os.path.join(self.tmp_path, 'basal_contacts.shp'), os.path.join(self.tmp_path, 'faults_clip.shp'), ls_dict, 10, self.c_l, self.proj_crs)
 
         # Remove faults from decimated basal contacts then save
-        contacts = gpd.read_file(self.tmp_path+'basal_contacts.shp')
+        contacts = gpd.read_file(os.path.join(
+            self.tmp_path, 'basal_contacts.shp'))
         m2l_geometry.save_basal_contacts_csv(
             contacts, self.output_path, self.dtm, self.dtb, self.dtb_null, False, contact_decimate, self.c_l)
         # False in this call was already false and isn't the cover flag
         if self.quiet == "None":
-            m2l_utils.plot_points(self.output_path+'contacts4.csv',
+            m2l_utils.plot_points(os.path.join(self.output_path, 'contacts4.csv'),
                                   self.geol_clip, 'formation', 'X', 'Y', False, 'alpha')
 
     # Interpolates a regular grid of orientations from an shapefile of
@@ -520,7 +522,7 @@ class Config(object):
 
         geology_file = self.geol_clip_file
         structure_file = self.structure_clip_file
-        basal_contacts = self.tmp_path+'basal_contacts.shp'
+        basal_contacts = os.path.join(self.tmp_path, 'basal_contacts.shp')
         self.spacing = interpolation_spacing  # grid spacing in meters
         # misorientation = misorientation
         self.scheme = interpolation_scheme
@@ -541,19 +543,19 @@ class Config(object):
         orientation_interp, contact_interp, combo_interp = m2l_interpolation.interpolation_grids(
             geology_file, structure_file, basal_contacts, bbox, self.spacing, self.proj_crs, self.scheme, super_groups, self.c_l)
 
-        with open(self.tmp_path+'interpolated_orientations.csv', 'w') as f:
+        with open(os.path.join(self.tmp_path, 'interpolated_orientations.csv'), 'w') as f:
             f.write('X, Y, l, m, n, dip, dip_dir\n')
             for row in orientation_interp:
                 ostr = '{}, {}, {}, {}, {}, {}, {}\n'.format(
                     row[0], row[1], row[2], row[3], row[4], row[5], row[6])
                 f.write(ostr)
-        with open(self.tmp_path+'interpolated_contacts.csv', 'w') as f:
+        with open(os.path.join(self.tmp_path, 'interpolated_contacts.csv'), 'w') as f:
             f.write('X, Y, l, m, angle\n')
             for row in contact_interp:
                 ostr = '{}, {}, {}, {}, {}\n'.format(
                     row[0], row[1], row[2], row[3], row[4])
                 f.write(ostr)
-        with open(self.tmp_path+'interpolated_combined.csv', 'w') as f:
+        with open(os.path.join(self.tmp_path, 'interpolated_combined.csv'), 'w') as f:
             f.write('X, Y, l, m, n, dip, dip_dir\n')
             for row in combo_interp:
                 ostr = '{}, {}, {}, {}, {}, {}, {}\n'.format(
@@ -606,17 +608,19 @@ class Config(object):
     def save_cmap(self):
         """Create a colourmap for the model using the colour code
         """
-        all_sorts = pd.read_csv(self.tmp_path + 'all_sorts_clean.csv')
+        all_sorts = pd.read_csv(os.path.join(
+            self.tmp_path, 'all_sorts_clean.csv'))
 
         colours = []
-        for code in all_sorts[self.c_l['u']]:
+        for code in all_sorts['code']:
             colours.append([self.colour_dict[code]])
 
         data = colours
         expected_extra_cols = pd.DataFrame(
             columns=['colour'], data=data)
         all_sorts = pd.concat([all_sorts, expected_extra_cols], axis=1)
-        all_sorts.to_csv(self.tmp_path+'all_sorts_clean.csv', ",", index=None)
+        all_sorts.to_csv(os.path.join(
+            self.tmp_path, 'all_sorts_clean.csv'), ",", index=None)
 
     def export_faults(self, fault_decimate, min_fault_length, fault_dip):
         # fault_decimate = 5
@@ -624,7 +628,7 @@ class Config(object):
         # fault_dip = 90
 
         m2l_geometry.save_faults(
-            self.tmp_path+'faults_clip.shp', self.output_path, self.dtm, self.dtb, self.dtb_null, False, self.c_l, fault_decimate, min_fault_length, fault_dip)
+            os.path.join(self.tmp_path, 'faults_clip.shp'), self.output_path, self.dtm, self.dtb, self.dtb_null, False, self.c_l, fault_decimate, min_fault_length, fault_dip)
 
         faults = pd.read_csv(self.fault_output_file_csv, sep=",")
         faults_len = len(faults)
@@ -670,25 +674,29 @@ class Config(object):
         m2l_geometry.extract_section(self.tmp_path, self.output_path, seismic_line, seismic_bbox,
                                      seismic_interp, self.dtm, self.dtb, self.dtb_null, False, surface_cut)
 
-        contacts = pd.read_csv(self.output_path+'contacts4.csv', ", ")
+        contacts = pd.read_csv(os.path.join(
+            self.output_path, 'contacts4.csv'), ", ")
         seismic_contacts = pd.read_csv(
-            self.output_path+'seismic_base.csv', ", ")
+            os.path.join(self.output_path, 'seismic_base.csv'), ", ")
         all_contacts = pd.concat([contacts, seismic_contacts], sort=False)
-        all_contacts.to_csv(self.output_path+'contacts4.csv',
+        all_contacts.to_csv(os.path.join(self.output_path, 'contacts4.csv'),
                             index=None, header=True)
 
-        faults = pd.read_csv(self.output_path+'faults.csv', ", ")
+        faults = pd.read_csv(os.path.join(
+            self.output_path, 'faults.csv'), ", ")
         seismic_faults = pd.read_csv(
-            self.output_path+'seismic_faults.csv', ", ")
+            os.path.join(self.output_path, 'seismic_faults.csv'), ", ")
         all_faults = pd.concat([faults, seismic_faults], sort=False)
-        all_faults.to_csv(self.output_path+'faults.csv',
+        all_faults.to_csv(os.path.join(self.output_path, 'faults.csv'),
                           index=None, header=True)
 
     def propagate_contact_dips(self, contact_dip, contact_orientation_decimate):
         print("Propagating dips along contacts...")
-        orientations = pd.read_csv(self.output_path+'orientations.csv', ", ")
+        orientations = pd.read_csv(os.path.join(
+            self.output_path, 'orientations.csv'), ", ")
         # This is supposed to be a csv but my csv doesn't have a geometry part
-        contacts = gpd.read_file(self.tmp_path + 'basal_contacts.shp')
+        contacts = gpd.read_file(os.path.join(
+            self.tmp_path, 'basal_contacts.shp'))
         # contact_dip = -999
         # contact_orientation_decimate = 5
         m2l_geometry.save_basal_contacts_orientations_csv(contacts, orientations, self.geol_clip, self.tmp_path, self.output_path, self.dtm, self.dtb,
@@ -696,7 +704,7 @@ class Config(object):
 
     def calc_thickness(self, contact_decimate, null_scheme, thickness_buffer, max_thickness_allowed, cl):
         # Estimate formation thickness and normalised formation thickness
-        geology_file = self.tmp_path+'basal_contacts.shp'
+        geology_file = os.path.join(self.tmp_path, 'basal_contacts.shp')
         # contact_decimate = 5
         # null_scheme = 'null'
         m2l_interpolation.save_contact_vectors(
@@ -714,7 +722,7 @@ class Config(object):
         m2l_geometry.normalise_thickness(self.output_path)
 
         if self.quiet == "None":
-            m2l_utils.plot_points(self.output_path+'formation_thicknesses_norm.csv',
+            m2l_utils.plot_points(os.path.join(self.output_path, 'formation_thicknesses_norm.csv'),
                                   self.geol_clip, 'norm_th', 'x', 'y', True, 'numeric')
 
     # TODO: This needs a shorter name
@@ -744,25 +752,25 @@ class Config(object):
         # Calculate polarity of original bedding orientation data
         if(workflow['polarity']):
             m2l_geometry.save_orientations_with_polarity(
-                self.output_path+'orientations.csv', self.output_path, self.c_l, self.tmp_path+'basal_contacts.shp', self.tmp_path+'all_sorts.csv', )
+                os.path.join(self.output_path, 'orientations.csv'), self.output_path, self.c_l, os.path.join(self.tmp_path, 'basal_contacts.shp'), os.path.join(self.tmp_path, 'all_sorts.csv'), )
 
             if self.quiet == "None":
-                m2l_utils.plot_points(self.output_path+'orientations_polarity.csv',
+                m2l_utils.plot_points(os.path.join(self.output_path, 'orientations_polarity.csv'),
                                       self.geol_clip, 'polarity', 'X', 'Y', True, 'alpha')
 
         # Calculate minimum fault offset from stratigraphy and stratigraphic fault offset
         if(workflow['strat_offset']):
             fault_test = pd.read_csv(
-                self.output_path+'fault_dimensions.csv', ', ')
+                os.path.join(self.output_path, 'fault_dimensions.csv'), ', ')
             if(len(fault_test) > 0):
 
-                m2l_geometry.fault_strat_offset(self.output_path, self.c_l, self.proj_crs, self.output_path+'formation_summary_thicknesses.csv', self.tmp_path +
-                                                'all_sorts.csv', self.tmp_path+'faults_clip.shp', self.tmp_path+'geol_clip.shp', self.output_path+'fault_dimensions.csv')
+                m2l_geometry.fault_strat_offset(self.output_path, self.c_l, self.proj_crs, os.path.join(self.output_path, 'formation_summary_thicknesses.csv'), os.path.join(self.tmp_path,
+                                                                                                                                                                             'all_sorts.csv'), os.path.join(self.tmp_path, 'faults_clip.shp'), os.path.join(self.tmp_path, 'geol_clip.shp'), os.path.join(self.output_path, 'fault_dimensions.csv'))
 
                 if self.quiet == "None":
-                    m2l_utils.plot_points(self.output_path+'fault_strat_offset3.csv',
+                    m2l_utils.plot_points(os.path.join(self.output_path, 'fault_strat_offset3.csv'),
                                           self.geol_clip, 'min_offset', 'X', 'Y', True, 'numeric')
-                    m2l_utils.plot_points(self.output_path+'fault_strat_offset3.csv',
+                    m2l_utils.plot_points(os.path.join(self.output_path, 'fault_strat_offset3.csv'),
                                           self.geol_clip, 'strat_offset', 'X', 'Y', True, 'numeric')
 
         # Analyse fault topologies
@@ -782,7 +790,8 @@ class Config(object):
     def export_png(self):
         filename = self.loop_projectfile
         if self.loop_projectfile is None:
-            filename = 'GEOLOGY_CLIP'
+            # TODO: Make sure these user provided paths end with a slash or are joined properly
+            filename = os.path.join(self.project_path, 'GEOLOGY_CLIP')
         print("Exporting graphical map...")
         try:
 

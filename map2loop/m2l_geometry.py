@@ -36,7 +36,7 @@ import random
 
 def save_orientations(structures, path_out, c_l, orientation_decimate, dtm, dtb, dtb_null, cover_map):
     i = 0
-    f = open(path_out+'/orientations.csv', "w")
+    f = open(os.path.join(path_out, 'orientations.csv'), "w")
     f.write("X,Y,Z,azimuth,dip,polarity,formation\n")
     for indx, apoint in structures.iterrows():
         if(not str(apoint[c_l['r1']]) == 'None'):
@@ -61,12 +61,12 @@ def save_orientations(structures, path_out, c_l, orientation_decimate, dtm, dtb,
                             ostr = "{},{},{},{},{},{},{}\n"\
                                 .format(apoint['geometry'].x, apoint['geometry'].y, height, dipdir, apoint[c_l['d']],
                                         polarity, apoint[c_l['c']].replace(" ", "_").replace("-", "_"))
-                            #ostr = str(apoint['geometry'].x)+","+str(apoint['geometry'].y)+","+height+","+str(dipdir)+","+str(apoint[c_l['d']])+",1,"+str(apoint[c_l['c']].replace(" ","_").replace("-","_"))+"\n"
+                            # ostr = str(apoint['geometry'].x)+","+str(apoint['geometry'].y)+","+height+","+str(dipdir)+","+str(apoint[c_l['d']])+",1,"+str(apoint[c_l['c']].replace(" ","_").replace("-","_"))+"\n"
                             f.write(ostr)
                     i = i+1
 
     f.close()
-    print(i, 'orientations saved to', path_out+'orientations.csv')
+    print(i, 'orientations saved to', os.path.join(path_out, 'orientations.csv'))
 
 ####################################################
 # Find those series that don't have any orientation or contact point data and add some random data
@@ -87,13 +87,14 @@ def save_orientations(structures, path_out, c_l, orientation_decimate, dtm, dtb,
 
 def create_orientations(path_in, path_out, dtm, dtb, dtb_null, cover_map, geology, structures, c_l):
     """Create orientations if there is a series that does not have one."""
-    #f = open(path_in+'/groups.csv',"r")
-    #contents  = f.readlines()
+    # f = open(os.path.join(path_in,'groups.csv'),"r")
+    # contents  = f.readlines()
     # f.close
 
-    #ngroups = contents[0].split(" ")
-    #ngroups = int(ngroups[1])
-    contents = np.genfromtxt(path_in+'groups.csv', delimiter=',', dtype='U100')
+    # ngroups = contents[0].split(" ")
+    # ngroups = int(ngroups[1])
+    contents = np.genfromtxt(os.path.join(
+        path_in, 'groups.csv'), delimiter=',', dtype='U100')
     ngroups = len(contents[0])-1
     # print(len(contents[0]))
     groups = []
@@ -134,7 +135,7 @@ def create_orientations(path_in, path_out, dtm, dtb, dtb_null, cover_map, geolog
 
     # print("Contacts----------\n",len(set(all_codes)),set(all_codes))
 
-    f = open(path_out+'/empty_series_orientations.csv', "w")
+    f = open(os.path.join(path_out, 'empty_series_orientations.csv'), "w")
     f.write("X,Y,Z,azimuth,dip,polarity,formation\n")
     # f.write("X,Y,Z,DipDirection,dip,dippolarity,formation\n")
 
@@ -153,17 +154,17 @@ def create_orientations(path_in, path_out, dtm, dtb, dtb_null, cover_map, geolog
                         height = 0   # needs a better solution!
                     ostr = "{},{},{},{},{},{},{}\n"\
                         .format(apoint.x, apoint.y, height, 0, 45, 1, ageol[c_l['c']].replace(" ", "_").replace("-", "_"))
-                    #ostr = str(apoint.x)+","+str(apoint.y)+","+height+",0,45,1"+","+str(ageol[c_l['c']].replace(" ","_").replace("-","_"))+"\n"
+                    # ostr = str(apoint.x)+","+str(apoint.y)+","+height+",0,45,1"+","+str(ageol[c_l['c']].replace(" ","_").replace("-","_"))+"\n"
                     f.write(ostr)
-                    #plt.title(str(ageol[c_l['c']].replace(" ","_").replace("-","_")))
-                    #plt.scatter(apoint.x,apoint.y,color = "red")
+                    # plt.title(str(ageol[c_l['c']].replace(" ","_").replace("-","_")))
+                    # plt.scatter(apoint.x,apoint.y,color = "red")
                     # plt.plot(*apoly.exterior.xy)
                     # plt.show()
                     break
 
     f.close()
-    print('extra orientations saved as', path_out +
-          '/empty_series_orientations.csv')
+    print('extra orientations saved as', os.path.join(
+        path_out, '/empty_series_orientations.csv'))
 
 ####################################################
 # Convert polygons with holes into distinct poygons
@@ -228,7 +229,7 @@ def extract_poly_coords(geom, i):
 
 
 def save_basal_contacts(path_in, dtm, dtb, dtb_null, cover_map, geol_clip, contact_decimate, c_l, intrusion_mode):
-    #print("decimation: 1 /",contact_decimate)
+    # print("decimation: 1 /",contact_decimate)
     plist = []
     i = 0
     all_geom = m2l_utils.explode(geol_clip)
@@ -243,8 +244,8 @@ def save_basal_contacts(path_in, dtm, dtb, dtb_null, cover_map, geol_clip, conta
                       ageol[c_l['ds']], ageol[c_l['g']], ageol[c_l['r1']], ageol[c_l['o']])
             i = i+1
 
-    #dtm  =  rasterio.open(path_in+'/dtm_rp.tif')
-    ag = open(path_in+'/all_sorts.csv', "r")
+    # dtm  =  rasterio.open(os.path.join(path_in,'dtm_rp.tif'))
+    ag = open(os.path.join(path_in, 'all_sorts.csv'), "r")
     contents = ag.readlines()
     ag.close
     # print("surfaces:",len(contents))
@@ -256,9 +257,9 @@ def save_basal_contacts(path_in, dtm, dtb, dtb_null, cover_map, geol_clip, conta
         ulist.append([i, cont_list[4].replace("\n", "")])
     # print(ulist)
 
-    allc = open(path_in+'/all_contacts.csv', "w")
+    allc = open(os.path.join(path_in, 'all_contacts.csv'), "w")
     allc.write('GROUP_,id,x,y,z,code\n')
-    ac = open(path_in+'/contacts.csv', "w")
+    ac = open(os.path.join(path_in, 'contacts.csv'), "w")
     ac.write("X,Y,Z,formation\n")
     # print(dtm.bounds)
     j = 0
@@ -350,7 +351,7 @@ def save_basal_contacts(path_in, dtm, dtb, dtb_null, cover_map, geol_clip, conta
                                                         dtm, dtb, dtb_null, cover_map, locations)
                                                     ostr = "{},{},{},{}\n"\
                                                         .format(lineC.coords[0][0], lineC.coords[0][1], height, plist[a_poly+2].replace(" ", "_").replace("-", "_"))
-                                                    #ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+str(plist[a_poly+2].replace(" ","_").replace("-","_"))+"\n"
+                                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+str(plist[a_poly+2].replace(" ","_").replace("-","_"))+"\n"
                                                     ac.write(ostr)
                                                     allc.write(
                                                         agp+","+str(ageol[c_l['o']])+","+ostr)
@@ -364,7 +365,7 @@ def save_basal_contacts(path_in, dtm, dtb, dtb_null, cover_map, geol_clip, conta
                                                     deci_points = deci_points+1
                                                 else:
                                                     continue
-                                                    #print("debug:edge points")
+                                                    # print("debug:edge points")
                                             else:
                                                 # doesn't like point right on edge?
                                                 locations = [
@@ -375,7 +376,7 @@ def save_basal_contacts(path_in, dtm, dtb, dtb_null, cover_map, geol_clip, conta
                                                         dtm, dtb, dtb_null, cover_map, locations)
                                                     ostr = "{},{},{},{}\n"\
                                                         .format(lineC.coords[0][0], lineC.coords[0][1], height, plist[a_poly+2].replace(" ", "_").replace("-", "_"))
-                                                    #ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+str(plist[a_poly+2].replace(" ","_").replace("-","_"))+"\n"
+                                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+str(plist[a_poly+2].replace(" ","_").replace("-","_"))+"\n"
                                                     allc.write(
                                                         agp+","+str(ageol[c_l['o']])+","+ostr)
                                                     allpts += 1
@@ -397,7 +398,8 @@ def save_basal_contacts(path_in, dtm, dtb, dtb_null, cover_map, geol_clip, conta
     ac.close()
     allc.close()
     print("basal contacts saved allpts = ", allpts, "deci_pts = ", deci_points)
-    print("saved as", path_in+'all_contacts.csv', "and", path_in+'contacts.csv')
+    print("saved as", os.path.join(path_in, 'all_contacts.csv'),
+          "and", os.path.join(path_in, 'contacts.csv'))
     return(ls_dict, ls_dict_decimate)
 
 #########################################
@@ -454,7 +456,7 @@ def save_basal_no_faults(path_out, path_fault, ls_dict, dist_buffer, c_l, dst_cr
         contacts_nf = GeoDataFrame(df_nf, crs=dst_crs, geometry='geometry')
         contacts_nf.to_file(driver='ESRI Shapefile', filename=path_out)
 
-        #contacts_nofaults  =  gpd.read_file('./data/faults_clip.shp')
+        # contacts_nofaults  =  gpd.read_file('./data/faults_clip.shp')
         print("basal contacts without faults saved as", path_out)
     else:
         df = DataFrame.from_dict(ls_dict, "index")
@@ -475,7 +477,7 @@ def save_basal_no_faults(path_out, path_fault, ls_dict, dist_buffer, c_l, dst_cr
 
 
 def save_basal_contacts_csv(contacts, output_path, dtm, dtb, dtb_null, cover_map, contact_decimate, c_l):
-    f = open(output_path+'contacts4.csv', 'w')
+    f = open(os.path.join(output_path, 'contacts4.csv'), 'w')
     f.write('X,Y,Z,formation\n')
     for index, contact in contacts.iterrows():
         i = 0
@@ -493,7 +495,7 @@ def save_basal_contacts_csv(contacts, output_path, dtm, dtb, dtb_null, cover_map
                                 dtm, dtb, dtb_null, cover_map, locations)
                             ostr = "{},{},{},{}\n"\
                                 .format(line.coords[0][0], line.coords[0][1], height, contact[c_l['c']])
-                            #ostr = str(line.coords[0][0])+','+str(line.coords[0][1])+','+str(height)+','+str(contact[c_l['c']])+'\n'
+                            # ostr = str(line.coords[0][0])+','+str(line.coords[0][1])+','+str(height)+','+str(contact[c_l['c']])+'\n'
                             f.write(ostr)
                     else:  # new line
                         if(not first):
@@ -502,14 +504,14 @@ def save_basal_contacts_csv(contacts, output_path, dtm, dtb, dtb_null, cover_map
                                 dtm, dtb, dtb_null, cover_map, locations)
                             ostr = "{},{},{},{}\n"\
                                 .format(lastx, lasty, height, contact[c_l['c']])
-                            #ostr = str(lastx)+','+str(lasty)+','+str(height)+','+str(contact[c_l['c']])+'\n'
+                            # ostr = str(lastx)+','+str(lasty)+','+str(height)+','+str(contact[c_l['c']])+'\n'
                             f.write(ostr)
                         locations = [(line.coords[0][0], line.coords[0][1])]
                         height = m2l_utils.value_from_dtm_dtb(
                             dtm, dtb, dtb_null, cover_map, locations)
                         ostr = "{},{},{},{}\n"\
                             .format(line.coords[0][0], line.coords[0][1], height, contact[c_l['c']])
-                        #ostr = str(line.coords[0][0])+','+str(line.coords[0][1])+','+str(height)+','+str(contact[c_l['c']])+'\n'
+                        # ostr = str(line.coords[0][0])+','+str(line.coords[0][1])+','+str(height)+','+str(contact[c_l['c']])+'\n'
                         f.write(ostr)
                         first = False
                     i = i+1
@@ -523,7 +525,7 @@ def save_basal_contacts_csv(contacts, output_path, dtm, dtb, dtb_null, cover_map
                     dtm, dtb, dtb_null, cover_map, locations)
                 ostr = "{},{},{},{}\n"\
                     .format(contact.geometry.coords[0][0], contact.geometry.coords[0][1], height, contact[c_l['c']])
-                #ostr = str(contact.geometry.coords[0][0])+','+str(contact.geometry.coords[0][1])+','+str(height)+','+str(contact[c_l['c']])+'\n'
+                # ostr = str(contact.geometry.coords[0][0])+','+str(contact.geometry.coords[0][1])+','+str(height)+','+str(contact[c_l['c']])+'\n'
                 f.write(ostr)
                 locations = [(contact.geometry.coords[1][0],
                               contact.geometry.coords[1][1])]
@@ -531,10 +533,11 @@ def save_basal_contacts_csv(contacts, output_path, dtm, dtb, dtb_null, cover_map
                     dtm, dtb, dtb_null, cover_map, locations)
                 ostr = "{},{},{},{}\n"\
                     .format(contact.geometry.coords[1][0], contact.geometry.coords[1][1], height, contact[c_l['c']])
-                #ostr = str(contact.geometry.coords[1][0])+','+str(contact.geometry.coords[1][1])+','+str(height)+','+str(contact[c_l['c']])+'\n'
+                # ostr = str(contact.geometry.coords[1][0])+','+str(contact.geometry.coords[1][1])+','+str(height)+','+str(contact[c_l['c']])+'\n'
                 f.write(ostr)
     f.close()
-    print('decimated contacts saved as', output_path+'contacts4.csv')
+    print('decimated contacts saved as',
+          os.path.join(output_path, 'contacts4.csv'))
 
 #########################################
 # Remove faults from decimated basal contacts as save as csv file   (superceded by save_basal_contacts_csv)
@@ -577,7 +580,7 @@ def save_contacts_with_faults_removed(path_fault, path_out, dist_buffer, ls_dict
 
     cnf_de_copy = contacts_decimate_nofaults.copy()
 
-    ac = open(path_out+'/contacts4.csv', "w")
+    ac = open(os.path.join(path_out, 'contacts4.csv'), "w")
     ac.write("X,Y,Z,formation\n")
     i = 0
     for indx, cdn in contacts_decimate_nofaults.iterrows():
@@ -590,12 +593,13 @@ def save_contacts_with_faults_removed(path_fault, path_out, dist_buffer, ls_dict
                 dtm, dtb, dtb_null, cover_map, locations)
             ostr = "{},{},{},{}\n"\
                 .format(cdn.geometry.x, cdn.geometry.y, height, cdn[c_l['c']].replace(" ", "_").replace("-", "_"))
-            #ostr = str(cdn.geometry.x)+","+str(cdn.geometry.y)+","+height+","+str(cdn[c_l['c']].replace(" ","_").replace("-","_"))+"\n"
+            # ostr = str(cdn.geometry.x)+","+str(cdn.geometry.y)+","+height+","+str(cdn[c_l['c']].replace(" ","_").replace("-","_"))+"\n"
             ac.write(ostr)
 
         i = i+1
     ac.close()
-    print(i, "decimated contact points saved as", path_out+'/contacts4.csv')
+    print(i, "decimated contact points saved as",
+          os.path.join(path_out, 'contacts4.csv'))
 
 #########################################
 # Save faults as contact info and make vertical (for the moment)
@@ -615,12 +619,12 @@ def save_contacts_with_faults_removed(path_fault, path_out, dist_buffer, ls_dict
 
 
 def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fault_decimate, fault_min_len, fault_dip):
-    f = open(output_path+'faults.csv', "w")
+    f = open(os.path.join(output_path, 'faults.csv'), "w")
     f.write("X,Y,Z,formation\n")
-    fo = open(output_path+'fault_orientations.csv', "w")
+    fo = open(os.path.join(output_path, 'fault_orientations.csv'), "w")
     fo.write("X,Y,Z,DipDirection,dip,DipPolarity,formation\n")
     # fo.write("X,Y,Z,azimuth,dip,polarity,formation\n")
-    fd = open(output_path+'fault_dimensions.csv', "w")
+    fd = open(os.path.join(output_path, 'fault_dimensions.csv'), "w")
     fd.write(
         "Fault,HorizontalRadius,VerticalRadius,InfluenceDistance,incLength,colour\n")
     # fd.write("Fault_ID,strike,dip_direction,down_dip\n")
@@ -884,9 +888,11 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
     f.close()
     fo.close()
     fd.close()
-    print("fault orientations saved as", output_path+'fault_orientations.csv')
-    print("fault positions saved as", output_path+'faults.csv')
-    print("fault dimensions saved as", output_path+'fault_dimensions.csv')
+    print("fault orientations saved as", os.path.join(
+        output_path, 'fault_orientations.csv'))
+    print("fault positions saved as", os.path.join(output_path, 'faults.csv'))
+    print("fault dimensions saved as", os.path.join(
+        output_path, 'fault_dimensions.csv'))
     random.seed()
 
 #########################################
@@ -897,12 +903,13 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
 
 def old_save_faults(path_faults, path_fault_orientations, dtm, dtb, dtb_null, cover_map, c_l, fault_decimate, fault_min_len, fault_dip):
     faults_clip = gpd.read_file(path_faults)
-    f = open(path_fault_orientations+'/faults.csv', "w")
+    f = open(os.path.join(path_fault_orientations, 'faults.csv'), "w")
     f.write("X,Y,Z,formation\n")
-    fo = open(path_fault_orientations+'/fault_orientations.csv', "w")
+    fo = open(os.path.join(path_fault_orientations,
+                           'fault_orientations.csv'), "w")
     fo.write("X,Y,Z,DipDirection,dip,DipPolarity,formation\n")
     # fo.write("X,Y,Z,azimuth,dip,polarity,formation\n")
-    fd = open(path_fault_orientations+'/fault_dimensions.csv', "w")
+    fd = open(os.path.join(path_fault_orientations, 'fault_dimensions.csv'), "w")
     fd.write("Fault,HorizontalRadius,VerticalRadius,InfluenceDistance\n")
     # fd.write("Fault_ID,strike,dip_direction,down_dip\n")
 
@@ -923,7 +930,7 @@ def old_save_faults(path_faults, path_fault_orientations, dtm, dtb, dtb_null, co
                             dtm, dtb, dtb_null, cover_map, locations)
                         ostr = "{},{},{},{}\n"\
                             .format(afs[0], afs[1], height, fault_name)
-                        #ostr = str(afs[0])+","+str(afs[1])+","+str(height)+","+fault_name+"\n"
+                        # ostr = str(afs[0])+","+str(afs[1])+","+str(height)+","+fault_name+"\n"
                         f.write(ostr)
                     i = i+1
                 if(dlsx == 0.0 or dlsy == 0.0):
@@ -938,21 +945,22 @@ def old_save_faults(path_faults, path_fault_orientations, dtm, dtb, dtb_null, co
                     dtm, dtb, dtb_null, cover_map, locations)
                 ostr = "{},{},{},{},{},{},{}\n"\
                     .format(flt_ls.coords[int((len(flt_ls.coords)-1)/2)][0], flt_ls.coords[int((len(flt_ls.coords)-1)/2)][1], height, azimuth, fault_dip, 1, fault_name)
-                #ostr = str(flt_ls.coords[int((len(flt_ls.coords)-1)/2)][0])+","+str(flt_ls.coords[int((len(flt_ls.coords)-1)/2)][1])+","+height+","+str(azimuth)+","+str(fault_dip)+",1,"+fault_name+"\n"
+                # ostr = str(flt_ls.coords[int((len(flt_ls.coords)-1)/2)][0])+","+str(flt_ls.coords[int((len(flt_ls.coords)-1)/2)][1])+","+height+","+str(azimuth)+","+str(fault_dip)+",1,"+fault_name+"\n"
                 fo.write(ostr)
                 ostr = "{},{},{},{}\n"\
                     .format(fault_name, strike/2, strike/2, strike/4.0)
-                #ostr = fault_name+","+str(strike/2)+","+str(strike/2)+","+str(strike/4.0)+"\n"
+                # ostr = fault_name+","+str(strike/2)+","+str(strike/2)+","+str(strike/4.0)+"\n"
                 fd.write(ostr)
 
     f.close()
     fo.close()
     fd.close()
     print("fault orientations saved as",
-          path_fault_orientations+'fault_orientations.csv')
-    print("fault positions saved as", path_fault_orientations+'faults.csv')
+          os.path.join(path_fault_orientations, 'fault_orientations.csv'))
+    print("fault positions saved as", os.path.join(
+        path_fault_orientations, 'faults.csv'))
     print("fault dimensions saved as",
-          path_fault_orientations+'fault_dimensions.csv')
+          os.path.join(path_fault_orientations, 'fault_dimensions.csv'))
 
 ########################################
 # Save fold axial traces
@@ -971,7 +979,8 @@ def old_save_faults(path_faults, path_fault_orientations, dtm, dtb, dtb_null, co
 
 def save_fold_axial_traces(path_folds, path_fold_orientations, dtm, dtb, dtb_null, cover_map, c_l, fold_decimate):
     folds_clip = gpd.read_file(path_folds)
-    fo = open(path_fold_orientations+'/fold_axial_traces.csv', "w")
+    fo = open(os.path.join(path_fold_orientations,
+                           'fold_axial_traces.csv'), "w")
     fo.write("X,Y,Z,code,type\n")
     folds_clip = folds_clip.dropna(subset=['geometry'])
 
@@ -992,7 +1001,7 @@ def save_fold_axial_traces(path_folds, path_fold_orientations, dtm, dtb, dtb_nul
                                     dtm, dtb, dtb_null, cover_map, locations)
                                 ostr = "{},{},{},FA_{},{}\n"\
                                     .format(afs[0], afs[1], height, fold_name, fold[c_l['t']].replace(',', ''))
-                                #ostr = str(afs[0])+','+str(afs[1])+','+str(height)+','+'FA_'+fold_name+','+fold[c_l['t']].replace(',','')+'\n'
+                                # ostr = str(afs[0])+','+str(afs[1])+','+str(height)+','+'FA_'+fold_name+','+fold[c_l['t']].replace(',','')+'\n'
                                 fo.write(ostr)
                         i = i+1
             else:
@@ -1008,13 +1017,13 @@ def save_fold_axial_traces(path_folds, path_fold_orientations, dtm, dtb, dtb_nul
                                 dtm, dtb, dtb_null, cover_map, locations)
                             ostr = "{},{},{},FA_{},{}\n"\
                                 .format(afs[0], afs[1], height, fold_name, fold[c_l['t']].replace(',', ''))
-                            #ostr = str(afs[0])+','+str(afs[1])+','+str(height)+','+'FA_'+fold_name+','+fold[c_l['t']].replace(',','')+'\n'
+                            # ostr = str(afs[0])+','+str(afs[1])+','+str(height)+','+'FA_'+fold_name+','+fold[c_l['t']].replace(',','')+'\n'
                             fo.write(ostr)
                     i = i+1
 
     fo.close()
     print("fold axial traces saved as",
-          path_fold_orientations+'fold_axial_traces.csv')
+          os.path.join(path_fold_orientations, 'fold_axial_traces.csv'))
 
 #########################################
 # Create basal contact points with orientation from orientations and basal points
@@ -1030,14 +1039,14 @@ def save_fold_axial_traces(path_folds, path_fold_orientations, dtm, dtb, dtb_nul
 
 
 def create_basal_contact_orientations(contacts, structures, output_path, dtm, dtb, dtb_null, cover_map, dist_buffer, c_l):
-    f = open(output_path+'projected_dip_contacts2.csv', "w")
+    f = open(os.path.join(output_path, 'projected_dip_contacts2.csv'), "w")
     f.write('X,Y,Z,azimuth,dip,polarity,formation\n')
-    #print("len = ",len(contacts))
+    # print("len = ",len(contacts))
     i = 0
     for indx, acontact in contacts.iterrows():  # loop through distinct linestrings
         # display(acontact[1].geometry)
         thegroup = acontact[c_l['g']].replace("_", " ")
-        #print("thegroup = ",thegroup)
+        # print("thegroup = ",thegroup)
         # subset orientations to just those with this group
         is_gp = structures[c_l['g']] == thegroup
         all_structures = structures[is_gp]
@@ -1075,13 +1084,13 @@ def create_basal_contact_orientations(contacts, structures, output_path, dtm, dt
                                 ostr = "{},{},{},{},{},{},{}\n"\
                                     .format(np.x, np.y, height, ls_ddir, astr[c_l['d']],
                                             1, acontact[c_l['c']].replace(" ", "_").replace("-", "_"))
-                                #ostr = str(np.x)+","+str(np.y)+","+height+","+str(ls_ddir)+","+str(astr[c_l['d']])+",1,"+acontact[c_l['c']].replace(" ","_").replace("-","_")+"\n"
+                                # ostr = str(np.x)+","+str(np.y)+","+height+","+str(ls_ddir)+","+str(astr[c_l['d']])+",1,"+acontact[c_l['c']].replace(" ","_").replace("-","_")+"\n"
                                 f.write(ostr)
                                 i = i+1
 
     f.close()
     print("basal contact orientations saved as",
-          output_path+'projected_dip_contacts2.csv')
+          os.path.join(output_path, 'projected_dip_contacts2.csv'))
 
 #########################################
 # For each pluton polygon, create dip info based on ideal form with azimuth parallel to local contact
@@ -1107,7 +1116,8 @@ def create_basal_contact_orientations(contacts, structures, output_path, dtm, dt
 
 def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb_null, cover_map, pluton_form, pluton_dip, contact_decimate, c_l):
 
-    groups = np.genfromtxt(tmp_path+'groups.csv', delimiter=',', dtype='U100')
+    groups = np.genfromtxt(os.path.join(
+        tmp_path, 'groups.csv'), delimiter=',', dtype='U100')
 
     if(len(groups.shape) == 1):
         ngroups = len(groups)-1
@@ -1137,11 +1147,12 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
 
     # print(local_paths)
 
-    allc = open(output_path+'all_ign_contacts.csv', "w")
+    allc = open(os.path.join(output_path, 'all_ign_contacts.csv'), "w")
     allc.write('GROUP_,id,x,y,z,code\n')
-    ac = open(output_path+'ign_contacts.csv', "w")
+    ac = open(os.path.join(output_path, 'ign_contacts.csv'), "w")
     ac.write("X,Y,Z,formation\n")
-    ao = open(output_path+'ign_orientations_'+pluton_form+'.csv', "w")
+    ao = open(os.path.join(
+        output_path, 'ign_orientations_'+pluton_form+'.csv'), "w")
     ao.write("X,Y,Z,azimuth,dip,polarity,formation\n")
     # print(output_path+'ign_orientations_'+pluton_form+'.csv')
     j = 0
@@ -1223,7 +1234,7 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
                                                 dtm, dtb, dtb_null, cover_map, locations)
                                             ostr = "{},{},{},{}\n"\
                                                 .format(lineC.coords[0][0], lineC.coords[0][1], height, newgp.replace(" ", "_").replace("-", "_"))
-                                            #ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
+                                            # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
                                             ac.write(ostr)
                                             allc.write(
                                                 agp+","+str(ageol[c_l['o']])+","+ostr)
@@ -1239,8 +1250,8 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
                                                 dtm, dtb, dtb_null, cover_map, locations)
                                             ostr = "{},{},{},{}\n"\
                                                 .format(lineC.coords[0][0], lineC.coords[0][1], height, newgp.replace(" ", "_").replace("-", "_"))
-                                            #ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
-                                            #ls_dict_decimate[allpts]  =  {"id": id,"CODE":ageol['CODE'],"GROUP_":ageol['GROUP_'], "geometry": Point(lineC.coords[0][0],lineC.coords[0][1])}
+                                            # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
+                                            # ls_dict_decimate[allpts]  =  {"id": id,"CODE":ageol['CODE'],"GROUP_":ageol['GROUP_'], "geometry": Point(lineC.coords[0][0],lineC.coords[0][1])}
                                             allc.write(
                                                 agp+","+str(ageol[c_l['o']])+","+ostr)
                                             allpts += 1
@@ -1276,18 +1287,18 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
 
                                         if(pluton_form == 'saucers'):
                                             polarity = 1
-                                            #ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",1,"+newgp.replace(" ","_").replace("-","_")+"\n"
+                                            # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",1,"+newgp.replace(" ","_").replace("-","_")+"\n"
                                         elif(pluton_form == 'domes'):
                                             polarity = 0
                                             azimuth = (azimuth-180) % 360
-                                            #ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",0,"+newgp.replace(" ","_").replace("-","_")+"\n"
+                                            # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",0,"+newgp.replace(" ","_").replace("-","_")+"\n"
                                         elif(pluton_form == 'pendant'):
                                             polarity = 0
-                                            #ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",0,"+newgp.replace(" ","_").replace("-","_")+"\n"
+                                            # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",0,"+newgp.replace(" ","_").replace("-","_")+"\n"
                                         else:  # pluton_form  ==  batholith
                                             polarity = 1
                                             azimuth = (azimuth-180) % 360
-                                            #ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",1,"+newgp.replace(" ","_").replace("-","_")+"\n"
+                                            # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",1,"+newgp.replace(" ","_").replace("-","_")+"\n"
                                         ostr = "{},{},{},{},{},{},{}\n"\
                                             .format(lineC.coords[0][0], lineC.coords[0][1], height, azimuth, pluton_dip, polarity, newgp.replace(" ", "_").replace("-", "_"))
                                         ao.write(ostr)
@@ -1308,7 +1319,7 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
                                         dtm, dtb, dtb_null, cover_map, locations)
                                     ostr = "{},{},{},{}\n"\
                                         .format(lineC.coords[0][0], lineC.coords[0][1], height, newgp.replace(" ", "_").replace("-", "_"))
-                                    #ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
+                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
                                     ac.write(ostr)
                                     allc.write(
                                         agp+","+str(ageol[c_l['o']])+","+ostr)
@@ -1324,8 +1335,8 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
                                         dtm, dtb, dtb_null, cover_map, locations)
                                     ostr = "{},{},{},{}\n"\
                                         .format(lineC.coords[0][0], lineC.coords[0][1], height, newgp.replace(" ", "_").replace("-", "_"))
-                                    #ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
-                                    #ls_dict_decimate[allpts]  =  {"id": id,"CODE":ageol['CODE'],"GROUP_":ageol['GROUP_'], "geometry": Point(lineC.coords[0][0],lineC.coords[0][1])}
+                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
+                                    # ls_dict_decimate[allpts]  =  {"id": id,"CODE":ageol['CODE'],"GROUP_":ageol['GROUP_'], "geometry": Point(lineC.coords[0][0],lineC.coords[0][1])}
                                     allc.write(
                                         agp+","+str(ageol[c_l['o']])+","+ostr)
                                     allpts += 1
@@ -1356,18 +1367,18 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
 
                                 if(pluton_form == 'saucers'):
                                     polarity = 1
-                                    #ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",1,"+newgp.replace(" ","_").replace("-","_")+"\n"
+                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",1,"+newgp.replace(" ","_").replace("-","_")+"\n"
                                 elif(pluton_form == 'domes'):
                                     polarity = 0
                                     azimuth = (azimuth-180) % 360
-                                    #ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",0,"+newgp.replace(" ","_").replace("-","_")+"\n"
+                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",0,"+newgp.replace(" ","_").replace("-","_")+"\n"
                                 elif(pluton_form == 'pendant'):
                                     polarity = 0
-                                    #ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",0,"+newgp.replace(" ","_").replace("-","_")+"\n"
+                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",0,"+newgp.replace(" ","_").replace("-","_")+"\n"
                                 else:  # pluton_form  ==  batholith
                                     polarity = 1
                                     azimuth = (azimuth-180) % 360
-                                    #ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",1,"+newgp.replace(" ","_").replace("-","_")+"\n"
+                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",1,"+newgp.replace(" ","_").replace("-","_")+"\n"
                                 ostr = "{},{},{},{},{},{},{}\n"\
                                     .format(lineC.coords[0][0], lineC.coords[0][1], height, azimuth, pluton_dip, polarity, newgp.replace(" ", "_").replace("-", "_").replace(",", "_"))
                                 ao.write(ostr)
@@ -1385,20 +1396,20 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
     ao.close()
     allc.close()
 
-    an = open(tmp_path+'groups2.csv', "w")
+    an = open(os.path.join(tmp_path, 'groups2.csv'), "w")
 
     for i in range(0, orig_ngroups):
         print(i, gp_names[i].replace(" ", "_").replace("-", "_"))
         an.write(gp_names[i].replace(" ", "_").replace("-", "_")+'\n')
     an.close()
 
-    all_sorts = pd.read_csv(tmp_path+'all_sorts.csv', ",")
+    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts.csv'), ",")
 
-    as_2 = open(tmp_path+'all_sorts.csv', "r")
+    as_2 = open(os.path.join(tmp_path, 'all_sorts.csv'), "r")
     contents = as_2.readlines()
     as_2.close
 
-    all_sorts_file = open(tmp_path+'all_sorts2.csv', "w")
+    all_sorts_file = open(os.path.join(tmp_path, 'all_sorts2.csv'), "w")
     all_sorts_file.write(
         'index,group number,index in group,number in group,code,group\n')
     j = 1
@@ -1411,8 +1422,8 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
 
     all_sorts_file.close()
     print('pluton contacts and orientations saved as:')
-    print(output_path+'ign_contacts.csv')
-    print(output_path+'ign_orientations_'+pluton_form+'.csv')
+    print(os.path.join(output_path, 'ign_contacts.csv'))
+    print(os.path.join(output_path, 'ign_orientations_'+pluton_form+'.csv'))
 
 
 ###################################
@@ -1431,64 +1442,67 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
 
 def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, use_fat, pluton_form, inputs, workflow, c_l):
 
-    contacts = pd.read_csv(output_path+'contacts4.csv', ",")
-    all_orientations = pd.read_csv(output_path+'orientations.csv', ",")
-    intrusive_contacts = pd.read_csv(output_path+'ign_contacts.csv', ",")
-    all_sorts = pd.read_csv(tmp_path+'all_sorts2.csv', ",")
+    contacts = pd.read_csv(os.path.join(output_path, 'contacts4.csv'), ",")
+    all_orientations = pd.read_csv(os.path.join(
+        output_path, 'orientations.csv'), ",")
+    intrusive_contacts = pd.read_csv(
+        os.path.join(output_path, 'ign_contacts.csv'), ",")
+    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts2.csv'), ",")
 
-    if('invented_orientations' in inputs and os.path.exists(output_path+'empty_series_orientations.csv')):
+    if('invented_orientations' in inputs and os.path.exists(os.path.join(output_path, 'empty_series_orientations.csv'))):
         invented_orientations = pd.read_csv(
-            output_path+'empty_series_orientations.csv', ",")
+            os.path.join(output_path, 'empty_series_orientations.csv'), ",")
         all_orientations = pd.concat(
             [all_orientations, invented_orientations], sort=False)
-    elif('invented_orientations' in inputs and not os.path.exists(output_path+'empty_series_orientations.csv')):
+    elif('invented_orientations' in inputs and not os.path.exists(os.path.join(output_path, 'empty_series_orientations.csv'))):
         print('No invented orientations available for merging.')
 
-    if('interpolated_orientations' in inputs and os.path.exists(tmp_path+'combo_full.csv')):
-        interpolated_orientations = pd.read_csv(tmp_path+'combo_full.csv', ",")
+    if('interpolated_orientations' in inputs and os.path.exists(os.path.join(tmp_path, 'combo_full.csv'))):
+        interpolated_orientations = pd.read_csv(
+            os.path.join(tmp_path, 'combo_full.csv'), ",")
         all_orientations = pd.concat(
             [all_orientations, interpolated_orientations.iloc[::2, :]], sort=False)
-    elif('interpolated_orientations' in inputs and not os.path.exists(tmp_path+'combo_full.csv')):
+    elif('interpolated_orientations' in inputs and not os.path.exists(os.path.join(tmp_path, 'combo_full.csv'))):
         print('No interpolated orientations available for merging.')
 
-    if('intrusive_orientations' in inputs and os.path.exists(output_path+'ign_orientations_'+pluton_form+'.csv')):
+    if('intrusive_orientations' in inputs and os.path.exists(os.path.join(output_path, 'ign_orientations_'+pluton_form+'.csv'))):
         intrusive_orientations = pd.read_csv(
-            output_path+'ign_orientations_'+pluton_form+'.csv', ",")
+            os.path.join(output_path, 'ign_orientations_'+pluton_form+'.csv'), ",")
         all_orientations = pd.concat(
             [all_orientations, intrusive_orientations], sort=False)
-    elif('intrusive_orientations' in inputs and not os.path.exists(output_path+'ign_orientations_'+pluton_form+'.csv')):
+    elif('intrusive_orientations' in inputs and not os.path.exists(os.path.join(output_path, 'ign_orientations_'+pluton_form+'.csv'))):
         print('No intrusive orientations available for merging.')
 
-    if('fat_orientations' in inputs and os.path.exists(output_path+'fold_axial_trace_orientations2.csv')):
+    if('fat_orientations' in inputs and os.path.exists(os.path.join(output_path, 'fold_axial_trace_orientations2.csv'))):
         fat_orientations = pd.read_csv(
-            output_path+'fold_axial_trace_orientations2.csv', ",")
+            os.path.join(output_path, 'fold_axial_trace_orientations2.csv'), ",")
         all_orientations = pd.concat(
             [all_orientations, fat_orientations], sort=False)
-    elif('fat_orientations' in inputs and not os.path.exists(output_path+'fold_axial_trace_orientations2.csv')):
+    elif('fat_orientations' in inputs and not os.path.exists(os.path.join(output_path, 'fold_axial_trace_orientations2.csv'))):
         print('No fat orientations available for merging.')
 
-    if('near_fault_orientations' in inputs and os.path.exists(tmp_path+'ex_f_combo_full.csv')):
+    if('near_fault_orientations' in inputs and os.path.exists(os.path.join(tmp_path, 'ex_f_combo_full.csv'))):
         near_fault_orientations = pd.read_csv(
-            tmp_path+'ex_f_combo_full.csv', ",")
+            os.path.join(tmp_path, 'ex_f_combo_full.csv'), ",")
         all_orientations = pd.concat(
             [all_orientations, near_fault_orientations], sort=False)
-    elif('near_fault_orientations' in inputs and not os.path.exists(tmp_path+'ex_f_combo_full.csv')):
+    elif('near_fault_orientations' in inputs and not os.path.exists(os.path.join(tmp_path, 'ex_f_combo_full.csv'))):
         print('No near fault orientations available for merging.')
 
-    if('cover_orientations' in inputs and os.path.exists(output_path+'cover_orientations.csv')):
+    if('cover_orientations' in inputs and os.path.exists(os.path.join(output_path, 'cover_orientations.csv'))):
         cover_orientations = pd.read_csv(
-            output_path+'cover_orientations.csv', ",")
+            os.path.join(output_path, 'cover_orientations.csv'), ",")
         all_orientations = pd.concat(
             [all_orientations, cover_orientations], sort=False)
-    elif('cover_orientations' in inputs and not os.path.exists(output_path+'cover_orientations.csv')):
+    elif('cover_orientations' in inputs and not os.path.exists(os.path.join(output_path, 'cover_orientations.csv'))):
         print('No cover orientations available for merging.')
 
-    if('contact_orientations' in inputs and os.path.exists(output_path+'contact_orientations.csv')):
+    if('contact_orientations' in inputs and os.path.exists(os.path.join(output_path, 'contact_orientations.csv'))):
         contact_orientations = pd.read_csv(
-            output_path+'contact_orientations.csv', ",")
+            os.path.join(output_path, 'contact_orientations.csv'), ",")
         all_orientations = pd.concat(
             [all_orientations, contact_orientations], sort=False)
-    elif('contact_orientations' in inputs and not os.path.exists(output_path+'contact_orientations.csv')):
+    elif('contact_orientations' in inputs and not os.path.exists(os.path.join(output_path, 'contact_orientations.csv'))):
         print('No contact orientations available for merging.')
 
     # display(cover_orientations)
@@ -1500,26 +1514,25 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
 
     all_contacts = pd.concat([intrusive_contacts, contacts], sort=False)
 
-    if('cover_contacts' in inputs and os.path.exists(output_path+'cover_grid.csv')):
-        cover_contacts = pd.read_csv(output_path+'cover_grid.csv', ",")
+    if('cover_contacts' in inputs and os.path.exists(os.path.join(output_path, 'cover_grid.csv'))):
+        cover_contacts = pd.read_csv(os.path.join(
+            output_path, 'cover_grid.csv'), ",")
         all_contacts = pd.concat([all_contacts, cover_contacts], sort=False)
-    elif('cover_contacts' in inputs and not os.path.exists(output_path+'cover_grid.csv')):
+    elif('cover_contacts' in inputs and not os.path.exists(os.path.join(output_path, 'cover_grid.csv'))):
         print('No cover grid contacts available for merging.')
 
     if('fault_tip_contacts' in inputs):
         fault_tip_contacts = pd.read_csv(
-            output_path+'fault_tip_contacts.csv', ",")
+            os.path.join(output_path, 'fault_tip_contacts.csv'), ",")
         all_contacts = pd.concat(
             [all_contacts, fault_tip_contacts], sort=False)
-    elif('fault_tip_contacts' in inputs and not os.path.exists(output_path+'fault_tip_contacts.csv')):
+    elif('fault_tip_contacts' in inputs and not os.path.exists(os.path.join(output_path, 'fault_tip_contacts.csv'))):
         print('No fault tip contacts available for merging.')
 
-    all_contacts.reset_index(inplace=True)
-    all_contacts.to_csv(output_path+'contacts_clean.csv',
-                        index=None, header=True)
-
-    output_path+'contacts_clean.csv'
     all_groups = set(all_sorts['group'])
+    all_contacts.reset_index(inplace=True)
+    all_contacts.to_csv(os.path.join(output_path, 'contacts_clean.csv'),
+                        index=None, header=True)
 
     unique_contacts = set(all_contacts['formation'])
     # Remove groups that don't have any contact info
@@ -1534,18 +1547,18 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
                     break
         if(not found):
             no_contacts.append(agroup)
-            #print('no contacts for the group:',agroup)
+            # print('no contacts for the group:',agroup)
         else:
             groups.append(agroup)
 
     # Update list of all groups that have formations info
 
-    f = open(tmp_path+'groups2.csv', "r")
+    f = open(os.path.join(tmp_path, 'groups2.csv'), "r")
     contents = f.readlines()
     f.close
 
-    #ngroups = contents[0].split(" ")
-    #ngroups = int(ngroups[1])
+    # ngroups = contents[0].split(" ")
+    # ngroups = int(ngroups[1])
     ngroups = len(contents)
     no_contacts = []
     groups = []
@@ -1561,13 +1574,13 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
                     break
         if(not found):
             no_contacts.append(contents[i].replace("\n", ""))
-            #print('no contacts for the group:',contents[i].replace("\n",""))
+            # print('no contacts for the group:',contents[i].replace("\n",""))
         else:
             groups.append(contents[i].replace("\n", ""))
 
     # Make new list of groups
-    #print('groups contents',len(groups),len(contents))
-    fgp = open(tmp_path+'groups_clean.csv', "w")
+    # print('groups contents',len(groups),len(contents))
+    fgp = open(os.path.join(tmp_path, 'groups_clean.csv'), "w")
     for i in range(0, len(groups)):
         fgp.write(groups[i].replace("\n", "")+'\n')
     fgp.close()
@@ -1592,20 +1605,20 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
 
     # Update master list of  groups and formations info
 
-    fas = open(tmp_path+'all_sorts_clean.csv', "w")
+    fas = open(os.path.join(tmp_path, 'all_sorts_clean.csv'), "w")
     fas.write(
         'index,group number,index in group,number in group,code,group,uctype\n')
     for a_sort in all_sorts.iterrows():
         if(a_sort[1]['group'] not in no_contacts):
             ostr = "{},{},{},{},{},{},{}\n"\
                 .format(a_sort[1]['index'], a_sort[1]['group number'], a_sort[1]['index in group'], a_sort[1]['number in group'], a_sort[0], a_sort[1]['group'], 'erode')
-            #ostr = str(a_sort[1]['index'])+","+str(a_sort[1]['group number'])+","+str(a_sort[1]['index in group'])+","+str(a_sort[1]['number in group'])+","+a_sort[0]+","+a_sort[1]['group']+",erode\n"
+            # ostr = str(a_sort[1]['index'])+","+str(a_sort[1]['group number'])+","+str(a_sort[1]['index in group'])+","+str(a_sort[1]['number in group'])+","+a_sort[0]+","+a_sort[1]['group']+",erode\n"
             fas.write(ostr)
     fas.close()
 
     # Update orientation info
 
-    fao = open(output_path+'orientations_clean.csv', "w")
+    fao = open(os.path.join(output_path, 'orientations_clean.csv'), "w")
     fao.write('X,Y,Z,azimuth,dip,polarity,formation\n')
     all_sort_codes = set(all_sorts.index)
     # display(no_contacts,unique_contacts,all_sorts,all_sort_contacts)
@@ -1615,7 +1628,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
             # fix here################################
             if(all_sorts.loc[ano['formation']]['group'] in no_contacts or not ano['formation'] in unique_contacts or not all_sorts.loc[ano['formation']]['group'] in use_group):
                 continue
-                #print('dud orientation:',ano[1]['formation'])
+                # print('dud orientation:',ano[1]['formation'])
             else:
                 ostr = "{},{},{},{},{},{},{}\n"\
                     .format(ano['X'], ano['Y'], ano['Z'], ano['azimuth'], ano['dip'], ano['polarity'], ano['formation'])
@@ -1626,11 +1639,12 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     fao.close()
 
     # Update formation info
-    age_sorted = pd.read_csv(tmp_path+'age_sorted_groups.csv', ",")
+    age_sorted = pd.read_csv(os.path.join(
+        tmp_path, 'age_sorted_groups.csv'), ",")
 
     newdx = 1
     gpdx = 1
-    # fas = open(tmp_path+'all_sorts_clean.csv',"w")
+    # fas = open(os.path.join(tmp_path,'all_sorts_clean.csv'),"w")
     # fas.write('index,group number,index in group,number in group,code,group,uctype\n')
     # if(workflow['cover_map']):
     # fas.write('-1,0,1,1,cover,cover,erode\n')
@@ -1647,11 +1661,12 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     # fas.close()
 
     # add missing formation thickness estimates
-    sum_thick = pd.read_csv(output_path+'formation_summary_thicknesses.csv')
-    all_sorts = pd.read_csv(tmp_path+'all_sorts_clean.csv')
+    sum_thick = pd.read_csv(os.path.join(
+        output_path, 'formation_summary_thicknesses.csv'))
+    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'))
     found_codes = sum_thick['formation'].unique()
     median_th = sum_thick['thickness median'].median()
-    fs = open(output_path+'formation_summary_thicknesses.csv', 'a+')
+    fs = open(os.path.join(output_path, 'formation_summary_thicknesses.csv'), 'a+')
 
     for ind, a_s in all_sorts.iterrows():
         if(not a_s['code'] in found_codes):
@@ -1664,7 +1679,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
 
     # add colours (hardwired to GSWA or the moment
     # if(clut_path  == ''):
-    # asc = pd.read_csv(tmp_path+'all_sorts_clean.csv',",")
+    # asc = pd.read_csv(os.path.join(tmp_path,'all_sorts_clean.csv'),",")
     # colours = []
     # for i in range(len(asc)):
     # r = random.randint(1,256)-1
@@ -1673,9 +1688,9 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     # hex_rgb = m2l_utils.intstohex((r,g,b))
     # colours.append(hex_rgb)
     # asc['colour']  =  colours
-    # asc.to_csv(tmp_path+'all_sorts_clean.csv', index  =  None, header = True)
+    # asc.to_csv(os.path.join(tmp_path,'all_sorts_clean.csv'), index  =  None, header = True)
     # else:
-    # asc = pd.read_csv(tmp_path+'all_sorts_clean.csv',",")
+    # asc = pd.read_csv(os.path.join(tmp_path,'all_sorts_clean.csv'),",")
     # colours = pd.read_csv(clut_path,",")
     # if( c_l['c'] == 'CODE'):
     # code = c_l['c'].lower()
@@ -1692,17 +1707,17 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     # for row in range(len(asc2)-1,0,-1):
     # if(asc2.iloc[row]['index'] == asc2.iloc[row-1]['index']):
     # asc2.drop(index = row-1,inplace = True)
-    # asc2.to_csv(tmp_path+'all_sorts_clean.csv', index  =  None, header = True)
+    # asc2.to_csv(os.path.join(tmp_path,'all_sorts_clean.csv'), index  =  None, header = True)
 
 
 """
-    fac = open(output_path+'contacts_clean.csv',"w")
+    fac = open(os.path.join(output_path,'contacts_clean.csv'),"w")
     fac.write('X,Y,Z,formation\n')
 
     for acontact in all_contacts.iterrows():
         if(all_sorts.loc[acontact[1]['formation']]['group'] in no_contacts or not all_sorts.loc[acontact[1]['formation']]['group'] in use_group):
             continue
-            #print('dud contact:',acontact[1]['formation'])
+            # print('dud contact:',acontact[1]['formation'])
         else:
             ostr = str(acontact[1]['X'])+","+str(acontact[1]['Y'])+","+str(acontact[1]['Z'])+","+acontact[1]['formation']+"\n"
             fac.write(ostr)
@@ -1755,11 +1770,12 @@ def bboxes_intersect(bbox1, bbox2):
 
 
 def calc_thickness(tmp_path, output_path, buffer, max_thickness_allowed, c_l):
-    contact_points_file = tmp_path+'raw_contacts.csv'
-    interpolated_combo_file = tmp_path+'combo_full.csv'
+    contact_points_file = os.path.join(tmp_path, 'raw_contacts.csv')
+    interpolated_combo_file = os.path.join(tmp_path, 'combo_full.csv')
     # load basal contacts as geopandas dataframe
-    contact_lines = gpd.read_file(tmp_path+'/basal_contacts.shp')
-    all_sorts = pd.read_csv(tmp_path+'all_sorts.csv')
+    contact_lines = gpd.read_file(
+        os.path.join(tmp_path, '/basal_contacts.shp'))
+    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts.csv'))
     contacts = pd.read_csv(contact_points_file)
     orientations = pd.read_csv(interpolated_combo_file)
     olength = len(orientations)
@@ -1778,12 +1794,12 @@ def calc_thickness(tmp_path, output_path, buffer, max_thickness_allowed, c_l):
     l = np.zeros(len(ox))
     m = np.zeros(len(ox))
     n = np.zeros(len(ox))
-    file = open(output_path+'formation_thicknesses.csv', 'w')
+    file = open(os.path.join(output_path, 'formation_thicknesses.csv'), 'w')
     file.write(
         'X,Y,formation,appar_th,thickness,cl,cm,meanl,meanm,meann,p1x,p1y,p2x,p2y,dip\n')
     dist = m2l_interpolation.distance_matrix(ox, oy, cx, cy)
 
-    #np.savetxt(tmp_path+'dist.csv',dist,delimiter = ',')
+    # np.savetxt(os.path.join(tmp_path,'dist.csv'),dist,delimiter = ',')
     # display("ppp",cx.shape,cy.shape,ox.shape,oy.shape,dip.shape,azimuth.shape,dist.shape)
     n_est = 0
     for k in range(0, clength):  # loop through all contact segments
@@ -1838,7 +1854,7 @@ def calc_thickness(tmp_path, output_path, buffer, max_thickness_allowed, c_l):
                                 if(isects.geom_type == "MultiPoint"):
                                     for pt in isects:
                                         if(pt.distance(orig) < buffer*2):
-                                            #print(i,",", pt.x, ",",pt.y,",",apair[1]['code'],",",apair[1]['group'])
+                                            # print(i,",", pt.x, ",",pt.y,",",apair[1]['code'],",",apair[1]['group'])
                                             crossings[i, 0] = i
                                             crossings[i, 1] = int(
                                                 apair['index'])
@@ -1848,7 +1864,7 @@ def calc_thickness(tmp_path, output_path, buffer, max_thickness_allowed, c_l):
                                             i = i+1
                                 else:
                                     if(isects.distance(orig) < buffer*2):
-                                        #print(i,",", isects.x,",", isects.y,",",apair[1]['code'],",",apair[1]['group'])
+                                        # print(i,",", isects.x,",", isects.y,",",apair[1]['code'],",",apair[1]['group'])
                                         crossings[i, 0] = i
                                         crossings[i, 1] = int(apair['index'])
                                         crossings[i, 2] = 0
@@ -1879,15 +1895,16 @@ def calc_thickness(tmp_path, output_path, buffer, max_thickness_allowed, c_l):
 
                 g = g+1
     print(n_est, 'thickness estimates saved as',
-          output_path+'formation_thicknesses.csv')
+          os.path.join(output_path, 'formation_thicknesses.csv'))
 
 
 def calc_thickness_with_grid(tmp_path, output_path, buffer, max_thickness_allowed, c_l, bbox, dip_grid, dip_dir_grid, x, y, spacing, dtm):
-    contact_points_file = tmp_path+'raw_contacts.csv'
+    contact_points_file = os.path.join(tmp_path, 'raw_contacts.csv')
 
     # load basal contacts as geopandas dataframe
-    contact_lines = gpd.read_file(tmp_path+'/basal_contacts.shp')
-    all_sorts = pd.read_csv(tmp_path+'all_sorts.csv')
+    contact_lines = gpd.read_file(
+        os.path.join(tmp_path, 'basal_contacts.shp'))
+    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts.csv'))
     contacts = pd.read_csv(contact_points_file)
 
     clength = len(contacts)
@@ -1897,10 +1914,10 @@ def calc_thickness_with_grid(tmp_path, output_path, buffer, max_thickness_allowe
     cm = contacts['lsy'].to_numpy(dtype=float)
     ctextcode = contacts['formation'].to_numpy()
 
-    fth = open(output_path+'formation_thicknesses.csv', 'w')
+    fth = open(os.path.join(output_path, 'formation_thicknesses.csv'), 'w')
     fth.write('X,Y,formation,appar_th,thickness,cl,cm,p1x,p1y,p2x,p2y,dip,type,slope_dip,slope_length,delz,zbase,zcross\n')
 
-    #np.savetxt(tmp_path+'dist.csv',dist,delimiter = ',')
+    # np.savetxt(os.path.join(tmp_path,'dist.csv'),dist,delimiter = ',')
     # display("ppp",cx.shape,cy.shape,ox.shape,oy.shape,dip.shape,azimuth.shape,dist.shape)
     n_est = 0
     for k in range(0, clength):  # loop through all contact segments
@@ -1939,7 +1956,7 @@ def calc_thickness_with_grid(tmp_path, output_path, buffer, max_thickness_allowe
                             if(isects.geom_type == "MultiPoint"):
                                 for pt in isects:
                                     if(pt.distance(orig) < buffer*2):
-                                        #print(i,",", pt.x, ",",pt.y,",",apair[1]['code'],",",apair[1]['group'])
+                                        # print(i,",", pt.x, ",",pt.y,",",apair[1]['code'],",",apair[1]['group'])
                                         crossings[i, 0] = i
                                         crossings[i, 1] = int(apair['index'])
                                         crossings[i, 2] = 0
@@ -1948,7 +1965,7 @@ def calc_thickness_with_grid(tmp_path, output_path, buffer, max_thickness_allowe
                                         i = i+1
                             else:
                                 if(isects.distance(orig) < buffer*2):
-                                    #print(i,",", isects.x,",", isects.y,",",apair[1]['code'],",",apair[1]['group'])
+                                    # print(i,",", isects.x,",", isects.y,",",apair[1]['code'],",",apair[1]['group'])
                                     crossings[i, 0] = i
                                     crossings[i, 1] = int(apair['index'])
                                     crossings[i, 2] = 0
@@ -2001,18 +2018,19 @@ def calc_thickness_with_grid(tmp_path, output_path, buffer, max_thickness_allowe
 
             g = g+1
     print(n_est, 'thickness estimates saved as',
-          output_path+'formation_thicknesses.csv')
+          os.path.join(output_path, 'formation_thicknesses.csv'))
 
 
 def calc_min_thickness_with_grid(tmp_path, output_path, buffer, max_thickness_allowed, c_l, bbox, dip_grid, dip_dir_grid, x, y, spacing, dtm):
-    contact_points_file = tmp_path+'raw_contacts.csv'
+    contact_points_file = os.path.join(tmp_path, 'raw_contacts.csv')
 
     # load basal contacts as geopandas dataframe
-    contact_lines = gpd.read_file(tmp_path+'/basal_contacts.shp')
-    all_sorts = pd.read_csv(tmp_path+'all_sorts.csv')
+    contact_lines = gpd.read_file(os.path.join(tmp_path, 'basal_contacts.shp'))
+    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts.csv'))
     contacts = pd.read_csv(contact_points_file)
 
-    sum_thick = pd.read_csv(output_path+'formation_thicknesses.csv')
+    sum_thick = pd.read_csv(os.path.join(
+        output_path, 'formation_thicknesses.csv'))
     found_codes = sum_thick['formation'].unique()
     print(found_codes, "already processed")
     clength = len(contacts)
@@ -2022,10 +2040,10 @@ def calc_min_thickness_with_grid(tmp_path, output_path, buffer, max_thickness_al
     cm = contacts['lsy'].to_numpy(dtype=float)
     ctextcode = contacts['formation'].to_numpy()
 
-    fth = open(output_path+'formation_thicknesses.csv', 'a+')
+    fth = open(os.path.join(output_path, 'formation_thicknesses.csv'), 'a+')
     # fth.write('X,Y,formation,appar_th,thickness,cl,cm,p1x,p1y,p2x,p2y,dip\n')
 
-    #np.savetxt(tmp_path+'dist.csv',dist,delimiter = ',')
+    # np.savetxt(os.path.join(tmp_path,'dist.csv'),dist,delimiter = ',')
     # display("ppp",cx.shape,cy.shape,ox.shape,oy.shape,dip.shape,azimuth.shape,dist.shape)
     n_est = 0
     for k in range(0, clength):  # loop through all contact segments
@@ -2068,7 +2086,7 @@ def calc_min_thickness_with_grid(tmp_path, output_path, buffer, max_thickness_al
                                 if(isects.geom_type == "MultiPoint"):
                                     for pt in isects:
                                         if(pt.distance(orig) < buffer*2):
-                                            #print(i,",", pt.x, ",",pt.y,",",apair[1]['code'],",",apair[1]['group'])
+                                            # print(i,",", pt.x, ",",pt.y,",",apair[1]['code'],",",apair[1]['group'])
                                             crossings[i, 0] = i
                                             crossings[i, 1] = int(
                                                 apair['index'])
@@ -2079,7 +2097,7 @@ def calc_min_thickness_with_grid(tmp_path, output_path, buffer, max_thickness_al
                                 else:
                                     if(not isects.geom_type == "GeometryCollection"):
                                         if(isects.distance(orig) < buffer*2):
-                                            #print(i,",", isects.x,",", isects.y,",",apair[1]['code'],",",apair[1]['group'])
+                                            # print(i,",", isects.x,",", isects.y,",",apair[1]['code'],",",apair[1]['group'])
                                             crossings[i, 0] = i
                                             crossings[i, 1] = int(
                                                 apair['index'])
@@ -2134,7 +2152,7 @@ def calc_min_thickness_with_grid(tmp_path, output_path, buffer, max_thickness_al
 
             g = g+1
     print(n_est, 'min thickness estimates appended to',
-          output_path+'formation_thicknesses.csv')
+          os.path.join(output_path, 'formation_thicknesses.csv'))
     fth.close()
 
 
@@ -2148,13 +2166,14 @@ def calc_min_thickness_with_grid(tmp_path, output_path, buffer, max_thickness_al
 # Normalises previously calculated formation thickness by dviding by median value for that formation
 ####################################
 def normalise_thickness(output_path):
-    thickness = pd.read_csv(output_path+'formation_thicknesses.csv', sep=',')
+    thickness = pd.read_csv(os.path.join(
+        output_path, 'formation_thicknesses.csv'), sep=',')
 
     codes = thickness.formation.unique()
 
-    f = open(output_path+'formation_thicknesses_norm.csv', 'w')
+    f = open(os.path.join(output_path, 'formation_thicknesses_norm.csv'), 'w')
     f.write('x,y,formation,app_th,thickness,norm_th\n')
-    fs = open(output_path+'formation_summary_thicknesses.csv', 'w')
+    fs = open(os.path.join(output_path, 'formation_summary_thicknesses.csv'), 'w')
     fs.write('formation,thickness median,thickness std,method\n')
     for code in codes:
         is_code = thickness.formation.str.contains(code, regex=False)
@@ -2165,7 +2184,7 @@ def normalise_thickness(output_path):
             ), all_thick2.loc[:, "thickness"].std())
             ostr = "{},{},{},{}\n"\
                 .format(code, all_thick2.loc[:, "thickness"].median(), all_thick2.loc[:, "thickness"].std(), all_thick2.iloc[0]['type'])
-            #ostr = str(code)+","+str(all_thick2.loc[:,"thickness"].median())+","+str(all_thick2.loc[:,"thickness"].std())+"\n"
+            # ostr = str(code)+","+str(all_thick2.loc[:,"thickness"].median())+","+str(all_thick2.loc[:,"thickness"].std())+"\n"
             fs.write(ostr)
             med = all_thick2.loc[:, "thickness"].median()
             std = all_thick2.loc[:, "thickness"].std()
@@ -2176,7 +2195,7 @@ def normalise_thickness(output_path):
                 if(med > 0):
                     ostr = "{},{},{},{},{},{}\n"\
                         .format(thick[i, 0], thick[i, 1], thick[i, 2], thick[i, 3], thick[i, 4], thick[i, 4]/med)
-                    #ostr = str(thick[i,0])+","+str(thick[i,1])+","+str(thick[i,2])+","+str(thick[i,3])+","+str(thick[i,3]/med)+"\n"
+                    # ostr = str(thick[i,0])+","+str(thick[i,1])+","+str(thick[i,2])+","+str(thick[i,3])+","+str(thick[i,3]/med)+"\n"
                     f.write(ostr)
     f.close()
     fs.close()
@@ -2195,13 +2214,13 @@ def normalise_thickness(output_path):
 ###################################################
 
 def save_fold_axial_traces_orientations(path_folds, output_path, tmp_path, dtm, dtb, dtb_null, cover_map, c_l, dst_crs, fold_decimate, fat_step, close_dip, scheme, bbox, spacing, dip_grid, dip_dir_grid):
-    geology = gpd.read_file(tmp_path+'geol_clip.shp')
-    #contacts = np.genfromtxt(tmp_path+'interpolation_contacts_'+scheme+'.csv',delimiter = ',',dtype = 'float')
-    f = open(output_path+'fold_axial_trace_orientations2.csv', 'w')
+    geology = gpd.read_file(os.path.join(tmp_path, 'geol_clip.shp'))
+    # contacts = np.genfromtxt(os.path.join(tmp_path,'interpolation_contacts_'+scheme+'.csv'),delimiter = ',',dtype = 'float')
+    f = open(os.path.join(output_path, 'fold_axial_trace_orientations2.csv'), 'w')
     f.write('X,Y,Z,azimuth,dip,polarity,formation,group\n')
     folds_clip = gpd.read_file(path_folds,)
     folds_clip = folds_clip.dropna(subset=['geometry'])
-    fo = open(output_path+'fold_axial_traces.csv', "w")
+    fo = open(os.path.join(output_path, 'fold_axial_traces.csv'), "w")
     fo.write("X,Y,Z,code,type\n")
     dummy = []
     dummy.append(1)
@@ -2224,7 +2243,7 @@ def save_fold_axial_traces_orientations(path_folds, output_path, tmp_path, dtm, 
                                     dtm, dtb, dtb_null, cover_map, locations)
                                 ostr = "{},{},{},FA_{},{}\n"\
                                     .format(afs[0], afs[1], height, fold_name, fold[c_l['t']].replace(',', ''))
-                                #ostr = str(afs[0])+','+str(afs[1])+','+str(height)+','+'FA_'+fold_name+','+fold[c_l['t']].replace(',','')+'\n'
+                                # ostr = str(afs[0])+','+str(afs[1])+','+str(height)+','+'FA_'+fold_name+','+fold[c_l['t']].replace(',','')+'\n'
                                 fo.write(ostr)
                                 # calculate FAT normal offsets
                                 if(not first):
@@ -2266,7 +2285,7 @@ def save_fold_axial_traces_orientations(path_folds, output_path, tmp_path, dtm, 
                                                 dtm, dtb, dtb_null, cover_map, locations)
                                             ostr = "{},{},{},{},{},{},{},{}\n"\
                                                 .format(midxr, midyr, height, dipdir2, int(dip), 1, str(structure_code.iloc[0][c_l['c']]).replace(" ", "_").replace("-", "_"), structure_code.iloc[0][c_l['g']])
-                                            #ostr = str(midxr)+','+str(midyr)+','+str(height)+','+str(dipdir)+','+str(int(dip))+',1,'+str(structure_code.iloc[0][c_l['c']]).replace(" ","_").replace("-","_")+','+str(structure_code.iloc[0][c_l['g']])+'\n'
+                                            # ostr = str(midxr)+','+str(midyr)+','+str(height)+','+str(dipdir)+','+str(int(dip))+',1,'+str(structure_code.iloc[0][c_l['c']]).replace(" ","_").replace("-","_")+','+str(structure_code.iloc[0][c_l['g']])+'\n'
                                             f.write(ostr)
 
                                         geometry = [Point(midxl, midyl)]
@@ -2280,7 +2299,7 @@ def save_fold_axial_traces_orientations(path_folds, output_path, tmp_path, dtm, 
                                                 dtm, dtb, dtb_null, cover_map, locations)
                                             ostr = "{},{},{},{},{},{},{},{}\n"\
                                                 .format(midxl, midyl, height, dipdir2+180, int(dip), 1, str(structure_code.iloc[0][c_l['c']]).replace(" ", "_").replace("-", "_"), structure_code.iloc[0][c_l['g']])
-                                            #ostr = str(midxl)+','+str(midyl)+','+str(height)+','+str(dipdir+180)+','+str(int(dip))+',1,'+str(structure_code.iloc[0][c_l['c']]).replace(" ","_").replace("-","_")+','+str(structure_code.iloc[0][c_l['g']])+'\n'
+                                            # ostr = str(midxl)+','+str(midyl)+','+str(height)+','+str(dipdir+180)+','+str(int(dip))+',1,'+str(structure_code.iloc[0][c_l['c']]).replace(" ","_").replace("-","_")+','+str(structure_code.iloc[0][c_l['g']])+'\n'
                                             f.write(ostr)
                                 first = False
                                 lastx = afs[0]
@@ -2300,7 +2319,7 @@ def save_fold_axial_traces_orientations(path_folds, output_path, tmp_path, dtm, 
                                 dtm, dtb, dtb_null, cover_map, locations)
                             ostr = "{},{},{},FA_{},{}\n"\
                                 .format(afs[0], afs[1], height, fold_name, fold[c_l['t']].replace(',', ''))
-                            #ostr = str(afs[0])+','+str(afs[1])+','+str(height)+','+'FA_'+fold_name+','+fold[c_l['t']].replace(',','')+'\n'
+                            # ostr = str(afs[0])+','+str(afs[1])+','+str(height)+','+'FA_'+fold_name+','+fold[c_l['t']].replace(',','')+'\n'
                             fo.write(ostr)
                             # calculate FAT normal offsets
                             if(not first):
@@ -2340,7 +2359,7 @@ def save_fold_axial_traces_orientations(path_folds, output_path, tmp_path, dtm, 
                                             dtm, dtb, dtb_null, cover_map, locations)
                                         ostr = "{},{},{},{},{},{},{},{}\n"\
                                             .format(midxr, midyr, height, dipdir2, int(dip), 1, str(structure_code.iloc[0][c_l['c']]).replace(" ", "_").replace("-", "_"), structure_code.iloc[0][c_l['g']])
-                                        #ostr = str(midxr)+','+str(midyr)+','+str(height)+','+str(dipdir)+','+str(int(dip))+',1,'+str(structure_code.iloc[0][c_l['c']]).replace(" ","_").replace("-","_")+','+str(structure_code.iloc[0][c_l['g']])+'\n'
+                                        # ostr = str(midxr)+','+str(midyr)+','+str(height)+','+str(dipdir)+','+str(int(dip))+',1,'+str(structure_code.iloc[0][c_l['c']]).replace(" ","_").replace("-","_")+','+str(structure_code.iloc[0][c_l['g']])+'\n'
                                         f.write(ostr)
 
                                     geometry = [Point(midxl, midyl)]
@@ -2354,7 +2373,7 @@ def save_fold_axial_traces_orientations(path_folds, output_path, tmp_path, dtm, 
                                             dtm, dtb, dtb_null, cover_map, locations)
                                         ostr = "{},{},{},{},{},{},{},{}\n"\
                                             .format(midxl, midyl, height, dipdir2+180, int(dip), 1, str(structure_code.iloc[0][c_l['c']]).replace(" ", "_").replace("-", "_"), structure_code.iloc[0][c_l['g']])
-                                        #ostr = str(midxl)+','+str(midyl)+','+str(height)+','+str(dipdir+180)+','+str(int(dip))+',1,'+str(structure_code.iloc[0][c_l['c']]).replace(" ","_").replace("-","_")+','+str(structure_code.iloc[0][c_l['g']])+'\n'
+                                        # ostr = str(midxl)+','+str(midyl)+','+str(height)+','+str(dipdir+180)+','+str(int(dip))+',1,'+str(structure_code.iloc[0][c_l['c']]).replace(" ","_").replace("-","_")+','+str(structure_code.iloc[0][c_l['g']])+'\n'
                                         f.write(ostr)
                             first = False
                             lastx = afs[0]
@@ -2363,9 +2382,10 @@ def save_fold_axial_traces_orientations(path_folds, output_path, tmp_path, dtm, 
 
     fo.close()
     f.close()
-    print("fold axial traces saved as", output_path+'fold_axial_traces.csv')
+    print("fold axial traces saved as", os.path.join(
+        output_path, 'fold_axial_traces.csv'))
     print("fold axial trace orientations saved as",
-          output_path+'fold_axial_trace_orientations.csv')
+          os.path.join(output_path, 'fold_axial_trace_orientations.csv'))
 
 ####################################################
 # Convert XZ section information to XY Model coordinates:
@@ -2427,12 +2447,12 @@ def section2model(seismic_line, seismic_bbox, sx, sy):
 
 
 def extract_section(tmp_path, output_path, seismic_line, seismic_bbox, seismic_interp, dtm, dtb, dtb_null, cover_map, surface_cut):
-    fault_clip_file = tmp_path+'faults_clip.shp'
+    fault_clip_file = os.path.join(tmp_path, 'faults_clip.shp')
     faults = gpd.read_file(fault_clip_file)  # import faults
-    all_sorts = pd.read_csv(tmp_path+'all_sorts2.csv', ",")
-    sf = open(output_path+'seismic_faults.csv', "w")
+    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts2.csv'), ",")
+    sf = open(os.path.join(output_path, 'seismic_faults.csv'), "w")
     sf.write('X,Y,Z,formation\n')
-    sb = open(output_path+'seismic_base.csv', "w")
+    sb = open(os.path.join(output_path, 'seismic_base.csv'), "w")
     sb.write('X,Y,Z,formation\n')
     for indx, interps in seismic_interp.iterrows():
         i_ls = LineString(interps.geometry)
@@ -2460,7 +2480,7 @@ def extract_section(tmp_path, output_path, seismic_line, seismic_bbox, seismic_i
                                 maxname = formation['code']
                         ostr = "{},{},{},{}\n"\
                             .format(mx, my, mz2, maxname)
-                        #ostr = str(mx)+','+str(my)+','+str(mz2)+','+maxname+'\n'
+                        # ostr = str(mx)+','+str(my)+','+str(mz2)+','+maxname+'\n'
                         sb.write(ostr)
                     else:
                         for indx, aflt in faults.iterrows():
@@ -2470,7 +2490,7 @@ def extract_section(tmp_path, output_path, seismic_line, seismic_bbox, seismic_i
                                     fault_id = 'Fault_'+str(aflt['OBJECTID'])
                                     ostr = "{},{},{},{}\n"\
                                         .format(mx, my, mz2, fault_id)
-                                    #ostr = str(mx)+','+str(my)+','+str(mz2)+','+fault_id+'\n'
+                                    # ostr = str(mx)+','+str(my)+','+str(mz2)+','+fault_id+'\n'
                                     sf.write(ostr)
                                     break
     sf.close()
@@ -2500,7 +2520,7 @@ def save_orientations_with_polarity(orientations_path, path_out, c_l, basal_path
     codes = all_sorts['code'].unique()
     all_sorts.set_index('code',  inplace=True)
 
-    f = open(path_out+'orientations_polarity.csv', 'w')
+    f = open(os.path.join(path_out, 'orientations_polarity.csv'), 'w')
     f.write("X,Y,Z,azimuth,dip,polarity,formation\n")
 
     for indx, anori in orientations.iterrows():  # loop through orientations
@@ -2597,10 +2617,11 @@ def save_orientations_with_polarity(orientations_path, path_out, c_l, basal_path
             polarity = -999
         ostr = "{},{},{},{},{},{},{}\n"\
             .format(anori['X'], anori['Y'], anori['Z'], anori['azimuth'], anori['dip'], polarity, anori['formation'])
-        #ostr = str(anori['X'])+","+str(anori['Y'])+","+str(anori['Z'])+","+str(anori['azimuth'])+","+str(anori['dip'])+","+str(polarity)+","+str(anori['formation'])+"\n"
+        # ostr = str(anori['X'])+","+str(anori['Y'])+","+str(anori['Z'])+","+str(anori['azimuth'])+","+str(anori['dip'])+","+str(polarity)+","+str(anori['formation'])+"\n"
         f.write(ostr)
     f.close()
-    print('orientations saved to', path_out+'orientations_polarity.csv')
+    print('orientations saved to', os.path.join(
+        path_out, 'orientations_polarity.csv'))
 
 
 ####################################################
@@ -2660,7 +2681,7 @@ def fault_strat_offset(path_out, c_l, dst_crs, fm_thick_file, all_sorts_file, fa
             thick_diff = thick_diff+new_als.iloc[j]['thickness median']
             fm_thick_arr[i, j+1] = thick_diff
 
-    np.savetxt(path_out+'fault_strat_offset_array.csv',
+    np.savetxt(os.path.join(path_out, 'fault_strat_offset_array.csv'),
                fm_thick_arr, delimiter=',')
 
     new_als.set_index('code',  inplace=True)
@@ -2668,7 +2689,7 @@ def fault_strat_offset(path_out, c_l, dst_crs, fm_thick_file, all_sorts_file, fa
     all_long_faults = np.genfromtxt(
         fault_dim_file, delimiter=',', dtype='U100')
 
-    f = open(path_out+'fault_strat_offset3.csv', 'w')
+    f = open(os.path.join(path_out, 'fault_strat_offset3.csv'), 'w')
     f.write('X,Y,id,left_fm,right_fm,min_offset,strat_offset\n')
     if(len(all_long_faults) > 0):
         fault_names = all_long_faults[1:, :1]
@@ -2722,7 +2743,7 @@ def fault_strat_offset(path_out, c_l, dst_crs, fm_thick_file, all_sorts_file, fa
                             diff = number_string.zfill(3)
                             ostr = "{},{},Fault_{},{},{},{},{}\n"\
                                 .format(midx, midy, fault[c_l['o']], lcode_fm, rcode_fm, fm_thick_arr[fm_l, fm_r], diff)
-                            #ostr = str(midx)+','+str(midy)+','+str('Fault_'+str(fault[c_l['o']]))+','+str(lcode_fm)+','+str(rcode_fm)+','+str(fm_thick_arr[fm_l,fm_r])+","+str(diff)+'\n'
+                            # ostr = str(midx)+','+str(midy)+','+str('Fault_'+str(fault[c_l['o']]))+','+str(lcode_fm)+','+str(rcode_fm)+','+str(fm_thick_arr[fm_l,fm_r])+","+str(diff)+'\n'
                         elif(lcode_fm in codes and rcode_fm in codes):
                             midx = lcode.iloc[i].geometry.x + \
                                 ((rcode.iloc[i].geometry.x -
@@ -2743,16 +2764,16 @@ def fault_strat_offset(path_out, c_l, dst_crs, fm_thick_file, all_sorts_file, fa
                             diff = number_string.zfill(3)
                             ostr = "{},{},Fault_{},{},{},{},{}\n"\
                                 .format(midx, midy, fault[c_l['o']], lcode_fm, rcode_fm, '-1', diff)
-                            #ostr = str(midx)+','+str(midy)+','+str('Fault_'+str(fault[c_l['o']]))+','+str(lcode_fm)+','+str(rcode_fm)+','+str('-1')+","+str(diff)+'\n'
+                            # ostr = str(midx)+','+str(midy)+','+str('Fault_'+str(fault[c_l['o']]))+','+str(lcode_fm)+','+str(rcode_fm)+','+str('-1')+","+str(diff)+'\n'
                         else:
                             ostr = "{},{},Fault_{},{},{},{},{}\n"\
                                 .format(midx, midy, fault[c_l['o']], '', '', '-1', '-1')
-                            #ostr = str(midx)+','+str(midy)+','+str('Fault_'+str(fault[c_l['o']]))+','+str('')+','+str('')+','+str('-1')+','+str('-1')+'\n'
+                            # ostr = str(midx)+','+str(midy)+','+str('Fault_'+str(fault[c_l['o']]))+','+str('')+','+str('')+','+str('-1')+','+str('-1')+'\n'
 
                         f.write(ostr)
     f.close()
     print('minumim stratigraphic offsets saved as',
-          path_out+'fault_strat_offset3.csv')
+          os.path.join(path_out, 'fault_strat_offset3.csv'))
 
 ##########################################################
 # Extract cover thickness dip and contact info from depth to basement grid
@@ -2780,7 +2801,7 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
 
         actual_cover["index_right"] = actual_cover["index_right"].fillna(0)
 
-        allpts = open(output_path+'/cover_grid.csv', "w")
+        allpts = open(os.path.join(output_path, '/cover_grid.csv'), "w")
         allpts.write('X,Y,Z,formation\n')
 
         for indx, pt in actual_cover.iterrows():
@@ -2790,7 +2811,7 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                     dtm, dtb, dtb_null, cover_map, locations)
                 ostr = "{},{},{},{}\n"\
                     .format(pt['X'], pt['Y'], height, 'cover')
-                #ostr = str(pt['X'])+','+str(pt['Y'])+','+str(height)+',cover\n'
+                # ostr = str(pt['X'])+','+str(pt['Y'])+','+str(height)+',cover\n'
                 allpts.write(ostr)
 
         for indx, cpoly in cover.iterrows():
@@ -2807,7 +2828,7 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                             dtm, dtb, dtb_null, False, locations)
                         ostr = "{},{},{},{}\n"\
                             .format(pt[0], pt[1], height, 'cover')
-                        #ostr = str(pt[0])+","+str(pt[1])+","+height+",cover\n"
+                        # ostr = str(pt[0])+","+str(pt[1])+","+height+",cover\n"
                         allpts.write(ostr)
                 k = k+1
             if(len(coords['interior_coords']) > 0):
@@ -2824,12 +2845,13 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                                     ostr = "{},{},{},{}\n"\
                                         .format(pt[0], pt[1], height, 'cover')
 
-                                    #ostr = str(pt[0])+","+str(pt[1])+","+height+",cover\n"
+                                    # ostr = str(pt[0])+","+str(pt[1])+","+height+",cover\n"
                                     allpts.write(ostr)
                 k = k+1
 
         allpts.close()
-        print("cover grid saved out as", output_path+'cover_grid.csv')
+        print("cover grid saved out as", os.path.join(
+            output_path, 'cover_grid.csv'))
 
     elif(use_grid and not use_vector):  # assumes a grid of depth to cover, with a defined null value for no cover, but no vector description of cover limits
 
@@ -2845,7 +2867,7 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
         cover_pts = gpd.GeoDataFrame(df, geometry='coords')
         cover_pts.crs = dst_crs
 
-        allpts = open(output_path+'/cover_grid.csv', "w")
+        allpts = open(os.path.join(output_path, 'cover_grid.csv'), "w")
         allpts.write('X,Y,Z,formation\n')
 
         for indx, pt in cover_pts.iterrows():
@@ -2855,14 +2877,15 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                     dtm, dtb, dtb_null, cover_map, locations)
                 ostr = "{},{},{},{}\n"\
                     .format(pt['X'], pt['Y'], height, 'cover')
-                #ostr = str(pt['X'])+','+str(pt['Y'])+','+str(height)+',cover\n'
+                # ostr = str(pt['X'])+','+str(pt['Y'])+','+str(height)+',cover\n'
                 allpts.write(ostr)
 
         allpts.close()
-        print("cover grid saved out as", output_path+'cover_grid.csv')
+        print("cover grid saved out as", os.path.join(
+            output_path, 'cover_grid.csv'))
 
     if(use_vector):  # assume vector of limits of cover
-        allo = open(output_path+'cover_orientations.csv', "w")
+        allo = open(os.path.join(output_path, 'cover_orientations.csv'), "w")
         allo.write('X,Y,Z,azimuth,dip,polarity,formation\n')
 
         for indx, cpoly in cover.iterrows():
@@ -2902,7 +2925,7 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                                 azimuth = (azimuth-180) % 360
                             ostr = "{},{},{},{},{},{},{}\n"\
                                 .format(pt[0], pt[1], height, azimuth, cover_dip, '1', 'cover')
-                            #ostr = str(pt[0])+","+str(pt[1])+","+str(height)+","+str(azimuth)+","+str(cover_dip)+",1,cover\n"
+                            # ostr = str(pt[0])+","+str(pt[1])+","+str(height)+","+str(azimuth)+","+str(cover_dip)+",1,cover\n"
                             allo.write(ostr)
 
                 k = k+1
@@ -2947,23 +2970,23 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                                         ostr = "{},{},{},{},{},{},{}\n"\
                                             .format(pt[0], pt[1], height, azimuth, cover_dip, '1', 'cover')
 
-                                        #ostr = str(pt[0])+","+str(pt[1])+","+str(height)+","+str(azimuth)+","+str(cover_dip)+",1,cover\n"
+                                        # ostr = str(pt[0])+","+str(pt[1])+","+str(height)+","+str(azimuth)+","+str(cover_dip)+",1,cover\n"
                                         allo.write(ostr)
 
                             k = k+1
     elif(use_grid and not use_vector):  # assumes grid but no vector of limits of cover
-        allo = open(output_path+'cover_orientations.csv', "w")
+        allo = open(os.path.join(output_path, 'cover_orientations.csv'), "w")
         allo.write('X,Y,Z,azimuth,dip,polarity,formation\n')
         midx = bbox[0]+((bbox[2]-bbox[0])/2)
         midy = bbox[1]+((bbox[3]-bbox[1])/2)
         ostr = "{},{},{},{},{},{},{}\n"\
             .format(midx, midy, '0', '0', '0', '1', 'cover')
-        #ostr = str(midx)+","+str(midy)+","+str(0)+","+str(0)+","+str(0)+",1,cover\n"
+        # ostr = str(midx)+","+str(midy)+","+str(0)+","+str(0)+","+str(0)+",1,cover\n"
         allo.write(ostr)
 
         allo.close()
         print("cover orientations saved out as",
-              output_path+'cover_orientations.csv')
+              os.path.join(output_path, 'cover_orientations.csv'))
 
 
 ##########################################################
@@ -2972,10 +2995,10 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
 def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_path, output_path, dtm, dtb,
                                          dtb_null, cover_map, contact_decimate, c_l, contact_dip, dip_grid, spacing, bbox):
 
-    interpolated_combo_file = tmp_path+'combo_full.csv'
-    #orientations = pd.read_csv(interpolated_combo_file)
+    interpolated_combo_file = os.path.join(tmp_path, 'combo_full.csv')
+    # orientations = pd.read_csv(interpolated_combo_file)
 
-    f = open(output_path+'contact_orientations.csv', 'w')
+    f = open(os.path.join(output_path, 'contact_orientations.csv'), 'w')
     f.write("X,Y,Z,azimuth,dip,polarity,formation\n")
     for index, contact in contacts.iterrows():
         i = 0
@@ -3030,7 +3053,7 @@ def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_
                             if(dip != -999):
                                 ostr = "{},{},{},{},{},{},{}\n"\
                                     .format(midx, midy, height, dipdir, str(dip), '1', str(contact[c_l['c']]).replace(" ", "_").replace("-", "_"))
-                                #ostr = str(midx)+','+str(midy)+','+str(height)+','+str(dipdir)+','+str(contact_dip)+',1,'+str(contact[c_l['c']]).replace(" ","_").replace("-","_")+'\n'
+                                # ostr = str(midx)+','+str(midy)+','+str(height)+','+str(dipdir)+','+str(contact_dip)+',1,'+str(contact[c_l['c']]).replace(" ","_").replace("-","_")+'\n'
                                 f.write(ostr)
 
                     else:
@@ -3152,4 +3175,4 @@ def process_sills(output_path, geol_clip, dtm, dtb, dtb_null, cover_map, contact
                                 k += 1
 
     sills_df = pd.DataFrame.from_dict(sill_dict, orient='index')
-    sills_df.to_csv(output_path+'sills.csv')
+    sills_df.to_csv(os.path.join(output_path, 'sills.csv'))
