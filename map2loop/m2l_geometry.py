@@ -646,6 +646,9 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                 fault_name = 'Fault_'+str(flt[c_l['o']])
                 # display(flt.geometry.type)
                 if(flt.geometry.type == 'LineString'):
+                    flt_ls = LineString(flt.geometry)
+                    first = True
+
                     i = 0
                     saved = 0
                     for afs in flt_ls.coords:
