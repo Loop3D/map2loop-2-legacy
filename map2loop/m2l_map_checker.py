@@ -299,6 +299,21 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                     'some faults are MultiPolyLines, and have been split')
             faults_explode.crs = dst_crs
 
+            print("original no of faults:",len(faults_explode))
+            lengths=[]
+            for indx, flt in faults_explode.iterrows():
+                if(c_l['fault'] in flt[c_l['f']]):
+                    if(flt.geometry.type == 'LineString'):
+                        flt_ls = LineString(flt.geometry)
+                        dlsx = flt_ls.coords[0][0] - \
+                            flt_ls.coords[len(flt_ls.coords)-1][0]
+                        dlsy = flt_ls.coords[0][1] - \
+                            flt_ls.coords[len(flt_ls.coords)-1][1]
+                        strike = sqrt((dlsx*dlsx)+(dlsy*dlsy))
+                        lengths+=[strike]
+            faults_explode['f_length']=lengths
+            faults_explode=faults_explode[faults_explode['f_length']>2500]
+
             show_metadata(faults_explode, "fault layer")
         else:
 
