@@ -648,6 +648,11 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                 if(flt.geometry.type == 'LineString'):
                     flt_ls = LineString(flt.geometry)
                     first = True
+                    dlsx = flt_ls.coords[0][0] - \
+                        flt_ls.coords[len(flt_ls.coords)-1][0]
+                    dlsy = flt_ls.coords[0][1] - \
+                        flt_ls.coords[len(flt_ls.coords)-1][1]
+                    strike = sqrt((dlsx*dlsx)+(dlsy*dlsy))
 
                     i = 0
                     saved = 0
