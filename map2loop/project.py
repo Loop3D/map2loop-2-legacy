@@ -209,7 +209,7 @@ class Project(object):
         :type step_out: int, optional
         :param quiet: Allow or block print statements and matplotlib figures, 'None' to quiet nothing, 'all' to quiet everything, 'no-figures' to disable plots and allow text output. Defaults to 'None'
         :type quiet: string, optional
-        :param **kwargs: 
+        :param **kwargs:
         """
         # TODO: Proj crs probably doesn't need to be here
 
@@ -270,12 +270,33 @@ class Project(object):
             if filename.startswith("http"):
                 with urllib.request.urlopen(filename) as raw_data:
                     self.c_l = hjson.load(raw_data)
+                    if self.state == 'SA':
+                        for key in self.c_l.keys():
+                            try:
+                                self.c_l[key] = self.c_l[key].lower()
+                            except Exception as e:
+                                pass
+
             else:
                 with open(filename) as raw_data:
                     self.c_l = hjson.load(raw_data)
+
+            # self.cols = []
+            # geol = gpd.read_file(self.geology_file)
+            # self.cols += list(geol.columns)
+            # struct = gpd.read_file(self.structure_file)
+            # self.cols += list(struct.columns)
+            # faults = gpd.read_file(self.fault_file)
+            # self.cols += list(faults.columns)
+            # for key in self.c_l.keys():
+                # if self.c_l[key] not in self.cols:
+                    # try:
+                    # print(self.c_l[key].lower())
+                    # except Exception as e:
+                    # print(self.c_l[key])
+            # sys.exit('done')
         except Exception as e:
-            print(e)
-            sys.exit("ERROR: Unable to read provided filename file")
+            sys.exit(e)
 
     def fetch_sources(self, bbox):
         """Fetch remote loop geospatial data and metadata.
@@ -284,8 +305,10 @@ class Project(object):
         :type bbox: list
 
         """
+        bbox_str = "{},{},{},{}".format(bbox[0], bbox[1], bbox[2], bbox[3])
+        self.metadata = None
+
         if self.state == "WA":
-            bbox_str = "{},{},{},{}".format(bbox[0], bbox[1], bbox[2], bbox[3])
             self.geology_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:geol_500k&bbox={}&srs=EPSG:28350'.format(
                 bbox_str)
             self.fault_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=linear_500k&bbox={}&srs=EPSG:28350'.format(
@@ -296,11 +319,9 @@ class Project(object):
                 bbox_str)
             self.mindep_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:mindeps_2018_28350&bbox={}&srs=EPSG:28350'.format(
                 bbox_str)
-            self.metadata = 'https://gist.githubusercontent.com/yohanderose/8f843de0dde531f009a3973cbdadcc9f/raw/918f412ae488ce1a6bca188306f7730061ecf551/meta_remote.hjson'
-            self.read_metadata(self.metadata)
+            self.metadata = 'https://gist.githubusercontent.com/yohanderose/8f843de0dde531f009a3973cbdadcc9f/raw/cad97e91a71b4e4791629a6d384e2700095eb3b6/WA_meta.hjson'
 
         if self.state == "QLD":
-            bbox_str = "{},{},{},{}".format(bbox[0], bbox[1], bbox[2], bbox[3])
             self.structure_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=outcrops_28355&bbox={}&srsName=EPSG:28355'.format(
                 bbox_str)
             self.geology_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_geol_dissolved_join_fix_mii_clip_wgs84&bbox={}&srsName=EPSG:28355'.format(
@@ -312,10 +333,21 @@ class Project(object):
             self.fold_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_faults_folds_28355&bbox={}&srsName=EPSG:28355'.format(
                 bbox_str)
             self.metadata = "https://gist.githubusercontent.com/yohanderose/7ad2ae1b36e4e0b3f27dff17eeae0cc2/raw/ec8d33e52d913e2df4658ca94e7eb467e35adccd/QLD_meta.hjson"
-            self.read_metadata(self.metadata)
 
-    # TODO: Create notebooks for lower level use
-    # TODO: Run flags that affect the config object functions
+        if self.state == "SA":
+            self.structure_file = 'http://geo.loop-gis.org/geoserver/GSSA/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=GSSA:sth_flinders_28354&bbox={}&srs=EPSG:28354'.format(
+                bbox_str)
+            self.geology_file = 'http://geo.loop-gis.org/geoserver/GSSA/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=GSSA:2m_surface_geology_28354_relage&bbox={}&srs=EPSG:28354'.format(
+                bbox_str)
+            self.fault_file = 'http://geo.loop-gis.org/geoserver/GSSA/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=GSSA:2m_linear_structures_28354&bbox={}&srs=EPSG:28354'.format(
+                bbox_str)
+            self.fold_file = self.fault_file
+            self.mindep_file = ''
+
+            self.metadata = "https://gist.githubusercontent.com/yohanderose/9401ce1ac72969e2e7fe78e64ca57212/raw/bb7afca4436b6a844053b0ae06978bf59495ed87/SA_meta.hjson"
+
+        if self.metadata is not None:
+            self.read_metadata(self.metadata)
 
     def run(self,
             aus=True,

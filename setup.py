@@ -38,7 +38,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="map2loop",
     version="1.1.1",
-    author="Yohan de Rose",
+    author="The Loop Organisation",
     author_email="contact@loop3d.org",
     description="Generate 3D model data from 2D maps.",
     long_description=long_description,

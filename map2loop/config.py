@@ -160,15 +160,38 @@ class Config(object):
         faults = gpd.read_file(self.fault_file, bbox=self.bbox)
         folds = gpd.read_file(self.fold_file, bbox=self.bbox)
         structures = gpd.read_file(self.structure_file, bbox=self.bbox)
-        mindeps = gpd.read_file(self.mindep_file, bbox=self.bbox)
+        mindeps = None
+        try:
+            mindeps = gpd.read_file(self.mindep_file, bbox=self.bbox)
+            mindeps.crs = self.proj_crs
+        except Exception as e:
+            print("Warning: Valid mineral deposit file missing")
 
         # Fix crs to project default and overwrite source
-        # TODO: - Maybe do these checks in map_checker
         geology.crs = self.proj_crs
         faults.crs = self.proj_crs
         folds.crs = self.proj_crs
         structures.crs = self.proj_crs
-        mindeps.crs = self.proj_crs
+        self.mindeps = mindeps
+
+        self.geology = geology
+        self.faults = faults
+        self.structures = structures
+
+        # Faults
+        self.faults_clip = faults.copy()
+        self.faults_clip.crs = self.proj_crs
+        self.faults_clip_file = os.path.join(self.tmp_path, "faults_clip.shp")
+        self.faults_clip.to_file(self.faults_clip_file)
+
+        # Geology
+        self.geol_clip = m2l_utils.explode(self.geology)
+        self.geol_clip.crs = self.proj_crs
+        self.geol_clip_file = os.path.join(self.tmp_path, "geol_clip.shp")
+        self.geol_clip.to_file(self.geol_clip_file)
+
+        # pd.set_option('display.max_columns', None)
+        # pd.set_option('display.max_rows', None)
 
         # Check if bedding data uses the strike convention instead of dip direction
         if(self.c_l['otype'] == 'strike'):
@@ -178,43 +201,41 @@ class Config(object):
             self.c_l['otype'] = 'dip direction'
             structures.to_file(self.structure_file)
 
-        self.geology = geology
-        self.faults = faults
-        self.structures = structures
-        self.mindeps = mindeps
+        # Structures
+        list1 = ['geometry', self.c_l['d'],
+                 self.c_l['dd'], self.c_l['sf'], self.c_l['bo']]
+        list2 = list(set(list1))
+        sub_pts = self.structures[list2]
+        structure_code = gpd.sjoin(
+            sub_pts, self.geol_clip, how="left", op="within")
 
-        # Make colours consistent from map to model
-        formations = sorted([formation.replace(" ", "_") for formation in list(
-            set(geology[self.c_l['c']].to_numpy()))])
-        temp_colours = [""] * len(formations)
-        self.colour_dict = dict(zip(formations, temp_colours))
-        try:
-            # Try to retrieve the clut reference
-            colour_ref = pd.read_csv(self.clut_path)
-            for formation in formations:
-                key = formation
-                colour = None
-                try:
-                    colour = colour_ref[colour_ref['UNITNAME'] == key]['colour'].to_numpy()[
-                        0]
-                except Exception as e:
-                    colour = ('#%02X%02X%02X' % (random.randint(
-                        0, 255), random.randint(0, 255), random.randint(0, 255)))
+        minx, miny, maxx, maxy = self.bbox
+        y_point_list = [miny, miny, maxy, maxy, miny]
+        x_point_list = [minx, maxx, maxx, minx, minx]
 
-                self.colour_dict[key] = colour
-                print(key, colour)
+        bbox_geom = shapely.geometry.Polygon(zip(x_point_list, y_point_list))
 
-        except Exception as e:
-            # Otherwise, just append a random set
-            self.clut_path = ""
-            random_colours = ['#%02X%02X%02X' % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-                              for i in range(len(formations))]
-            i = 0
-            for key in self.colour_dict.keys():
-                self.colour_dict[key] = random_colours[i]
+        polygo = gpd.GeoDataFrame(
+            index=[0], crs=self.proj_crs, geometry=[bbox_geom])
+        is_bed = structure_code[self.c_l['sf']].str.contains(
+            self.c_l['bedding'], regex=False)
 
-        self.cmap = colors.ListedColormap(
-            self.colour_dict.values(), name='geol_key')
+        structure_clip = structure_code[is_bed]
+        structure_clip.crs = self.proj_crs
+
+        if(self.c_l['otype'] == 'strike'):
+            structure_clip['azimuth2'] = structure_clip.apply(
+                lambda row: row[self.c_l['dd']]+90.0, axis=1)
+            self.c_l['dd'] = 'azimuth2'
+            self.c_l['otype'] = 'dip direction'
+
+        self.structure_clip = structure_clip[~structure_clip[self.c_l['o']].isnull(
+        )]
+        self.structure_clip_file = os.path.join(
+            self.tmp_path, 'structure_clip.shp')
+        self.structure_clip.to_file(self.structure_clip_file)
+
+        self.create_cmap()
 
         try:
             fig, ax = plt.subplots()
@@ -254,6 +275,40 @@ class Config(object):
 
         disable_quiet_mode()
 
+    def create_cmap(self):
+       # Make colours consistent from map to model
+        formations = sorted([formation.replace(" ", "_") for formation in list(
+            set(self.geol_clip[self.c_l['c']].to_numpy()))])
+        temp_colours = [""] * len(formations)
+        self.colour_dict = dict(zip(formations, temp_colours))
+        try:
+            # Try to retrieve the clut reference
+            colour_ref = pd.read_csv(self.clut_path)
+            for formation in formations:
+                key = formation
+                colour = None
+                try:
+                    colour = colour_ref[colour_ref['UNITNAME'] == key]['colour'].to_numpy()[
+                        0]
+                except Exception as e:
+                    colour = ('#%02X%02X%02X' % (random.randint(
+                        0, 255), random.randint(0, 255), random.randint(0, 255)))
+
+                self.colour_dict[key] = colour
+                print(key, colour)
+
+        except Exception as e:
+            # Otherwise, just append a random set
+            self.clut_path = ""
+            random_colours = ['#%02X%02X%02X' % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                              for i in range(len(formations))]
+            i = 0
+            for key in self.colour_dict.keys():
+                self.colour_dict[key] = random_colours[i]
+
+        self.cmap = colors.ListedColormap(
+            self.colour_dict.values(), name='geol_key')
+
     def export_csv(self):
         # TODO: - Move away from tab seperators entirely (topology and map2model)
 
@@ -265,10 +320,11 @@ class Config(object):
             sub_geol, self.geology_file_csv, self.c_l, hint_flag)
 
         # Save mineral deposits
-        sub_mindep = self.mindeps[['geometry', self.c_l['msc'], self.c_l['msn'],
-                                   self.c_l['mst'], self.c_l['mtc'], self.c_l['mscm'], self.c_l['mcom']]]
-        Topology.save_mindep_wkt(
-            sub_mindep, self.mindep_file_csv, self.c_l)
+        if self.mindeps is not None:
+            sub_mindep = self.mindeps[['geometry', self.c_l['msc'], self.c_l['msn'],
+                                       self.c_l['mst'], self.c_l['mtc'], self.c_l['mscm'], self.c_l['mcom']]]
+            Topology.save_mindep_wkt(
+                sub_mindep, self.mindep_file_csv, self.c_l)
 
         # Save orientation data
         sub_pts = self.structures[[
@@ -288,13 +344,22 @@ class Config(object):
         quiet_m2m = False
         if self.quiet == 'all':
             quiet_m2m = True
-        run_log = map2model.run(self.graph_path, self.geology_file_csv,
-                                self.fault_file_csv, self.mindep_file_csv,
-                                self.bbox_3d,
-                                self.c_l,
-                                quiet_m2m,
-                                deposits
-                                )
+        if self.mindeps is not None:
+            run_log = map2model.run(self.graph_path, self.geology_file_csv,
+                                    self.fault_file_csv, self.mindep_file_csv,
+                                    self.bbox_3d,
+                                    self.c_l,
+                                    quiet_m2m,
+                                    deposits
+                                    )
+        else:
+            run_log = map2model.run(self.graph_path, self.geology_file_csv,
+                                    self.fault_file_csv, "",
+                                    self.bbox_3d,
+                                    self.c_l,
+                                    quiet_m2m,
+                                    deposits
+                                    )
 
         print(run_log)
 
@@ -339,7 +404,7 @@ class Config(object):
 
         print("Done")
 
-    def load_dtm(self, aus):
+    def load_dtm(self, aus=True):
 
         polygon_ll = self.polygon.to_crs(self.dtm_crs)
 
@@ -384,56 +449,6 @@ class Config(object):
             plt.show()
 
     def join_features(self):
-        # Faults
-        self.faults_clip = gpd.read_file(self.fault_file, bbox=self.bbox)
-        self.faults_clip.crs = self.proj_crs
-        self.faults_clip_file = os.path.join(self.tmp_path, "faults_clip.shp")
-        self.faults_clip.to_file(self.faults_clip_file)
-
-        # Geology
-        self.geol_clip = m2l_utils.explode(self.geology)
-        self.geol_clip.crs = self.proj_crs
-        self.geol_clip_file = os.path.join(self.tmp_path, "geol_clip.shp")
-        self.geol_clip.to_file(self.geol_clip_file)
-
-        pd.set_option('display.max_columns', None)
-        pd.set_option('display.max_rows', None)
-
-        # Structures
-        list1 = ['geometry', self.c_l['d'],
-                 self.c_l['dd'], self.c_l['sf'], self.c_l['bo']]
-        list2 = list(set(list1))
-        sub_pts = self.structures[list2]
-        structure_code = gpd.sjoin(
-            sub_pts, self.geol_clip, how="left", op="within")
-
-        minx, miny, maxx, maxy = self.bbox
-        y_point_list = [miny, miny, maxy, maxy, miny]
-        x_point_list = [minx, maxx, maxx, minx, minx]
-
-        bbox_geom = shapely.geometry.Polygon(zip(x_point_list, y_point_list))
-
-        # TODO: 'polygo' is never used
-        polygo = gpd.GeoDataFrame(
-            index=[0], crs=self.proj_crs, geometry=[bbox_geom])
-        is_bed = structure_code[self.c_l['sf']].str.contains(
-            self.c_l['bedding'], regex=False)
-
-        structure_clip = structure_code[is_bed]
-        structure_clip.crs = self.proj_crs
-
-        if(self.c_l['otype'] == 'strike'):
-            structure_clip['azimuth2'] = structure_clip.apply(
-                lambda row: row[self.c_l['dd']]+90.0, axis=1)
-            self.c_l['dd'] = 'azimuth2'
-            self.c_l['otype'] = 'dip direction'
-
-        self.structure_clip = structure_clip[~structure_clip[self.c_l['o']].isnull(
-        )]
-        self.structure_clip_file = os.path.join(
-            self.tmp_path, 'structure_clip.shp')
-        self.structure_clip.to_file(self.structure_clip_file)
-
         # Save geology clips
         quiet_topology = True
         if self.quiet == "None":
