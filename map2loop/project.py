@@ -131,54 +131,47 @@ class Project(object):
         :type workflow: dict
 
         """
-        if (workflow['model_engine'] == 'geomodeller'):
-            workflow.update({
-                'seismic_section': False,
-                'cover_map': False,
-                'near_fault_interpolations': True,
-                'fold_axial_traces': False,
-                'stereonets': False,
-                'formation_thickness': True,
-                'polarity': False,
-                'strat_offset': False,
-                'contact_dips': True
-            })
-        elif (workflow['model_engine'] == 'loopstructural'):
-            workflow.update({
-                'seismic_section': False,
-                'cover_map': False,
-                'near_fault_interpolations': False,
-                'fold_axial_traces': True,
-                'stereonets': False,
-                'formation_thickness': True,
-                'polarity': False,
-                'strat_offset': True,
-                'contact_dips': True
-            })
-        elif (workflow['model_engine'] == 'gempy'):
-            workflow.update({
-                'seismic_section': False,
-                'cover_map': False,
-                'near_fault_interpolations': False,
-                'fold_axial_traces': True,
-                'stereonets': False,
-                'formation_thickness': False,
-                'polarity': False,
-                'strat_offset': False,
-                'contact_dips': False
-            })
-        elif (workflow['model_engine'] == 'noddy'):
-            workflow.update({
-                'seismic_section': False,
-                'cover_map': False,
-                'near_fault_interpolations': False,
-                'fold_axial_traces': False,
-                'stereonets': False,
-                'formation_thickness': False,
-                'polarity': False,
-                'strat_offset': False,
-                'contact_dips': False
-            })
+        if(workflow['model_engine'] == 'geomodeller'):
+            workflow.update({'seismic_section': False,
+                             'cover_map': False,
+                             'near_fault_interpolations': True,
+                             'fold_axial_traces': False,
+                             'stereonets': False,
+                             'formation_thickness': True,
+                             'polarity': False,
+                             'strat_offset': False,
+                             'contact_dips': True})
+        elif(workflow['model_engine'] == 'loopstructural'):
+            workflow.update({'seismic_section': False,
+                             'cover_map': False,
+                             'near_fault_interpolations': False,
+                             'fold_axial_traces': False,
+                             'stereonets': False,
+                             'formation_thickness': True,
+                             'polarity': False,
+                             'strat_offset': True,
+                             'contact_dips': True})
+        elif(workflow['model_engine'] == 'gempy'):
+            workflow.update({'seismic_section': False,
+                             'cover_map': False,
+                             'near_fault_interpolations': False,
+                             'fold_axial_traces': True,
+                             'stereonets': False,
+                             'formation_thickness': False,
+                             'polarity': False,
+                             'strat_offset': False,
+                             'contact_dips': False})
+        elif(workflow['model_engine'] == 'noddy'):
+            workflow.update({'seismic_section': False,
+                             'cover_map': False,
+                             'near_fault_interpolations': False,
+                             'fold_axial_traces': False,
+                             'stereonets': False,
+                             'formation_thickness': False,
+                             'polarity': False,
+                             'strat_offset': False,
+                             'contact_dips': False})
+
         else:
             workflow.update({
                 'seismic_section': False,
@@ -191,6 +184,7 @@ class Project(object):
                 'strat_offset': True,
                 'contact_dips': False
             })
+            
         self.workflow = workflow
 
     def update_config(self,
