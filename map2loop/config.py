@@ -17,8 +17,6 @@ from map2loop.m2l_export import export_to_projectfile
 import map2model
 
 import networkx as nx
-import matplotlib
-matplotlib.use('PS')
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import rasterio
@@ -929,8 +927,11 @@ class Config(object):
         # TODO: Figures sometimes look a bit squashed in notebooks
 
     def update_projectfile(self):
-        self.loop_projectfile = export_to_projectfile(
-            self.loop_projectfile, self.tmp_path, self.output_path, self.bbox_3d, self.proj_crs)
+        self.loop_projectfile = export_to_projectfile(self.loop_projectfile,
+                                                      self.tmp_path,
+                                                      self.output_path,
+                                                      self.bbox_3d,
+                                                      self.proj_crs)
 
         print("PROJECTFILE FOUND AT", self.loop_projectfile)
 
