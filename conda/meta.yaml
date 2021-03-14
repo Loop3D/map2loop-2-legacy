@@ -19,11 +19,11 @@ requirements:
     - pybind11
     - setuptools
   run:
-    - python >=3.6
+    - python
     - numpy
     - pandas
     - geopandas
-    - pyproj=2.6.0
+    - pyproj
     - shapely
     - rasterio
     - descartes
