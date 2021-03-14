@@ -2,7 +2,7 @@
 
 Generate 3D geological model inputs from geographical maps — a high-level implementation and extension of [https://github.com/Loop3D/map2loop](https://github.com/Loop3D/map2loop) by Prof. Mark Jessell at UWA.
 
-![screenshots/GEOLOGY_CLIP.png](screenshots/GEOLOGY_CLIP.png)
+![./screenshots/GEOLOGY_CLIP.png](screenshots/GEOLOGY_CLIP.png)
 
 ## Install
 
@@ -48,22 +48,22 @@ Fair warning, we recommend conda to almost everyone. With great software develop
 1. Clone this repo and navigate inside as per above
 2. Run the following and click on the Jupyter server forwarded link to access and edit the notebooks
 
-   ```bash
-   docker-compose up --build
-   ```
+    ```bash
+    docker-compose up --build
+    ```
 
 3. To hop into a bash shell in a running container, open a terminal and issue
 
-   ```bash
-   docker ps
-   ```
+    ```bash
+    docker ps
+    ```
 
-   Find the container name or ID and then run
+    Find the container name or ID and then run
 
-   ```bash
-   docker exec -it <container_NAMEorID> bash
-   # Probably -> docker exec -it  map2loop-2_dev_1 bash
-   ```
+    ```bash
+    docker exec -it <container_NAMEorID> bash
+    # Probably -> docker exec -it  map2loop-2_dev_1 bash
+    ```
 
 ---
 
@@ -86,7 +86,7 @@ bbox_3d = {
 }
 ```
 
-![screenshots/Untitled.png](screenshots/Untitled.png)
+![./screenshots/Untitled.png](screenshots/Untitled.png)
 
 Then, specify: the state, directory for the output, the bounding box and projection from above - and hit go! That's it.
 
@@ -109,17 +109,17 @@ Our _documentation and other resources outline how to extend map2loop and port t
 
 _Loop is led by Laurent Ailleres (Monash University) with a team of Work Package leaders from:_
 
-- _Monash University: Roy Thomson, Lachlan Grose and Robin Armit_
-- _University of Western Australia: Mark Jessell, Jeremie Giraud, Mark Lindsay and Guillaume Pirot_
-- _Geological Survey of Canada: Boyan Brodaric and Eric de Kemp_
+-   _Monash University: Roy Thomson, Lachlan Grose and Robin Armit_
+-   _University of Western Australia: Mark Jessell, Jeremie Giraud, Mark Lindsay and Guillaume Pirot_
+-   _Geological Survey of Canada: Boyan Brodaric and Eric de Kemp_
 
 ---
 
 ### Known Issues and FAQs
 
-- Developing with docker on Windows means you won't have GPU passthrough and can’t use a discrete graphics card in the container even if you have one.
-- If Jupyter links require a token or password, it may mean port 8888 is already in use. To fix, either make docker map to another port on the host ie -p 8889:8888 or stop any other instances on 8888.
-- Sometimes the submodules misbehave. Ensure you specify the recurse-submodules flag with an 's' as opposed to recurse-submodule, and double-check your .git directory is clean, see [https://github.com/Loop3D/map2loop-2/issues/41](https://github.com/Loop3D/map2loop-2/issues/41)
+-   Developing with docker on Windows means you won't have GPU passthrough and can’t use a discrete graphics card in the container even if you have one.
+-   If Jupyter links require a token or password, it may mean port 8888 is already in use. To fix, either make docker map to another port on the host ie -p 8889:8888 or stop any other instances on 8888.
+-   Sometimes the submodules misbehave. Ensure you specify the recurse-submodules flag with an 's' as opposed to recurse-submodule, and double-check your .git directory is clean, see [https://github.com/Loop3D/map2loop-2/issues/41](https://github.com/Loop3D/map2loop-2/issues/41)
 
 ### Links
 
