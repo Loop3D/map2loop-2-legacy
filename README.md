@@ -2,7 +2,7 @@
 
 Generate 3D geological model inputs from geographical maps — a high-level implementation and extension of [https://github.com/Loop3D/map2loop](https://github.com/Loop3D/map2loop) by Prof. Mark Jessell at UWA.
 
-![wa example](docs/GEOLOGY_CLIP.png)
+![wa example](docs/GEOLOGY_CLIP.png?raw=true)
 
 ## Install
 
@@ -86,7 +86,7 @@ bbox_3d = {
 }
 ```
 
-![sa example](docs/Untitled.png)
+![sa example](docs/Untitled.png?raw=true)
 
 Then, specify: the state, directory for the output, the bounding box and projection from above - and hit go! That's it.
 
