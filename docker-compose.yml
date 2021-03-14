@@ -15,3 +15,5 @@ services:
         reservations:
           # cpus: "0.0001"
           memory: 4G
+    command: >
+              bash -c "jupyter notebook --ip=0.0.0.0 --allow-root --no-browser"

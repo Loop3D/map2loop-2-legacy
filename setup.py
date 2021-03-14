@@ -1,13 +1,16 @@
+import os
+import sys
 import setuptools
 from setuptools.command.develop import develop
 import subprocess
 import platform
 
+head, tail = os.path.split(sys.argv[0])
 
 class CondaDependencies(develop):
     def run(self):
         try:
-            deplist_path = "./dependencies.txt"
+            deplist_path = os.path.join(head, "dependencies.txt")
             deps = []
             with open(deplist_path, 'r') as f:
                 for line in f:
@@ -31,13 +34,13 @@ class CondaDependencies(develop):
 
 
 long_description = ""
-with open("README.md", "r") as fh:
+readme_file = os.path.join(head, "README.md")
+with open(readme_file, "r") as fh:
     long_description = fh.read()
-
 
 setuptools.setup(
     name="map2loop",
-    version="1.1.1",
+    version="1.1.3",
     author="The Loop Organisation",
     author_email="contact@loop3d.org",
     description="Generate 3D model data from 2D maps.",
@@ -53,17 +56,5 @@ setuptools.setup(
     cmdclass={
         'develop': CondaDependencies,
     },
-    # install_requires=[
-    #     'map2model-loop3d',
-    #     'numpy',
-    #     'pandas',
-    #     'geopandas',
-    #     'matplotlib',
-    #     'hjson',
-    #     'networkx',
-    #     'shapely',
-    #     'rasterio',
-    #     'scipy'
-    # ],
     python_requires='>=3.6',
 )
