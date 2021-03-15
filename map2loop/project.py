@@ -52,6 +52,7 @@ class Project(object):
 
         if loopdata_state is None:
             self.local = True
+            self.state = None
             if any(source is None for source in [
                     geology_file, fault_file, fold_file, structure_file,
                     metadata
@@ -295,12 +296,14 @@ class Project(object):
             if filename.startswith("http"):
                 with urllib.request.urlopen(filename) as raw_data:
                     self.c_l = hjson.load(raw_data)
-                    if self.state == 'SA':
-                        for key in self.c_l.keys():
-                            try:
-                                self.c_l[key] = self.c_l[key].lower()
-                            except Exception as e:
-                                pass
+                    if self.state is not None:
+                        # Check for if remote sources are given as local files, state won't exist
+                        if self.state == 'SA':
+                            for key in self.c_l.keys():
+                                try:
+                                    self.c_l[key] = self.c_l[key].lower()
+                                except Exception as e:
+                                    pass
 
             else:
                 with open(filename) as raw_data:
