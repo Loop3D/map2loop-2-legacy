@@ -297,7 +297,7 @@ class Config(object):
     def create_cmap(self):
         # Make colours consistent from map to model
         formations = sorted([
-            formation.replace(" ", "_") for formation in list(
+            formation.replace(" ", "_").replace('-', '_') for formation in list(
                 set(self.geol_clip[self.c_l['c']].to_numpy()))
         ])
         temp_colours = [""] * len(formations)
@@ -318,6 +318,8 @@ class Config(object):
 
                 self.colour_dict[key] = colour
                 print(key, colour)
+
+            sys.exit('done')
 
         except Exception as e:
             # Otherwise, just append a random set
