@@ -319,8 +319,6 @@ class Config(object):
                 self.colour_dict[key] = colour
                 print(key, colour)
 
-            sys.exit('done')
-
         except Exception as e:
             # Otherwise, just append a random set
             self.clut_path = ""
