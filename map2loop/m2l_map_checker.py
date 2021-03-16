@@ -393,11 +393,13 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             geol_gaps=check_gaps(geol_clip)
             if(len(geol_gaps)>0):
                 warnings.warn('Gaps between geology polygons, consider editing geology layer or rounding vertices')
+                geol_gaps.to_file(os.path.join(tmp_path,'geology_gaps.shp'))
             else:
                 print("No gaps between geology polygons")
             geol_overlaps=check_overlaps(geol_clip)
             if(len(geol_overlaps)>0):
                 warnings.warn('Overlaps between geology polygons, consider editing geology layer or rounding vertices')
+                geol_overlaps.to_file(os.path.join(tmp_path,'geology_overlaps.shp'))
             else:
                 print("No overlaps between geology polygons")
             geol_clip.crs = dst_crs
