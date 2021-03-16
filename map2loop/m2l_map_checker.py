@@ -8,6 +8,8 @@ import numpy as np
 import pandas as pd
 from math import sqrt
 from map2loop.m2l_utils import print
+from shapely.wkt import loads
+import re
 
 
 # explodes polylines and modifies objectid for exploded parts
@@ -72,7 +74,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
         if(len(orientations) < 2):
             m2l_errors.append(
-                'not enough orientations to complete calculations (need at least 2)')
+                'not enough orientations to complete calculations (need at least 2), projection may be inconsistent')
 
         orientations = orientations.replace(r'^\s+$', np.nan, regex=True)
         orientations = orientations[orientations[c_l['d']] != -999]
@@ -104,74 +106,76 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
     if (os.path.isfile(geology_file) or geology_file.startswith("http") or not local_paths):
         geology = gpd.read_file(geology_file, bbox=bbox)
+        if(not geology.empty):
+            if not c_l['o'] in geology.columns:
+                # print(geology.columns)
+                geology = geology.reset_index()
+                geology[c_l['o']] = geology.index
 
-        if not c_l['o'] in geology.columns:
-            # print(geology.columns)
-            geology = geology.reset_index()
-            geology[c_l['o']] = geology.index
+            unique_g = set(geology[c_l['o']])
 
-        unique_g = set(geology[c_l['o']])
+            if(not len(unique_g) == len(geology)):
+                m2l_warnings.append('duplicate geology polygon unique IDs')
 
-        if(not len(unique_g) == len(geology)):
-            m2l_warnings.append('duplicate geology polygon unique IDs')
+            nans = geology[c_l['c']].isnull().sum()
+            if(nans > 0):
+                m2l_errors.append(''+str(nans)+' NaN/blank found in column "' +
+                                str(c_l['c'])+'" of geology file, please fix')
 
-        nans = geology[c_l['c']].isnull().sum()
-        if(nans > 0):
-            m2l_errors.append(''+str(nans)+' NaN/blank found in column "' +
-                              str(c_l['c'])+'" of geology file, please fix')
+            if(c_l['g'] == 'No_col' or not c_l['g'] in geology.columns):
+                m2l_warnings.append(
+                    'No secondary strat coding for geology polygons')
+                c_l['g'] = 'group'
+                geology[c_l['g']] = "Top"
 
-        if(c_l['g'] == 'No_col' or not c_l['g'] in geology.columns):
-            m2l_warnings.append(
-                'No secondary strat coding for geology polygons')
-            c_l['g'] = 'group'
-            geology[c_l['g']] = "Top"
+            geology = geology.replace(r'^\s+$', np.nan, regex=True)
+            geology=geology.replace(',',' ', regex=True)        
+            geology[c_l['g']].fillna(geology[c_l['g2']], inplace=True)
+            geology[c_l['g']].fillna(geology[c_l['c']], inplace=True)
 
-        geology = geology.replace(r'^\s+$', np.nan, regex=True)
-        geology=geology.replace(',',' ', regex=True)        
-        geology[c_l['g']].fillna(geology[c_l['g2']], inplace=True)
-        geology[c_l['g']].fillna(geology[c_l['c']], inplace=True)
+            if(c_l['r1'] == 'No_col' or not c_l['r1'] in geology.columns):
+                m2l_warnings.append('No extra litho for geology polygons')
+                c_l['r1'] = 'r1'
+                geology[c_l['r1']] = 'Nope'
 
-        if(c_l['r1'] == 'No_col' or not c_l['r1'] in geology.columns):
-            m2l_warnings.append('No extra litho for geology polygons')
-            c_l['r1'] = 'r1'
-            geology[c_l['r1']] = 'Nope'
+            if(c_l['r2'] == 'No_col' or not c_l['r2'] in geology.columns):
+                m2l_warnings.append('No more extra litho for geology polygons')
+                c_l['r2'] = 'r2'
+                geology[c_l['r2']] = 'Nope'
 
-        if(c_l['r2'] == 'No_col' or not c_l['r2'] in geology.columns):
-            m2l_warnings.append('No more extra litho for geology polygons')
-            c_l['r2'] = 'r2'
-            geology[c_l['r2']] = 'Nope'
+            if(c_l['min'] == 'No_col' or not c_l['min'] in geology.columns):
+                m2l_warnings.append('No min age for geology polygons')
+                c_l['min'] = 'min'
+                geology[c_l['min']] = 0
 
-        if(c_l['min'] == 'No_col' or not c_l['min'] in geology.columns):
-            m2l_warnings.append('No min age for geology polygons')
-            c_l['min'] = 'min'
-            geology[c_l['min']] = 0
+            if(c_l['max'] == 'No_col' or not c_l['max'] in geology.columns):
+                m2l_warnings.append('No max age for geology polygons')
+                c_l['max'] = 'max'
+                geology[c_l['max']] = 100
 
-        if(c_l['max'] == 'No_col' or not c_l['max'] in geology.columns):
-            m2l_warnings.append('No max age for geology polygons')
-            c_l['max'] = 'max'
-            geology[c_l['max']] = 100
+            if(c_l['c'] == 'No_col' or not c_l['c'] in geology.columns):
+                m2l_errors.append(
+                    'Must have primary strat coding field for geology polygons')
 
-        if(c_l['c'] == 'No_col' or not c_l['c'] in geology.columns):
-            m2l_errors.append(
-                'Must have primary strat coding field for geology polygons')
+            for code in ('c', 'g', 'g2', 'ds', 'u', 'r1'):
+                if(c_l[code] in geology.columns):
 
-        for code in ('c', 'g', 'g2', 'ds', 'u', 'r1'):
-            if(c_l[code] in geology.columns):
+                    geology[c_l[code]].str.replace(",", " ")
+                    if(code == 'c' or code == 'g' or code == 'g2'):
+                        geology[c_l[code]].str.replace(" ", "_")
+                        geology[c_l[code]].str.replace("-", "_")
 
-                geology[c_l[code]].str.replace(",", " ")
-                if(code == 'c' or code == 'g' or code == 'g2'):
-                    geology[c_l[code]].str.replace(" ", "_")
-                    geology[c_l[code]].str.replace("-", "_")
+                    nans = geology[c_l[code]].isnull().sum()
+                    if(nans > 0):
+                        m2l_warnings.append(''+str(nans)+' NaN/blank found in column "'+str(
+                            c_l[code])+'" of geology file, replacing with 0')
+                        geology[c_l[code]].fillna("0", inplace=True)
+            for drift in drift_prefix:
+                geology = geology[~geology[c_l['u']].str.startswith(drift)]
 
-                nans = geology[c_l[code]].isnull().sum()
-                if(nans > 0):
-                    m2l_warnings.append(''+str(nans)+' NaN/blank found in column "'+str(
-                        c_l[code])+'" of geology file, replacing with 0')
-                    geology[c_l[code]].fillna("0", inplace=True)
-        for drift in drift_prefix:
-            geology = geology[~geology[c_l['u']].str.startswith(drift)]
-
-        show_metadata(geology, "geology layer")
+            show_metadata(geology, "geology layer")
+        else: 
+            print('No geology in area, projection may be inconsistent')
 
     # Process fold polylines
 
@@ -222,7 +226,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
             show_metadata(folds_clip,"fold layer")    
         else: 
-            print('No folds in area')
+            print('No folds in area, projection may be inconsistent')
 
     # Process fault polylines
 
@@ -318,7 +322,8 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
         else:
 
             # fault_file='None'
-            print('No faults in area')
+            print('No faults in area, projection may be inconsistent')
+
 
     # Process mindep points
 
@@ -385,6 +390,16 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
         geol_clip = gpd.overlay(geology, polygo, how='intersection')
         if(len(geol_clip) > 0):
+            geol_gaps=check_gaps(geol_clip)
+            if(len(geol_gaps)>0):
+                warnings.warn('Gaps between geology polygons, consider editing geology layer or rounding vertices')
+            else:
+                print("No gaps between geology polygons")
+            geol_overlaps=check_overlaps(geol_clip)
+            if(len(geol_overlaps)>0):
+                warnings.warn('Overlaps between geology polygons, consider editing geology layer or rounding vertices')
+            else:
+                print("No overlaps between geology polygons")
             geol_clip.crs = dst_crs
             geol_file = os.path.join(tmp_path,'geol_clip.shp')
             geol_clip.to_file(geol_file)
@@ -421,3 +436,75 @@ def show_metadata(gdf, name):
     else:
         print("\n", name, " metadata\n--------------------")
         print("    empty file, check contents")
+
+
+#########################################
+#
+# Checks for polygons overlaps and returns geopandas object of overlapping areas
+#
+#########################################
+def check_overlaps(data_temp):
+    data_temp['id'] = data_temp.index
+
+    data_overlaps=gpd.GeoDataFrame()
+    for index, row in data_temp.iterrows():
+        data_temp1=data_temp.loc[data_temp.id!=row.id,]
+        # check if intersection occured
+        overlaps=data_temp1[data_temp1.geometry.overlaps(row.geometry)]['id'].tolist()
+        if len(overlaps)>0:
+            # compare the area with threshold
+            for y in overlaps:
+                temp_area=gpd.overlay(data_temp.loc[data_temp.id==y,],data_temp.loc[data_temp.id==row.id,],how='intersection')
+                temp_area=temp_area.loc[temp_area.geometry.area>=9e-9]
+                if temp_area.shape[0]>0:
+                    data_overlaps=gpd.GeoDataFrame(pd.concat([temp_area,data_overlaps],ignore_index=True),crs=data_temp.crs)
+    # get unique of list id
+    if(not data_overlaps.empty):
+        data_overlaps['sorted']=data_overlaps.apply(lambda y: sorted([y['id_1'],y['id_2']]),axis=1)
+        data_overlaps['sorted']=data_overlaps.sorted.apply(lambda y: ''.join(str(y)))
+        data_overlaps=data_overlaps.drop_duplicates('sorted')
+        data_overlaps=data_overlaps.reset_index()[['id_1','id_2','geometry']]
+        data_overlaps.crs=data_temp.crs
+        return(data_overlaps)
+    else:
+        return()
+
+#########################################
+#
+# Checks for gaps between polygons and returns geopandas object of missing sections
+#
+#########################################
+
+def check_gaps(data_temp):
+    data_temp['id'] = data_temp.index
+    data_temp['diss_id']=100
+    data_temp_diss=data_temp.dissolve(by='diss_id')
+    interior=data_temp_diss.interiors.values.tolist()[0]
+    gap_list=[]
+    for i in interior:
+        gap_list.append(LineString(i))
+    data_gaps=gpd.GeoDataFrame(geometry=gap_list,crs=data_temp.crs)
+    data_gaps['feature_touches']=data_gaps.geometry.apply(lambda y: data_temp.loc[data_temp.touches(y)]['id'].tolist())
+    if(not data_gaps.empty):
+        data_gaps.head()
+        return(data_gaps)
+    else:
+        return()
+
+#########################################
+#
+# truncates polygon or polyline vertices to given precision and saves out as new shapefile
+#
+#########################################
+
+
+def round_vertices(layer_file,precision,output_file):
+
+    simpledec = re.compile(r"\d*\.\d+")
+    def mround(match):
+        return "{:.{}f}".format(float(match.group()),precision)
+
+    layer_file.geometry = layer_file.geometry.apply(lambda x: loads(re.sub(simpledec, mround, x.wkt)))
+    layer_file.to_file(output_file)
+    print("rounded file written to ",output_file)
+    #https://gis.stackexchange.com/questions/321518/rounding-coordinates-to-5-decimals-in-geopandas
