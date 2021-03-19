@@ -14,7 +14,7 @@ import re
 
 # explodes polylines and modifies objectid for exploded parts
 def explode_polylines(indf, c_l, dst_crs):
-    #indf = gpd.GeoDataFrame.from_file(indata)
+    # indf = gpd.GeoDataFrame.from_file(indata)
     outdf = gpd.GeoDataFrame(columns=indf.columns, crs=dst_crs)
     for idx, row in indf.iterrows():
         if type(row.geometry) == LineString:
@@ -49,10 +49,9 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
     m2l_errors = []
     m2l_warnings = []
-    if(local_paths):
-        for file_name in (structure_file, geology_file, fault_file, mindep_file, fold_file):
-            if not file_name.startswith("http") and not os.path.isfile(file_name):
-                m2l_errors.append('file '+file_name+' not found')
+    for file_name in (structure_file, geology_file, fault_file, fold_file):
+        if not file_name.startswith("http") and not os.path.isfile(file_name):
+            m2l_errors.append('file '+file_name+' not found')
 
     # Process orientation points
 
@@ -178,45 +177,44 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             print('No geology in area, projection may be inconsistent')
 
     # Process fold polylines
-
     folds = None
     if (os.path.isfile(fold_file) or not local_paths):
-        folds = gpd.read_file(fold_file,bbox=bbox)
-        if(len(folds)>0):
+        folds = gpd.read_file(fold_file, bbox=bbox)
+        if(len(folds) > 0):
             if not c_l['o'] in folds.columns:
                 folds = folds.reset_index()
-                folds[c_l['o']]=folds.index
-            unique_g=set(folds[c_l['o']])
+                folds[c_l['o']] = folds.index
+            unique_g = set(folds[c_l['o']])
 
             if(not len(unique_g) == len(folds)):
                 m2l_warnings.append('duplicate fold polyline unique IDs')
 
-            folds = folds[folds[c_l['ff']].str.contains(c_l['fold'])]        
+            folds = folds[folds[c_l['ff']].str.contains(
+                c_l['fold'], case=False)]
 
             folds = folds.replace(r'^\s+$', np.nan, regex=True)
-            
-                
 
-            for code in ('ff','t'):
-                if(c_l['ff']=='No_col'  or not c_l['ff'] in folds.columns):
+            for code in ('ff', 't'):
+                if(c_l['ff'] == 'No_col' or not c_l['ff'] in folds.columns):
                     m2l_warnings.append('No fold code for fold polylines')
-                    c_l['ff']='ff'
-                    folds[c_l['ff']]=c_l['fold']
-                    
-                if(c_l['t']=='No_col'  or not c_l['t'] in folds.columns):
+                    c_l['ff'] = 'ff'
+                    folds[c_l['ff']] = c_l['fold']
+
+                if(c_l['t'] == 'No_col' or not c_l['t'] in folds.columns):
                     m2l_warnings.append('No fold polarity for fold polylines')
-                    c_l['t']='t'
-                    folds[c_l['t']]='None'
-                    
+                    c_l['t'] = 't'
+                    folds[c_l['t']] = 'None'
+
                 if(c_l[code] in folds.columns):
-                    folds[c_l[code]].str.replace(","," ")        
+                    folds[c_l[code]].str.replace(",", " ")
 
-                    nans=folds[c_l[code]].isnull().sum() 
-                    if(nans>0):
-                        m2l_warnings.append(''+str(nans)+' NaN/blank found in column "'+str(c_l[code])+'" of folds file, replacing with 0')
-                        folds[c_l[code]].fillna("0", inplace = True)
+                    nans = folds[c_l[code]].isnull().sum()
+                    if(nans > 0):
+                        m2l_warnings.append(''+str(nans)+' NaN/blank found in column "'+str(
+                            c_l[code])+'" of folds file, replacing with 0')
+                        folds[c_l[code]].fillna("0", inplace=True)
 
-            folds_clip=m2l_utils.clip_shp(folds,polygo)
+            folds_clip = m2l_utils.clip_shp(folds, polygo)
             if(len(folds_clip) > 0):
                 folds_explode = explode_polylines(folds_clip, c_l, dst_crs)
                 if(len(folds_explode) > len(folds_clip)):
@@ -228,13 +226,14 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
         else: 
             print('No folds in area, projection may be inconsistent')
 
+
     # Process fault polylines
 
     if (os.path.isfile(fault_file) or fault_file.startswith("http") or not local_paths):
         faults_folds = gpd.read_file(fault_file, bbox=bbox)
 
         faults = faults_folds[faults_folds[c_l['f']
-                                           ].str.contains(c_l['fault'])]
+                                           ].str.contains(c_l['fault'], case=False)]
         faults = faults.replace(r'^\s+$', np.nan, regex=True)
 
         if not c_l['o'] in faults.columns:
@@ -292,8 +291,6 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
         if(not len(unique_f) == len(faults)):
             m2l_errors.append('duplicate fault/fold polyline unique IDs')
 
-        faults = faults.replace(r'^\s+$', np.nan, regex=True)
-
         faults_clip = m2l_utils.clip_shp(faults, polygo)
 
         if(len(faults_clip) > 0):
@@ -327,10 +324,33 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
     # Process mindep points
 
+    mindeps = None
     if (os.path.isfile(mindep_file) or mindep_file.startswith("http") or not local_paths):
-        mindeps = gpd.read_file(mindep_file, bbox=bbox)
-        if(len(mindeps) == 0):
+        try:
+            # No need to specify mindeps
+            mindeps = gpd.read_file(mindep_file, bbox=bbox)
+            if(len(mindeps) == 0):
+                m2l_warnings.append('no mindeps for analysis')
+            else:
+                mindeps = mindeps.replace(r'^\s+$', np.nan, regex=True)
+
+                for code in ('msc', 'msn', 'mst', 'mtc', 'mscm', 'mcom'):
+                    if(c_l[code] == 'No_col'):
+                        mindeps[c_l[code]] = 'No_col'
+                    if not c_l[code] in mindeps.columns:
+                        m2l_errors.append(
+                            'field named "'+str(c_l[code])+'" not found in mineral deposits file')
+                    else:
+                        nans = mindeps[c_l[code]].isnull().sum()
+                        if(nans > 0):
+                            m2l_warnings.append(str(
+                                nans)+' NaN/blank found in column '+str(c_l[code])+' of mindep file, replacing with 0')
+                            mindeps[c_l[code]].fillna("0", inplace=True)
+            show_metadata(mindeps, "mindeps layer")
+
+        except Exception as e:
             m2l_warnings.append('no mindeps for analysis')
+
         else:
             mindeps = mindeps.replace(r'^\s+$', np.nan, regex=True)
 
@@ -423,6 +443,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
         print('\nNo errors found, clipped and updated files saved to tmp')
 
         return(structure_file, geol_file, fault_file, mindep_file, fold_file, c_l)
+
 
 
 def show_metadata(gdf, name):
