@@ -7,10 +7,13 @@ from shapely.geometry.multipolygon import MultiPolygon
 from shapely.geometry import Point
 import numpy as np
 import rasterio
+import fiona
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 from rasterio.transform import from_origin
 from rasterio import features
+import rasterio.mask
 import re  # typo? check
+import os
 from urllib.request import urlopen
 from math import sin, cos, atan, atan2, asin, radians, degrees, sqrt, pow, acos, fmod, fabs, isnan, floor
 from owslib.wcs import WebCoverageService
@@ -290,6 +293,40 @@ def get_dtm_topography_org(path_out, minlong, maxlong, minlat, maxlat):
     f.close()
     print("dtm geotif saved as", path_out)
 
+############################################
+# get dtm data from local geotiff file, assumes same crs as model
+#
+# get_local_dtm(dtm_path,geotif_file,dst_src,bbox)
+# Args:
+# dtm_path path to location where geotiff of elevation will be saved (inlocal coords)
+# geotiff_file source dtm in local coordinates
+# dst_crs  local coordinate ref system
+# bbox [minx,miny,maxx,maxy] in local coordinates
+#
+# Extracts and saves to file digital terrain model
+############################################
+
+def get_local_dtm(dtm_path,geotif_file,dst_crs,bbox):
+    y_point_list = [bbox[1], bbox[1], bbox[3], bbox[3],bbox[3]]
+    x_point_list = [bbox[0], bbox[2], bbox[2], bbox[0], bbox[0]]
+    bbox_geom = Polygon(zip(x_point_list, y_point_list))
+    mbbox = gpd.GeoDataFrame(index=[0], crs=dst_crs, geometry=[bbox_geom]) 
+    mbbox.to_file(os.path.join(dtm_path, 'roi_poly_dst.shp'))
+
+    with fiona.open(os.path.join(dtm_path, 'roi_poly_dst.shp'), "r") as shapefile:
+        shapes = [feature["geometry"] for feature in shapefile]
+        
+    with rasterio.open(geotif_file) as src:
+        out_image, out_transform = rasterio.mask.mask(src, shapes, crop=True)
+        out_meta = src.meta
+    
+    out_meta.update({"driver": "GTiff",
+                 "height": out_image.shape[1],
+                 "width": out_image.shape[2],
+                 "transform": out_transform})
+
+    with rasterio.open(os.path.join(dtm_path, 'dtm_rp.tif'), "w", **out_meta) as dest:
+        dest.write(out_image)
 
 ############################################
 # get dtm data from GA SRTM server and save as geotiff

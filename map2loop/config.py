@@ -451,11 +451,17 @@ class Config(object):
         downloaded = False
         i = 0
         print('Attempt: 0 ', end='')
+        local_dtm=False
+        geotif_file='F:/Loop_Data/BGS/terr50_gagg_gb/terr50_gagg_gb_all.tif'
         while downloaded == False:
             try:
-                if (aus):
-                    m2l_utils.get_dtm(self.dtm_file, minlong, maxlong, minlat,
-                                      maxlat)
+                if(aus):
+                    m2l_utils.get_dtm(self.dtm_file, minlong,
+                                      maxlong, minlat, maxlat)
+                elif(local_dtm):                   
+                    bbox=[ self.bbox_3d["minx"],self.bbox_3d["miny"],self.bbox_3d["maxx"],self.bbox_3d["maxy"]]
+                    m2l_utils.get_local_dtm(self.dtm_path,geotif_file,self.dtm_crs,bbox)
+
                 else:
                     m2l_utils.get_dtm_hawaii(self.dtm_file, minlong, maxlong,
                                              minlat, maxlat)
@@ -471,8 +477,10 @@ class Config(object):
             )
         print('Done.')
 
-        geom_rp = m2l_utils.reproject_dtm(self.dtm_file, self.dtm_reproj_file,
-                                          self.dtm_crs, self.proj_crs)
+        if(not local_dtm):
+            geom_rp = m2l_utils.reproject_dtm(
+                self.dtm_file, self.dtm_reproj_file, self.dtm_crs, self.proj_crs)
+
         self.dtm = rasterio.open(self.dtm_reproj_file)
 
         if self.quiet == 'None':
