@@ -1,6 +1,8 @@
 # Map2Loop 2.0
 
-Generate 3D geological model inputs from geographical maps — a high-level implementation and extension of [https://github.com/Loop3D/map2loop](https://github.com/Loop3D/map2loop) by Prof. Mark Jessell at UWA. To see an example interactive model build using map2loop and LoopStructural, follow this link: <a href="http://geo.loop-gis.org/models/vtkleaflet_2021-03-19-11-40.html">3D Model from the Hamersley region, Western Australia</a>)
+Generate 3D geological model inputs from geographical maps — a high-level implementation and extension of [https://github.com/Loop3D/map2loop](https://github.com/Loop3D/map2loop) by Prof. Mark Jessell at UWA. To see an example interactive model build using map2loop and LoopStructural, follow this link:   
+   
+ <a href="http://geo.loop-gis.org/models/vtkleaflet_2021-03-19-11-40.html">3D Model from the Hamersley region, Western Australia</a>)
 
 ## Install
 
