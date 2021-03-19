@@ -12,6 +12,7 @@ import pandas as pd
 import numpy as np
 from shapely.geometry import Polygon
 from matplotlib import pyplot as plt
+from map2loop import geology_loopdata, structure_loopdata, fault_loopdata, fold_loopdata, mindep_loopdata, metafiles, clut_paths
 
 from map2loop.config import Config
 from map2loop.m2l_utils import display, enable_quiet_mode, disable_quiet_mode, print
@@ -19,16 +20,16 @@ from map2loop.m2l_utils import display, enable_quiet_mode, disable_quiet_mode, p
 
 class Project(object):
     """A high level object implementation of the map2loop workflow."""
-
-    def __init__(self,
-                 loopdata_state=None,
-                 geology_file=None,
-                 fault_file=None,
-                 fold_file=None,
-                 structure_file=None,
-                 mindep_file=None,
-                 metadata=None,
-                 ):
+    def __init__(
+        self,
+        loopdata_state=None,
+        geology_file=None,
+        fault_file=None,
+        fold_file=None,
+        structure_file=None,
+        mindep_file=None,
+        metadata=None,
+    ):
         """Creates project that defines the shared source data.
 
         :param loopdata_state: Indicates use of loop remote sources and which Australian state to use, defaults to None
@@ -51,16 +52,24 @@ class Project(object):
 
         if loopdata_state is None:
             self.local = True
-            if any(source is None for source in [geology_file, fault_file, fold_file, structure_file, metadata]):
+            self.state = None
+            if any(source is None for source in [
+                    geology_file, fault_file, fold_file, structure_file,
+                    metadata
+            ]):
                 sys.exit(
-                    "Please pass local file paths or urls and a metadata file as input params if you do not wish to use Loop's remote sources.")
+                    "Please pass local file paths or urls and a metadata file as input params if you do not wish to use Loop's remote sources."
+                )
         else:
             self.local = False
-            if loopdata_state in ['WA', 'NSW', 'VIC', 'SA', 'QLD', 'ACT', 'TAS']:
+            if loopdata_state in [
+                    'WA', 'NSW', 'VIC', 'SA', 'QLD', 'ACT', 'TAS'
+            ]:
                 self.state = loopdata_state
             else:
                 sys.exit(
-                    "Valid state code not found, expected 'WA', 'NSW', 'VIC', 'SA', 'QLD', 'ACT' or 'TAS'")
+                    "Valid state code not found, expected 'WA', 'NSW', 'VIC', 'SA', 'QLD', 'ACT' or 'TAS'"
+                )
 
         # If remote, these will be set to null for now, otherwise set to local paths
         self.geology_file = geology_file
@@ -123,56 +132,68 @@ class Project(object):
         :type workflow: dict
 
         """
-        if(workflow['model_engine'] == 'geomodeller'):
-            workflow.update({'seismic_section': False,
-                             'cover_map': False,
-                             'near_fault_interpolations': True,
-                             'fold_axial_traces': False,
-                             'stereonets': False,
-                             'formation_thickness': True,
-                             'polarity': False,
-                             'strat_offset': False,
-                             'contact_dips': True})
-        elif(workflow['model_engine'] == 'loopstructural'):
-            workflow.update({'seismic_section': False,
-                             'cover_map': False,
-                             'near_fault_interpolations': False,
-                             'fold_axial_traces': True,
-                             'stereonets': False,
-                             'formation_thickness': True,
-                             'polarity': False,
-                             'strat_offset': True,
-                             'contact_dips': True})
-        elif(workflow['model_engine'] == 'gempy'):
-            workflow.update({'seismic_section': False,
-                             'cover_map': False,
-                             'near_fault_interpolations': False,
-                             'fold_axial_traces': True,
-                             'stereonets': False,
-                             'formation_thickness': False,
-                             'polarity': False,
-                             'strat_offset': False,
-                             'contact_dips': False})
-        elif(workflow['model_engine'] == 'noddy'):
-            workflow.update({'seismic_section': False,
-                             'cover_map': False,
-                             'near_fault_interpolations': False,
-                             'fold_axial_traces': False,
-                             'stereonets': False,
-                             'formation_thickness': False,
-                             'polarity': False,
-                             'strat_offset': False,
-                             'contact_dips': False})
+        if (workflow['model_engine'] == 'geomodeller'):
+            workflow.update({
+                'seismic_section': False,
+                'cover_map': False,
+                'near_fault_interpolations': True,
+                'fold_axial_traces': False,
+                'stereonets': False,
+                'formation_thickness': True,
+                'polarity': False,
+                'strat_offset': False,
+                'contact_dips': True
+            })
+        elif (workflow['model_engine'] == 'loopstructural'):
+            workflow.update({
+                'seismic_section': False,
+                'cover_map': False,
+                'near_fault_interpolations': False,
+                'fold_axial_traces': False,
+                'stereonets': False,
+                'formation_thickness': True,
+                'polarity': False,
+                'strat_offset': True,
+                'contact_dips': True
+            })
+        elif (workflow['model_engine'] == 'gempy'):
+            workflow.update({
+                'seismic_section': False,
+                'cover_map': False,
+                'near_fault_interpolations': False,
+                'fold_axial_traces': True,
+                'stereonets': False,
+                'formation_thickness': False,
+                'polarity': False,
+                'strat_offset': False,
+                'contact_dips': False
+            })
+        elif (workflow['model_engine'] == 'noddy'):
+            workflow.update({
+                'seismic_section': False,
+                'cover_map': False,
+                'near_fault_interpolations': False,
+                'fold_axial_traces': False,
+                'stereonets': False,
+                'formation_thickness': False,
+                'polarity': False,
+                'strat_offset': False,
+                'contact_dips': False
+            })
+
         else:
-            workflow.update({'seismic_section': False,
-                             'cover_map': False,
-                             'near_fault_interpolations': False,
-                             'fold_axial_traces': False,
-                             'stereonets': True,
-                             'formation_thickness': True,
-                             'polarity': False,
-                             'strat_offset': True,
-                             'contact_dips': False})
+            workflow.update({
+                'seismic_section': False,
+                'cover_map': False,
+                'near_fault_interpolations': False,
+                'fold_axial_traces': False,
+                'stereonets': True,
+                'formation_thickness': True,
+                'polarity': False,
+                'strat_offset': True,
+                'contact_dips': False
+            })
+
         self.workflow = workflow
 
     def update_config(self,
@@ -191,8 +212,8 @@ class Project(object):
                       proj_crs=None,
                       step_out=None,
                       quiet='None',
-                      **kwargs
-                      ):
+                      clut_path='',
+                      **kwargs):
         """Creates a sub-project Config object and preprocesses input data for some area.
 
         :param out_dir: Path to write output files to.
@@ -209,7 +230,7 @@ class Project(object):
         :type step_out: int, optional
         :param quiet: Allow or block print statements and matplotlib figures, 'None' to quiet nothing, 'all' to quiet everything, 'no-figures' to disable plots and allow text output. Defaults to 'None'
         :type quiet: string, optional
-        :param **kwargs: 
+        :param **kwargs:
         """
         # TODO: Proj crs probably doesn't need to be here
 
@@ -226,8 +247,7 @@ class Project(object):
                 "minx": self.proj_bounds[3],
             })
 
-        # for key in bbox_3d.keys():
-            # bbox_3d[key] = int(bbox_3d[key])
+        self.clut_path = ''
 
         if proj_crs is None:
             proj_crs = self.proj_crs
@@ -237,25 +257,31 @@ class Project(object):
 
         self.quiet = quiet
 
-        bbox = tuple([bbox_3d["minx"], bbox_3d["miny"],
-                      bbox_3d["maxx"], bbox_3d["maxy"]])
+        bbox = tuple([
+            bbox_3d["minx"], bbox_3d["miny"], bbox_3d["maxx"], bbox_3d["maxy"]
+        ])
         minx, miny, maxx, maxy = bbox
         lat_point_list = [miny, miny, maxy, maxy, maxy]
         lon_point_list = [minx, maxx, maxx, minx, minx]
         bbox_geom = Polygon(zip(lon_point_list, lat_point_list))
-        polygon = gpd.GeoDataFrame(
-            index=[0], crs=proj_crs, geometry=[bbox_geom])
+        polygon = gpd.GeoDataFrame(index=[0],
+                                   crs=proj_crs,
+                                   geometry=[bbox_geom])
 
         # Define the url queries if remote flag is set
         if self.geology_file is None:
             self.fetch_sources(bbox)
 
-        self.config = Config(out_dir, overwrite,
-                             self.geology_file, self.fault_file, self.fold_file,
-                             self.structure_file, self.mindep_file,
-                             bbox_3d, polygon, step_out, dtm_crs, proj_crs, self.local, self.quiet, self.loopFilename, self.c_l,
-                             **kwargs
-                             )
+        # TODO: Make run flags global vars that can be updated here instead of in run
+        if clut_path != '':
+            self.clut_path = clut_path
+
+        kwargs = {'clut_path': self.clut_path}
+        self.config = Config(out_dir, overwrite, self.geology_file,
+                             self.fault_file, self.fold_file,
+                             self.structure_file, self.mindep_file, bbox_3d,
+                             polygon, step_out, dtm_crs, proj_crs, self.local,
+                             self.quiet, self.loopFilename, self.c_l, **kwargs)
 
         self.config.preprocess()
 
@@ -270,12 +296,35 @@ class Project(object):
             if filename.startswith("http"):
                 with urllib.request.urlopen(filename) as raw_data:
                     self.c_l = hjson.load(raw_data)
+                    if self.state is not None:
+                        # Check for if remote sources are given as local files, state won't exist
+                        if self.state == 'SA':
+                            for key in self.c_l.keys():
+                                try:
+                                    self.c_l[key] = self.c_l[key].lower()
+                                except Exception as e:
+                                    pass
+
             else:
                 with open(filename) as raw_data:
                     self.c_l = hjson.load(raw_data)
+
+            # self.cols = []
+            # geol = gpd.read_file(self.geology_file)
+            # self.cols += list(geol.columns)
+            # struct = gpd.read_file(self.structure_file)
+            # self.cols += list(struct.columns)
+            # faults = gpd.read_file(self.fault_file)
+            # self.cols += list(faults.columns)
+            # for key in self.c_l.keys():
+            # if self.c_l[key] not in self.cols:
+            # try:
+            # print(self.c_l[key].lower())
+            # except Exception as e:
+            # print(self.c_l[key])
+            # sys.exit('done')
         except Exception as e:
-            print(e)
-            sys.exit("ERROR: Unable to read provided filename file")
+            sys.exit(e)
 
     def fetch_sources(self, bbox):
         """Fetch remote loop geospatial data and metadata.
@@ -284,38 +333,22 @@ class Project(object):
         :type bbox: list
 
         """
-        if self.state == "WA":
-            bbox_str = "{},{},{},{}".format(bbox[0], bbox[1], bbox[2], bbox[3])
-            self.geology_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:geol_500k&bbox={}&srs=EPSG:28350'.format(
-                bbox_str)
-            self.fault_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=linear_500k&bbox={}&srs=EPSG:28350'.format(
-                bbox_str)
-            self.fold_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=linear_500k&bbox={}&srs=EPSG:28350'.format(
-                bbox_str)
-            self.structure_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=waroxi_wa_28350_bed&bbox={}&srs=EPSG:28350'.format(
-                bbox_str)
-            self.mindep_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:mindeps_2018_28350&bbox={}&srs=EPSG:28350'.format(
-                bbox_str)
-            self.metadata = 'https://gist.githubusercontent.com/yohanderose/8f843de0dde531f009a3973cbdadcc9f/raw/918f412ae488ce1a6bca188306f7730061ecf551/meta_remote.hjson'
-            self.read_metadata(self.metadata)
+        bbox_str = "{},{},{},{}".format(bbox[0], bbox[1], bbox[2], bbox[3])
+        self.geology_file = geology_loopdata[self.state].replace(
+            'bbox=', 'bbox=' + bbox_str)
+        self.structure_file = structure_loopdata[self.state].replace(
+            'bbox=', 'bbox=' + bbox_str)
+        self.fault_file = fault_loopdata[self.state].replace(
+            'bbox=', 'bbox=' + bbox_str)
+        self.fold_file = fold_loopdata[self.state].replace(
+            'bbox=', 'bbox=' + bbox_str)
+        self.mindep_file = mindep_loopdata[self.state].replace(
+            'bbox=', 'bbox=' + bbox_str)
+        self.metadata = metafiles[self.state]
+        self.clut_path = clut_paths[self.state]
 
-        if self.state == "QLD":
-            bbox_str = "{},{},{},{}".format(bbox[0], bbox[1], bbox[2], bbox[3])
-            self.structure_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=outcrops_28355&bbox={}&srsName=EPSG:28355'.format(
-                bbox_str)
-            self.geology_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_geol_dissolved_join_fix_mii_clip_wgs84&bbox={}&srsName=EPSG:28355'.format(
-                bbox_str)
-            self.mindep_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_mindeps_28355&bbox={}&srsName=EPSG:28355'.format(
-                bbox_str)
-            self.fault_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_faults_folds_28355&bbox={}&srsName=EPSG:28355'.format(
-                bbox_str)
-            self.fold_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_faults_folds_28355&bbox={}&srsName=EPSG:28355'.format(
-                bbox_str)
-            self.metadata = "https://gist.githubusercontent.com/yohanderose/7ad2ae1b36e4e0b3f27dff17eeae0cc2/raw/ec8d33e52d913e2df4658ca94e7eb467e35adccd/QLD_meta.hjson"
+        if self.metadata is not '':
             self.read_metadata(self.metadata)
-
-    # TODO: Create notebooks for lower level use
-    # TODO: Run flags that affect the config object functions
 
     def run(self,
             aus=True,
@@ -342,8 +375,7 @@ class Project(object):
             fat_step=750,
             close_dip=-999,
             use_interpolations=True,
-            use_fat=True
-            ):
+            use_fat=True):
         """Performs the data processing steps of the map2loop workflow.
 
         :param aus: Indicates if area is in Australia for using ASUD. Defaults to True.
@@ -422,14 +454,15 @@ class Project(object):
             pbar.update(10)
             self.config.export_contacts(contact_decimate, intrusion_mode)
             pbar.update(10)
-            self.config.test_interpolation(
-                interpolation_spacing, misorientation, interpolation_scheme)
+            self.config.test_interpolation(interpolation_spacing,
+                                           misorientation,
+                                           interpolation_scheme)
             pbar.update(10)
 
-            self.config.export_faults(
-                fault_decimate, min_fault_length, fault_dip)
-            self.config.process_plutons(
-                pluton_dip, pluton_form, dist_buffer, contact_decimate)
+            self.config.export_faults(fault_decimate, min_fault_length,
+                                      fault_dip)
+            self.config.process_plutons(pluton_dip, pluton_form, dist_buffer,
+                                        contact_decimate)
             pbar.update(20)
 
             # Seismic section is in the hamersely model area
@@ -439,40 +472,42 @@ class Project(object):
                                                      seismic_bbox_file="",
                                                      seismic_interp_file="")
 
-            if(self.workflow['contact_dips']):
+            if (self.workflow['contact_dips']):
                 self.config.propagate_contact_dips(
                     contact_dip, contact_orientation_decimate)
 
-            if(self.workflow['formation_thickness']):
-                self.config.calc_thickness(
-                    contact_decimate, null_scheme, thickness_buffer, max_thickness_allowed, self.c_l)
+            if (self.workflow['formation_thickness']):
+                self.config.calc_thickness(contact_decimate, null_scheme,
+                                           thickness_buffer,
+                                           max_thickness_allowed, self.c_l)
 
-            if(self.workflow['fold_axial_traces']):
+            if (self.workflow['fold_axial_traces']):
                 self.config.create_fold_axial_trace_points(
                     fold_decimate, fat_step, close_dip)
 
             # Prepocess model inputs
             inputs = ('')
-            if(self.workflow['model_engine'] == 'geomodeller'):
+            if (self.workflow['model_engine'] == 'geomodeller'):
                 inputs = ('invented_orientations', 'intrusive_orientations',
-                          'fat_orientations', 'fault_tip_contacts', 'contact_orientations')
-            elif(self.workflow['model_engine'] == 'loopstructural'):
-                inputs = ('invented_orientations',
-                          'fat_orientations', 'contact_orientations')
-            elif(self.workflow['model_engine'] == 'gempy'):
+                          'fat_orientations', 'fault_tip_contacts',
+                          'contact_orientations')
+            elif (self.workflow['model_engine'] == 'loopstructural'):
+                inputs = ('invented_orientations', 'fat_orientations',
+                          'contact_orientations')
+            elif (self.workflow['model_engine'] == 'gempy'):
                 inputs = ('invented_orientations', 'interpolated_orientations',
                           'fat_orientations', 'contact_orientations')
-            elif(self.workflow['model_engine'] == 'noddy'):
+            elif (self.workflow['model_engine'] == 'noddy'):
                 inputs = ('')
 
-            self.config.postprocess(
-                inputs, self.workflow, use_interpolations, use_fat)
+            self.config.postprocess(inputs, self.workflow, use_interpolations,
+                                    use_fat)
             pbar.update(10)
 
             self.config.save_cmap()
 
             if self.loopFilename is not None:
                 self.config.update_projectfile()
-                # self.config.export_png()
+                self.config.export_png()
 
         disable_quiet_mode()
