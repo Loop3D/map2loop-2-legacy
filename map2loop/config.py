@@ -27,6 +27,7 @@ class Config(object):
     """Object that represents a sub-project. It is defined by some source data, 
     a region of interest (bounding box or polygon) and some execution flags.
     """
+
     def __init__(self,
                  project_path,
                  overwrite,
@@ -46,6 +47,17 @@ class Config(object):
                  c_l={},
                  **kwargs):
 
+        self.project_path = project_path
+
+        if overwrite is False:
+            print(
+                "WARNING: Overwrite should be a string value {true, in-place} ...")
+            self.check_overwrite()
+        if overwrite is True:
+            print(
+                "WARNING: Overwrite should be a string value {true, in-place} ... converting to true.")
+            overwrite = 'true'
+
         if (not os.path.exists(project_path)):
             # Create proj root dir if doesn't exist
             os.mkdir(project_path)
@@ -60,18 +72,7 @@ class Config(object):
                     pass
                 os.mkdir(project_path)
             else:
-                allow = input(
-                    "Directory \"{}\" exists, overwrite? (y/[n])".format(
-                        project_path))
-                if allow == "y":
-                    shutil.rmtree(project_path)
-                    while os.path.exists(project_path):
-                        pass
-                    os.mkdir(project_path)
-                else:
-                    sys.exit(0)
-
-        self.project_path = project_path
+                self.check_overwrite()
 
         self.graph_path = os.path.join(self.project_path, 'graph')
         self.tmp_path = os.path.join(self.project_path, 'tmp')
@@ -143,6 +144,19 @@ class Config(object):
         self.clut_path = kwargs['clut_path']
 
         disable_quiet_mode()
+
+    def check_overwrite(self):
+        allow = input(
+            "Directory \"{}\" exists, overwrite? (y/[n])".format(
+                self.project_path))
+        if allow == "y":
+            shutil.rmtree(self.project_path)
+            while os.path.exists(self.project_path):
+                pass
+            os.mkdir(self.project_path)
+        else:
+            sys.exit(
+                'Either set overwrite to true or specify a different output_path.')
 
     def preprocess(self):
         """[summary]
@@ -297,8 +311,8 @@ class Config(object):
     def create_cmap(self):
         # Make colours consistent from map to model
         formations = sorted([
-            formation.replace(" ", "_").replace('-', '_') for formation in list(
-                set(self.geol_clip[self.c_l['c']].to_numpy()))
+            formation.replace(" ", "_").replace('-', '_') for formation in
+            list(set(self.geol_clip[self.c_l['c']].to_numpy()))
         ])
         temp_colours = [""] * len(formations)
         self.colour_dict = dict(zip(formations, temp_colours))
@@ -431,8 +445,7 @@ class Config(object):
             self.tmp_path,
             self.glabels,
             Australia=True,
-            asud_strat_file=
-            "https://gist.githubusercontent.com/yohanderose/3b257dc768fafe5aaf70e64ae55e4c42/raw/8598c7563c1eea5c0cd1080f2c418dc975cc5433/ASUD.csv",
+            asud_strat_file="https://gist.githubusercontent.com/yohanderose/3b257dc768fafe5aaf70e64ae55e4c42/raw/8598c7563c1eea5c0cd1080f2c418dc975cc5433/ASUD.csv",
             quiet=quiet_topology)
 
         print("Done")
@@ -451,16 +464,20 @@ class Config(object):
         downloaded = False
         i = 0
         print('Attempt: 0 ', end='')
-        local_dtm=False
-        geotif_file='F:/Loop_Data/BGS/terr50_gagg_gb/terr50_gagg_gb_all.tif'
+        local_dtm = False
+        geotif_file = 'F:/Loop_Data/BGS/terr50_gagg_gb/terr50_gagg_gb_all.tif'
         while downloaded == False:
             try:
-                if(aus):
-                    m2l_utils.get_dtm(self.dtm_file, minlong,
-                                      maxlong, minlat, maxlat)
-                elif(local_dtm):                   
-                    bbox=[ self.bbox_3d["minx"],self.bbox_3d["miny"],self.bbox_3d["maxx"],self.bbox_3d["maxy"]]
-                    m2l_utils.get_local_dtm(self.dtm_path,geotif_file,self.dtm_crs,bbox)
+                if (aus):
+                    m2l_utils.get_dtm(self.dtm_file, minlong, maxlong, minlat,
+                                      maxlat)
+                elif (local_dtm):
+                    bbox = [
+                        self.bbox_3d["minx"], self.bbox_3d["miny"],
+                        self.bbox_3d["maxx"], self.bbox_3d["maxy"]
+                    ]
+                    m2l_utils.get_local_dtm(self.dtm_path, geotif_file,
+                                            self.dtm_crs, bbox)
 
                 else:
                     m2l_utils.get_dtm_hawaii(self.dtm_file, minlong, maxlong,
@@ -477,9 +494,10 @@ class Config(object):
             )
         print('Done.')
 
-        if(not local_dtm):
-            geom_rp = m2l_utils.reproject_dtm(
-                self.dtm_file, self.dtm_reproj_file, self.dtm_crs, self.proj_crs)
+        if (not local_dtm):
+            geom_rp = m2l_utils.reproject_dtm(self.dtm_file,
+                                              self.dtm_reproj_file,
+                                              self.dtm_crs, self.proj_crs)
 
         self.dtm = rasterio.open(self.dtm_reproj_file)
 

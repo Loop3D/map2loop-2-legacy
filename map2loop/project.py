@@ -20,12 +20,13 @@ from map2loop.m2l_utils import display, enable_quiet_mode, disable_quiet_mode, p
 
 class Project(object):
     """A high level object implementation of the map2loop workflow."""
+
     def __init__(
         self,
         loopdata_state=None,
         geology_file=None,
-        fault_file=None,
-        fold_file=None,
+            fault_file=None,
+            fold_file=None,
         structure_file=None,
         mindep_file=None,
         metadata=None,
