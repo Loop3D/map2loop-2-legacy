@@ -1,3 +1,4 @@
+import time
 import os
 import sys
 import re
@@ -214,6 +215,7 @@ class Project(object):
                       step_out=None,
                       quiet='None',
                       clut_path='',
+                      run_flags=None,
                       **kwargs):
         """Creates a sub-project Config object and preprocesses input data for some area.
 
@@ -233,7 +235,6 @@ class Project(object):
         :type quiet: string, optional
         :param **kwargs:
         """
-        # TODO: Proj crs probably doesn't need to be here
 
         self.loopFilename = loopFilename
         if self.loopFilename is not None:
@@ -277,7 +278,52 @@ class Project(object):
         if clut_path != '':
             self.clut_path = clut_path
 
-        kwargs = {'clut_path': self.clut_path}
+        try:
+            # Check if (perhaps editted) run_flags already exist
+            self.run_flags = self.run_flags
+        except Exception:
+            # Otherwise set them up
+            self.run_flags = {
+                'aus': True,
+                'deposits': "Fe,Cu,Au,NONE",
+                'dtb': '',
+                'orientation_decimate': 0,
+                'contact_decimate': 5,
+                'intrusion_mode': 0,
+                'interpolation_spacing': 500,
+                'misorientation': 30,
+                'interpolation_scheme': 'scipy_rbf',
+                'fault_decimate': 5,
+                'min_fault_length': 5000,
+                'fault_dip': 90,
+                'pluton_dip': 45,
+                'pluton_form': 'domes',
+                'dist_buffer': 10,
+                'contact_dip': -999,
+                'contact_orientation_decimate': 5,
+                'null_scheme': 'null',
+                'thickness_buffer': 5000,
+                'max_thickness_allowed': 10000,
+                'fold_decimate': 5,
+                'fat_step': 750,
+                'close_dip': -999,
+                'use_interpolations': True,
+                'use_fat': True
+            }
+
+        # And copy in any new settings from the user
+        if run_flags is not None:
+            try:
+                for key in self.run_flags.keys():
+                    try:
+                        self.run_flags[key] = run_flags[key]
+                    except Exception:
+                        pass
+            except Exception:
+                print('run_flags must be a dictionary, setting defaults.')
+
+        kwargs = {'clut_path': self.clut_path,
+                  'run_flags': self.run_flags}
         self.config = Config(out_dir, overwrite, self.geology_file,
                              self.fault_file, self.fold_file,
                              self.structure_file, self.mindep_file, bbox_3d,
@@ -351,85 +397,7 @@ class Project(object):
         if self.metadata is not '':
             self.read_metadata(self.metadata)
 
-    def run(self,
-            aus=True,
-            deposits="Fe,Cu,Au,NONE",
-            dtb='',
-            orientation_decimate=0,
-            contact_decimate=5,
-            intrusion_mode=0,
-            interpolation_spacing=500,
-            misorientation=30,
-            interpolation_scheme='scipy_rbf',
-            fault_decimate=5,
-            min_fault_length=5000,
-            fault_dip=90,
-            pluton_dip=45,
-            pluton_form='domes',
-            dist_buffer=10,
-            contact_dip=-999,
-            contact_orientation_decimate=5,
-            null_scheme='null',
-            thickness_buffer=5000,
-            max_thickness_allowed=10000,
-            fold_decimate=5,
-            fat_step=750,
-            close_dip=-999,
-            use_interpolations=True,
-            use_fat=True):
-        """Performs the data processing steps of the map2loop workflow.
-
-        :param aus: Indicates if area is in Australia for using ASUD. Defaults to True.
-        :type aus: bool
-        :param deposits: Mineral deposit names for focused topology extraction. Defaults to "Fe,Cu,Au,NONE".
-        :type deposits: str
-        :param dtb: Path to depth to basement grid. Defaults to ''.
-        :type dtb: str
-        :param orientation_decimate: Save every nth orientation data point. Defaults to 0.
-        :type orientation_decimate: int
-        :param contact_decimate: Save every nth contact data point. Defaults to 5.
-        :type contact_decimate: int
-        :param intrusion_mode: 1 to exclude all intrusions from basal contacts, 0 to only exclude sills. Defaults to 0.
-        :type intrusion_mode: intrusion_mode: int
-        :param interpolation_spacing: Interpolation grid spacing in meters. Defaults to 500.
-        :type interpolation_spacing: interpolation_spacing: int
-        :param misorientation: Defaults to 30.
-        :type misorientation: int
-        :param interpolation_scheme: What interpolation function to use of scipy_rbf (radial basis) or scipy_idw (inverse distance weighted). Defaults to 'scipy_rbf'.
-        :type interpolation_scheme: str
-        :param fault_decimate: Save every nth fault data point. Defaults to 5.
-        :type fault_decimate: int
-        :param min_fault_length: Min fault length to be considered. Defaults to 5000.
-        :type min_fault_length: int
-        :param fault_dip: Defaults to 90.
-        :type fault_dip: int
-        :param pluton_dip: Defaults to 45.
-        :type pluton_dip: int
-        :param pluton_form: Possible forms from domes, saucers or pendant. Defaults to 'domes'.
-        :type pluton_form: str
-        :param dist_buffer: Buffer for processing plutons. Defaults to 10.
-        :type dist_buffer: int
-        :param contact_dip: Defaults to -999.
-        :type contact_dip: int
-        :param contact_orientation_decimate: Save every nth contact orientation point. Defaults to 5.
-        :type contact_orientation_decimate: int
-        :param null_scheme: How null values present in the dtb. Defaults to 'null'.
-        :type null_scheme: str
-        :param thickness_buffer: Defaults to 5000.
-        :type thickness_buffer: int
-        :param max_thickness_allowed: Defaults to 10000.
-        :type max_thickness_allowed: int
-        :param fold_decimate: Save every nth fold data point. Defaults to 5.
-        :type fold_decimate: int
-        :param fat_step: How much to step out normal to the fold axial trace. Defaults to 750.
-        :type fat_step: int
-        :param close_dip: Dip to assign to all new orientations. Defaults to -999.
-        :type close_dip: int
-        :param use_interpolations: Defaults to True.
-        :type use_interpolations: bool
-        :param use_fat: Defaults to True.
-        :type use_fat: bool
-        """
+    def run(self):
 
         if self.quiet == 'all':
             enable_quiet_mode()
@@ -439,35 +407,37 @@ class Project(object):
 
             print("Generating topology analyser input...")
             self.config.export_csv()
-            self.config.run_map2model(deposits, aus)
+            self.config.run_map2model(
+                self.run_flags['deposits'], self.run_flags['aus'])
             pbar.update(10)
 
-            self.config.load_dtm(aus)
+            self.config.load_dtm(self.run_flags['aus'])
             pbar.update(10)
 
             self.config.join_features()
             pbar.update(10)
 
-            self.config.calc_depth_grid(dtb)
+            self.config.calc_depth_grid(self.run_flags['dtb'])
             pbar.update(10)
 
-            self.config.export_orientations(orientation_decimate)
+            self.config.export_orientations(
+                self.run_flags['orientation_decimate'])
             pbar.update(10)
-            self.config.export_contacts(contact_decimate, intrusion_mode)
+            self.config.export_contacts(
+                self.run_flags['contact_decimate'], self.run_flags['intrusion_mode'])
             pbar.update(10)
-            self.config.test_interpolation(interpolation_spacing,
-                                           misorientation,
-                                           interpolation_scheme)
+            self.config.test_interpolation(self.run_flags['interpolation_spacing'],
+                                           self.run_flags['misorientation'],
+                                           self.run_flags['interpolation_scheme'])
             pbar.update(10)
 
-            self.config.export_faults(fault_decimate, min_fault_length,
-                                      fault_dip)
-            self.config.process_plutons(pluton_dip, pluton_form, dist_buffer,
-                                        contact_decimate)
+            self.config.export_faults(self.run_flags['fault_decimate'], self.run_flags['min_fault_length'],
+                                      self.run_flags['fault_dip'])
+            self.config.process_plutons(self.run_flags['pluton_dip'], self.run_flags['pluton_form'], self.run_flags['dist_buffer'],
+                                        self.run_flags['contact_decimate'])
             pbar.update(20)
 
             # Seismic section is in the hamersely model area
-            # TODO: Implement this option better and test with Turner
             if (self.workflow['seismic_section']):
                 self.config.extract_section_features(seismic_line_file="",
                                                      seismic_bbox_file="",
@@ -475,16 +445,16 @@ class Project(object):
 
             if (self.workflow['contact_dips']):
                 self.config.propagate_contact_dips(
-                    contact_dip, contact_orientation_decimate)
+                    self.run_flags['contact_dip'], self.run_flags['contact_orientation_decimate'])
 
             if (self.workflow['formation_thickness']):
-                self.config.calc_thickness(contact_decimate, null_scheme,
-                                           thickness_buffer,
-                                           max_thickness_allowed, self.c_l)
+                self.config.calc_thickness(self.run_flags['contact_decimate'], self.run_flags['null_scheme'],
+                                           self.run_flags['thickness_buffer'],
+                                           self.run_flags['max_thickness_allowed'], self.c_l)
 
             if (self.workflow['fold_axial_traces']):
                 self.config.create_fold_axial_trace_points(
-                    fold_decimate, fat_step, close_dip)
+                    self.run_flags['fold_decimate'], self.run_flags['fat_step'], self.run_flags['close_dip'])
 
             # Prepocess model inputs
             inputs = ('')
@@ -501,8 +471,8 @@ class Project(object):
             elif (self.workflow['model_engine'] == 'noddy'):
                 inputs = ('')
 
-            self.config.postprocess(inputs, self.workflow, use_interpolations,
-                                    use_fat)
+            self.config.postprocess(inputs, self.workflow, self.run_flags['use_interpolations'],
+                                    self.run_flags['use_fat'])
             pbar.update(10)
 
             self.config.save_cmap()

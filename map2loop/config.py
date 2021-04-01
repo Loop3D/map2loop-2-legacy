@@ -110,6 +110,9 @@ class Config(object):
         if self.quiet == 'all':
             enable_quiet_mode()
 
+        self.clut_path = kwargs['clut_path']
+        self.run_flags = kwargs['run_flags']
+
         self.bbox_3d = bbox_3d
         self.bbox = tuple([
             bbox_3d["minx"], bbox_3d["miny"], bbox_3d["maxx"], bbox_3d["maxy"]
@@ -140,8 +143,6 @@ class Config(object):
         self.fault_file = fault_file
         self.fold_file = fold_file
         self.mindep_file = mindep_file
-
-        self.clut_path = kwargs['clut_path']
 
         disable_quiet_mode()
 
@@ -849,6 +850,7 @@ class Config(object):
         # buffer = 5000
         # max_thickness_allowed = 10000
 
+        # TODO: multi thread / numba jit
         m2l_geometry.calc_thickness_with_grid(self.tmp_path, self.output_path,
                                               thickness_buffer,
                                               max_thickness_allowed, self.c_l,
@@ -869,7 +871,6 @@ class Config(object):
                              'formation_thicknesses_norm.csv'), self.geol_clip,
                 'norm_th', 'x', 'y', True, 'numeric')
 
-    # TODO: This needs a shorter name
     def create_fold_axial_trace_points(self, fold_decimate, fat_step,
                                        close_dip):
         # fold_decimate = 5
@@ -881,6 +882,7 @@ class Config(object):
                                                 self.dtb, self.dtb_null, False,
                                                 self.c_l, fold_decimate)
 
+            # TODO : better approximation / multithread / numba
             m2l_geometry.save_fold_axial_traces_orientations(
                 self.fold_file, self.output_path, self.tmp_path, self.dtm,
                 self.dtb, self.dtb_null, False, self.c_l, self.proj_crs,
