@@ -306,26 +306,30 @@ def get_dtm_topography_org(path_out, minlong, maxlong, minlat, maxlat):
 # Extracts and saves to file digital terrain model
 ############################################
 
-def get_local_dtm(dtm_path,geotif_file,dst_crs,bbox):
+def get_local_dtm(dtm_file,geotif_file,dst_crs,bbox):
+    # get project extent
     y_point_list = [bbox[1], bbox[1], bbox[3], bbox[3],bbox[3]]
     x_point_list = [bbox[0], bbox[2], bbox[2], bbox[0], bbox[0]]
-    bbox_geom = Polygon(zip(x_point_list, y_point_list))
+    bbox_geom =  Polygon(zip(x_point_list, y_point_list))
+    # shapes = Polygon(zip(x_point_list, y_point_list)) # this should require to pass CRS along
     mbbox = gpd.GeoDataFrame(index=[0], crs=dst_crs, geometry=[bbox_geom]) 
+    # write extent as a polygon in a temp shapefile
+    dtm_path = os.path.split(dtm_file)[0]
     mbbox.to_file(os.path.join(dtm_path, 'roi_poly_dst.shp'))
-
+    # read temp shapefile with project extent
     with fiona.open(os.path.join(dtm_path, 'roi_poly_dst.shp'), "r") as shapefile:
         shapes = [feature["geometry"] for feature in shapefile]
-        
+    # crop raster to extent
     with rasterio.open(geotif_file) as src:
         out_image, out_transform = rasterio.mask.mask(src, shapes, crop=True)
         out_meta = src.meta
-    
+    # update geotiff metadata
     out_meta.update({"driver": "GTiff",
                  "height": out_image.shape[1],
                  "width": out_image.shape[2],
                  "transform": out_transform})
-
-    with rasterio.open(os.path.join(dtm_path, 'dtm_rp.tif'), "w", **out_meta) as dest:
+    # write cropped geotiff
+    with rasterio.open(dtm_file, "w", **out_meta) as dest:
         dest.write(out_image)
 
 ############################################
