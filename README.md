@@ -8,7 +8,7 @@ Generate 3D geological model inputs from geographical maps — a high-level impl
 
 You will need some flavour of conda (a python package manager, [see here](https://docs.anaconda.com/anaconda/install/index.html)), as well as Python ≥ 3.6
 
-### Run 🐍
+### Run
 
 To just use map2loop, issue the following
 
@@ -16,7 +16,7 @@ To just use map2loop, issue the following
 conda install -c conda-forge -c loop3d map2loop -y
 ```
 
-### Development 🔧
+### Development
 
 If you want to tinker yourself/contribute, clone the source code with
 
@@ -43,7 +43,7 @@ python setup.py develop
 
 Fair warning, we recommend conda to almost everyone. With great software development power comes great environment setup inconvenience. You'll need to download and install the [docker containerisation software](https://docs.docker.com/get-docker/), and the docker and docker-compose CLI.
 
-### Development ️️️️🐋
+### Development 
 
 1. Clone this repo and navigate inside as per above
 2. Run the following and click on the Jupyter server forwarded link to access and edit the notebooks
