@@ -350,6 +350,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
         except Exception as e:
             m2l_warnings.append('no mindeps for analysis')
+            mindeps=0
 
         else:
             mindeps = mindeps.replace(r'^\s+$', np.nan, regex=True)
@@ -435,8 +436,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             orientations[c_l['d']] = pd.to_numeric(orientations[c_l['d']])
 
             orientations.to_file(structure_file)
-
-        if(len(mindeps) > 0):
+        if(len(mindeps)>0):
             mindep_file = os.path.join(tmp_path,'mindeps_clip.shp')
             mindeps.crs = dst_crs
             mindeps.to_file(mindep_file)
