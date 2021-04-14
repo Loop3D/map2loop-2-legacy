@@ -34,9 +34,9 @@ class CondaDependencies(develop):
 
 
 long_description = ""
-readme_file = os.path.join(head, "README.md")
-with open(readme_file, "r") as fh:
-    long_description = fh.read()
+#readme_file = os.path.join(head, "README.md")
+#with open(readme_file, "r") as fh:
+#    long_description = fh.read()
 
 setuptools.setup(
     name="map2loop",
