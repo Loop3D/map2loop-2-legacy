@@ -10,6 +10,8 @@ from math import sqrt
 from map2loop.m2l_utils import print
 from shapely.wkt import loads
 import re
+from osgeo import ogr
+from shapely.wkt import loads
 
 
 # explodes polylines and modifies objectid for exploded parts
@@ -533,3 +535,14 @@ def round_vertices(layer_file,precision,output_file):
     layer_file.to_file(output_file)
     print("rounded file written to ",output_file)
     #https://gis.stackexchange.com/questions/321518/rounding-coordinates-to-5-decimals-in-geopandas
+
+def densify(geom):
+    wkt = geom.wkt  # Get wkt
+    geom = ogr.CreateGeometryFromWkt(wkt) 
+    geom.Segmentize(spacing)  #Modify the geometry such it has no segment longer than the given (maximum) length.
+    wkt2 = geom.ExportToWkt()
+    new = loads(wkt2)
+    return new
+
+#spacing=500
+#shapefile['geometry'] = shapefile['geometry'].map(densify)
