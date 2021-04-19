@@ -1475,11 +1475,11 @@ def interpolate_orientation_grid(structures, calc, xcoords, ycoords, c_l):
         else:
             dipdir[i] = a_pt[1][c_l['dd']]
 
-        if(structures.iloc[i][c_l['bo']] == c_l['btype']):
+        if(structures.iloc[i][c_l['bo']] == c_l['btype']):  #this code is in the wrong place, it needs its own loop after l,m,n calculated...
             l[i] = -l[i]
             m[i] = -m[i]
             n[i] = -n[i]
-
+        i=i+1
     l = np.zeros(npts)
     m = np.zeros(npts)
     n = np.zeros(npts)
