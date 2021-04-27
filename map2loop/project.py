@@ -13,7 +13,15 @@ import pandas as pd
 import numpy as np
 from shapely.geometry import Polygon
 from matplotlib import pyplot as plt
-from map2loop import geology_loopdata, structure_loopdata, fault_loopdata, fold_loopdata, mindep_loopdata, metafiles, clut_paths
+from map2loop import (
+    geology_loopdata,
+    structure_loopdata,
+    fault_loopdata,
+    fold_loopdata,
+    mindep_loopdata,
+    metafiles,
+    clut_paths,
+)
 
 from map2loop.config import Config
 from map2loop.m2l_utils import display, enable_quiet_mode, disable_quiet_mode, print
@@ -25,9 +33,10 @@ class Project(object):
     def __init__(
         self,
         loopdata_state=None,
+        dtm_file=None,
         geology_file=None,
-            fault_file=None,
-            fold_file=None,
+        fault_file=None,
+        fold_file=None,
         structure_file=None,
         mindep_file=None,
         metadata=None,
@@ -36,6 +45,8 @@ class Project(object):
 
         :param loopdata_state: Indicates use of loop remote sources and which Australian state to use, defaults to None
         :type loopdata_state: string, optional
+        :param dtm_file: Local path or URL to digital terrain model source data, defaults to None
+        :type dtm_file: string, optional
         :param geology_file: Local path or URL to stratigraphic source data, defaults to None
         :type geology_file: string, optional
         :param fault_file:  Local path or URL to fault source data[description], defaults to None
@@ -50,23 +61,27 @@ class Project(object):
         :type metadata: string, optional
         """
 
-        warnings.filterwarnings('ignore')
+        warnings.filterwarnings("ignore")
 
         if loopdata_state is None:
             self.local = True
             self.state = None
-            if any(source is None for source in [
-                    geology_file, fault_file, fold_file, structure_file,
-                    metadata
-            ]):
+            if any(
+                source is None
+                for source in [
+                    geology_file,
+                    fault_file,
+                    fold_file,
+                    structure_file,
+                    metadata,
+                ]
+            ):
                 sys.exit(
                     "Please pass local file paths or urls and a metadata file as input params if you do not wish to use Loop's remote sources."
                 )
         else:
             self.local = False
-            if loopdata_state in [
-                    'WA', 'NSW', 'VIC', 'SA', 'QLD', 'ACT', 'TAS'
-            ]:
+            if loopdata_state in ["WA", "NSW", "VIC", "SA", "QLD", "ACT", "TAS"]:
                 self.state = loopdata_state
             else:
                 sys.exit(
@@ -74,6 +89,7 @@ class Project(object):
                 )
 
         # If remote, these will be set to null for now, otherwise set to local paths
+        self.dtm_file = dtm_file
         self.geology_file = geology_file
         self.fault_file = fault_file
         self.fold_file = fold_file
@@ -108,23 +124,26 @@ class Project(object):
             # TODO: doesn't like zeros
             self.proj_bounds = (0, 0, 0, 0)
             # TODO: If remote, make epsg required
-            self.proj_crs = {'init': 'EPSG:28350'}
+            self.proj_crs = {"init": "EPSG:28350"}
 
         self.step_out = 0.1
 
         # Make matplotlib comply with interface/cmd line window managers
         import matplotlib
-        gui_env = ['Qt4Agg', 'TkAgg', 'GTK3Agg', 'WXAgg']
+
+        gui_env = ["Qt4Agg", "TkAgg", "GTK3Agg", "WXAgg"]
         all_backends = list(set([*gui_env, *matplotlib.rcsetup.all_backends]))
 
         for gui in all_backends:
             try:
                 matplotlib.use(gui, warn=False, force=True)
                 from matplotlib import pyplot as plt
+
                 break
             except:
                 continue
         # print("Using:", matplotlib.get_backend())
+
 
     def update_workflow(self, model_engine):
         """Set unique run flags depending on model engine to tailor outputs.
@@ -133,6 +152,7 @@ class Project(object):
         :type workflow: dict
 
         """
+
         workflow = {'model_engine': model_engine}
 
         if (workflow['model_engine'] == 'geomodeller'):
@@ -183,19 +203,20 @@ class Project(object):
                 'strat_offset': False,
                 'contact_dips': False
             })
-
         else:
-            workflow.update({
-                'seismic_section': False,
-                'cover_map': False,
-                'near_fault_interpolations': False,
-                'fold_axial_traces': False,
-                'stereonets': True,
-                'formation_thickness': True,
-                'polarity': False,
-                'strat_offset': True,
-                'contact_dips': False
-            })
+            workflow.update(
+                {
+                    "seismic_section": False,
+                    "cover_map": False,
+                    "near_fault_interpolations": False,
+                    "fold_axial_traces": False,
+                    "stereonets": True,
+                    "formation_thickness": True,
+                    "polarity": False,
+                    "strat_offset": True,
+                    "contact_dips": False,
+                }
+            )
 
         self.workflow = workflow
 
@@ -252,14 +273,16 @@ class Project(object):
                 sys.exit("That project file path does not exist.")
 
         if bbox_3d["minx"] == 0 and bbox_3d["maxx"] == 0:
-            bbox_3d.update({
-                "minx": self.proj_bounds[0],
-                "minx": self.proj_bounds[1],
-                "minx": self.proj_bounds[2],
-                "minx": self.proj_bounds[3],
-            })
+            bbox_3d.update(
+                {
+                    "minx": self.proj_bounds[0],
+                    "minx": self.proj_bounds[1],
+                    "minx": self.proj_bounds[2],
+                    "minx": self.proj_bounds[3],
+                }
+            )
 
-        self.clut_path = ''
+        self.clut_path = ""
 
         if proj_crs is None:
             proj_crs = self.proj_crs
@@ -269,23 +292,21 @@ class Project(object):
 
         self.quiet = quiet
 
-        bbox = tuple([
-            bbox_3d["minx"], bbox_3d["miny"], bbox_3d["maxx"], bbox_3d["maxy"]
-        ])
+        bbox = tuple(
+            [bbox_3d["minx"], bbox_3d["miny"], bbox_3d["maxx"], bbox_3d["maxy"]]
+        )
         minx, miny, maxx, maxy = bbox
         lat_point_list = [miny, miny, maxy, maxy, maxy]
         lon_point_list = [minx, maxx, maxx, minx, minx]
         bbox_geom = Polygon(zip(lon_point_list, lat_point_list))
-        polygon = gpd.GeoDataFrame(index=[0],
-                                   crs=proj_crs,
-                                   geometry=[bbox_geom])
+        polygon = gpd.GeoDataFrame(index=[0], crs=proj_crs, geometry=[bbox_geom])
 
         # Define the url queries if remote flag is set
         if self.geology_file is None:
             self.fetch_sources(bbox)
 
         # TODO: Make run flags global vars that can be updated here instead of in run
-        if clut_path != '':
+        if clut_path != "":
             self.clut_path = clut_path
 
         try:
@@ -355,7 +376,7 @@ class Project(object):
                     self.c_l = hjson.load(raw_data)
                     if self.state is not None:
                         # Check for if remote sources are given as local files, state won't exist
-                        if self.state == 'SA':
+                        if self.state == "SA":
                             for key in self.c_l.keys():
                                 try:
                                     self.c_l[key] = self.c_l[key].lower()
@@ -392,24 +413,27 @@ class Project(object):
         """
         bbox_str = "{},{},{},{}".format(bbox[0], bbox[1], bbox[2], bbox[3])
         self.geology_file = geology_loopdata[self.state].replace(
-            'bbox=', 'bbox=' + bbox_str)
+            "bbox=", "bbox=" + bbox_str
+        )
         self.structure_file = structure_loopdata[self.state].replace(
-            'bbox=', 'bbox=' + bbox_str)
+            "bbox=", "bbox=" + bbox_str
+        )
         self.fault_file = fault_loopdata[self.state].replace(
-            'bbox=', 'bbox=' + bbox_str)
-        self.fold_file = fold_loopdata[self.state].replace(
-            'bbox=', 'bbox=' + bbox_str)
+            "bbox=", "bbox=" + bbox_str
+        )
+        self.fold_file = fold_loopdata[self.state].replace("bbox=", "bbox=" + bbox_str)
         self.mindep_file = mindep_loopdata[self.state].replace(
-            'bbox=', 'bbox=' + bbox_str)
+            "bbox=", "bbox=" + bbox_str
+        )
         self.metadata = metafiles[self.state]
         self.clut_path = clut_paths[self.state]
 
-        if self.metadata is not '':
+        if self.metadata is not "":
             self.read_metadata(self.metadata)
 
     def run(self):
 
-        if self.quiet == 'all':
+        if self.quiet == "all":
             enable_quiet_mode()
 
         with tqdm(total=100, position=0) as pbar:
@@ -421,7 +445,7 @@ class Project(object):
                 self.run_flags['deposits'], self.run_flags['aus'])
             pbar.update(10)
 
-            self.config.load_dtm(self.run_flags['aus'])
+            self.config.load_dtm(self.dtm_file if self.local else self.state)
             pbar.update(10)
 
             self.config.join_features()
@@ -453,7 +477,7 @@ class Project(object):
                                                      seismic_bbox_file="",
                                                      seismic_interp_file="")
 
-            if (self.workflow['contact_dips']):
+            if self.workflow["contact_dips"]:
                 self.config.propagate_contact_dips(
                     self.run_flags['contact_dip'], self.run_flags['contact_orientation_decimate'])
 
@@ -462,7 +486,7 @@ class Project(object):
                                            self.run_flags['thickness_buffer'],
                                            self.run_flags['max_thickness_allowed'], self.c_l)
 
-            if (self.workflow['fold_axial_traces']):
+            if self.workflow["fold_axial_traces"]:
                 self.config.create_fold_axial_trace_points(
                     self.run_flags['fold_decimate'], self.run_flags['fat_step'], self.run_flags['close_dip'])
 

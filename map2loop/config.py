@@ -451,52 +451,50 @@ class Config(object):
 
         print("Done")
 
-    def load_dtm(self, aus=True):
+    def load_dtm(self, source="AU"):
+        # group all Australian states codes under the global country code (ISO 3166 ALPHA-2)
+        if source in ("WA", "NSW", "VIC", "SA", "QLD", "ACT", "TAS"):
+            source = "AU"
+        
+        if os.path.isfile(source):
+            bbox = [
+                self.bbox_3d["minx"], self.bbox_3d["miny"],
+                self.bbox_3d["maxx"], self.bbox_3d["maxy"]
+            ]
+            m2l_utils.get_local_dtm(self.dtm_file, source, self.dtm_crs, bbox)
+        else:
+            polygon_ll = self.polygon.to_crs(self.dtm_crs)
+            minlong = polygon_ll.total_bounds[0] - self.step_out
+            maxlong = polygon_ll.total_bounds[2] + self.step_out
+            minlat = polygon_ll.total_bounds[1] - self.step_out
+            maxlat = polygon_ll.total_bounds[3] + self.step_out
+            print("Fetching DTM... ", end=" bbox:")
+            print(minlong, maxlong, minlat, maxlat)
+            i, done = 0, False
+            while not done:
+                if i >= 10:
+                        raise NameError(
+                            f'map2loop error: Could not access DTM server after {i} attempts'
+                        )
+                try:
+                    print(f'Attempt: {i} ...', end='')
+                    if source.upper() in ("AU", "AUSTRALIA"):
+                        m2l_utils.get_dtm(self.dtm_file, minlong, maxlong, minlat,
+                                        maxlat)
+                    elif source.upper() in ("T.H", "HAWAII"): # beware, TH is ISO 3166 code for Thailand
+                        m2l_utils.get_dtm_hawaii(self.dtm_file, minlong, maxlong,
+                                                minlat, maxlat)
+                    else:  # try from opentopography
+                        m2l.utils.get_dtm_topography_org(self.dtm_file, minlog, maxlong, minlat, maxlat)
+                    print( "Succeeded !")
+                    done = True
+                except:
+                    time.sleep(1)
+                    i += 1
+                    print(f' Failed !')
 
-        polygon_ll = self.polygon.to_crs(self.dtm_crs)
-
-        minlong = polygon_ll.total_bounds[0] - self.step_out
-        maxlong = polygon_ll.total_bounds[2] + self.step_out
-        minlat = polygon_ll.total_bounds[1] - self.step_out
-        maxlat = polygon_ll.total_bounds[3] + self.step_out
-
-        print("Fetching DTM... ", end=" bbox:")
-        print(minlong, maxlong, minlat, maxlat)
-        downloaded = False
-        i = 0
-        print('Attempt: 0 ', end='')
-        local_dtm = False
-        geotif_file = 'F:/Loop_Data/BGS/terr50_gagg_gb/terr50_gagg_gb_all.tif'
-        while downloaded == False:
-            try:
-                if (aus):
-                    m2l_utils.get_dtm(self.dtm_file, minlong, maxlong, minlat,
-                                      maxlat)
-                elif (local_dtm):
-                    bbox = [
-                        self.bbox_3d["minx"], self.bbox_3d["miny"],
-                        self.bbox_3d["maxx"], self.bbox_3d["maxy"]
-                    ]
-                    m2l_utils.get_local_dtm(self.dtm_path, geotif_file,
-                                            self.dtm_crs, bbox)
-
-                else:
-                    m2l_utils.get_dtm_hawaii(self.dtm_file, minlong, maxlong,
-                                             minlat, maxlat)
-
-                downloaded = True
-            except:
-                time.sleep(10)
-                i = i + 1
-                print(' ', i, end='')
-        if (i == 100):
-            raise NameError(
-                'map2loop error: Could not access DTM server after 100 attempts'
-            )
-        print('Done.')
-
-        if (not local_dtm):
-            geom_rp = m2l_utils.reproject_dtm(self.dtm_file,
+        # TODO: maybe check if self.dtm != self.proj_crs...
+        geom_rp = m2l_utils.reproject_dtm(self.dtm_file,
                                               self.dtm_reproj_file,
                                               self.dtm_crs, self.proj_crs)
 
