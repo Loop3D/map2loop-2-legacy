@@ -721,7 +721,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
 
                     if(flt[c_l['o']] == '-1'):
                         print(flt[c_l['o']], c_l['fdip'], flt[c_l['fdip']], c_l['fdipnull'], c_l['fdipest'],
-                                flt[c_l['fdipest']], c_l['fdipest_vals'])
+                              flt[c_l['fdipest']], c_l['fdipest_vals'])
 
                     if(flt[c_l['fdip']] == c_l['fdipnull']):  # null specifc dip defined
                         # dip estimate defined
@@ -1885,7 +1885,7 @@ def calc_thickness(tmp_path, output_path, buffer, max_thickness_allowed, c_l):
                                     if(min_dist < max_thickness_allowed):
                                         true_thick = sin(
                                             radians(dip_mean))*min_dist
-                                        ostr = "{},{},{},{},{},{},{},{},{},{},{},{}\n"\
+                                        ostr = "{},{},{},{},{},{},{},{},{},{},{}\n"\
                                             .format(cx[k], cy[k], ctextcode[k], min_dist, int(true_thick), cl[k], cm[k], lm, mm, nm, p1.x, p1.y, p2.x, p2.y, dip_mean)
                                         # ostr = str(cx[k])+','+str(cy[k])+','+ctextcode[k]+','+str(int(true_thick))+\
                                         #    ','+str(cl[k])+','+str(cm[k])+','+str(lm)+','+str(mm)+','+str(nm)+','+\
