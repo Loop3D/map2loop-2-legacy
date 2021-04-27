@@ -4,6 +4,7 @@ import random
 import numpy as np
 import pandas as pd
 import os
+import sys
 import geopandas as gpd
 import rasterio
 from rasterio import plot
@@ -1642,6 +1643,19 @@ def display_LS_map(model, dtm, geol_clip, faults_clip, dst_crs, use_cmap, cmap,
 
 
 def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs):
+    if loopFilename is None:
+        loopFilename = os.path.join(output_path.split(
+            '/')[0], output_path.split('/')[0] + '.loop3d')
+        resp = LoopProjectFile.CreateBasic(loopFilename)
+        if resp['errorFlag']:
+            print(resp['errorString'])
+        else:
+            LoopProjectFile.Set(loopFilename, "extents", geodesic=[0, 1, -180, -179],
+                                utm=[1, 1, bbox['maxy'], bbox['miny'],
+                                     bbox['maxx'], bbox['minx']],
+                                depth=[bbox['top'], bbox['base']],
+                                spacing=[1000, 1000, 10],
+                                preference="utm")
 
     form2supergroup = pd.read_csv(
         os.path.join(tmp_path, 'all_sorts_clean.csv'),

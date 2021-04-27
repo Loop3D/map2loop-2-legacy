@@ -272,7 +272,7 @@ class Config(object):
                 linewidth=0.2,
                 cmap=self.cmap).get_figure()
 
-            self.export_png()
+            # self.export_png()
             fig, ax = plt.subplots()
 
             base = geology.plot(column=self.c_l['c'],
@@ -965,7 +965,8 @@ class Config(object):
         filename = self.loop_projectfile
         if self.loop_projectfile is None:
             # TODO: Make sure these user provided paths end with a slash or are joined properly
-            filename = os.path.join(self.project_path, 'GEOLOGY_CLIP')
+            filename = os.path.join(
+                self.project_path, '{}'.format(self.project_path))
         print("Exporting graphical map...")
         try:
 
