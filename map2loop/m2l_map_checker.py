@@ -10,6 +10,8 @@ from math import sqrt
 from map2loop.m2l_utils import print
 from shapely.wkt import loads
 import re
+from osgeo import ogr
+from shapely.wkt import loads
 
 
 # explodes polylines and modifies objectid for exploded parts
@@ -350,6 +352,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
         except Exception as e:
             m2l_warnings.append('no mindeps for analysis')
+            mindeps=0
 
         else:
             mindeps = mindeps.replace(r'^\s+$', np.nan, regex=True)
@@ -410,25 +413,26 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             print("No faults found, projection may be inconsistent")
 
         geol_clip = gpd.overlay(geology, polygo, how='intersection')
-#        if(len(geol_clip) > 0):
-#            geol_gaps = check_gaps(geol_clip)
-#            if(len(geol_gaps) > 0):
-#                warnings.warn(
-#                    'Gaps between geology polygons, consider editing geology layer or rounding vertices')
-#                geol_gaps.to_file(os.path.join(tmp_path, 'geology_gaps.shp'))
-#            else:
-#                print("No gaps between geology polygons")
-#            geol_overlaps = check_overlaps(geol_clip)
-#            if(len(geol_overlaps) > 0):
-#                warnings.warn(
-#                    'Overlaps between geology polygons, consider editing geology layer or rounding vertices')
-#                geol_overlaps.to_file(os.path.join(
-#                    tmp_path, 'geology_overlaps.shp'))
-#            else:
-#                print("No overlaps between geology polygons")
-#             geol_clip.crs = dst_crs
-        geol_file = os.path.join(tmp_path, 'geol_clip.shp')
-        geol_clip.to_file(geol_file)
+
+        if(len(geol_clip) > 0):
+            geol_gaps=check_gaps(geol_clip)
+            if(len(geol_gaps)>0):
+                warnings.warn('Gaps between geology polygons, consider editing geology layer or rounding vertices')
+                display(geol_gaps)
+                #geol_gaps.to_file(os.path.join(tmp_path,'geology_gaps.shp'))
+            else:
+                print("No gaps between geology polygons")
+            geol_overlaps=check_overlaps(geol_clip)
+            if(len(geol_overlaps)>0):
+                warnings.warn('Overlaps between geology polygons, consider editing geology layer or rounding vertices')
+                display(geol_overlaps)
+                #geol_overlaps.to_file(os.path.join(tmp_path,'geology_overlaps.shp'))
+            else:
+                print("No overlaps between geology polygons")
+            geol_clip.crs = dst_crs
+            geol_file = os.path.join(tmp_path,'geol_clip.shp')
+            geol_clip.to_file(geol_file)
+
 
         if(len(orientations) > 0):
             structure_file = os.path.join(tmp_path, 'structure_clip.shp')
@@ -438,6 +442,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
             orientations.to_file(structure_file)
 
+
         try:
             if(len(mindeps) > 0):
                 mindep_file = os.path.join(tmp_path, 'mindeps_clip.shp')
@@ -445,7 +450,6 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                 mindeps.to_file(mindep_file)
         except Exception as e:
             print('Not clipping mindeps, dataframe is empty')
-
         print('\nNo errors found, clipped and updated files saved to tmp')
 
         return(structure_file, geol_file, fault_file, mindep_file, fold_file, c_l)
@@ -503,7 +507,7 @@ def check_overlaps(data_temp):
         data_overlaps.crs = data_temp.crs
         return(data_overlaps)
     else:
-        return()
+        return('')
 
 #########################################
 #
@@ -527,7 +531,7 @@ def check_gaps(data_temp):
         data_gaps.head()
         return(data_gaps)
     else:
-        return()
+        return('')
 
 #########################################
 #
@@ -546,5 +550,17 @@ def round_vertices(layer_file, precision, output_file):
     layer_file.geometry = layer_file.geometry.apply(
         lambda x: loads(re.sub(simpledec, mround, x.wkt)))
     layer_file.to_file(output_file)
-    print("rounded file written to ", output_file)
-    # https://gis.stackexchange.com/questions/321518/rounding-coordinates-to-5-decimals-in-geopandas
+    print("rounded file written to ",output_file)
+    #https://gis.stackexchange.com/questions/321518/rounding-coordinates-to-5-decimals-in-geopandas
+
+def densify(geom):
+    wkt = geom.wkt  # Get wkt
+    geom = ogr.CreateGeometryFromWkt(wkt) 
+    geom.Segmentize(spacing)  #Modify the geometry such it has no segment longer than the given (maximum) length.
+    wkt2 = geom.ExportToWkt()
+    new = loads(wkt2)
+    return new
+
+#spacing=500
+#shapefile['geometry'] = shapefile['geometry'].map(densify)
+

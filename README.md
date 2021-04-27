@@ -1,8 +1,9 @@
 # Map2Loop 2.0
 
-Generate 3D geological model inputs from geographical maps — a high-level implementation and extension of map2loop by Prof. Mark Jessell at UWA.
+Generate 3D geological model inputs from geographical maps — a high-level implementation and extension of [https://github.com/Loop3D/map2loop](https://github.com/Loop3D/map2loop) by Prof. Mark Jessell at UWA. To see an example interactive model build using map2loop and LoopStructural, follow this link:   
+   
+ <a href="http://geo.loop-gis.org/models/vtkleaflet_2021-03-19-11-40.html">3D Model from the Hamersley region, Western Australia</a>)
 
-![wa example](docs/GEOLOGY_CLIP.png?raw=true)
 
 ## Install
 
@@ -37,8 +38,6 @@ Navigate into map2loop-2, and issue the following to install map2loop and its de
 python setup.py develop
 ```
 
----
-
 ## Building with Docker
 
 Fair warning, we recommend conda to almost everyone. With great software development power comes great environment setup inconvenience. You'll need to download and install the [docker containerisation software](https://docs.docker.com/get-docker/), and the docker and docker-compose CLI.
@@ -64,8 +63,6 @@ Fair warning, we recommend conda to almost everyone. With great software develop
    docker exec -it <container_NAMEorID> bash
    # Probably -> docker exec -it  map2loop-2_dev_1 bash
    ```
-
----
 
 ## Usage
 
