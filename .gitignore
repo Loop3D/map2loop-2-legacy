@@ -3,6 +3,8 @@
 /model-test*
 .ipynb_checkpoints
 notebooks/Testing.ipynb
+.vim/
+.vscode/
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,c++,cmake

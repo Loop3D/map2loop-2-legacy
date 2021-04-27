@@ -4,11 +4,12 @@ Generate 3D geological model inputs from geographical maps — a high-level impl
    
  <a href="http://geo.loop-gis.org/models/vtkleaflet_2021-03-19-11-40.html">3D Model from the Hamersley region, Western Australia</a>)
 
+
 ## Install
 
 You will need some flavour of conda (a python package manager, [see here](https://docs.anaconda.com/anaconda/install/index.html)), as well as Python ≥ 3.6
 
-### Run 🐍
+### Run
 
 To just use map2loop, issue the following
 
@@ -16,7 +17,7 @@ To just use map2loop, issue the following
 conda install -c conda-forge -c loop3d map2loop -y
 ```
 
-### Development 🔧
+### Development
 
 If you want to tinker yourself/contribute, clone the source code with
 
@@ -37,13 +38,11 @@ Navigate into map2loop-2, and issue the following to install map2loop and its de
 python setup.py develop
 ```
 
----
-
 ## Building with Docker
 
 Fair warning, we recommend conda to almost everyone. With great software development power comes great environment setup inconvenience. You'll need to download and install the [docker containerisation software](https://docs.docker.com/get-docker/), and the docker and docker-compose CLI.
 
-### Development ️️️️🐋
+### Development 
 
 1. Clone this repo and navigate inside as per above
 2. Run the following and click on the Jupyter server forwarded link to access and edit the notebooks
@@ -64,8 +63,6 @@ Fair warning, we recommend conda to almost everyone. With great software develop
    docker exec -it <container_NAMEorID> bash
    # Probably -> docker exec -it  map2loop-2_dev_1 bash
    ```
-
----
 
 ## Usage
 

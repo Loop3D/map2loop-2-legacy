@@ -121,7 +121,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             nans = geology[c_l['c']].isnull().sum()
             if(nans > 0):
                 m2l_errors.append(''+str(nans)+' NaN/blank found in column "' +
-                                str(c_l['c'])+'" of geology file, please fix')
+                                  str(c_l['c'])+'" of geology file, please fix')
 
             if(c_l['g'] == 'No_col' or not c_l['g'] in geology.columns):
                 m2l_warnings.append(
@@ -130,7 +130,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                 geology[c_l['g']] = "Top"
 
             geology = geology.replace(r'^\s+$', np.nan, regex=True)
-            geology=geology.replace(',',' ', regex=True)        
+            geology = geology.replace(',', ' ', regex=True)
             geology[c_l['g']].fillna(geology[c_l['g2']], inplace=True)
             geology[c_l['g']].fillna(geology[c_l['c']], inplace=True)
 
@@ -175,7 +175,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                 geology = geology[~geology[c_l['u']].str.startswith(drift)]
 
             show_metadata(geology, "geology layer")
-        else: 
+        else:
             print('No geology in area, projection may be inconsistent')
 
     # Process fold polylines
@@ -224,10 +224,9 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                         'some folds are MultiPolyLines, and have been split')
                 folds_explode.crs = dst_crs
 
-            show_metadata(folds_clip,"fold layer")    
-        else: 
+            show_metadata(folds_clip, "fold layer")
+        else:
             print('No folds in area, projection may be inconsistent')
-
 
     # Process fault polylines
 
@@ -302,10 +301,11 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                     'some faults are MultiPolyLines, and have been split')
             faults_explode.crs = dst_crs
 
-            print("original no of faults:",len(faults_explode))
-            lengths=[]
+            print("original no of faults:", len(faults_explode))
+            lengths = []
+
             for indx, flt in faults_explode.iterrows():
-                if(c_l['fault'] in flt[c_l['f']]):
+                if(c_l['fault'].lower() in flt[c_l['f']].lower()):
                     if(flt.geometry.type == 'LineString'):
                         flt_ls = LineString(flt.geometry)
                         dlsx = flt_ls.coords[0][0] - \
@@ -313,16 +313,16 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                         dlsy = flt_ls.coords[0][1] - \
                             flt_ls.coords[len(flt_ls.coords)-1][1]
                         strike = sqrt((dlsx*dlsx)+(dlsy*dlsy))
-                        lengths+=[strike]
-            faults_explode['f_length']=lengths
-            faults_explode=faults_explode[faults_explode['f_length']>2500]
+                        lengths.append(strike)
+                        #print(flt)
+            faults_explode['f_length'] = lengths
+            faults_explode = faults_explode[faults_explode['f_length'] > 2500]
 
             show_metadata(faults_explode, "fault layer")
         else:
 
             # fault_file='None'
             print('No faults in area, projection may be inconsistent')
-
 
     # Process mindep points
 
@@ -369,7 +369,8 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                         m2l_warnings.append(str(
                             nans)+' NaN/blank found in column '+str(c_l[code])+' of mindep file, replacing with 0')
                         mindeps[c_l[code]].fillna("0", inplace=True)
-        show_metadata(mindeps, "mindeps layer")
+
+            show_metadata(mindeps, "mindeps layer")
 
         # explode fault/fold multipolylines
         # sometimes faults go off map and come back in again which after clipping creates multipolylines
@@ -386,32 +387,33 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
         for e in m2l_errors:
             print("    ", e)
         sep = '\12'
-        raise NameError(sep.join(m2l_errors) + '\n map2loop error: Fix errors before running again')
+        raise NameError(sep.join(m2l_errors) +
+                        '\n map2loop error: Fix errors before running again')
 
     if(len(m2l_errors) == 0):
 
         if folds is not None:
-            if(len(folds)>0):
-                if(len(folds_clip)>0):
-                    fold_file=os.path.join(tmp_path,'folds_clip.shp')
-                    folds_explode=folds_explode.dropna(subset=['geometry'])
-                    folds_explode.to_file(fold_file)         
+            if(len(folds) > 0):
+                if(len(folds_clip) > 0):
+                    fold_file = os.path.join(tmp_path, 'folds_clip.shp')
+                    folds_explode = folds_explode.dropna(subset=['geometry'])
+                    folds_explode.to_file(fold_file)
                 else:
-                    fold_file=os.path.join(tmp_path,'folds_clip.shp')
-                    print("\nFold layer metadata\n--------------------")             
+                    fold_file = os.path.join(tmp_path, 'folds_clip.shp')
+                    print("\nFold layer metadata\n--------------------")
                     print("No folds found, projection may be inconsistent")
 
-
         if(len(faults_clip) > 0):
-            fault_file = os.path.join(tmp_path,'faults_clip.shp')
+            fault_file = os.path.join(tmp_path, 'faults_clip.shp')
             faults_explode.crs = dst_crs
             faults_explode.to_file(fault_file)
         else:
-            fault_file = os.path.join(tmp_path,'faults_clip.shp')
+            fault_file = os.path.join(tmp_path, 'faults_clip.shp')
             print("\nFault layer metadata\n--------------------")
             print("No faults found, projection may be inconsistent")
 
         geol_clip = gpd.overlay(geology, polygo, how='intersection')
+
         if(len(geol_clip) > 0):
             geol_gaps=check_gaps(geol_clip)
             if(len(geol_gaps)>0):
@@ -431,21 +433,26 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             geol_file = os.path.join(tmp_path,'geol_clip.shp')
             geol_clip.to_file(geol_file)
 
+
         if(len(orientations) > 0):
-            structure_file = os.path.join(tmp_path,'structure_clip.shp')
+            structure_file = os.path.join(tmp_path, 'structure_clip.shp')
             orientations.crs = dst_crs
             orientations[c_l['dd']] = pd.to_numeric(orientations[c_l['dd']])
             orientations[c_l['d']] = pd.to_numeric(orientations[c_l['d']])
 
             orientations.to_file(structure_file)
-        if(len(mindeps)>0):
-            mindep_file = os.path.join(tmp_path,'mindeps_clip.shp')
-            mindeps.crs = dst_crs
-            mindeps.to_file(mindep_file)
+
+
+        try:
+            if(len(mindeps) > 0):
+                mindep_file = os.path.join(tmp_path, 'mindeps_clip.shp')
+                mindeps.crs = dst_crs
+                mindeps.to_file(mindep_file)
+        except Exception as e:
+            print('Not clipping mindeps, dataframe is empty')
         print('\nNo errors found, clipped and updated files saved to tmp')
 
         return(structure_file, geol_file, fault_file, mindep_file, fold_file, c_l)
-
 
 
 def show_metadata(gdf, name):
@@ -473,25 +480,31 @@ def show_metadata(gdf, name):
 def check_overlaps(data_temp):
     data_temp['id'] = data_temp.index
 
-    data_overlaps=gpd.GeoDataFrame()
+    data_overlaps = gpd.GeoDataFrame()
     for index, row in data_temp.iterrows():
-        data_temp1=data_temp.loc[data_temp.id!=row.id,]
+        data_temp1 = data_temp.loc[data_temp.id != row.id, ]
         # check if intersection occured
-        overlaps=data_temp1[data_temp1.geometry.overlaps(row.geometry)]['id'].tolist()
-        if len(overlaps)>0:
+        overlaps = data_temp1[data_temp1.geometry.overlaps(
+            row.geometry)]['id'].tolist()
+        if len(overlaps) > 0:
             # compare the area with threshold
             for y in overlaps:
-                temp_area=gpd.overlay(data_temp.loc[data_temp.id==y,],data_temp.loc[data_temp.id==row.id,],how='intersection')
-                temp_area=temp_area.loc[temp_area.geometry.area>=9e-9]
-                if temp_area.shape[0]>0:
-                    data_overlaps=gpd.GeoDataFrame(pd.concat([temp_area,data_overlaps],ignore_index=True),crs=data_temp.crs)
+                temp_area = gpd.overlay(
+                    data_temp.loc[data_temp.id == y, ], data_temp.loc[data_temp.id == row.id, ], how='intersection')
+                temp_area = temp_area.loc[temp_area.geometry.area >= 9e-9]
+                if temp_area.shape[0] > 0:
+                    data_overlaps = gpd.GeoDataFrame(
+                        pd.concat([temp_area, data_overlaps], ignore_index=True), crs=data_temp.crs)
     # get unique of list id
     if(not data_overlaps.empty):
-        data_overlaps['sorted']=data_overlaps.apply(lambda y: sorted([y['id_1'],y['id_2']]),axis=1)
-        data_overlaps['sorted']=data_overlaps.sorted.apply(lambda y: ''.join(str(y)))
-        data_overlaps=data_overlaps.drop_duplicates('sorted')
-        data_overlaps=data_overlaps.reset_index()[['id_1','id_2','geometry']]
-        data_overlaps.crs=data_temp.crs
+        data_overlaps['sorted'] = data_overlaps.apply(
+            lambda y: sorted([y['id_1'], y['id_2']]), axis=1)
+        data_overlaps['sorted'] = data_overlaps.sorted.apply(
+            lambda y: ''.join(str(y)))
+        data_overlaps = data_overlaps.drop_duplicates('sorted')
+        data_overlaps = data_overlaps.reset_index()[
+            ['id_1', 'id_2', 'geometry']]
+        data_overlaps.crs = data_temp.crs
         return(data_overlaps)
     else:
         return('')
@@ -502,16 +515,18 @@ def check_overlaps(data_temp):
 #
 #########################################
 
+
 def check_gaps(data_temp):
     data_temp['id'] = data_temp.index
-    data_temp['diss_id']=100
-    data_temp_diss=data_temp.dissolve(by='diss_id')
-    interior=data_temp_diss.interiors.values.tolist()[0]
-    gap_list=[]
+    data_temp['diss_id'] = 100
+    data_temp_diss = data_temp.dissolve(by='diss_id')
+    interior = data_temp_diss.interiors.values.tolist()[0]
+    gap_list = []
     for i in interior:
         gap_list.append(LineString(i))
-    data_gaps=gpd.GeoDataFrame(geometry=gap_list,crs=data_temp.crs)
-    data_gaps['feature_touches']=data_gaps.geometry.apply(lambda y: data_temp.loc[data_temp.touches(y)]['id'].tolist())
+    data_gaps = gpd.GeoDataFrame(geometry=gap_list, crs=data_temp.crs)
+    data_gaps['feature_touches'] = data_gaps.geometry.apply(
+        lambda y: data_temp.loc[data_temp.touches(y)]['id'].tolist())
     if(not data_gaps.empty):
         data_gaps.head()
         return(data_gaps)
@@ -525,13 +540,15 @@ def check_gaps(data_temp):
 #########################################
 
 
-def round_vertices(layer_file,precision,output_file):
+def round_vertices(layer_file, precision, output_file):
 
     simpledec = re.compile(r"\d*\.\d+")
-    def mround(match):
-        return "{:.{}f}".format(float(match.group()),precision)
 
-    layer_file.geometry = layer_file.geometry.apply(lambda x: loads(re.sub(simpledec, mround, x.wkt)))
+    def mround(match):
+        return "{:.{}f}".format(float(match.group()), precision)
+
+    layer_file.geometry = layer_file.geometry.apply(
+        lambda x: loads(re.sub(simpledec, mround, x.wkt)))
     layer_file.to_file(output_file)
     print("rounded file written to ",output_file)
     #https://gis.stackexchange.com/questions/321518/rounding-coordinates-to-5-decimals-in-geopandas
@@ -546,3 +563,4 @@ def densify(geom):
 
 #spacing=500
 #shapefile['geometry'] = shapefile['geometry'].map(densify)
+

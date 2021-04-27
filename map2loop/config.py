@@ -27,6 +27,7 @@ class Config(object):
     """Object that represents a sub-project. It is defined by some source data, 
     a region of interest (bounding box or polygon) and some execution flags.
     """
+
     def __init__(self,
                  project_path,
                  overwrite,
@@ -46,6 +47,17 @@ class Config(object):
                  c_l={},
                  **kwargs):
 
+        self.project_path = project_path
+
+        if overwrite is False:
+            print(
+                "WARNING: Overwrite should be a string value {true, in-place} ...")
+            self.check_overwrite()
+        if overwrite is True:
+            print(
+                "WARNING: Overwrite should be a string value {true, in-place} ... converting to true.")
+            overwrite = 'true'
+
         if (not os.path.exists(project_path)):
             # Create proj root dir if doesn't exist
             os.mkdir(project_path)
@@ -60,18 +72,7 @@ class Config(object):
                     pass
                 os.mkdir(project_path)
             else:
-                allow = input(
-                    "Directory \"{}\" exists, overwrite? (y/[n])".format(
-                        project_path))
-                if allow == "y":
-                    shutil.rmtree(project_path)
-                    while os.path.exists(project_path):
-                        pass
-                    os.mkdir(project_path)
-                else:
-                    sys.exit(0)
-
-        self.project_path = project_path
+                self.check_overwrite()
 
         self.graph_path = os.path.join(self.project_path, 'graph')
         self.tmp_path = os.path.join(self.project_path, 'tmp')
@@ -109,6 +110,9 @@ class Config(object):
         if self.quiet == 'all':
             enable_quiet_mode()
 
+        self.clut_path = kwargs['clut_path']
+        self.run_flags = kwargs['run_flags']
+
         self.bbox_3d = bbox_3d
         self.bbox = tuple([
             bbox_3d["minx"], bbox_3d["miny"], bbox_3d["maxx"], bbox_3d["maxy"]
@@ -140,9 +144,20 @@ class Config(object):
         self.fold_file = fold_file
         self.mindep_file = mindep_file
 
-        self.clut_path = kwargs['clut_path']
-
         disable_quiet_mode()
+
+    def check_overwrite(self):
+        allow = input(
+            "Directory \"{}\" exists, overwrite? (y/[n])".format(
+                self.project_path))
+        if allow == "y":
+            shutil.rmtree(self.project_path)
+            while os.path.exists(self.project_path):
+                pass
+            os.mkdir(self.project_path)
+        else:
+            sys.exit(
+                'Either set overwrite to true or specify a different output_path.')
 
     def preprocess(self):
         """[summary]
@@ -257,7 +272,7 @@ class Config(object):
                 linewidth=0.2,
                 cmap=self.cmap).get_figure()
 
-            self.export_png()
+            # self.export_png()
             fig, ax = plt.subplots()
 
             base = geology.plot(column=self.c_l['c'],
@@ -297,8 +312,8 @@ class Config(object):
     def create_cmap(self):
         # Make colours consistent from map to model
         formations = sorted([
-            formation.replace(" ", "_").replace('-', '_') for formation in list(
-                set(self.geol_clip[self.c_l['c']].to_numpy()))
+            formation.replace(" ", "_").replace('-', '_') for formation in
+            list(set(self.geol_clip[self.c_l['c']].to_numpy()))
         ])
         temp_colours = [""] * len(formations)
         self.colour_dict = dict(zip(formations, temp_colours))
@@ -431,55 +446,79 @@ class Config(object):
             self.tmp_path,
             self.glabels,
             Australia=True,
-            asud_strat_file=
-            "https://gist.githubusercontent.com/yohanderose/3b257dc768fafe5aaf70e64ae55e4c42/raw/8598c7563c1eea5c0cd1080f2c418dc975cc5433/ASUD.csv",
+            asud_strat_file="https://gist.githubusercontent.com/yohanderose/3b257dc768fafe5aaf70e64ae55e4c42/raw/8598c7563c1eea5c0cd1080f2c418dc975cc5433/ASUD.csv",
             quiet=quiet_topology)
 
         print("Done")
 
-    def load_dtm(self, aus=True):
-
+    def load_dtm(self, source="AU"):
+        # group all Australian states codes under the global country code (ISO 3166 ALPHA-2)
         polygon_ll = self.polygon.to_crs(self.dtm_crs)
-
         minlong = polygon_ll.total_bounds[0] - self.step_out
         maxlong = polygon_ll.total_bounds[2] + self.step_out
         minlat = polygon_ll.total_bounds[1] - self.step_out
         maxlat = polygon_ll.total_bounds[3] + self.step_out
-
         print("Fetching DTM... ", end=" bbox:")
         print(minlong, maxlong, minlat, maxlat)
-        downloaded = False
-        i = 0
-        print('Attempt: 0 ', end='')
-        local_dtm=False
-        geotif_file='F:/Loop_Data/BGS/terr50_gagg_gb/terr50_gagg_gb_all.tif'
-        while downloaded == False:
-            try:
-                if(aus):
-                    m2l_utils.get_dtm(self.dtm_file, minlong,
-                                      maxlong, minlat, maxlat)
-                elif(local_dtm):                   
-                    bbox=[ self.bbox_3d["minx"],self.bbox_3d["miny"],self.bbox_3d["maxx"],self.bbox_3d["maxy"]]
-                    m2l_utils.get_local_dtm(self.dtm_path,geotif_file,self.dtm_crs,bbox)
+        if source in ("WA", "NSW", "VIC", "SA", "QLD", "ACT", "TAS"):
+            source = 'AU'
+            i, done = 0, False
+            while not done:
+                if i >= 10:
+                    raise NameError(
+                        f'map2loop error: Could not access DTM server after {i} attempts'
+                    )
+                try:
+                    print(f'Attempt: {i} ...', end='')
+                    if source.upper() in ("AU", "AUSTRALIA"):
+                        m2l_utils.get_dtm(self.dtm_file, minlong, maxlong, minlat,
+                                          maxlat)
+                    elif source.upper() in ("T.H", "HAWAII"):  # beware, TH is ISO 3166 code for Thailand
+                        m2l_utils.get_dtm_hawaii(self.dtm_file, minlong, maxlong,
+                                                 minlat, maxlat)
+                    else:  # try from opentopography
+                        m2l_utils.get_dtm_topography_org(
+                            self.dtm_file, minlong, maxlong, minlat, maxlat)
+                    print("Succeeded !")
+                    done = True
+                except:
+                    time.sleep(1)
+                    i += 1
+                    print(f' Failed !')
+        elif source.startswith('http'):
+            i, done = 0, False
+            while not done:
+                if i >= 10:
+                    raise NameError(
+                        f'map2loop error: Could not access DTM server after {i} attempts'
+                    )
+                try:
+                    print(f'Attempt: {i} ...', end='')
+                    if 'au' in source:
+                        m2l_utils.get_dtm(self.dtm_file, minlong, maxlong, minlat,
+                                          maxlat, url=source)
+                    elif 'hawaii' in source:  # beware, TH is ISO 3166 code for Thailand
+                        m2l_utils.get_dtm_hawaii(self.dtm_file, minlong, maxlong,
+                                                 minlat, maxlat, url=source)
+                    else:  # try from opentopography
+                        m2l_utils.get_dtm_topography_org(
+                            self.dtm_file, minlong, maxlong, minlat, maxlat)
+                    print("Succeeded !")
+                    done = True
+                except:
+                    time.sleep(1)
+                    i += 1
+                    print(f' Failed !')
+        else:
+            bbox = [
+                self.bbox_3d["minx"], self.bbox_3d["miny"],
+                self.bbox_3d["maxx"], self.bbox_3d["maxy"]
+            ]
+            m2l_utils.get_local_dtm(self.dtm_file, source, self.dtm_crs, bbox)
 
-                else:
-                    m2l_utils.get_dtm_hawaii(self.dtm_file, minlong, maxlong,
-                                             minlat, maxlat)
-
-                downloaded = True
-            except:
-                time.sleep(10)
-                i = i + 1
-                print(' ', i, end='')
-        if (i == 100):
-            raise NameError(
-                'map2loop error: Could not access DTM server after 100 attempts'
-            )
-        print('Done.')
-
-        if(not local_dtm):
-            geom_rp = m2l_utils.reproject_dtm(
-                self.dtm_file, self.dtm_reproj_file, self.dtm_crs, self.proj_crs)
+        m2l_utils.reproject_dtm(self.dtm_file,
+                                self.dtm_reproj_file,
+                                self.dtm_crs, self.proj_crs)
 
         self.dtm = rasterio.open(self.dtm_reproj_file)
 
@@ -831,6 +870,7 @@ class Config(object):
         # buffer = 5000
         # max_thickness_allowed = 10000
 
+        # TODO: multi thread / numba jit
         m2l_geometry.calc_thickness_with_grid(self.tmp_path, self.output_path,
                                               thickness_buffer,
                                               max_thickness_allowed, self.c_l,
@@ -851,7 +891,6 @@ class Config(object):
                              'formation_thicknesses_norm.csv'), self.geol_clip,
                 'norm_th', 'x', 'y', True, 'numeric')
 
-    # TODO: This needs a shorter name
     def create_fold_axial_trace_points(self, fold_decimate, fat_step,
                                        close_dip):
         # fold_decimate = 5
@@ -863,6 +902,7 @@ class Config(object):
                                                 self.dtb, self.dtb_null, False,
                                                 self.c_l, fold_decimate)
 
+            # TODO : better approximation / multithread / numba
             m2l_geometry.save_fold_axial_traces_orientations(
                 self.fold_file, self.output_path, self.tmp_path, self.dtm,
                 self.dtb, self.dtb_null, False, self.c_l, self.proj_crs,
@@ -947,7 +987,8 @@ class Config(object):
         filename = self.loop_projectfile
         if self.loop_projectfile is None:
             # TODO: Make sure these user provided paths end with a slash or are joined properly
-            filename = os.path.join(self.project_path, 'GEOLOGY_CLIP')
+            filename = os.path.join(
+                self.project_path, '{}'.format(self.project_path))
         print("Exporting graphical map...")
         try:
 

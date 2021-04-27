@@ -4,6 +4,7 @@ import random
 import numpy as np
 import pandas as pd
 import os
+import sys
 import geopandas as gpd
 import rasterio
 from rasterio import plot
@@ -115,7 +116,7 @@ def loop2geomodeller(model_name, test_data_path, tmp_path, output_path,
         if (not foundcontact or not foundorientation):
             empty_fm.append(afm['code'])
 
-    #print(empty_fm)
+    # print(empty_fm)
     asc = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), ",")
 
     all_sorts = np.genfromtxt(os.path.join(tmp_path, 'all_sorts_clean.csv'),
@@ -150,7 +151,7 @@ def loop2geomodeller(model_name, test_data_path, tmp_path, output_path,
             f.write('    }\n')
             f.write('}\n')
 
-    if (True):  #Basal formation if only one supergroup
+    if (True):  # Basal formation if only one supergroup
         f.write('GeomodellerTask {\n')
         f.write('CreateFormation {\n')
 
@@ -177,7 +178,7 @@ def loop2geomodeller(model_name, test_data_path, tmp_path, output_path,
         '#---------------------------------------------------------------\n')
 
     for sg in sg_set:
-        #for i in range (nformations-1,0,-1):
+        # for i in range (nformations-1,0,-1):
         f.write('GeomodellerTask {\n')
         f.write('SetSeries {\n')
 
@@ -209,7 +210,7 @@ def loop2geomodeller(model_name, test_data_path, tmp_path, output_path,
                     f.write('    }\n')
                     f.write('}\n')
 
-    if (True):  #Basal series/formation if only one supergroup
+    if (True):  # Basal series/formation if only one supergroup
         f.write('GeomodellerTask {\n')
         f.write('SetSeries {\n')
 
@@ -290,10 +291,10 @@ def loop2geomodeller(model_name, test_data_path, tmp_path, output_path,
                            ',')
     all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), ',')
     #all_sorts.set_index('code',  inplace = True)
-    #display(all_sorts)
+    # display(all_sorts)
 
     for inx, afm in all_sorts.iterrows():
-        #print(afm[0])
+        # print(afm[0])
         if (not afm['code'] in empty_fm):
             f.write('GeomodellerTask {\n')
             f.write('    Add3DInterfacesToFormation {\n')
@@ -319,10 +320,10 @@ def loop2geomodeller(model_name, test_data_path, tmp_path, output_path,
         os.path.join(output_path, 'orientations_clean.csv'), ',')
     all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), ',')
     #all_sorts.set_index('code',  inplace = True)
-    #display(all_sorts)
+    # display(all_sorts)
 
     for inx, afm in all_sorts.iterrows():
-        #print(groups[agp])
+        # print(groups[agp])
         if (not afm['code'] in empty_fm):
             f.write('GeomodellerTask {\n')
             f.write('    Add3DFoliationToFormation {\n')
@@ -420,10 +421,10 @@ def loop2geomodeller(model_name, test_data_path, tmp_path, output_path,
                         label='label')
         #nx.draw(G, with_labels=True, font_weight='bold')
         edges = list(G.edges)
-        #for i in range(0,len(edges)):
-        #print(edges[i][0],edges[i][1])
+        # for i in range(0,len(edges)):
+        # print(edges[i][0],edges[i][1])
         cycles = list(nx.simple_cycles(G))
-        #display(cycles)
+        # display(cycles)
         f.write(
             '#---------------------------------------------------------------\n'
         )
@@ -453,8 +454,8 @@ def loop2geomodeller(model_name, test_data_path, tmp_path, output_path,
     if (save_faults):
         all_fault_group = np.genfromtxt(os.path.join(
             output_path, 'group-fault-relationships.csv'),
-                                        delimiter=',',
-                                        dtype='U100')
+            delimiter=',',
+            dtype='U100')
         ngroups = len(all_fault_group)
         all_fault_group = np.transpose(all_fault_group)
         nfaults = len(all_fault_group)
@@ -675,7 +676,7 @@ def loop2geomodeller2(model_name, test_data_path, tmp_path, output_path,
         if (not foundcontact or not foundorientation):
             empty_fm.append(afm['code'])
 
-    #print(empty_fm)
+    # print(empty_fm)
 
     all_sorts = np.genfromtxt(os.path.join(tmp_path, 'all_sorts_clean.csv'),
                               delimiter=',',
@@ -717,7 +718,7 @@ def loop2geomodeller2(model_name, test_data_path, tmp_path, output_path,
         '#---------------------------------------------------------------\n')
 
     for i in range(1, nformations):
-        #for i in range (nformations-1,0,-1):
+        # for i in range (nformations-1,0,-1):
         if (all_sorts[i, 2] == str(1)):
             ostr.append('GeomodellerTask {\n')
             ostr.append('SetSeries {\n')
@@ -802,10 +803,10 @@ def loop2geomodeller2(model_name, test_data_path, tmp_path, output_path,
                            ',')
     all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), ',')
     #all_sorts.set_index('code',  inplace = True)
-    #display(all_sorts)
+    # display(all_sorts)
 
     for inx, afm in all_sorts.iterrows():
-        #print(afm[0])
+        # print(afm[0])
         if (not afm['code'] in empty_fm):
             ostr.append('GeomodellerTask {\n')
             ostr.append('    Add3DInterfacesToFormation {\n')
@@ -831,10 +832,10 @@ def loop2geomodeller2(model_name, test_data_path, tmp_path, output_path,
         os.path.join(output_path, 'orientations_clean.csv'), ',')
     all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), ',')
     #all_sorts.set_index('code',  inplace = True)
-    #display(all_sorts)
+    # display(all_sorts)
 
     for inx, afm in all_sorts.iterrows():
-        #print(groups[agp])
+        # print(groups[agp])
         if (not afm['code'] in empty_fm):
             ostr.append('GeomodellerTask {\n')
             ostr.append('    Add3DFoliationToFormation {\n')
@@ -932,10 +933,10 @@ def loop2geomodeller2(model_name, test_data_path, tmp_path, output_path,
                         label='label')
         #nx.draw(G, with_labels=True, font_weight='bold')
         edges = list(G.edges)
-        #for i in range(0,len(edges)):
-        #print(edges[i][0],edges[i][1])
+        # for i in range(0,len(edges)):
+        # print(edges[i][0],edges[i][1])
         cycles = list(nx.simple_cycles(G))
-        #display(cycles)
+        # display(cycles)
         ostr.append(
             '#---------------------------------------------------------------\n'
         )
@@ -965,8 +966,8 @@ def loop2geomodeller2(model_name, test_data_path, tmp_path, output_path,
     if (save_faults):
         all_fault_group = np.genfromtxt(os.path.join(
             output_path, 'group-fault-relationships.csv'),
-                                        delimiter=',',
-                                        dtype='U100')
+            delimiter=',',
+            dtype='U100')
         ngroups = len(all_fault_group)
         all_fault_group = np.transpose(all_fault_group)
         nfaults = len(all_fault_group)
@@ -1128,7 +1129,7 @@ def loop2LoopStructural(m2l_directory):
         path to the map2loop directory
     """
     visualise = False
-    ## make sure everything is installed and can be imported
+    # make sure everything is installed and can be imported
     try:
         from LoopStructural import GeologicalModel
         from LoopStructural.utils import process_map2loop
@@ -1185,7 +1186,7 @@ def loop2LoopStructural(m2l_directory):
                 cpw=10,
                 npw=10))
 
-    ## loop through all of the groups and add them to the model in youngest to oldest.
+    # loop through all of the groups and add them to the model in youngest to oldest.
     group_features = []
     for i in m2l_data['groups']['group number'].unique():
         g = m2l_data['groups'].loc[m2l_data['groups']['group number'] == i,
@@ -1407,9 +1408,9 @@ def loop2gempy_(test_data_name, tmp_path, vtk_path, orientations_file,
 
     faults = gp.Faults()
     series = gp.Series(faults)
-    #series.df
+    # series.df
 
-    #display(ngroups,contents)
+    # display(ngroups,contents)
     groups = []
 
     for i in range(0, ngroups):
@@ -1419,7 +1420,7 @@ def loop2gempy_(test_data_name, tmp_path, vtk_path, orientations_file,
 
     series.delete_series('Default series')
 
-    #series
+    # series
 
     # Load surfaces and assign to series
     surfaces = gp.Surfaces(series)
@@ -1437,14 +1438,14 @@ def loop2gempy_(test_data_name, tmp_path, vtk_path, orientations_file,
                 d = {groups[i]: str(contents[j]).replace("\n", "")}
                 surfaces.map_series({
                     groups[i]: (str(contents[j]).replace("\n", ""))
-                })  #working but no gps
+                })  # working but no gps
         else:
             for j in range(1, len(contents[0])):
                 surfaces.add_surface(str(contents[0][j]).replace("\n", ""))
                 d = {groups[i]: str(contents[0][j]).replace("\n", "")}
                 surfaces.map_series({
                     groups[i]: (str(contents[0][j]).replace("\n", ""))
-                })  #working but no gps
+                })  # working but no gps
 
     # Set Interpolation Data
     id_only_one_bool = geo_model.surface_points.df['id'].value_counts() == 1
@@ -1464,9 +1465,9 @@ def loop2gempy_(test_data_name, tmp_path, vtk_path, orientations_file,
 
     # Provide summary data on model
 
-    #geo_model.additional_data.structure_data
+    # geo_model.additional_data.structure_data
 
-    #Calculate Model
+    # Calculate Model
     gp.compute_model(geo_model)
 
     # Extract surfaces to visualize in 3D renderers
@@ -1481,10 +1482,10 @@ def loop2gempy_(test_data_name, tmp_path, vtk_path, orientations_file,
     # winsound.Beep(freq, duration)
     # winsound.Beep(freq, duration)
 
-    #Visualise Model
+    # Visualise Model
     gp.plot.plot_3D(geo_model, render_data=False)
 
-    #Save model as vtk
+    # Save model as vtk
     if (vtk):
         gp.plot.export_to_vtk(geo_model,
                               path=vtk_path,
@@ -1512,7 +1513,7 @@ def rand_cmap(nlabels,
     :param last_color_black: Option to use last color as black, True or False
     :param verbose: Prints the number of labels and shows the colormap. True or False
     :return: colormap for matplotlib
-    
+
     """
     from matplotlib.colors import LinearSegmentedColormap
     import colorsys
@@ -1642,6 +1643,19 @@ def display_LS_map(model, dtm, geol_clip, faults_clip, dst_crs, use_cmap, cmap,
 
 
 def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs):
+    if loopFilename is None:
+        loopFilename = os.path.join(output_path.split(
+            '/')[0], output_path.split('/')[0] + '.loop3d')
+        resp = LoopProjectFile.CreateBasic(loopFilename)
+        if resp['errorFlag']:
+            print(resp['errorString'])
+        else:
+            LoopProjectFile.Set(loopFilename, "extents", geodesic=[0, 1, -180, -179],
+                                utm=[1, 1, bbox['maxy'], bbox['miny'],
+                                     bbox['maxx'], bbox['minx']],
+                                depth=[bbox['top'], bbox['base']],
+                                spacing=[1000, 1000, 10],
+                                preference="utm")
 
     form2supergroup = pd.read_csv(
         os.path.join(tmp_path, 'all_sorts_clean.csv'),
@@ -1660,7 +1674,7 @@ def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs):
         'min': 'minAge',
         'max': 'maxAge'
     },
-                     inplace=True)
+        inplace=True)
     stratLayers = pd.merge(form2supergroup,
                            stratigraphicLayers,
                            on=['formation'])
