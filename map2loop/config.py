@@ -453,50 +453,72 @@ class Config(object):
 
     def load_dtm(self, source="AU"):
         # group all Australian states codes under the global country code (ISO 3166 ALPHA-2)
+        polygon_ll = self.polygon.to_crs(self.dtm_crs)
+        minlong = polygon_ll.total_bounds[0] - self.step_out
+        maxlong = polygon_ll.total_bounds[2] + self.step_out
+        minlat = polygon_ll.total_bounds[1] - self.step_out
+        maxlat = polygon_ll.total_bounds[3] + self.step_out
+        print("Fetching DTM... ", end=" bbox:")
+        print(minlong, maxlong, minlat, maxlat)
         if source in ("WA", "NSW", "VIC", "SA", "QLD", "ACT", "TAS"):
-            source = "AU"
-        
-        if os.path.isfile(source):
-            bbox = [
-                self.bbox_3d["minx"], self.bbox_3d["miny"],
-                self.bbox_3d["maxx"], self.bbox_3d["maxy"]
-            ]
-            m2l_utils.get_local_dtm(self.dtm_file, source, self.dtm_crs, bbox)
-        else:
-            polygon_ll = self.polygon.to_crs(self.dtm_crs)
-            minlong = polygon_ll.total_bounds[0] - self.step_out
-            maxlong = polygon_ll.total_bounds[2] + self.step_out
-            minlat = polygon_ll.total_bounds[1] - self.step_out
-            maxlat = polygon_ll.total_bounds[3] + self.step_out
-            print("Fetching DTM... ", end=" bbox:")
-            print(minlong, maxlong, minlat, maxlat)
+            source = 'AU'
             i, done = 0, False
             while not done:
                 if i >= 10:
-                        raise NameError(
-                            f'map2loop error: Could not access DTM server after {i} attempts'
-                        )
+                    raise NameError(
+                        f'map2loop error: Could not access DTM server after {i} attempts'
+                    )
                 try:
                     print(f'Attempt: {i} ...', end='')
                     if source.upper() in ("AU", "AUSTRALIA"):
                         m2l_utils.get_dtm(self.dtm_file, minlong, maxlong, minlat,
-                                        maxlat)
-                    elif source.upper() in ("T.H", "HAWAII"): # beware, TH is ISO 3166 code for Thailand
+                                          maxlat)
+                    elif source.upper() in ("T.H", "HAWAII"):  # beware, TH is ISO 3166 code for Thailand
                         m2l_utils.get_dtm_hawaii(self.dtm_file, minlong, maxlong,
-                                                minlat, maxlat)
+                                                 minlat, maxlat)
                     else:  # try from opentopography
-                        m2l.utils.get_dtm_topography_org(self.dtm_file, minlog, maxlong, minlat, maxlat)
-                    print( "Succeeded !")
+                        m2l_utils.get_dtm_topography_org(
+                            self.dtm_file, minlong, maxlong, minlat, maxlat)
+                    print("Succeeded !")
                     done = True
                 except:
                     time.sleep(1)
                     i += 1
                     print(f' Failed !')
+        elif source.startswith('http'):
+            i, done = 0, False
+            while not done:
+                if i >= 10:
+                    raise NameError(
+                        f'map2loop error: Could not access DTM server after {i} attempts'
+                    )
+                try:
+                    print(f'Attempt: {i} ...', end='')
+                    if 'au' in source:
+                        m2l_utils.get_dtm(self.dtm_file, minlong, maxlong, minlat,
+                                          maxlat, url=source)
+                    elif 'hawaii' in source:  # beware, TH is ISO 3166 code for Thailand
+                        m2l_utils.get_dtm_hawaii(self.dtm_file, minlong, maxlong,
+                                                 minlat, maxlat, url=source)
+                    else:  # try from opentopography
+                        m2l_utils.get_dtm_topography_org(
+                            self.dtm_file, minlong, maxlong, minlat, maxlat)
+                    print("Succeeded !")
+                    done = True
+                except:
+                    time.sleep(1)
+                    i += 1
+                    print(f' Failed !')
+        else:
+            bbox = [
+                self.bbox_3d["minx"], self.bbox_3d["miny"],
+                self.bbox_3d["maxx"], self.bbox_3d["maxy"]
+            ]
+            m2l_utils.get_local_dtm(self.dtm_file, source, self.dtm_crs, bbox)
 
-        # TODO: maybe check if self.dtm != self.proj_crs...
-        geom_rp = m2l_utils.reproject_dtm(self.dtm_file,
-                                              self.dtm_reproj_file,
-                                              self.dtm_crs, self.proj_crs)
+        m2l_utils.reproject_dtm(self.dtm_file,
+                                self.dtm_reproj_file,
+                                self.dtm_crs, self.proj_crs)
 
         self.dtm = rasterio.open(self.dtm_reproj_file)
 

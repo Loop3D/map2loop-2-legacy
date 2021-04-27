@@ -33,11 +33,11 @@ class Project(object):
     def __init__(
         self,
         loopdata_state=None,
-        dtm_file=None,
         geology_file=None,
         fault_file=None,
         fold_file=None,
         structure_file=None,
+        dtm_file=None,
         mindep_file=None,
         metadata=None,
     ):
@@ -143,7 +143,6 @@ class Project(object):
             except:
                 continue
         # print("Using:", matplotlib.get_backend())
-
 
     def update_workflow(self, model_engine):
         """Set unique run flags depending on model engine to tailor outputs.
@@ -299,7 +298,8 @@ class Project(object):
         lat_point_list = [miny, miny, maxy, maxy, maxy]
         lon_point_list = [minx, maxx, maxx, minx, minx]
         bbox_geom = Polygon(zip(lon_point_list, lat_point_list))
-        polygon = gpd.GeoDataFrame(index=[0], crs=proj_crs, geometry=[bbox_geom])
+        polygon = gpd.GeoDataFrame(
+            index=[0], crs=proj_crs, geometry=[bbox_geom])
 
         # Define the url queries if remote flag is set
         if self.geology_file is None:
@@ -421,7 +421,8 @@ class Project(object):
         self.fault_file = fault_loopdata[self.state].replace(
             "bbox=", "bbox=" + bbox_str
         )
-        self.fold_file = fold_loopdata[self.state].replace("bbox=", "bbox=" + bbox_str)
+        self.fold_file = fold_loopdata[self.state].replace(
+            "bbox=", "bbox=" + bbox_str)
         self.mindep_file = mindep_loopdata[self.state].replace(
             "bbox=", "bbox=" + bbox_str
         )

@@ -110,82 +110,90 @@ def bilinear_interpolation(x, y, z01, z11, z00, z10):
 ############################################
 
 
-def value_from_dtm_dtb(dtm,dtb,dtb_null,cover_map,locations):
-    dtm_arr=dtm.read(1)
-    bounds  = dtm.bounds
-    minlong=bounds.left 
-    minlat=bounds.bottom 
-    maxlong=bounds.right 
-    maxlat=bounds.top
-    xscale=(maxlong-minlong)/dtm_arr.shape[1]
-    yscale=(maxlat-minlat)/dtm_arr.shape[0]    
-    corners=np.zeros((4,4))
-    zvals=np.zeros((4))
-    corners[0][0]=minlong+(floor((locations[0][0]-minlong-(xscale/2))/xscale)*xscale)+(xscale/2)
-    corners[0][1]=minlat+(floor((locations[0][1]-minlat-(yscale/2))/yscale)*yscale)+(yscale/2)
-    corners[1][0]=corners[0][0]+xscale
-    corners[1][1]=corners[0][1]
-    corners[2][0]=corners[0][0]
-    corners[2][1]=corners[0][1]+yscale
-    corners[3][0]=corners[0][0]+xscale
-    corners[3][1]=corners[0][1]+yscale
-    delx=(locations[0][0]-corners[0][0])/xscale
-    dely=(locations[0][1]-corners[0][1])/yscale
+def value_from_dtm_dtb(dtm, dtb, dtb_null, cover_map, locations):
+    dtm_arr = dtm.read(1)
+    bounds = dtm.bounds
+    minlong = bounds.left
+    minlat = bounds.bottom
+    maxlong = bounds.right
+    maxlat = bounds.top
+    xscale = (maxlong-minlong)/dtm_arr.shape[1]
+    yscale = (maxlat-minlat)/dtm_arr.shape[0]
+    corners = np.zeros((4, 4))
+    zvals = np.zeros((4))
+    corners[0][0] = minlong + \
+        (floor((locations[0][0]-minlong-(xscale/2))/xscale)*xscale)+(xscale/2)
+    corners[0][1] = minlat + \
+        (floor((locations[0][1]-minlat-(yscale/2))/yscale)*yscale)+(yscale/2)
+    corners[1][0] = corners[0][0]+xscale
+    corners[1][1] = corners[0][1]
+    corners[2][0] = corners[0][0]
+    corners[2][1] = corners[0][1]+yscale
+    corners[3][0] = corners[0][0]+xscale
+    corners[3][1] = corners[0][1]+yscale
+    delx = (locations[0][0]-corners[0][0])/xscale
+    dely = (locations[0][1]-corners[0][1])/yscale
 
     for i in range(4):
-        corner=[(corners[i][0],corners[i][1])]
-        #print(corner[0][0],dtm.bounds[0],dtm.bounds[2],corner[0][1],dtm.bounds[1],dtm.bounds[3])
-        if(corner[0][0] > dtm.bounds[0] and corner[0][0] < dtm.bounds[2] and  
-        corner[0][1] > dtm.bounds[1] and corner[0][1] < dtm.bounds[3]):       
+        corner = [(corners[i][0], corners[i][1])]
+        # print(corner[0][0],dtm.bounds[0],dtm.bounds[2],corner[0][1],dtm.bounds[1],dtm.bounds[3])
+        if(corner[0][0] > dtm.bounds[0] and corner[0][0] < dtm.bounds[2] and
+           corner[0][1] > dtm.bounds[1] and corner[0][1] < dtm.bounds[3]):
             for val in dtm.sample(corner):
-                zvals[i]=float(str(val).replace("[","").replace("]",""))
+                zvals[i] = float(str(val).replace("[", "").replace("]", ""))
         else:
             return(-999)
-    value_dtm=bilinear_interpolation(delx, dely, zvals[2], zvals[3], zvals[0], zvals[1])
-    
-    if(cover_map):
-        if(locations[0][0] > dtm.bounds[0] and locations[0][0] < dtm.bounds[2] and  
-        locations[0][1] > dtm.bounds[1] and locations[0][1] < dtm.bounds[3] and
-        locations[0][0] > dtb.bounds[0] and locations[0][0] < dtb.bounds[2] and  
-        locations[0][1] > dtb.bounds[1] and locations[0][1] < dtb.bounds[3]):   
-            dtb_arr=dtb.read(1)
-            bounds  = dtb.bounds
-            minlong=bounds.left 
-            minlat=bounds.bottom 
-            maxlong=bounds.right 
-            maxlat=bounds.top
-            xscale=(maxlong-minlong)/dtb_arr.shape[1]
-            yscale=(maxlat-minlat)/dtb_arr.shape[0]    
-            corners=np.zeros((4,4))
-            zvals=np.zeros((4))
-            corners[0][0]=minlong+(floor((locations[0][0]-minlong-(xscale/2))/xscale)*xscale)+(xscale/2)
-            corners[0][1]=minlat+(floor((locations[0][1]-minlat-(yscale/2))/yscale)*yscale)+(yscale/2)
-            corners[1][0]=corners[0][0]+xscale
-            corners[1][1]=corners[0][1]
-            corners[2][0]=corners[0][0]
-            corners[2][1]=corners[0][1]+yscale
-            corners[3][0]=corners[0][0]+xscale
-            corners[3][1]=corners[0][1]+yscale
-            delx=(locations[0][0]-corners[0][0])/xscale
-            dely=(locations[0][1]-corners[0][1])/yscale
+    value_dtm = bilinear_interpolation(
+        delx, dely, zvals[2], zvals[3], zvals[0], zvals[1])
 
+    if(cover_map):
+        if(locations[0][0] > dtm.bounds[0] and locations[0][0] < dtm.bounds[2] and
+           locations[0][1] > dtm.bounds[1] and locations[0][1] < dtm.bounds[3] and
+           locations[0][0] > dtb.bounds[0] and locations[0][0] < dtb.bounds[2] and
+           locations[0][1] > dtb.bounds[1] and locations[0][1] < dtb.bounds[3]):
+            dtb_arr = dtb.read(1)
+            bounds = dtb.bounds
+            minlong = bounds.left
+            minlat = bounds.bottom
+            maxlong = bounds.right
+            maxlat = bounds.top
+            xscale = (maxlong-minlong)/dtb_arr.shape[1]
+            yscale = (maxlat-minlat)/dtb_arr.shape[0]
+            corners = np.zeros((4, 4))
+            zvals = np.zeros((4))
+            corners[0][0] = minlong + \
+                (floor((locations[0][0]-minlong-(xscale/2)) /
+                 xscale)*xscale)+(xscale/2)
+            corners[0][1] = minlat + \
+                (floor((locations[0][1]-minlat-(yscale/2)) /
+                 yscale)*yscale)+(yscale/2)
+            corners[1][0] = corners[0][0]+xscale
+            corners[1][1] = corners[0][1]
+            corners[2][0] = corners[0][0]
+            corners[2][1] = corners[0][1]+yscale
+            corners[3][0] = corners[0][0]+xscale
+            corners[3][1] = corners[0][1]+yscale
+            delx = (locations[0][0]-corners[0][0])/xscale
+            dely = (locations[0][1]-corners[0][1])/yscale
 
             for i in range(4):
-                corner=[(corners[i][0],corners[i][1])]
-                #print(corner[0][0],dtm.bounds[0],dtm.bounds[2],corner[0][1],dtm.bounds[1],dtm.bounds[3])
-                if(corner[0][0] > dtb.bounds[0] and corner[0][0] < dtb.bounds[2] and  
-                corner[0][1] > dtb.bounds[1] and corner[0][1] < dtb.bounds[3]):       
+                corner = [(corners[i][0], corners[i][1])]
+                # print(corner[0][0],dtm.bounds[0],dtm.bounds[2],corner[0][1],dtm.bounds[1],dtm.bounds[3])
+                if(corner[0][0] > dtb.bounds[0] and corner[0][0] < dtb.bounds[2] and
+                   corner[0][1] > dtb.bounds[1] and corner[0][1] < dtb.bounds[3]):
                     for val in dtb.sample(corner):
-                        zvals[i]=float(str(val).replace("[","").replace("]",""))
+                        zvals[i] = float(str(val).replace(
+                            "[", "").replace("]", ""))
                 else:
                     return(-999)
-            value_dtb=bilinear_interpolation(delx, dely, zvals[2], zvals[3], zvals[0], zvals[1])
+            value_dtb = bilinear_interpolation(
+                delx, dely, zvals[2], zvals[3], zvals[0], zvals[1])
 
             return(str(value_dtm-value_dtb))
         else:
             return(-999)
-    else: 
-         return(str(value_dtm))
+    else:
+        return(str(value_dtm))
 
 
 ############################################
@@ -211,7 +219,7 @@ def pairs(lst):
 ############################################
 
 
-def get_dtm_hawaii(path_out, minlong, maxlong, minlat, maxlat):
+def get_dtm_hawaii(path_out, minlong, maxlong, minlat, maxlat, url="https://pae-paha.pacioos.hawaii.edu/thredds/dodsC/srtm30plus_v11_land.ascii?elev"):
 
     step_out = 0
     minxll = int(((minlong+180)*120)-step_out)
@@ -228,7 +236,7 @@ def get_dtm_hawaii(path_out, minlong, maxlong, minlat, maxlat):
     maxyll = str(maxyll)
     bbox = "["+minyll+":1:"+maxyll+"]["+minxll+":1:"+maxxll+"]"
 
-    link = "https://pae-paha.pacioos.hawaii.edu/thredds/dodsC/srtm30plus_v11_land.ascii?elev"+bbox
+    link = url+bbox
     print(link)
     f = urlopen(link)
     myfile = f.read()
@@ -306,13 +314,14 @@ def get_dtm_topography_org(path_out, minlong, maxlong, minlat, maxlat):
 # Extracts and saves to file digital terrain model
 ############################################
 
-def get_local_dtm(dtm_file,geotif_file,dst_crs,bbox):
+
+def get_local_dtm(dtm_file, geotif_file, dst_crs, bbox):
     # get project extent
-    y_point_list = [bbox[1], bbox[1], bbox[3], bbox[3],bbox[3]]
+    y_point_list = [bbox[1], bbox[1], bbox[3], bbox[3], bbox[3]]
     x_point_list = [bbox[0], bbox[2], bbox[2], bbox[0], bbox[0]]
-    bbox_geom =  Polygon(zip(x_point_list, y_point_list))
+    bbox_geom = Polygon(zip(x_point_list, y_point_list))
     # shapes = Polygon(zip(x_point_list, y_point_list)) # this should require to pass CRS along
-    mbbox = gpd.GeoDataFrame(index=[0], crs=dst_crs, geometry=[bbox_geom]) 
+    mbbox = gpd.GeoDataFrame(index=[0], crs=dst_crs, geometry=[bbox_geom])
     # write extent as a polygon in a temp shapefile
     dtm_path = os.path.split(dtm_file)[0]
     mbbox.to_file(os.path.join(dtm_path, 'roi_poly_dst.shp'))
@@ -325,9 +334,9 @@ def get_local_dtm(dtm_file,geotif_file,dst_crs,bbox):
         out_meta = src.meta
     # update geotiff metadata
     out_meta.update({"driver": "GTiff",
-                 "height": out_image.shape[1],
-                 "width": out_image.shape[2],
-                 "transform": out_transform})
+                     "height": out_image.shape[1],
+                     "width": out_image.shape[2],
+                     "transform": out_transform})
     # write cropped geotiff
     with rasterio.open(dtm_file, "w", **out_meta) as dest:
         dest.write(out_image)
@@ -342,11 +351,14 @@ def get_local_dtm(dtm_file,geotif_file,dst_crs,bbox):
 #
 # Extracts and saves to file digital terrain model from GA hosted data for Australia. Highest horizontal resolution is ? m. Min/max lat/long in WGS84 dtm_file is relative path filename.
 ############################################
-def get_dtm(path_out, minlong, maxlong, minlat, maxlat):
+
+
+def get_dtm(path_out, minlong, maxlong, minlat, maxlat,
+            url="http://services.ga.gov.au/gis/services/DEM_SRTM_1Second_over_Bathymetry_Topography/MapServer/WCSServer?"
+            ):
 
     bbox = (minlong, minlat, maxlong, maxlat)
 
-    url = "http://services.ga.gov.au/gis/services/DEM_SRTM_1Second_over_Bathymetry_Topography/MapServer/WCSServer?"
     wcs = WebCoverageService(url, version='1.0.0')
 
     cvg = wcs.getCoverage(identifier='1',  bbox=bbox,
