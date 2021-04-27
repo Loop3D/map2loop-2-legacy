@@ -222,7 +222,7 @@ def call_interpolator(calc, x, y, l, m, n, xi, yi, nx, ny, fault_flag):
 # The purpose of these interpolations and associated code is to help in three cases:
 # -- Providing estimated dips and contacts in fault-bounded domains where no structural data are available
 # -- Needed to estimate true thickness of formations
-# -- Useful for poulating parts of maps where little structural data is available
+# -- Useful for populating parts of maps where little structural data is available
 ######################################
 
 
