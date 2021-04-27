@@ -477,8 +477,7 @@ class Project(object):
 
             self.config.save_cmap()
 
-            if self.loopFilename is not None:
-                self.config.update_projectfile()
-                self.config.export_png()
+            self.config.update_projectfile()
+            self.config.export_png()
 
         disable_quiet_mode()

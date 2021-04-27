@@ -11,6 +11,8 @@ import os
 from shapely.geometry import Polygon, LineString, Point
 from map2loop import m2l_utils
 import rasterio
+import sys
+import time
 
 from map2loop.m2l_utils import print
 
@@ -2175,7 +2177,7 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
 
         fault_disp_found = fault_disp['fname'].unique()
 
-        f = open(os.path.join(output_path, 'fault_displacements3.csv'), 'a')
+        f = open(os.path.join(output_path, 'fault_displacements3.csv'), 'a+')
 
         for ind, fault in fault_ori.iterrows():
             if(not fault['formation'] in fault_disp_found):
