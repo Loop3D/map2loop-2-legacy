@@ -1465,6 +1465,9 @@ def interpolate_orientation_grid(structures, calc, xcoords, ycoords, c_l):
     dipdir = np.zeros(npts)
 
     i = 0
+    l = np.zeros(npts)
+    m = np.zeros(npts)
+    n = np.zeros(npts)
     for a_pt in structures.iterrows():
         x[i] = a_pt[1]['geometry'].x+(np.random.ranf())
         y[i] = a_pt[1]['geometry'].y+(np.random.ranf())
@@ -1475,14 +1478,12 @@ def interpolate_orientation_grid(structures, calc, xcoords, ycoords, c_l):
         else:
             dipdir[i] = a_pt[1][c_l['dd']]
 
-        if(structures.iloc[i][c_l['bo']] == c_l['btype']):  #this code is in the wrong place, it needs its own loop after l,m,n calculated...
+        # this code is in the wrong place, it needs its own loop after l,m,n calculated...
+        if(structures.iloc[i][c_l['bo']] == c_l['btype']):
             l[i] = -l[i]
             m[i] = -m[i]
             n[i] = -n[i]
-        i=i+1
-    l = np.zeros(npts)
-    m = np.zeros(npts)
-    n = np.zeros(npts)
+        i = i+1
 
     for i in range(0, npts):
         l[i], m[i], n[i] = m2l_utils.ddd2dircos(dip[i], dipdir[i])
@@ -1597,7 +1598,7 @@ def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spac
     nodes.crs = dst_crs
     nodes_code = gpd.sjoin(nodes, geology, how="left", op="within")
     # structures_code = gpd.sjoin(structures, geology, how="left", op="within")
-    structures_code=structures_code[structures_code[c_l['d']]!=0]
+    structures_code = structures_code[structures_code[c_l['d']] != 0]
     first_supergroup = True
     # avoids massive memory rbf calcs by splitting calc into (non-threaded) chunks, maybe try dask + masks??
     split = 100000
