@@ -94,7 +94,6 @@ class Project(object):
             self.read_metadata(metadata)
 
         self.set_proj_defaults()
-        self.update_workflow()
 
     def set_proj_defaults(self):
         """Set the bounds and projection of the input data to use if not explicitly provided."""
@@ -127,13 +126,15 @@ class Project(object):
                 continue
         # print("Using:", matplotlib.get_backend())
 
-    def update_workflow(self, workflow={'model_engine': 'loopstructural'}):
+    def update_workflow(self, model_engine):
         """Set unique run flags depending on model engine to tailor outputs.
 
         :param workflow: Dict containing desired engine to be updated with flags, defaults to {'model_engine': 'loopstructural'}
         :type workflow: dict
 
         """
+        workflow = {'model_engine': model_engine}
+
         if (workflow['model_engine'] == 'geomodeller'):
             workflow.update({
                 'seismic_section': False,
@@ -215,9 +216,10 @@ class Project(object):
                       step_out=None,
                       quiet='None',
                       clut_path='',
+                      model_engine='loopstructural',
                       run_flags=None,
                       **kwargs):
-        """Creates a sub-project Config object and preprocesses input data for some area.
+        """Creates a 'sub-project' Config object and pre-processes input data for some area.
 
         :param out_dir: Path to write output files to.
         :type out_dir: string
@@ -229,12 +231,20 @@ class Project(object):
         :type dtm_crs: dict, optional
         :param proj_crs: Set the projection of the input data, defaults to None
         :type proj_crs: dict, optional
-        :param step_out: How far to consider outside the reprojected dtm, defaults to None
+        :param step_out: How far to consider outside the re-projected dtm, defaults to None
         :type step_out: int, optional
         :param quiet: Allow or block print statements and matplotlib figures, 'None' to quiet nothing, 'all' to quiet everything, 'no-figures' to disable plots and allow text output. Defaults to 'None'
         :type quiet: string, optional
+        :param clut_path: Path to custom map colours file
+        :type clut_path: string, optional
+        :param model_engine: Which modelling engine to use and set associated flags for, defaults to loopstructural
+        :type model_engine: string, optional
+        :param run_flags: Global dictionary that defines custom params such as decimates and fault length see https://github.com/Loop3D/map2loop-2/issues/56  
+        :type run_flags: dict, optional
         :param **kwargs:
         """
+
+        self.update_workflow(model_engine)
 
         self.loopFilename = loopFilename
         if self.loopFilename is not None:
