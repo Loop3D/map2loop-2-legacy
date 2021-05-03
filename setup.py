@@ -6,7 +6,6 @@ import importlib
 from setuptools.command.develop import develop
 import subprocess
 import platform
-import setuptools_scm
 from map2loop import __version__
 
 head, tail = os.path.split(sys.argv[0])
@@ -59,20 +58,9 @@ def get_description():
     return long_description
 
 
-def my_local_scheme(version: setuptools_scm.version.ScmVersion) -> str:
-    """My local node and date version."""
-    return str(__version__)
-
-
-version = setuptools_scm.get_version(
-    write_to="map2loop/_version.py",
-    version_scheme="post-release",
-    local_scheme=my_local_scheme,
-)
-
 setuptools.setup(
     name="map2loop",
-    version=version,
+    version=__version__,
     author="The Loop Organisation",
     author_email="yohan.derose@monash.edu",
     description="Generate 3D model data from 2D maps.",

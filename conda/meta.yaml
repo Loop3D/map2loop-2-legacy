@@ -3,7 +3,7 @@
 
 package:
   name: "{{ name|lower }}"
-  version: "{{ data.get('version') }}"
+  version: "{{ GIT_DESCRIBE_TAG }}"
 
 source:
   git_url: https://github.com/Loop3D/map2loop-2
@@ -18,7 +18,6 @@ requirements:
     - python
     - pybind11
     - setuptools
-    - setuptools-scm
   run:
     - python
     - numpy
