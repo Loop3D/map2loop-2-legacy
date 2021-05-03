@@ -11,15 +11,13 @@ from map2loop import __version__
 head, tail = os.path.split(sys.argv[0])
 
 try:
-    # proc = subprocess.Popen(
-    # 'git tag'.split(), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    # existing_tags = proc.communicate()[0]
-    # tag_clean = 'git tag -d {}'.format(existing_tags.decode('ascii'))
-    # subprocess.run(
-    # tag_clean.split())
-    tag_create = 'git tag -a {0} -m {0}'.format(__version__)
+    cmd = 'bash .git.sh'
     subprocess.run(
-        tag_create.split())
+        cmd.split())
+    cmd = 'git tag -a {0} -m {0}'.format(
+        __version__)
+    subprocess.run(
+        cmd.split())
 except Exception as e:
     print(e)
 
