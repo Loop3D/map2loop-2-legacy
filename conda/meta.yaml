@@ -1,9 +1,9 @@
 {% set name = "map2loop" %}
-{% set version = load_setup_py_data()['version'] %}
+{% set metadata = load_setup_py_data() %}
 
 package:
   name: {{ name|lower }}
-  version: {{ version }}
+  version: {{ metadata.get('version') }}
 
 
 source:

@@ -5,6 +5,7 @@ import importlib
 from setuptools.command.develop import develop
 import subprocess
 import platform
+from version import __version__
 
 head, tail = os.path.split(sys.argv[0])
 
@@ -35,18 +36,6 @@ class CondaDependencies(develop):
         develop.run(self)
 
 
-def get_version(rel_path):
-    try:
-        with open(rel_path, 'r') as f:
-            for line in f:
-                if line.startswith('__version__'):
-                    return(line.split('=')[1].strip()[1:-1])
-    except Exception as e:
-        print(e)
-        print(
-            "Unable to find version in", rel_path)
-
-
 def get_description():
     long_description = ""
     readme_file = os.path.join(head, "README.md")
@@ -57,7 +46,7 @@ def get_description():
 
 setuptools.setup(
     name="map2loop",
-    version=get_version('map2loop/__init__.py'),
+    version=__version__,
     author="The Loop Organisation",
     author_email="yohan.derose@monash.edu",
     description="Generate 3D model data from 2D maps.",
