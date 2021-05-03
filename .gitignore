@@ -5,7 +5,7 @@
 notebooks/Testing.ipynb
 .vim/
 .vscode/
-
+_version.py
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,c++,cmake
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,visualstudiocode,c++,cmake
