@@ -2,6 +2,8 @@
 # import map2loop
 # map2loop._clut_path = newpath
 
+__version__ = "1.1.6"
+
 geology_loopdata = {
     'WA':
     'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:geol_500k&bbox=&srs=EPSG:28350',

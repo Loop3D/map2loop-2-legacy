@@ -1,13 +1,27 @@
 import os
 import sys
+import time
 import setuptools
 import importlib
 from setuptools.command.develop import develop
 import subprocess
 import platform
-from version import __version__
+from map2loop import __version__
 
 head, tail = os.path.split(sys.argv[0])
+
+try:
+    proc = subprocess.Popen(
+        'git tag'.split(), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    existing_tags = proc.communicate()[0]
+    tag_clean = 'git tag -d {}'.format(existing_tags.decode('ascii'))
+    tag_create = 'git tag -a {0} -m {0}'.format(__version__)
+    subprocess.run(
+        tag_clean.split())
+    subprocess.run(
+        tag_create.split())
+except Exception as e:
+    print(e)
 
 
 class CondaDependencies(develop):
@@ -63,4 +77,8 @@ setuptools.setup(
         'develop': CondaDependencies,
     },
     python_requires='>=3.6',
+    install_requires=[
+        'setuptools',
+    ],
+    include_package_data=True,
 )
