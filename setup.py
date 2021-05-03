@@ -1,6 +1,7 @@
 import os
 import sys
 import setuptools
+import importlib
 from setuptools.command.develop import develop
 import subprocess
 import platform
@@ -34,18 +35,33 @@ class CondaDependencies(develop):
         develop.run(self)
 
 
-long_description = ""
-readme_file = os.path.join(head, "README.md")
-with open(readme_file, "r") as fh:
-    long_description = fh.read()
+def get_version(rel_path):
+    try:
+        with open(rel_path, 'r') as f:
+            for line in f:
+                if line.startswith('__version__'):
+                    return(line.split('=')[1].strip()[1:-1])
+    except Exception as e:
+        print(e)
+        print(
+            "Unable to find version string in", rel_path)
+
+
+def get_description():
+    long_description = ""
+    readme_file = os.path.join(head, "README.md")
+    with open(readme_file, "r") as fh:
+        long_description = fh.read()
+    return long_description
+
 
 setuptools.setup(
     name="map2loop",
-    version="1.1.5",
+    version=get_version('map2loop/__init__.py'),
     author="The Loop Organisation",
-    author_email="contact@loop3d.org",
+    author_email="yohan.derose@monash.edu",
     description="Generate 3D model data from 2D maps.",
-    long_description=long_description,
+    long_description=get_description(),
     long_description_content_type="text/markdown",
     url="https://github.com/Loop3D/map2loop-2",
     packages=setuptools.find_packages(),
