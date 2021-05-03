@@ -44,7 +44,7 @@ def get_version(rel_path):
     except Exception as e:
         print(e)
         print(
-            "Unable to find version string in", rel_path)
+            "Unable to find version in", rel_path)
 
 
 def get_description():
