@@ -466,6 +466,7 @@ class Project(object):
                                            self.run_flags['interpolation_scheme'])
             pbar.update(10)
 
+            # TODO: make all these internal, the config class already has the run_flags dictionary
             self.config.export_faults(self.run_flags['fault_decimate'], self.run_flags['min_fault_length'],
                                       self.run_flags['fault_dip'])
             self.config.process_plutons(self.run_flags['pluton_dip'], self.run_flags['pluton_form'], self.run_flags['dist_buffer'],

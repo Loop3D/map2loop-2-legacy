@@ -7,6 +7,7 @@ import platform
 
 head, tail = os.path.split(sys.argv[0])
 
+
 class CondaDependencies(develop):
     def run(self):
         try:
@@ -34,13 +35,13 @@ class CondaDependencies(develop):
 
 
 long_description = ""
-#readme_file = os.path.join(head, "README.md")
-#with open(readme_file, "r") as fh:
-#    long_description = fh.read()
+readme_file = os.path.join(head, "README.md")
+with open(readme_file, "r") as fh:
+    long_description = fh.read()
 
 setuptools.setup(
     name="map2loop",
-    version="1.1.3",
+    version="1.1.5",
     author="The Loop Organisation",
     author_email="contact@loop3d.org",
     description="Generate 3D model data from 2D maps.",
