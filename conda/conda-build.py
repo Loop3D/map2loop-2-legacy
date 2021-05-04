@@ -8,8 +8,7 @@ import os
 def process(package):
     try:
 
-        # TODO: command = 'conda build --py 3.6 --py 3.7 --py 3.8 --py 3.9 -c default -c conda-forge -c loop3d {}'.format(
-        command = 'conda build {}'.format(
+        command = 'conda build --py 3.6 --py 3.7 --py 3.8 --py 3.9 {}'.format(
             package)
         p = Popen(
             command.split(), stdin=PIPE, stdout=PIPE, stderr=PIPE)
