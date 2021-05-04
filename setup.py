@@ -75,8 +75,4 @@ setuptools.setup(
         'develop': CondaDependencies,
     },
     python_requires='>=3.6',
-    install_requires=[
-        'setuptools_scm',
-    ],
-    include_package_data=True,
 )

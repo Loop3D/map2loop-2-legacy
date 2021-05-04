@@ -7,49 +7,49 @@ on:
 jobs:
   unix_package:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python: ['3.7']   
     steps:
       - uses: actions/checkout@v2
+
       - uses: conda-incubator/setup-miniconda@v2
         with:
-          python-version: ${{ matrix.python }} 
-      - name: conda build
-        shell: bash
-        run: |
-          conda install -c conda-build anacona-client -y
-          conda build --py 3.6 --py 3.7 --py 3.8 --py 3.9 -c default -c conda-forge -c loop3d --output-folder . .
-          conda convert -f -p osx-64 linux-64/*.tar.bz2
-      - name: conda upload
-        shell: bash
+          auto-activate-base: true
+          installer-url: https://github.com/conda-forge/miniforge/releases/download/4.10.1-0/Miniforge-pypy3-4.10.1-0-Linux-x86_64.sh
+          channels: anaconda,conda-forge,loop3d,conda-forge/label/cf202003
+          python-version: 3.7
+
+      - name: Building and uploading m2l pkg for linux, osx and windows
+        shell: bash -l {0}
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
-        run: | 
-          anaconda upload linux-64/*.tar.bz2 
-          anaconda upload osx-64/*.tar.bz2 
-  windows_package:
-    runs-on: windows-2019
-    strategy:
-      matrix:
-        python: ['3.7']
-    steps:
-      - uses: actions/checkout@v2
-      - name: msbuild to path
-        uses: microsoft/setup-msbuild@v1.0.2
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          python-version: ${{ matrix.python }} 
-      - name: conda build
-        shell: powershell
         run: |
-          python --version
-          conda install -c conda-build anacona-client -y
-          conda build -c anaconda -c conda-forge -c loop3d -c --output-folder . .
-      - name: conda upload
-        shell: powershell
-        env:
-          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
-        run: | 
-          anaconda upload win-64/*.tar.bz2 
+            conda env list
+            conda install conda-build anaconda-client conda-verify -y
+            python setup.py develop
+            cd conda
+            python conda-build.py
+
+  #windows_package:
+    #runs-on: windows-2019
+    #strategy:
+      #matrix:
+        #python: ['3.7']
+    #steps:
+      #- uses: actions/checkout@v2
+      #- name: msbuild to path
+        #uses: microsoft/setup-msbuild@v1.0.2
+      #- uses: conda-incubator/setup-miniconda@v2
+        #with:
+          #python-version: ${{ matrix.python }} 
+      #- name: conda build
+        #shell: powershell
+        #run: |
+          #python --version
+          #conda install -c conda-build anacona-client -y
+          #conda build -c anaconda -c conda-forge -c loop3d -c --output-folder . .
+      #- name: conda upload
+        #shell: powershell
+        #env:
+          #ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+        #run: | 
+          #anaconda upload win-64/*.tar.bz2 
 

@@ -38,18 +38,16 @@ requirements:
     - loopprojectfile
     - cftime=1.4.0
 
-#test:
-  #imports:
-    #- map2loop
+test:
+  imports:
+    - map2loop
 
 about:
   home: "https://github.com/Loop3D/map2loop-2"
   license: MIT
   license_family: MIT
-  license_file:
+  license_file: ../LICENSE
   summary: "Generate 3D model data using 2D maps."
-  doc_url:
-  dev_url:
 
 extra:
   recipe-maintainers:
