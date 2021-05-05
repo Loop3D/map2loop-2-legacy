@@ -608,10 +608,22 @@ class Topology(object):
 
         if not quiet:
             nx.draw(G, with_labels=True, font_weight='bold')
-        nx.write_gml(G, os.path.join(tmp_path, "fault_network.gml"))
+        
+        GD = G.copy()
+        edges = list(G.edges)
+        cycles = list(nx.simple_cycles(G))
+ 
+        for i in range(0, len(edges)):  # remove first edge from fault cycle
+            for j in range(0, len(cycles)):
+                if (edges[i][0] == cycles[j][0]
+                        and edges[i][1] == cycles[j][1]):
+                            if GD.has_edge(edges[i][0],edges[i][1]):
+                                    GD.remove_edge(edges[i][0],edges[i][1])                        
+
+        nx.write_gml(GD, os.path.join(tmp_path, "fault_network.gml"))
 
         try:
-            print('cycles', list(nx.simple_cycles(G)))
+            print('cycles', list(nx.simple_cycles(GD)))
         except:
             print('no cycles')
 
