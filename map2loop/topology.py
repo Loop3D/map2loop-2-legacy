@@ -618,7 +618,24 @@ class Topology(object):
                 if (edges[i][0] == cycles[j][0]
                         and edges[i][1] == cycles[j][1]):
                             if GD.has_edge(edges[i][0],edges[i][1]):
-                                    GD.remove_edge(edges[i][0],edges[i][1])                        
+                                    GD.remove_edge(edges[i][0],edges[i][1])
+                                    print('fault cycle removed:',edges[i][0],edges[i][1])
+
+
+
+        g=open(os.path.join(graph_path,'fault-fault-intersection.txt'),"r")
+        contents =g.readlines()
+        for line in contents:
+            parts=line.split(",")
+            f1='Fault_'+parts[1]
+            f1=f1.replace(" ","")
+            for fn in range(int((len(parts)-2)/3)):
+                f2='Fault_'+parts[2+(fn*3)].replace("{","").replace("(","")
+                f2=f2.replace(" ","")
+                angle=parts[4+(fn*3)].replace("}","").replace(")","")
+                angle=angle.replace(" ","").replace("}","").replace(")","").rstrip()
+                if GD.has_edge(f1,f2):
+                    GD[f1][f2]['angle']=angle
 
         nx.write_gml(GD, os.path.join(tmp_path, "fault_network.gml"))
 
