@@ -13,7 +13,7 @@ import pandas as pd
 import numpy as np
 from shapely.geometry import Polygon
 from matplotlib import pyplot as plt
-from map2loop import (
+from . import (
     geology_loopdata,
     structure_loopdata,
     fault_loopdata,
@@ -23,8 +23,8 @@ from map2loop import (
     clut_paths,
 )
 
-from map2loop.config import Config
-from map2loop.m2l_utils import display, enable_quiet_mode, disable_quiet_mode, print
+from .config import Config
+from .m2l_utils import display, enable_quiet_mode, disable_quiet_mode, print
 
 
 class Project(object):

@@ -12,8 +12,8 @@ from shapely.geometry import Point, LineString, MultiLineString, GeometryCollect
 from math import degrees, atan2, acos, degrees
 import warnings
 
-from map2loop import m2l_utils
-from map2loop.m2l_utils import display, print
+from . import m2l_utils
+from .m2l_utils import display, print
 
 
 class Topology(object):
@@ -180,8 +180,8 @@ class Topology(object):
                                 str(GD.nodes[cy[0]]['LabelGraphics']['text'])+' overlies '+str(
                                     GD.nodes[cy[1]]['LabelGraphics']['text'])+' removed to prevent cycle'
                             warnings.warn(warning_msg)
-                            if( GD.has_edge(cy[len_cy-1],cy[0])):
-                                if GD.has_edge(cy[0],cy[1]):
+                            if(GD.has_edge(cy[len_cy-1], cy[0])):
+                                if GD.has_edge(cy[0], cy[1]):
                                     GD.remove_edge(cy[0], cy[1])
 
                 else:
@@ -189,7 +189,7 @@ class Topology(object):
                         str(GD.nodes[cy[0]]['LabelGraphics']['text'])+' overlies '+str(
                             GD.nodes[cy[1]]['LabelGraphics']['text'])+' removed to prevent cycle'
                     warnings.warn(warning_msg)
-                    if GD.has_edge(cy[0],cy[1]):
+                    if GD.has_edge(cy[0], cy[1]):
                         GD.remove_edge(cy[0], cy[1])
 
             if not quiet:

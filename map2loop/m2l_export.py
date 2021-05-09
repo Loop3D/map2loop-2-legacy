@@ -13,7 +13,7 @@ from rasterio.mask import mask
 from rasterio.transform import from_origin
 from rasterio.io import MemoryFile
 import matplotlib
-from map2loop import m2l_utils
+from . import m2l_utils
 import LoopProjectFile
 import re
 

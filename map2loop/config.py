@@ -7,13 +7,13 @@ import random
 import numpy as np
 import pandas as pd
 import geopandas as gpd
-from map2loop.topology import Topology
-from map2loop import m2l_utils
-from map2loop import m2l_geometry
-from map2loop import m2l_interpolation
-from map2loop import m2l_map_checker
-from map2loop.m2l_utils import display, enable_quiet_mode, disable_quiet_mode, print
-from map2loop.m2l_export import export_to_projectfile
+from .topology import Topology
+from . import (m2l_utils,
+               m2l_geometry,
+               m2l_interpolation,
+               m2l_map_checker)
+from .m2l_utils import display, enable_quiet_mode, disable_quiet_mode, print
+from .m2l_export import export_to_projectfile
 import map2model
 
 import networkx as nx
