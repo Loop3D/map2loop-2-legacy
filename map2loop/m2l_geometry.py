@@ -618,7 +618,7 @@ def save_contacts_with_faults_removed(path_fault, path_out, dist_buffer, ls_dict
 #########################################
 
 
-def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fault_decimate, fault_min_len, fault_dip):
+def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fault_decimate, fault_min_len, fault_dip_var):
     
     f = open(os.path.join(output_path, 'faults.csv'), "w")
     f.write("X,Y,Z,formation\n")
@@ -741,10 +741,10 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                                 if(flt[c_l['fdip']] == -999):  # random flag
                                     fault_dip = random.randint(60, 90)
                                 else:
-                                    fault_dip = 90
+                                    fault_dip = fault_dip_var
                         else:
                            # specific dip defined
-                            fault_dip = int(flt[c_l['fdip']])
+                            fault_dip = fault_dip_var
                         
                         #print(c_l['fdipdir_flag'] ,str(flt[c_l['fdipdir']]), flt[c_l['fdip']] , c_l['fdipnull'])
                         if(c_l['fdipdir_flag'] == 'num' and not str(flt[c_l['fdipdir']]) == 'None' and not str(int(flt[c_l['fdipdir']])) == c_l['fdipnull'] ):  # numeric dip direction defined
