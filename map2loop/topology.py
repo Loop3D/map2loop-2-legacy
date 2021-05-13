@@ -632,10 +632,13 @@ class Topology(object):
             for fn in range(int((len(parts)-2)/3)):
                 f2='Fault_'+parts[2+(fn*3)].replace("{","").replace("(","")
                 f2=f2.replace(" ","")
+                topol=parts[3+(fn*3)].replace(" ","")
                 angle=parts[4+(fn*3)].replace("}","").replace(")","")
                 angle=angle.replace(" ","").replace("}","").replace(")","").rstrip()
                 if GD.has_edge(f1,f2):
                     GD[f1][f2]['angle']=angle
+                    GD[f1][f2]['topol']=topol
+
 
         nx.write_gml(GD, os.path.join(tmp_path, "fault_network.gml"))
 
