@@ -724,8 +724,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                         #if(flt[c_l['o']] == '-1'):
                         #print(flt[c_l['o']],  int(flt[c_l['fdip']]), c_l['fdipnull'],str(flt[c_l['fdipest']]))
 
-
-                        if(int(flt[c_l['fdip']]) == int(c_l['fdipnull'])):  # null specifc dip defined
+                        if( int(flt[c_l['fdip']]) == int(c_l['fdipnull'])):  # null specifc dip defined
                             # dip estimate defined
                             if(not str(flt[c_l['fdipest']]) == '-999'):
                                 i = 0
@@ -744,7 +743,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                                     fault_dip = fault_dip_var
                         else:
                            # specific dip defined
-                            fault_dip = fault_dip_var
+                            fault_dip = flt[c_l['fdip']]
                         
                         #print(c_l['fdipdir_flag'] ,str(flt[c_l['fdipdir']]), flt[c_l['fdip']] , c_l['fdipnull'])
                         if(c_l['fdipdir_flag'] == 'num' and not str(flt[c_l['fdipdir']]) == 'None' and not str(int(flt[c_l['fdipdir']])) == c_l['fdipnull'] ):  # numeric dip direction defined
