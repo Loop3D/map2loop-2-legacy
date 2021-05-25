@@ -1860,7 +1860,7 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                                             dtm, dtb, dtb_null, cover_map, locations)
                                         ostr = "{},{},{},{}\n"\
                                             .format(lastlx, lastly, last_height_l, indl[c_l['c']].replace(" ", "_").replace("-", "_"))
-                                        # fftc.write(ostr)
+                                        fftc.write(ostr)
 
                     # add points to list if they have different geology code than previous node on right side
 
@@ -1903,7 +1903,7 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                                             dtm, dtb, dtb_null, cover_map, locations)
                                         ostr = "{},{},{},{}\n"\
                                             .format(lastrx, lastry, last_height_r, indr[c_l['c']].replace(" ", "_").replace("-", "_"))
-                                        # fftc.write(ostr)
+                                        fftc.write(ostr)
 
                     # loop through left and right sides to find equivalent contact pairs along fault
 

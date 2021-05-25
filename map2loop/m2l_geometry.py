@@ -619,7 +619,7 @@ def save_contacts_with_faults_removed(path_fault, path_out, dist_buffer, ls_dict
 
 
 def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fault_decimate, fault_min_len, fault_dip_var):
-    
+
     f = open(os.path.join(output_path, 'faults.csv'), "w")
     f.write("X,Y,Z,formation\n")
     fo = open(os.path.join(output_path, 'fault_orientations.csv'), "w")
@@ -723,7 +723,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
 
                         #if(flt[c_l['o']] == '-1'):
                         #print(flt[c_l['o']],  int(flt[c_l['fdip']]), c_l['fdipnull'],str(flt[c_l['fdipest']]))
-
+                        fault_dip=90.0
                         if( int(flt[c_l['fdip']]) == int(c_l['fdipnull'])):  # null specifc dip defined
                             # dip estimate defined
                             if(not str(flt[c_l['fdipest']]) == '-999'):

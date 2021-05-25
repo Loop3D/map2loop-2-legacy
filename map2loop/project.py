@@ -513,7 +513,7 @@ class Project(object):
 
             self.config.save_cmap()
 
-            self.config.update_projectfile()
+            #self.config.update_projectfile()
             self.config.export_png()
 
         disable_quiet_mode()

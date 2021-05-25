@@ -316,7 +316,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                         lengths.append(strike)
                         #print(flt)
             faults_explode['f_length'] = lengths
-            faults_explode = faults_explode[faults_explode['f_length'] > 2500]
+            faults_explode = faults_explode[faults_explode['f_length'] > 500]
 
             show_metadata(faults_explode, "fault layer")
         else:
