@@ -280,6 +280,7 @@ An example minimum code to run *map2loop* with mostly default settings might loo
 
   proj=Project(geology_file="source/geology_polygons.shp",
               fault_file="source/fault_polylines.shp",
+              fold_file="source/fold_polylines.shp",
               structure_file="source/bedding_points.shp",
               mindep_file="source/mindep_points.shp",
               metadata="source/meta.hjson" 
