@@ -115,9 +115,11 @@ Examples:
 
   proj=Project(geology_file="source/geology_polygons.shp",
               fault_file="source/fault_polylines.shp",
+              fold_file="source/fold_polylines.shp",
               structure_file="source/bedding_points.shp",
               mindep_file="source/mindep_points.shp",
               metadata="source/meta.hjson", 
+              dtm_file='./source_data/terr50_gagg_gb_all.tif',
               remote=False)
 
 where remote=False signifies that local GIS files will be accessed. Paths can be relative or absolute, or even a URL, however for URLs, the components of the shapefile or TAB file have to be zipped up.
@@ -284,6 +286,7 @@ An example minimum code to run *map2loop* with mostly default settings might loo
               structure_file="source/bedding_points.shp",
               mindep_file="source/mindep_points.shp",
               metadata="source/meta.hjson" 
+              dtm_file='./source_data/terr50_gagg_gb_all.tif',
               )
 
   proj.update_config(
@@ -301,3 +304,19 @@ An example minimum code to run *map2loop* with mostly default settings might loo
                       )
 
   proj.run()
+
+4) Other update_config flags:
+#############################
+
+Project flags:
+ - **out_dir** Path to write output files to. :type out_dir: string
+ - **overwrite** Allow overwriting the given out_dir if it exists, false, true or in-place, defaults to false :type overwrite: string, optional
+ - **bbox_3d** 3D bounding box of coordinates and base/top values defining the area, defaults to { "minx": 0, "maxx": 0, "maxx": 0, "maxy": 0, "base": -10000, "top": 1200, } :type bbox_3d: dict, optional
+ - **dtm_crs** Set the projection of the dtm, defaults to {'init': 'EPSG:4326'} :type dtm_crs: dict, optional
+ - **proj_crs** Set the projection of the input data, defaults to None :type proj_crs: dict, optional
+ - **step_out** How far to consider outside the re-projected dtm, defaults to None :type step_out: int, optional
+ - **quiet** Allow or block print statements and matplotlib figures, 'None' to quiet nothing, 'all' to quiet everything, 'no-figures' to disable plots and allow text output. Defaults to 'None' :type quiet: string, optional
+ - **clut_path** Path to custom map colours file :type clut_path: string, optional
+ - **model_engine** Which modelling engine to use and set associated flags for, defaults to loopstructural :type model_engine: string, optional
+ - **run_flags** Global dictionary that defines custom params such as decimates and fault length see https://github.com/Loop3D/map2loop-2/issues/56 :type run_flags: dict, optional
+ - **\**kwargs**
