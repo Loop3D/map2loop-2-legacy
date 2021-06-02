@@ -2,7 +2,7 @@
 %“Œ‹ž ReportLab Generated PDF document http://www.reportlab.com
 1 0 obj
 <<
-/F1 2 0 R /F2 3 0 R /F3 12 0 R /F4 17 0 R /F5 20 0 R
+/F1 2 0 R /F2 3 0 R /F3 12 0 R /F4 18 0 R /F5 21 0 R
 >>
 endobj
 2 0 obj
@@ -47,28 +47,28 @@ endobj
 <<
 /A <<
 /S /URI /Type /Action /URI (mailto:mark.jessell@uwa.edu.au)
->> /Border [ 0 0 0 ] /Rect [ 113.4829 431.0236 228.1129 443.0236 ] /Subtype /Link /Type /Annot
+>> /Border [ 0 0 0 ] /Rect [ 113.4829 412.0236 228.1129 424.0236 ] /Subtype /Link /Type /Annot
 >>
 endobj
 9 0 obj
 <<
 /A <<
 /S /URI /Type /Action /URI (http://github.com/Loop3D/map2loop-2)
->> /Border [ 0 0 0 ] /Rect [ 105.6929 383.7736 273.0029 395.7736 ] /Subtype /Link /Type /Annot
+>> /Border [ 0 0 0 ] /Rect [ 85.69291 364.7736 253.0029 376.7736 ] /Subtype /Link /Type /Annot
 >>
 endobj
 10 0 obj
 <<
 /A <<
 /S /URI /Type /Action /URI (https://github.com/Loop3D/map2loop/blob/master/m2l_LS_install.md)
->> /Border [ 0 0 0 ] /Rect [ 62.69291 350.0236 365.6029 362.0236 ] /Subtype /Link /Type /Annot
+>> /Border [ 0 0 0 ] /Rect [ 85.69291 328.7736 388.6029 340.7736 ] /Subtype /Link /Type /Annot
 >>
 endobj
 11 0 obj
 <<
 /A <<
 /S /URI /Type /Action /URI (https://github.com/Loop3D/map2loop/issues)
->> /Border [ 0 0 0 ] /Rect [ 62.69291 302.0236 257.2329 314.0236 ] /Subtype /Link /Type /Annot
+>> /Border [ 0 0 0 ] /Rect [ 62.69291 283.0236 257.2329 295.0236 ] /Subtype /Link /Type /Annot
 >>
 endobj
 12 0 obj
@@ -78,7 +78,7 @@ endobj
 endobj
 13 0 obj
 <<
-/Annots [ 4 0 R 5 0 R 6 0 R 7 0 R 8 0 R 9 0 R 10 0 R 11 0 R ] /Contents 44 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 43 0 R /Resources <<
+/Annots [ 4 0 R 5 0 R 6 0 R 7 0 R 8 0 R 9 0 R 10 0 R 11 0 R ] /Contents 38 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 37 0 R /Resources <<
 /Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
 >> /Rotate 0 
   /Trans <<
@@ -88,7 +88,7 @@ endobj
 endobj
 14 0 obj
 <<
-/Contents 45 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 43 0 R /Resources <<
+/Contents 39 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 37 0 R /Resources <<
 /Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
 >> /Rotate 0 /Trans <<
 
@@ -98,29 +98,7 @@ endobj
 endobj
 15 0 obj
 <<
-/A <<
-/S /URI /Type /Action /URI (https://github.com/Loop3D/map2loop-2)
->> /Border [ 0 0 0 ] /Rect [ 62.69291 483.0236 235.0029 495.0236 ] /Subtype /Link /Type /Annot
->>
-endobj
-16 0 obj
-<<
-/Annots [ 15 0 R ] /Contents 46 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 43 0 R /Resources <<
-/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
->> /Rotate 0 
-  /Trans <<
-
->> /Type /Page
->>
-endobj
-17 0 obj
-<<
-/BaseFont /Helvetica-BoldOblique /Encoding /WinAnsiEncoding /Name /F4 /Subtype /Type1 /Type /Font
->>
-endobj
-18 0 obj
-<<
-/Contents 47 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 43 0 R /Resources <<
+/Contents 40 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 37 0 R /Resources <<
 /Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
 >> /Rotate 0 /Trans <<
 
@@ -128,9 +106,34 @@ endobj
   /Type /Page
 >>
 endobj
+16 0 obj
+<<
+/Contents 41 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 37 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+17 0 obj
+<<
+/Contents 42 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 37 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+18 0 obj
+<<
+/BaseFont /Helvetica-BoldOblique /Encoding /WinAnsiEncoding /Name /F4 /Subtype /Type1 /Type /Font
+>>
+endobj
 19 0 obj
 <<
-/Contents 48 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 43 0 R /Resources <<
+/Contents 43 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 37 0 R /Resources <<
 /Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
 >> /Rotate 0 /Trans <<
 
@@ -140,12 +143,7 @@ endobj
 endobj
 20 0 obj
 <<
-/BaseFont /Courier /Encoding /WinAnsiEncoding /Name /F5 /Subtype /Type1 /Type /Font
->>
-endobj
-21 0 obj
-<<
-/Contents 49 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 43 0 R /Resources <<
+/Contents 44 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 37 0 R /Resources <<
 /Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
 >> /Rotate 0 /Trans <<
 
@@ -153,9 +151,14 @@ endobj
   /Type /Page
 >>
 endobj
+21 0 obj
+<<
+/BaseFont /Courier /Encoding /WinAnsiEncoding /Name /F5 /Subtype /Type1 /Type /Font
+>>
+endobj
 22 0 obj
 <<
-/Contents 50 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 43 0 R /Resources <<
+/Contents 45 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 37 0 R /Resources <<
 /Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
 >> /Rotate 0 /Trans <<
 
@@ -165,7 +168,7 @@ endobj
 endobj
 23 0 obj
 <<
-/Contents 51 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 43 0 R /Resources <<
+/Contents 46 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 37 0 R /Resources <<
 /Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
 >> /Rotate 0 /Trans <<
 
@@ -175,7 +178,7 @@ endobj
 endobj
 24 0 obj
 <<
-/Contents 52 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 43 0 R /Resources <<
+/Contents 47 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 37 0 R /Resources <<
 /Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
 >> /Rotate 0 /Trans <<
 
@@ -185,7 +188,7 @@ endobj
 endobj
 25 0 obj
 <<
-/Contents 53 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 43 0 R /Resources <<
+/Contents 48 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 37 0 R /Resources <<
 /Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
 >> /Rotate 0 /Trans <<
 
@@ -195,7 +198,7 @@ endobj
 endobj
 26 0 obj
 <<
-/Contents 54 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 43 0 R /Resources <<
+/Contents 49 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 37 0 R /Resources <<
 /Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
 >> /Rotate 0 /Trans <<
 
@@ -205,95 +208,65 @@ endobj
 endobj
 27 0 obj
 <<
-/Outlines 29 0 R /PageLabels 55 0 R /PageMode /UseNone /Pages 43 0 R /Type /Catalog
+/Outlines 29 0 R /PageLabels 50 0 R /PageMode /UseNone /Pages 37 0 R /Type /Catalog
 >>
 endobj
 28 0 obj
 <<
-/Author () /CreationDate (D:20210602111816-08'00') /Creator (\(unspecified\)) /Keywords () /ModDate (D:20210602111816-08'00') /Producer (ReportLab PDF Library - www.reportlab.com) 
+/Author () /CreationDate (D:20210602162358-08'00') /Creator (\(unspecified\)) /Keywords () /ModDate (D:20210602162358-08'00') /Producer (ReportLab PDF Library - www.reportlab.com) 
   /Subject (\(unspecified\)) /Title (map2loop Package) /Trapped /False
 >>
 endobj
 29 0 obj
 <<
-/Count 14 /First 30 0 R /Last 42 0 R /Type /Outlines
+/Count 8 /First 30 0 R /Last 36 0 R /Type /Outlines
 >>
 endobj
 30 0 obj
 <<
-/Dest [ 13 0 R /XYZ 62.69291 671.0236 0 ] /Next 31 0 R /Parent 29 0 R /Title (What it does:)
+/Dest [ 13 0 R /XYZ 62.69291 671.0236 0 ] /Next 31 0 R /Parent 29 0 R /Title (1. What it does:)
 >>
 endobj
 31 0 obj
 <<
-/Count 1 /Dest [ 13 0 R /XYZ 62.69291 218.0236 0 ] /First 32 0 R /Last 32 0 R /Next 33 0 R /Parent 29 0 R 
-  /Prev 30 0 R /Title (map2loop outputs:)
+/Count 1 /Dest [ 13 0 R /XYZ 62.69291 199.0236 0 ] /First 32 0 R /Last 32 0 R /Next 33 0 R /Parent 29 0 R 
+  /Prev 30 0 R /Title (2. map2loop outputs:)
 >>
 endobj
 32 0 obj
 <<
-/Dest [ 13 0 R /XYZ 62.69291 185.0236 0 ] /Parent 31 0 R /Title (map2loop outputs:)
+/Dest [ 13 0 R /XYZ 62.69291 166.0236 0 ] /Parent 31 0 R /Title (map2loop outputs:)
 >>
 endobj
 33 0 obj
 <<
-/Dest [ 18 0 R /XYZ 62.69291 273.0236 0 ] /Next 34 0 R /Parent 29 0 R /Prev 31 0 R /Title (Using map2loop with your own or standard datasets)
+/Dest [ 19 0 R /XYZ 62.69291 729.0236 0 ] /Next 34 0 R /Parent 29 0 R /Prev 31 0 R /Title (3. Using map2loop with your own or standard datasets)
 >>
 endobj
 34 0 obj
 <<
-/Dest [ 19 0 R /XYZ 62.69291 753.0236 0 ] /Next 35 0 R /Parent 29 0 R /Prev 33 0 R /Title (1\) Minimum map2loop data requirements:)
+/Dest [ 19 0 R /XYZ 62.69291 573.0236 0 ] /Next 35 0 R /Parent 29 0 R /Prev 33 0 R /Title (4. Minimum map2loop data requirements:)
 >>
 endobj
 35 0 obj
 <<
-/Dest [ 21 0 R /XYZ 62.69291 420.8661 0 ] /Next 36 0 R /Parent 29 0 R /Prev 34 0 R /Title (2\) Defining map2loop parameters:)
+/Dest [ 20 0 R /XYZ 62.69291 237.0236 0 ] /Next 36 0 R /Parent 29 0 R /Prev 34 0 R /Title (5\) Defining map2loop parameters:)
 >>
 endobj
 36 0 obj
 <<
-/Dest [ 21 0 R /XYZ 62.69291 210.8661 0 ] /Next 37 0 R /Parent 29 0 R /Prev 35 0 R /Title (2.1 paths)
+/Dest [ 26 0 R /XYZ 62.69291 643.6661 0 ] /Parent 29 0 R /Prev 35 0 R /Title (6. Example minimum code:)
 >>
 endobj
 37 0 obj
 <<
-/Dest [ 22 0 R /XYZ 62.69291 411.2814 0 ] /Next 38 0 R /Parent 29 0 R /Prev 36 0 R /Title (2.2 Layer field codes:)
+/Count 12 /Kids [ 13 0 R 14 0 R 15 0 R 16 0 R 17 0 R 19 0 R 20 0 R 22 0 R 23 0 R 24 0 R 
+  25 0 R 26 0 R ] /Type /Pages
 >>
 endobj
 38 0 obj
 <<
-/Dest [ 23 0 R /XYZ 62.69291 415.2906 0 ] /Next 39 0 R /Parent 29 0 R /Prev 37 0 R /Title (2.3 ROI, Projection, output paths)
->>
-endobj
-39 0 obj
-<<
-/Dest [ 24 0 R /XYZ 62.69291 705.0236 0 ] /Next 40 0 R /Parent 29 0 R /Prev 38 0 R /Title (2.4 Full list of update_config flags:)
->>
-endobj
-40 0 obj
-<<
-/Dest [ 24 0 R /XYZ 62.69291 345.0236 0 ] /Next 41 0 R /Parent 29 0 R /Prev 39 0 R /Title (2.5 Calculation control parameters)
->>
-endobj
-41 0 obj
-<<
-/Dest [ 25 0 R /XYZ 62.69291 249.0236 0 ] /Next 42 0 R /Parent 29 0 R /Prev 40 0 R /Title (2.6 Calculation workflow parameters)
->>
-endobj
-42 0 obj
-<<
-/Dest [ 26 0 R /XYZ 62.69291 628.6661 0 ] /Parent 29 0 R /Prev 41 0 R /Title (3\) Example minimum code:)
->>
-endobj
-43 0 obj
-<<
-/Count 11 /Kids [ 13 0 R 14 0 R 16 0 R 18 0 R 19 0 R 21 0 R 22 0 R 23 0 R 24 0 R 25 0 R 
-  26 0 R ] /Type /Pages
->>
-endobj
-44 0 obj
-<<
-/Length 8306
+/Length 8644
 >>
 stream
 1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
@@ -313,7 +286,7 @@ Q
 q
 1 0 0 1 62.69291 650.0236 cm
 q
-BT 1 0 0 1 0 3.5 Tm 21 TL /F2 17.5 Tf 0 0 0 rg (What it does:) Tj T* ET
+BT 1 0 0 1 0 3.5 Tm 21 TL /F2 17.5 Tf 0 0 0 rg (1. What it does:) Tj T* ET
 Q
 Q
 q
@@ -437,20 +410,114 @@ q
 1 0 0 1 62.69291 530.0236 cm
 Q
 q
-1 0 0 1 62.69291 476.0236 cm
+1 0 0 1 62.69291 514.0236 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 38 Tm /F1 10 Tf 12 TL .310574 Tw (Loop is led by Laurent Ailleres \(Monash University\) with a team of Work Package leaders from: * Monash) Tj T* 0 Tw .220697 Tw (University: Roy Thomson, Lachlan Grose and Robin Armit * University of Western Australia: Mark Jessell,) Tj T* 0 Tw .931412 Tw (Jeremie Giraud, Mark Lindsay and Guillaume Pirot * Geological Survey of Canada: Boyan Brodaric and) Tj T* 0 Tw (Eric de Kemp) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (Loop is led by Laurent Ailleres \(Monash University\) with a team of Work Package leaders from:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 470.0236 cm
+1 0 0 1 62.69291 457.0236 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 44 Tm  T* ET
+q
+1 0 0 1 20 48 cm
 Q
 q
-1 0 0 1 62.69291 470.0236 cm
+1 0 0 1 20 48 cm
 Q
 q
-1 0 0 1 62.69291 434.0236 cm
+1 0 0 1 20 36 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 10.5 0 Td (\177) Tj T* -10.5 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Monash University: Roy Thomson, Lachlan Grose and Robin Armit) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 30 cm
+Q
+q
+1 0 0 1 20 18 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 10.5 0 Td (\177) Tj T* -10.5 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (University of Western Australia: Mark Jessell, Jeremie Giraud, Mark Lindsay and Guillaume Pirot) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 12 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 10.5 0 Td (\177) Tj T* -10.5 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Geological Survey of Canada: Boyan Brodaric and Eric de Kemp) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 62.69291 451.0236 cm
+Q
+q
+1 0 0 1 62.69291 451.0236 cm
+Q
+q
+1 0 0 1 62.69291 415.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -472,10 +539,10 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 428.0236 cm
+1 0 0 1 62.69291 409.0236 cm
 Q
 q
-1 0 0 1 62.69291 386.0236 cm
+1 0 0 1 62.69291 367.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -494,16 +561,7 @@ BT 1 0 0 1 0 14 Tm /F1 10 Tf 12 TL .262339 Tw (The fastest install path \(thanks
 Q
 Q
 q
-1 0 0 1 23 9 cm
-Q
-q
 1 0 0 1 23 -3 cm
-q
-0 0 0 rg
-BT /F1 10 Tf 12 TL ET
-BT 1 0 0 1 0 2 Tm  T* ET
-q
-1 0 0 1 20 0 cm
 q
 0 0 .501961 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (http://github.com/Loop3D/map2loop-2) Tj T* ET
@@ -514,55 +572,43 @@ Q
 Q
 Q
 q
-1 0 0 1 23 -3 cm
+1 0 0 1 62.69291 361.0236 cm
 Q
 q
-Q
-Q
-Q
-q
-1 0 0 1 62.69291 380.0236 cm
-Q
-q
-1 0 0 1 62.69291 368.0236 cm
+1 0 0 1 62.69291 331.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
 q
-1 0 0 1 6 -3 cm
+1 0 0 1 6 15 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 10.5 0 Td (\177) Tj T* -10.5 0 Td ET
 Q
 Q
 q
-1 0 0 1 23 -3 cm
+1 0 0 1 23 15 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (otherwise follow these instructions:) Tj T* ET
 Q
 Q
 q
+1 0 0 1 23 -3 cm
+q
+0 0 .501961 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (https://github.com/Loop3D/map2loop/blob/master/m2l_LS_install.md) Tj T* ET
+Q
+Q
+q
 Q
 Q
 Q
 q
-1 0 0 1 62.69291 368.0236 cm
+1 0 0 1 62.69291 325.0236 cm
 Q
 q
-1 0 0 1 62.69291 350.0236 cm
-q
-BT 1 0 0 1 0 2 Tm 12 TL /F1 10 Tf 0 0 .501961 rg (https://github.com/Loop3D/map2loop/blob/master/m2l_LS_install.md) Tj 0 0 0 rg ( Install Instructions) Tj T* ET
-Q
-Q
-q
-1 0 0 1 62.69291 344.0236 cm
-Q
-q
-1 0 0 1 62.69291 344.0236 cm
-Q
-q
-1 0 0 1 62.69291 332.0236 cm
+1 0 0 1 62.69291 313.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -585,22 +631,22 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 332.0236 cm
+1 0 0 1 62.69291 313.0236 cm
 Q
 q
-1 0 0 1 62.69291 302.0236 cm
+1 0 0 1 62.69291 283.0236 cm
 q
 BT 1 0 0 1 0 14 Tm 26.15568 Tw 12 TL /F1 10 Tf 0 0 0 rg (Any bugs/feature requests/comments please create a new issue:) Tj T* 0 Tw 0 0 .501961 rg (https://github.com/Loop3D/map2loop/issues) Tj 0 0 0 rg (.) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 296.0236 cm
+1 0 0 1 62.69291 277.0236 cm
 Q
 q
-1 0 0 1 62.69291 296.0236 cm
+1 0 0 1 62.69291 277.0236 cm
 Q
 q
-1 0 0 1 62.69291 284.0236 cm
+1 0 0 1 62.69291 265.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -623,45 +669,43 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 284.0236 cm
+1 0 0 1 62.69291 265.0236 cm
 Q
 q
-1 0 0 1 62.69291 230.0236 cm
+1 0 0 1 62.69291 211.0236 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 38 Tm /F3 10 Tf 12 TL 1.985366 Tw (The Loop platform is an open source 3D probabilistic geological and geophysical modelling platform,) Tj T* 0 Tw 1.428443 Tw (initiated by Geoscience Australia and the OneGeology consortium. The project is funded by Australian) Tj T* 0 Tw 3.911647 Tw (territory, State and Federal Geological Surveys, the Australian Research Council and the MinEx) Tj T* 0 Tw (Collaborative Research Centre.) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 197.0236 cm
+1 0 0 1 62.69291 178.0236 cm
 q
-BT 1 0 0 1 0 3.5 Tm 21 TL /F2 17.5 Tf 0 0 0 rg (map2loop outputs:) Tj T* ET
+BT 1 0 0 1 0 3.5 Tm 21 TL /F2 17.5 Tf 0 0 0 rg (2. map2loop outputs:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 167.0236 cm
+1 0 0 1 62.69291 148.0236 cm
 q
 BT 1 0 0 1 0 3 Tm 18 TL /F2 15 Tf 0 0 0 rg (map2loop outputs:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 155.0236 cm
+1 0 0 1 62.69291 136.0236 cm
 Q
 q
-1 0 0 1 62.69291 101.0236 cm
+1 0 0 1 62.69291 100.0236 cm
 q
 1 1 1 rg
-n 0 54 469.8898 -18 re f*
-.878431 .878431 .878431 rg
 n 0 36 469.8898 -18 re f*
-1 1 1 rg
+.878431 .878431 .878431 rg
 n 0 18 469.8898 -18 re f*
 .960784 .960784 .862745 rg
-n 0 54 469.8898 -18 re f*
+n 0 36 469.8898 -18 re f*
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
 q
-1 0 0 1 6 39 cm
+1 0 0 1 6 21 cm
 q
 .960784 .960784 .862745 rg
 n 0 0 230.6903 12 re f*
@@ -672,7 +716,7 @@ BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 98.94516 0 Td (content) Tj T* -98.94516 0 Td E
 Q
 Q
 q
-1 0 0 1 248.6903 39 cm
+1 0 0 1 248.6903 21 cm
 q
 .960784 .960784 .862745 rg
 n 0 0 215.1994 12 re f*
@@ -684,31 +728,17 @@ Q
 Q
 0 0 0 rg
 q
-1 0 0 1 6 21 cm
+1 0 0 1 6 3 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Various stratigraphic topology graphs) Tj T* ET
 Q
 Q
 q
-1 0 0 1 248.6903 21 cm
-q
-0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (*/graph/*.gml) Tj T* ET
-Q
-Q
-q
-1 0 0 1 6 3 cm
-q
-0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Group-level stratigraphic relationships) Tj T* ET
-Q
-Q
-q
 1 0 0 1 248.6903 3 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (*/tmp/groups.csv) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (*/graph/*.gml) Tj T* ET
 Q
 Q
 q
@@ -717,12 +747,11 @@ q
 0 0 0 RG
 .25 w
 n 0 0 m 469.8898 0 l S
-n 0 36 m 469.8898 36 l S
 n 0 18 m 469.8898 18 l S
-n 242.6903 0 m 242.6903 54 l S
-n 0 54 m 469.8898 54 l S
-n 0 0 m 0 54 l S
-n 469.8898 0 m 469.8898 54 l S
+n 242.6903 0 m 242.6903 36 l S
+n 0 36 m 469.8898 36 l S
+n 0 0 m 0 36 l S
+n 469.8898 0 m 469.8898 36 l S
 Q
 Q
 Q
@@ -742,29 +771,45 @@ Q
  
 endstream
 endobj
-45 0 obj
+39 0 obj
 <<
-/Length 11105
+/Length 11079
 >>
 stream
 1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
 q
-1 0 0 1 62.69291 645.0236 cm
+1 0 0 1 62.69291 627.0236 cm
 q
 1 1 1 rg
+n 0 126 469.8898 -18 re f*
+.878431 .878431 .878431 rg
 n 0 108 469.8898 -18 re f*
-.878431 .878431 .878431 rg
+1 1 1 rg
 n 0 90 469.8898 -18 re f*
-1 1 1 rg
+.878431 .878431 .878431 rg
 n 0 72 469.8898 -18 re f*
-.878431 .878431 .878431 rg
-n 0 54 469.8898 -18 re f*
 1 1 1 rg
-n 0 36 469.8898 -18 re f*
+n 0 54 469.8898 -18 re f*
 .878431 .878431 .878431 rg
+n 0 36 469.8898 -18 re f*
+1 1 1 rg
 n 0 18 469.8898 -18 re f*
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 111 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Group-level stratigraphic relationships) Tj T* ET
+Q
+Q
+q
+1 0 0 1 248.6903 111 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (*/tmp/groups.csv) Tj T* ET
+Q
+Q
 q
 1 0 0 1 6 93 cm
 q
@@ -854,34 +899,35 @@ q
 1 j
 0 0 0 RG
 .25 w
+n 0 126 m 469.8898 126 l S
 n 0 108 m 469.8898 108 l S
 n 0 90 m 469.8898 90 l S
 n 0 72 m 469.8898 72 l S
 n 0 54 m 469.8898 54 l S
 n 0 36 m 469.8898 36 l S
 n 0 18 m 469.8898 18 l S
-n 242.6903 0 m 242.6903 108 l S
-n 0 0 m 0 108 l S
-n 469.8898 0 m 469.8898 108 l S
+n 242.6903 0 m 242.6903 126 l S
+n 0 0 m 0 126 l S
+n 469.8898 0 m 469.8898 126 l S
 n 0 0 m 469.8898 0 l S
 Q
 Q
 Q
 q
-1 0 0 1 62.69291 645.0236 cm
+1 0 0 1 62.69291 627.0236 cm
 Q
 q
-1 0 0 1 62.69291 627.0236 cm
+1 0 0 1 62.69291 609.0236 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Digital Terrain Model:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 621.0236 cm
+1 0 0 1 62.69291 603.0236 cm
 Q
 q
-1 0 0 1 62.69291 567.0236 cm
+1 0 0 1 62.69291 549.0236 cm
 q
 1 1 1 rg
 n 0 54 469.8898 -18 re f*
@@ -960,20 +1006,20 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 567.0236 cm
+1 0 0 1 62.69291 549.0236 cm
 Q
 q
-1 0 0 1 62.69291 549.0236 cm
+1 0 0 1 62.69291 531.0236 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Geometry:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 543.0236 cm
+1 0 0 1 62.69291 525.0236 cm
 Q
 q
-1 0 0 1 62.69291 273.0236 cm
+1 0 0 1 62.69291 255.0236 cm
 q
 1 1 1 rg
 n 0 270 469.8898 -18 re f*
@@ -1220,43 +1266,41 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 273.0236 cm
+1 0 0 1 62.69291 255.0236 cm
 Q
 q
-1 0 0 1 62.69291 255.0236 cm
+1 0 0 1 62.69291 237.0236 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Orientations:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 249.0236 cm
+1 0 0 1 62.69291 231.0236 cm
 Q
 q
 1 0 0 1 62.69291 105.0236 cm
 q
 1 1 1 rg
-n 0 144 469.8898 -18 re f*
-.878431 .878431 .878431 rg
 n 0 126 469.8898 -18 re f*
-1 1 1 rg
+.878431 .878431 .878431 rg
 n 0 108 469.8898 -18 re f*
-.878431 .878431 .878431 rg
+1 1 1 rg
 n 0 90 469.8898 -18 re f*
-1 1 1 rg
+.878431 .878431 .878431 rg
 n 0 72 469.8898 -18 re f*
-.878431 .878431 .878431 rg
-n 0 54 469.8898 -18 re f*
 1 1 1 rg
-n 0 36 469.8898 -18 re f*
+n 0 54 469.8898 -18 re f*
 .878431 .878431 .878431 rg
+n 0 36 469.8898 -18 re f*
+1 1 1 rg
 n 0 18 469.8898 -18 re f*
 .960784 .960784 .862745 rg
-n 0 144 469.8898 -18 re f*
+n 0 126 469.8898 -18 re f*
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
 q
-1 0 0 1 6 129 cm
+1 0 0 1 6 111 cm
 q
 .960784 .960784 .862745 rg
 n 0 0 195.7407 12 re f*
@@ -1267,7 +1311,7 @@ BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 81.47037 0 Td (content) Tj T* -81.47037 0 Td E
 Q
 Q
 q
-1 0 0 1 213.7407 129 cm
+1 0 0 1 213.7407 111 cm
 q
 .960784 .960784 .862745 rg
 n 0 0 250.149 12 re f*
@@ -1279,101 +1323,87 @@ Q
 Q
 0 0 0 rg
 q
-1 0 0 1 6 111 cm
+1 0 0 1 6 93 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Bed dip dd data with z and formation) Tj T* ET
 Q
 Q
 q
-1 0 0 1 213.7407 111 cm
+1 0 0 1 213.7407 93 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (*/output/orientations.csv or orientations_clean.csv) Tj T* ET
 Q
 Q
 q
-1 0 0 1 6 93 cm
+1 0 0 1 6 75 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Bed dip dd data with calculated polarity) Tj T* ET
 Q
 Q
 q
-1 0 0 1 213.7407 93 cm
+1 0 0 1 213.7407 75 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (*/output/orientations_polarity.csv) Tj T* ET
 Q
 Q
 q
-1 0 0 1 6 75 cm
+1 0 0 1 6 57 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Extra orientations for empty series) Tj T* ET
 Q
 Q
 q
-1 0 0 1 213.7407 75 cm
+1 0 0 1 213.7407 57 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (*/output/empty_series_orientations.csv) Tj T* ET
 Q
 Q
 q
-1 0 0 1 6 57 cm
+1 0 0 1 6 39 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Fault orientation with z) Tj T* ET
 Q
 Q
 q
-1 0 0 1 213.7407 57 cm
+1 0 0 1 213.7407 39 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (*/output/fault_orientations.csv) Tj T* ET
 Q
 Q
 q
-1 0 0 1 6 39 cm
+1 0 0 1 6 21 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Clipped orientations shapefile) Tj T* ET
 Q
 Q
 q
-1 0 0 1 213.7407 39 cm
+1 0 0 1 213.7407 21 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (*/tmp/structure_clip.shp) Tj T* ET
 Q
 Q
 q
-1 0 0 1 6 21 cm
+1 0 0 1 6 3 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Interpolated dip dip direction grid) Tj T* ET
 Q
 Q
 q
-1 0 0 1 213.7407 21 cm
-q
-0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (*/tmp/interpolated_orientations.csv) Tj T* ET
-Q
-Q
-q
-1 0 0 1 6 3 cm
-q
-0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Interpolated contact vector grid) Tj T* ET
-Q
-Q
-q
 1 0 0 1 213.7407 3 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (*/tmp/interpolated_contacts.csv) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (*/tmp/interpolated_orientations.csv) Tj T* ET
 Q
 Q
 q
@@ -1382,17 +1412,16 @@ q
 0 0 0 RG
 .25 w
 n 0 0 m 469.8898 0 l S
-n 0 126 m 469.8898 126 l S
 n 0 108 m 469.8898 108 l S
 n 0 90 m 469.8898 90 l S
 n 0 72 m 469.8898 72 l S
 n 0 54 m 469.8898 54 l S
 n 0 36 m 469.8898 36 l S
 n 0 18 m 469.8898 18 l S
-n 207.7407 0 m 207.7407 144 l S
-n 0 144 m 469.8898 144 l S
-n 0 0 m 0 144 l S
-n 469.8898 0 m 469.8898 144 l S
+n 207.7407 0 m 207.7407 126 l S
+n 0 126 m 469.8898 126 l S
+n 0 0 m 0 126 l S
+n 469.8898 0 m 469.8898 126 l S
 Q
 Q
 Q
@@ -1412,25 +1441,41 @@ Q
  
 endstream
 endobj
-46 0 obj
+40 0 obj
 <<
-/Length 8084
+/Length 11817
 >>
 stream
 1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
 q
-1 0 0 1 62.69291 681.0236 cm
+1 0 0 1 62.69291 663.0236 cm
 q
 1 1 1 rg
+n 0 90 469.8898 -18 re f*
+.878431 .878431 .878431 rg
 n 0 72 469.8898 -18 re f*
-.878431 .878431 .878431 rg
-n 0 54 469.8898 -18 re f*
 1 1 1 rg
-n 0 36 469.8898 -18 re f*
+n 0 54 469.8898 -18 re f*
 .878431 .878431 .878431 rg
+n 0 36 469.8898 -18 re f*
+1 1 1 rg
 n 0 18 469.8898 -18 re f*
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 75 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Interpolated contact vector grid) Tj T* ET
+Q
+Q
+q
+1 0 0 1 213.7407 75 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (*/tmp/interpolated_contacts.csv) Tj T* ET
+Q
+Q
 q
 1 0 0 1 6 57 cm
 q
@@ -1492,51 +1537,50 @@ q
 1 j
 0 0 0 RG
 .25 w
+n 0 90 m 469.8898 90 l S
 n 0 72 m 469.8898 72 l S
 n 0 54 m 469.8898 54 l S
 n 0 36 m 469.8898 36 l S
 n 0 18 m 469.8898 18 l S
-n 207.7407 0 m 207.7407 72 l S
-n 0 0 m 0 72 l S
-n 469.8898 0 m 469.8898 72 l S
+n 207.7407 0 m 207.7407 90 l S
+n 0 0 m 0 90 l S
+n 469.8898 0 m 469.8898 90 l S
 n 0 0 m 469.8898 0 l S
 Q
 Q
 Q
 q
-1 0 0 1 62.69291 681.0236 cm
+1 0 0 1 62.69291 663.0236 cm
 Q
 q
-1 0 0 1 62.69291 663.0236 cm
+1 0 0 1 62.69291 645.0236 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (loop2model:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 657.0236 cm
+1 0 0 1 62.69291 639.0236 cm
 Q
 q
 1 0 0 1 62.69291 549.0236 cm
 q
 1 1 1 rg
-n 0 108 469.8898 -18 re f*
-.878431 .878431 .878431 rg
 n 0 90 469.8898 -18 re f*
-1 1 1 rg
+.878431 .878431 .878431 rg
 n 0 72 469.8898 -18 re f*
-.878431 .878431 .878431 rg
-n 0 54 469.8898 -18 re f*
 1 1 1 rg
-n 0 36 469.8898 -18 re f*
+n 0 54 469.8898 -18 re f*
 .878431 .878431 .878431 rg
+n 0 36 469.8898 -18 re f*
+1 1 1 rg
 n 0 18 469.8898 -18 re f*
 .960784 .960784 .862745 rg
-n 0 108 469.8898 -18 re f*
+n 0 90 469.8898 -18 re f*
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
 q
-1 0 0 1 6 93 cm
+1 0 0 1 6 75 cm
 q
 .960784 .960784 .862745 rg
 n 0 0 178.1935 12 re f*
@@ -1547,7 +1591,7 @@ BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 72.69674 0 Td (content) Tj T* -72.69674 0 Td E
 Q
 Q
 q
-1 0 0 1 196.1935 93 cm
+1 0 0 1 196.1935 75 cm
 q
 .960784 .960784 .862745 rg
 n 0 0 267.6963 12 re f*
@@ -1559,45 +1603,31 @@ Q
 Q
 0 0 0 rg
 q
-1 0 0 1 6 75 cm
+1 0 0 1 6 57 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Gempy) Tj T* ET
 Q
 Q
 q
-1 0 0 1 196.1935 75 cm
+1 0 0 1 196.1935 57 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Notebook creates 3D model itself) Tj T* ET
 Q
 Q
 q
-1 0 0 1 6 57 cm
+1 0 0 1 6 39 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Basic vtk model thanks to gempy) Tj T* ET
 Q
 Q
 q
-1 0 0 1 196.1935 57 cm
-q
-0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (*/vtk/*.vtp) Tj T* ET
-Q
-Q
-q
-1 0 0 1 6 39 cm
-q
-0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Geomodeller) Tj T* ET
-Q
-Q
-q
 1 0 0 1 196.1935 39 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (m2l.taskfile) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (*/vtk/*.vtp) Tj T* ET
 Q
 Q
 q
@@ -1633,16 +1663,15 @@ q
 1 j
 0 0 0 RG
 .25 w
-n 0 90 m 469.8898 90 l S
 n 0 72 m 469.8898 72 l S
 n 0 54 m 469.8898 54 l S
 n 0 36 m 469.8898 36 l S
 n 0 18 m 469.8898 18 l S
-n 190.1935 0 m 190.1935 108 l S
-n 0 108 m 469.8898 108 l S
+n 190.1935 0 m 190.1935 90 l S
+n 0 90 m 469.8898 90 l S
 n 0 0 m 469.8898 0 l S
-n 0 0 m 0 108 l S
-n 469.8898 0 m 469.8898 108 l S
+n 0 0 m 0 90 l S
+n 469.8898 0 m 469.8898 90 l S
 Q
 Q
 Q
@@ -1657,86 +1686,683 @@ BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Does not deal with sills yet.) Tj T* ET
 Q
 Q
 q
+1 0 0 1 62.69291 525.0236 cm
+Q
+q
 1 0 0 1 62.69291 513.0236 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 0 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Standalone map2model cpp code from Vitaliy provides fault/fault and fault/strat relationships) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 483.0236 cm
-q
-BT 1 0 0 1 0 14 Tm 2.236457 Tw 12 TL /F1 10 Tf 0 0 0 rg (Installation The best path to isntallation is via a docker. To do this visit the development version at) Tj T* 0 Tw 0 0 .501961 rg (https://github.com/Loop3D/map2loop-2) Tj 0 0 0 rg ( and follow the instructions.) Tj T* ET
+Q
 Q
 Q
 q
-1 0 0 1 62.69291 465.0236 cm
-q
-0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Requirements rasterio matplotlib networkx numpy pandas geopandas os urllib sys math shapely gempy) Tj T* ET
-Q
+1 0 0 1 62.69291 513.0236 cm
 Q
 q
-1 0 0 1 62.69291 411.0236 cm
+1 0 0 1 62.69291 495.0236 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 38 Tm /F1 10 Tf 12 TL 3.361976 Tw (Simplified calculation schemes 1\) Topology a. Stratigraphic relationships i. Adjacency relationships) Tj T* 0 Tw 1.725366 Tw (between neighbouring geological polygons based on formation and group ii. Directed graph based on) Tj T* 0 Tw 2.014651 Tw (these relationships and relative age of formations and groups iii. Edges attributed by type of contact) Tj T* 0 Tw (\(intrusive, stratigraphic, fault\)) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Requirements) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 369.0236 cm
-q
-0 0 0 rg
-BT 1 0 0 1 0 26 Tm /F1 10 Tf 12 TL 1.311984 Tw (b. Fault relationships i. Relative ages of faults longer than a specified length estimated from truncation) Tj T* 0 Tw .49152 Tw (relationships ii. Directed graph based on these relationships iii. Cyclic relationships removed \(A truncates) Tj T* 0 Tw (B; B truncates C; C truncates A\)) Tj T* ET
-Q
+1 0 0 1 62.69291 489.0236 cm
 Q
 q
-1 0 0 1 62.69291 339.0236 cm
+1 0 0 1 62.69291 477.0236 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 14 Tm /F1 10 Tf 12 TL .970697 Tw (c. Fault-stratigraphy relationships i. Adjacency matrices of relative ages of faults longer than a specified) Tj T* 0 Tw (length and formations and groups based on truncation relationships) Tj T* ET
-Q
-Q
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
 q
-1 0 0 1 62.69291 309.0236 cm
-q
-0 0 0 rg
-BT 1 0 0 1 0 14 Tm /F1 10 Tf 12 TL .43436 Tw (2\) Position Data a. DTM i. DTM downloaded for defined bounding box from SRTM server ii. Re-projected) Tj T* 0 Tw (to local EPSG-defined projection system) Tj T* ET
-Q
-Q
-q
-1 0 0 1 62.69291 267.0236 cm
+1 0 0 1 20 0 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 26 Tm /F1 10 Tf 12 TL .732126 Tw (b. Basal contacts i. Formation based on stratigraphic relationship \(assigned to younger formation\) ii. X,Y) Tj T* 0 Tw 1.944104 Tw (from contact nodes with optional decimation iii. Z from DTM iv. Nodes that are defined by faults are) Tj T* 0 Tw (removed) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (See dependencies.txt file) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 237.0236 cm
+Q
+Q
+Q
+q
+1 0 0 1 62.69291 477.0236 cm
+Q
+q
+1 0 0 1 62.69291 459.0236 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 14 Tm /F1 10 Tf 12 TL -0.055015 Tw (c. Igneous contacts i. Formation based on intrusive unit ii. X,Y from contact nodes with optional decimation) Tj T* 0 Tw (iii. Z from DTM iv. Nodes that are defined by faults are removed) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Simplified calculation schemes) Tj T* ET
 Q
+Q
+q
+1 0 0 1 62.69291 453.0236 cm
+Q
+q
+1 0 0 1 62.69291 453.0236 cm
+Q
+q
+1 0 0 1 62.69291 441.0236 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 5.66 0 Td (1.) Tj T* -5.66 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Topology) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 62.69291 441.0236 cm
+Q
+q
+1 0 0 1 62.69291 435.0236 cm
+Q
+q
+1 0 0 1 62.69291 213.0236 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 216 cm
+Q
+q
+1 0 0 1 20 216 cm
+Q
+q
+1 0 0 1 20 204 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 5.66 0 Td (a.) Tj T* -5.66 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Stratigraphic relationships) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 204 cm
+Q
+q
+1 0 0 1 20 198 cm
+Q
+q
+1 0 0 1 20 132 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 60 cm
+Q
+q
+1 0 0 1 20 60 cm
+Q
+q
+1 0 0 1 20 36 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 9 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 9 0 Td (i.) Tj T* -9 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 14 Tm /F1 10 Tf 12 TL .248863 Tw (Adjacency relationships between neighbouring geological polygons based on formation and) Tj T* 0 Tw (group) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 30 cm
+Q
+q
+1 0 0 1 20 18 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 6.78 0 Td (ii.) Tj T* -6.78 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Directed graph based on these relationships and relative age of formations and groups) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 12 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4.56 0 Td (iii.) Tj T* -4.56 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Edges attributed by type of contact \(intrusive, stratigraphic, fault\)) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 132 cm
+Q
+q
+1 0 0 1 20 126 cm
+Q
+q
+1 0 0 1 20 126 cm
+Q
+q
+1 0 0 1 20 114 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 5.66 0 Td (b.) Tj T* -5.66 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Fault relationships) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 114 cm
+Q
+q
+1 0 0 1 20 108 cm
+Q
+q
+1 0 0 1 20 54 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 48 cm
+Q
+q
+1 0 0 1 20 48 cm
+Q
+q
+1 0 0 1 20 36 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 9 0 Td (i.) Tj T* -9 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Relative ages of faults longer than a specified length estimated from truncation relationships) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 30 cm
+Q
+q
+1 0 0 1 20 18 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 6.78 0 Td (ii.) Tj T* -6.78 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Directed graph based on these relationships) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 12 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4.56 0 Td (iii.) Tj T* -4.56 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Cyclic relationships removed \(A truncates B; B truncates C; C truncates A\)) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 54 cm
+Q
+q
+1 0 0 1 20 48 cm
+Q
+q
+1 0 0 1 20 48 cm
+Q
+q
+1 0 0 1 20 36 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 6.22 0 Td (c.) Tj T* -6.22 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Fault-stratigraphy relationships) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 36 cm
+Q
+q
+1 0 0 1 20 30 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 24 cm
+Q
+q
+1 0 0 1 20 24 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 9 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 9 0 Td (i.) Tj T* -9 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 14 Tm /F1 10 Tf 12 TL .729213 Tw (Adjacency matrices of relative ages of faults longer than a specified length and formations) Tj T* 0 Tw (and groups based on truncation relationships) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 62.69291 213.0236 cm
 Q
 q
 1 0 0 1 62.69291 207.0236 cm
+Q
+q
+1 0 0 1 62.69291 207.0236 cm
+Q
+q
+1 0 0 1 62.69291 195.0236 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 14 Tm /F1 10 Tf 12 TL .261488 Tw (d. Faults i. Fault name based on id of fault ii. Optional removal of faults below a certain fault-tip to fault-tip) Tj T* 0 Tw (distance iii. X,Y from fault nodes with optional decimation iv. Z from DTM) Tj T* ET
-Q
-Q
+BT /F1 10 Tf 12 TL ET
 q
-1 0 0 1 62.69291 177.0236 cm
+1 0 0 1 6 -3 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 14 Tm /F1 10 Tf 12 TL -0.090011 Tw (e. Fold axial traces i. Fold axial trace name based on id of fold axial trace ii. X,Y from fold axial trace nodes) Tj T* 0 Tw (with optional decimation iii. Z from DTM) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 5.66 0 Td (2.) Tj T* -5.66 0 Td ET
 Q
 Q
 q
-1 0 0 1 62.69291 111.0236 cm
+1 0 0 1 23 -3 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 50 Tm /F1 10 Tf 12 TL 1.095868 Tw (f. Local formation thickness i. X,Y from basal contact nodes ii. Z from DTM iii. Thickness from distance) Tj T* 0 Tw 1.127318 Tw (from normal to local contact orientation to stratigraphically next upper contact polyline in the taking into) Tj T* 0 Tw 1.404983 Tw (account the local orientation of bedding estimated from the interpolation of basal contacts and primary) Tj T* 0 Tw .374269 Tw (orientation data iv. Normalised formation thickness calculated for each node based on division by median) Tj T* 0 Tw (of thicknesses for each formation) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Position Data) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 62.69291 195.0236 cm
+Q
+q
+1 0 0 1 62.69291 189.0236 cm
+Q
+q
+1 0 0 1 62.69291 88.86614 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 102 cm
+Q
+q
+1 0 0 1 20 102 cm
+Q
+q
+1 0 0 1 20 90 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 5.66 0 Td (a.) Tj T* -5.66 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (DTM) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 90 cm
+Q
+q
+1 0 0 1 20 84 cm
+Q
+q
+1 0 0 1 20 48 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 30 cm
+Q
+q
+1 0 0 1 20 30 cm
+Q
+q
+1 0 0 1 20 18 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 9 0 Td (i.) Tj T* -9 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (DTM downloaded for defined bounding box from SRTM server) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 12 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 6.78 0 Td (ii.) Tj T* -6.78 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Re-projected to local EPSG-defined projection system) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 48 cm
+Q
+q
+1 0 0 1 20 42 cm
+Q
+q
+1 0 0 1 20 42 cm
+Q
+q
+1 0 0 1 20 30 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 5.66 0 Td (b.) Tj T* -5.66 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Basal contacts) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 30 cm
+Q
+q
+1 0 0 1 20 24 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 18 cm
+Q
+q
+1 0 0 1 20 18 cm
+Q
+q
+1 0 0 1 20 6 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 9 0 Td (i.) Tj T* -9 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Formation based on stratigraphic relationship \(assigned to younger formation\)) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+Q
 Q
 Q
 q
@@ -1755,27 +2381,862 @@ Q
  
 endstream
 endobj
-47 0 obj
+41 0 obj
 <<
-/Length 8480
+/Length 11849
 >>
 stream
 1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
 q
-1 0 0 1 62.69291 729.0236 cm
+1 0 0 1 62.69291 213.0236 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 14 Tm /F1 10 Tf 12 TL .73528 Tw (g. Local fault displacement i. X,Y from fault contact nodes ii. Z from DTM iii. Displacement calculated by) Tj T* 0 Tw (finding distance between equivalent stratigraphic contacts either side of the fault) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 492 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 36 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 6.78 0 Td (ii.) Tj T* -6.78 0 Td ET
 Q
 Q
 q
-1 0 0 1 62.69291 723.0236 cm
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (X,Y from contact nodes with optional decimation) Tj T* ET
+Q
 Q
 q
-1 0 0 1 62.69291 723.0236 cm
+Q
+Q
 Q
 q
-1 0 0 1 62.69291 711.0236 cm
+1 0 0 1 20 30 cm
+Q
+q
+1 0 0 1 20 18 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4.56 0 Td (iii.) Tj T* -4.56 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Z from DTM) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 12 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4 0 Td (iv.) Tj T* -4 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Nodes that are defined by faults are removed) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 492 cm
+Q
+q
+1 0 0 1 20 486 cm
+Q
+q
+1 0 0 1 20 486 cm
+Q
+q
+1 0 0 1 20 474 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 6.22 0 Td (c.) Tj T* -6.22 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Igneous contacts) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 474 cm
+Q
+q
+1 0 0 1 20 468 cm
+Q
+q
+1 0 0 1 20 396 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 66 cm
+Q
+q
+1 0 0 1 20 66 cm
+Q
+q
+1 0 0 1 20 54 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 9 0 Td (i.) Tj T* -9 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Formation based on intrusive unit) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 48 cm
+Q
+q
+1 0 0 1 20 36 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 6.78 0 Td (ii.) Tj T* -6.78 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (X,Y from contact nodes with optional decimation) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 30 cm
+Q
+q
+1 0 0 1 20 18 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4.56 0 Td (iii.) Tj T* -4.56 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Z from DTM) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 12 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4 0 Td (iv.) Tj T* -4 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Nodes that are defined by faults are removed) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 396 cm
+Q
+q
+1 0 0 1 20 390 cm
+Q
+q
+1 0 0 1 20 390 cm
+Q
+q
+1 0 0 1 20 378 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 5.66 0 Td (d.) Tj T* -5.66 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Faults) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 378 cm
+Q
+q
+1 0 0 1 20 372 cm
+Q
+q
+1 0 0 1 20 300 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 66 cm
+Q
+q
+1 0 0 1 20 66 cm
+Q
+q
+1 0 0 1 20 54 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 9 0 Td (i.) Tj T* -9 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Fault name based on id of fault) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 48 cm
+Q
+q
+1 0 0 1 20 36 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 6.78 0 Td (ii.) Tj T* -6.78 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Optional removal of faults below a certain fault-tip to fault-tip distance) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 30 cm
+Q
+q
+1 0 0 1 20 18 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4.56 0 Td (iii.) Tj T* -4.56 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (X,Y from fault nodes with optional decimation) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 12 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4 0 Td (iv.) Tj T* -4 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Z from DTM) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 300 cm
+Q
+q
+1 0 0 1 20 294 cm
+Q
+q
+1 0 0 1 20 294 cm
+Q
+q
+1 0 0 1 20 282 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 5.66 0 Td (e.) Tj T* -5.66 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Fold axial traces) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 282 cm
+Q
+q
+1 0 0 1 20 276 cm
+Q
+q
+1 0 0 1 20 222 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 48 cm
+Q
+q
+1 0 0 1 20 48 cm
+Q
+q
+1 0 0 1 20 36 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 9 0 Td (i.) Tj T* -9 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Fold axial trace name based on id of fold axial trace) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 30 cm
+Q
+q
+1 0 0 1 20 18 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 6.78 0 Td (ii.) Tj T* -6.78 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (X,Y from fold axial trace nodes with optional decimation) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 12 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4.56 0 Td (iii.) Tj T* -4.56 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Z from DTM) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 222 cm
+Q
+q
+1 0 0 1 20 216 cm
+Q
+q
+1 0 0 1 20 216 cm
+Q
+q
+1 0 0 1 20 204 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 8.44 0 Td (f.) Tj T* -8.44 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Local formation thickness) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 204 cm
+Q
+q
+1 0 0 1 20 198 cm
+Q
+q
+1 0 0 1 20 90 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 102 cm
+Q
+q
+1 0 0 1 20 102 cm
+Q
+q
+1 0 0 1 20 90 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 9 0 Td (i.) Tj T* -9 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (X,Y from basal contact nodes) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 84 cm
+Q
+q
+1 0 0 1 20 72 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 6.78 0 Td (ii.) Tj T* -6.78 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Z from DTM) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 66 cm
+Q
+q
+1 0 0 1 20 30 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 21 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4.56 0 Td (iii.) Tj T* -4.56 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 26 Tm /F1 10 Tf 12 TL 1.724524 Tw (Thickness from distance from normal to local contact orientation to stratigraphically next) Tj T* 0 Tw .855366 Tw (upper contact polyline in the taking into account the local orientation of bedding estimated) Tj T* 0 Tw (from the interpolation of basal contacts and primary orientation data) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 24 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 9 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4 0 Td (iv.) Tj T* -4 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 14 Tm /F1 10 Tf 12 TL 1.300814 Tw (Normalised formation thickness calculated for each node based on division by median of) Tj T* 0 Tw (thicknesses for each formation) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 90 cm
+Q
+q
+1 0 0 1 20 84 cm
+Q
+q
+1 0 0 1 20 84 cm
+Q
+q
+1 0 0 1 20 72 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 5.66 0 Td (g.) Tj T* -5.66 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Local fault displacement) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 72 cm
+Q
+q
+1 0 0 1 20 66 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 60 cm
+Q
+q
+1 0 0 1 20 60 cm
+Q
+q
+1 0 0 1 20 48 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 9 0 Td (i.) Tj T* -9 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (X,Y from fault contact nodes) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 42 cm
+Q
+q
+1 0 0 1 20 30 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 6.78 0 Td (ii.) Tj T* -6.78 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Z from DTM) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 24 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 9 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4.56 0 Td (iii.) Tj T* -4.56 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 14 Tm /F1 10 Tf 12 TL -0.118915 Tw (Displacement calculated by finding distance between equivalent stratigraphic contacts either) Tj T* 0 Tw (side of the fault) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 62.69291 213.0236 cm
+Q
+q
+1 0 0 1 62.69291 207.0236 cm
+Q
+q
+1 0 0 1 62.69291 207.0236 cm
+Q
+q
+1 0 0 1 62.69291 195.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -1798,23 +3259,215 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 711.0236 cm
+1 0 0 1 62.69291 195.0236 cm
 Q
 q
-1 0 0 1 62.69291 681.0236 cm
+1 0 0 1 62.69291 189.0236 cm
+Q
+q
+1 0 0 1 62.69291 93.02362 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 14 Tm /F1 10 Tf 12 TL .84683 Tw (a. Primary dip/dip direction i. Orientations of bedding, but filter out dip = 0 ii. X,Y from primary data with) Tj T* 0 Tw (optional decimation iii. Add Z from DTM iv. Add geology polygon formation info) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 90 cm
+Q
+q
+1 0 0 1 20 90 cm
+Q
+q
+1 0 0 1 20 78 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 5.66 0 Td (a.) Tj T* -5.66 0 Td ET
 Q
 Q
 q
-1 0 0 1 62.69291 675.0236 cm
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Primary dip/dip direction) Tj T* ET
+Q
 Q
 q
-1 0 0 1 62.69291 675.0236 cm
+Q
+Q
 Q
 q
-1 0 0 1 62.69291 663.0236 cm
+1 0 0 1 20 78 cm
+Q
+q
+1 0 0 1 20 72 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 66 cm
+Q
+q
+1 0 0 1 20 66 cm
+Q
+q
+1 0 0 1 20 54 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 9 0 Td (i.) Tj T* -9 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Orientations of bedding, but filter out dip = 0) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 48 cm
+Q
+q
+1 0 0 1 20 36 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 6.78 0 Td (ii.) Tj T* -6.78 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (X,Y from primary data with optional decimation) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 30 cm
+Q
+q
+1 0 0 1 20 18 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4.56 0 Td (iii.) Tj T* -4.56 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Add Z from DTM) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 12 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4 0 Td (iv.) Tj T* -4 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Add geology polygon formation info) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 56.69291 773.1969 cm
+q
+BT 1 0 0 1 0 2 Tm 198.1449 0 Td 12 TL /F1 10 Tf 0 0 0 rg (map2loop Package) Tj T* -198.1449 0 Td ET
+Q
+Q
+q
+1 0 0 1 56.69291 56.69291 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 238.1649 0 Td (4) Tj T* -238.1649 0 Td ET
+Q
+Q
+ 
+endstream
+endobj
+42 0 obj
+<<
+/Length 11682
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+q
+1 0 0 1 62.69291 346.8661 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 408 cm
+Q
+q
+1 0 0 1 20 408 cm
+Q
+q
+1 0 0 1 20 396 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -1837,16 +3490,25 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 663.0236 cm
+1 0 0 1 20 396 cm
 Q
 q
-1 0 0 1 62.69291 657.0236 cm
+1 0 0 1 20 390 cm
 Q
 q
-1 0 0 1 62.69291 657.0236 cm
+1 0 0 1 20 336 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 48 cm
 Q
 q
-1 0 0 1 62.69291 645.0236 cm
+1 0 0 1 20 48 cm
+Q
+q
+1 0 0 1 20 36 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -1869,10 +3531,10 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 639.0236 cm
+1 0 0 1 20 30 cm
 Q
 q
-1 0 0 1 62.69291 627.0236 cm
+1 0 0 1 20 18 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -1895,10 +3557,10 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 621.0236 cm
+1 0 0 1 20 12 cm
 Q
 q
-1 0 0 1 62.69291 609.0236 cm
+1 0 0 1 20 0 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -1921,30 +3583,339 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 609.0236 cm
+1 0 0 1 20 0 cm
 Q
 q
-1 0 0 1 62.69291 567.0236 cm
+Q
+Q
+Q
+q
+1 0 0 1 20 336 cm
+Q
+q
+1 0 0 1 20 330 cm
+Q
+q
+1 0 0 1 20 330 cm
+Q
+q
+1 0 0 1 20 318 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 26 Tm /F1 10 Tf 12 TL 1.650542 Tw (c. Near-Fold Axial Trace orientations i. X,Y step out normal to fat from local nodes of fold axial trace) Tj T* 0 Tw .687882 Tw (polyline with optional decimation ii. Add Z from DTM iii. Dip direction from local normal to fat and sign of) Tj T* 0 Tw (fold axis iv. Dip arbitrarily set by user) Tj T* ET
-Q
-Q
+BT /F1 10 Tf 12 TL ET
 q
-1 0 0 1 62.69291 525.0236 cm
+1 0 0 1 6 -3 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 26 Tm /F1 10 Tf 12 TL 1.484692 Tw (d. Near-fault orientations i. X,Y step out normal to fault from local nodes of fault polyline with optional) Tj T* 0 Tw .899398 Tw (decimation ii. Add Z from DTM iii. Dip and dip direction from interpolation of basal contacts and primary) Tj T* 0 Tw (orientation data iv. Add geology polygon formation info) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 6.22 0 Td (c.) Tj T* -6.22 0 Td ET
 Q
 Q
 q
-1 0 0 1 62.69291 519.0236 cm
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Near-Fold Axial Trace orientations) Tj T* ET
+Q
 Q
 q
-1 0 0 1 62.69291 519.0236 cm
+Q
+Q
 Q
 q
-1 0 0 1 62.69291 507.0236 cm
+1 0 0 1 20 318 cm
+Q
+q
+1 0 0 1 20 312 cm
+Q
+q
+1 0 0 1 20 228 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 78 cm
+Q
+q
+1 0 0 1 20 78 cm
+Q
+q
+1 0 0 1 20 54 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 9 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 9 0 Td (i.) Tj T* -9 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 14 Tm /F1 10 Tf 12 TL 2.966651 Tw (X,Y step out normal to fat from local nodes of fold axial trace polyline with optional) Tj T* 0 Tw (decimation) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 48 cm
+Q
+q
+1 0 0 1 20 36 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 6.78 0 Td (ii.) Tj T* -6.78 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Add Z from DTM) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 30 cm
+Q
+q
+1 0 0 1 20 18 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4.56 0 Td (iii.) Tj T* -4.56 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Dip direction from local normal to fat and sign of fold axis) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 12 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4 0 Td (iv.) Tj T* -4 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Dip arbitrarily set by user) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 228 cm
+Q
+q
+1 0 0 1 20 222 cm
+Q
+q
+1 0 0 1 20 222 cm
+Q
+q
+1 0 0 1 20 210 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 5.66 0 Td (d.) Tj T* -5.66 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Near-fault orientations) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 210 cm
+Q
+q
+1 0 0 1 20 204 cm
+Q
+q
+1 0 0 1 20 132 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 66 cm
+Q
+q
+1 0 0 1 20 66 cm
+Q
+q
+1 0 0 1 20 54 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 9 0 Td (i.) Tj T* -9 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (X,Y step out normal to fault from local nodes of fault polyline with optional decimation) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 48 cm
+Q
+q
+1 0 0 1 20 36 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 6.78 0 Td (ii.) Tj T* -6.78 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Add Z from DTM) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 30 cm
+Q
+q
+1 0 0 1 20 18 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4.56 0 Td (iii.) Tj T* -4.56 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Dip and dip direction from interpolation of basal contacts and primary orientation data) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 12 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4 0 Td (iv.) Tj T* -4 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Add geology polygon formation info) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 132 cm
+Q
+q
+1 0 0 1 20 126 cm
+Q
+q
+1 0 0 1 20 126 cm
+Q
+q
+1 0 0 1 20 114 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -1967,30 +3938,215 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 507.0236 cm
+1 0 0 1 20 108 cm
 Q
 q
-1 0 0 1 62.69291 465.0236 cm
-q
-0 0 0 rg
-BT 1 0 0 1 0 26 Tm /F1 10 Tf 12 TL .797633 Tw (f. Igneous contacts i. X,Y from local nodes of igneous contact polyline with optional decimation ii. Add Z) Tj T* 0 Tw 1.554692 Tw (from DTM iii. Dip and polarity arbitrarily defined by user iv. Dip direction from local normal to igneous) Tj T* 0 Tw (contact interpolation of basal contacts v. Add geology polygon formation info) Tj T* ET
-Q
-Q
-q
-1 0 0 1 62.69291 447.0236 cm
+1 0 0 1 20 96 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Inputs Minimum map2loop inputs:) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 8.44 0 Td (f.) Tj T* -8.44 0 Td ET
 Q
 Q
 q
-1 0 0 1 62.69291 441.0236 cm
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Igneous contacts) Tj T* ET
+Q
 Q
 q
-1 0 0 1 62.69291 441.0236 cm
+Q
+Q
 Q
 q
-1 0 0 1 62.69291 429.0236 cm
+1 0 0 1 20 96 cm
+Q
+q
+1 0 0 1 20 90 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 84 cm
+Q
+q
+1 0 0 1 20 84 cm
+Q
+q
+1 0 0 1 20 72 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 9 0 Td (i.) Tj T* -9 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (X,Y from local nodes of igneous contact polyline with optional decimation) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 66 cm
+Q
+q
+1 0 0 1 20 54 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 6.78 0 Td (ii.) Tj T* -6.78 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Add Z from DTM) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 48 cm
+Q
+q
+1 0 0 1 20 36 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4.56 0 Td (iii.) Tj T* -4.56 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Dip and polarity arbitrarily defined by user) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 30 cm
+Q
+q
+1 0 0 1 20 18 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 4 0 Td (iv.) Tj T* -4 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Dip direction from local normal to igneous contact interpolation of basal contacts) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 12 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 6.22 0 Td (v.) Tj T* -6.22 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Add geology polygon formation info) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 62.69291 346.8661 cm
+Q
+q
+1 0 0 1 62.69291 328.8661 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Inputs) Tj T* ET
+Q
+Q
+q
+1 0 0 1 62.69291 310.8661 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Minimum map2loop inputs:) Tj T* ET
+Q
+Q
+q
+1 0 0 1 62.69291 304.8661 cm
+Q
+q
+1 0 0 1 62.69291 304.8661 cm
+Q
+q
+1 0 0 1 62.69291 292.8661 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -2013,10 +4169,10 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 423.0236 cm
+1 0 0 1 62.69291 286.8661 cm
 Q
 q
-1 0 0 1 62.69291 411.0236 cm
+1 0 0 1 62.69291 274.8661 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -2039,43 +4195,282 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 411.0236 cm
+1 0 0 1 62.69291 268.8661 cm
 Q
 q
-1 0 0 1 62.69291 357.0236 cm
-q
-0 0 0 rg
-BT 1 0 0 1 0 38 Tm /F1 10 Tf 12 TL 1.57686 Tw (3. Geology polygons: -a. All polygons are watertight -b. Polygons stop on faults -c. Polygons have as) Tj T* 0 Tw .147045 Tw (attributes: -i. Object ID -ii. Stratigraphic code -iii. Stratigraphic group -iv. One of more fields that describe if) Tj T* 0 Tw .48104 Tw (sill, if igneous, if volcanic -v. Min_age field -vi. Max_age field \(can be same as Min_age field, and can be) Tj T* 0 Tw (simple numerical ordering \(bigger number is older\)\)) Tj T* ET
-Q
-Q
-q
-1 0 0 1 62.69291 315.0236 cm
+1 0 0 1 62.69291 256.8661 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 26 Tm /F1 10 Tf 12 TL .953735 Tw (4. Fault/Fold Axial Trace Polylines: -a. Faults terminate on other faults but do not cross -b. Faults/Folds) Tj T* 0 Tw .430488 Tw (have as attributes: -i. Object ID -ii. Field that determines if polyline is fault or fold axial trace -iii. Field that) Tj T* 0 Tw (determine type of fold axial trace e.g. syncline or anticline\) -iv. Faults can have dip/dip direction info) Tj T* ET
-Q
-Q
+BT /F1 10 Tf 12 TL ET
 q
-1 0 0 1 62.69291 285.0236 cm
+1 0 0 1 6 -3 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 14 Tm /F1 10 Tf 12 TL .095697 Tw (5. Bedding orientations: -a. Assumes dip/dip direction or dip/strike data -b. Orientations have as attributes:) Tj T* 0 Tw (-i. Dip -ii. Dip Direction or strike) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 5.66 0 Td (3.) Tj T* -5.66 0 Td ET
 Q
 Q
 q
-1 0 0 1 62.69291 252.0236 cm
+1 0 0 1 23 -3 cm
 q
-BT 1 0 0 1 0 3.5 Tm 21 TL /F2 17.5 Tf 0 0 0 rg (Using ) Tj /F4 17.5 Tf (map2loop) Tj /F2 17.5 Tf ( with your own or standard datasets) Tj T* ET
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Geology polygons:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 234.0236 cm
+Q
+Q
+Q
+q
+1 0 0 1 62.69291 256.8661 cm
+Q
+q
+1 0 0 1 62.69291 250.8661 cm
+Q
+q
+1 0 0 1 62.69291 196.8661 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 42 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (-a. All polygons are watertight -b. Polygons stop on faults -c. Polygons have as attributes:) Tj T* ET
+Q
+Q
+q
+1 0 0 1 20 36 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 26 Tm /F1 10 Tf 12 TL .57436 Tw (-i. Object ID -ii. Stratigraphic code -iii. Stratigraphic group -iv. One of more fields that describe if) Tj T* 0 Tw .114104 Tw (sill, if igneous, if volcanic -v. Min_age field -vi. Max_age field \(can be same as Min_age field, and) Tj T* 0 Tw (can be simple numerical ordering \(bigger number is older\)\)) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 62.69291 196.8661 cm
+Q
+q
+1 0 0 1 62.69291 190.8661 cm
+Q
+q
+1 0 0 1 62.69291 190.8661 cm
+Q
+q
+1 0 0 1 62.69291 178.8661 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 5.66 0 Td (4.) Tj T* -5.66 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Fault/Fold Axial Trace Polylines:) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 62.69291 178.8661 cm
+Q
+q
+1 0 0 1 62.69291 172.8661 cm
+Q
+q
+1 0 0 1 62.69291 130.8661 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 30 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (-a. Faults terminate on other faults but do not cross -b. Faults/Folds have as attributes:) Tj T* ET
+Q
+Q
+q
+1 0 0 1 20 24 cm
+Q
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 14 Tm /F1 10 Tf 12 TL .325542 Tw (-i. Object ID -ii. Field that determines if polyline is fault or fold axial trace -iii. Field that determine) Tj T* 0 Tw (type of fold axial trace e.g. syncline or anticline\) -iv. Faults can have dip/dip direction info) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 62.69291 130.8661 cm
+Q
+q
+1 0 0 1 62.69291 124.8661 cm
+Q
+q
+1 0 0 1 62.69291 124.8661 cm
+Q
+q
+1 0 0 1 62.69291 112.8661 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 5.66 0 Td (5.) Tj T* -5.66 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Bedding orientations:) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 62.69291 112.8661 cm
+Q
+q
+1 0 0 1 62.69291 106.8661 cm
+Q
+q
+1 0 0 1 62.69291 88.86614 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 6 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (-a. Assumes dip/dip direction or dip/strike data -b. Orientations have as attributes:) Tj T* ET
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 56.69291 773.1969 cm
+q
+BT 1 0 0 1 0 2 Tm 198.1449 0 Td 12 TL /F1 10 Tf 0 0 0 rg (map2loop Package) Tj T* -198.1449 0 Td ET
+Q
+Q
+q
+1 0 0 1 56.69291 56.69291 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 238.1649 0 Td (5) Tj T* -238.1649 0 Td ET
+Q
+Q
+ 
+endstream
+endobj
+43 0 obj
+<<
+/Length 10140
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+q
+1 0 0 1 62.69291 741.0236 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 2 Tm  T* ET
+q
+1 0 0 1 20 0 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (-i. Dip -ii. Dip Direction or strike) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 0 cm
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 62.69291 741.0236 cm
+Q
+q
+1 0 0 1 62.69291 708.0236 cm
+q
+BT 1 0 0 1 0 3.5 Tm 21 TL /F2 17.5 Tf 0 0 0 rg (3. Using ) Tj /F4 17.5 Tf (map2loop) Tj /F2 17.5 Tf ( with your own or standard datasets) Tj T* ET
+Q
+Q
+q
+1 0 0 1 62.69291 690.0236 cm
 q
 BT 1 0 0 1 0 2 Tm 12 TL /F2 10 Tf 0 0 0 rg (In order to deconstruct a map with ) Tj /F4 10 Tf (map2loop) Tj /F2 10 Tf (, we need to undertake the following steps:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 129.0236 cm
+1 0 0 1 62.69291 585.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -2167,62 +4562,40 @@ Q
 Q
 Q
 q
-1 0 0 1 56.69291 773.1969 cm
+1 0 0 1 62.69291 552.0236 cm
 q
-BT 1 0 0 1 0 2 Tm 198.1449 0 Td 12 TL /F1 10 Tf 0 0 0 rg (map2loop Package) Tj T* -198.1449 0 Td ET
+BT 1 0 0 1 0 3.5 Tm 21 TL /F2 17.5 Tf 0 0 0 rg (4. Minimum ) Tj /F4 17.5 Tf (map2loop) Tj /F2 17.5 Tf ( data requirements:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 56.69291 56.69291 cm
-q
-0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 238.1649 0 Td (4) Tj T* -238.1649 0 Td ET
-Q
-Q
- 
-endstream
-endobj
-48 0 obj
-<<
-/Length 10617
->>
-stream
-1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
-q
-1 0 0 1 62.69291 732.0236 cm
-q
-BT 1 0 0 1 0 3.5 Tm 21 TL /F2 17.5 Tf 0 0 0 rg (1\) Minimum ) Tj /F4 17.5 Tf (map2loop) Tj /F2 17.5 Tf ( data requirements:) Tj T* ET
-Q
-Q
-q
-1 0 0 1 62.69291 714.0236 cm
+1 0 0 1 62.69291 534.0236 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (1.1 Vector Geospatial File Data Formats:) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (4.1 Vector Geospatial File Data Formats:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 684.0236 cm
+1 0 0 1 62.69291 504.0236 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 14 Tm /F1 10 Tf 12 TL 2.36498 Tw ('DXF': 'raw', 'CSV': 'raw', 'OpenFileGDB': 'r', 'ESRIJSON': 'r', 'ESRI Shapefile': 'raw', 'GeoJSON': 'rw',) Tj T* 0 Tw ('GeoJSONSeq': 'rw', 'GPKG': 'rw', 'GML': 'raw', 'MapInfo File': 'raw') Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 666.0236 cm
+1 0 0 1 62.69291 486.0236 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (r=read, a=append, w=write) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 660.0236 cm
+1 0 0 1 62.69291 480.0236 cm
 Q
 q
-1 0 0 1 62.69291 660.0236 cm
+1 0 0 1 62.69291 480.0236 cm
 Q
 q
-1 0 0 1 62.69291 648.0236 cm
+1 0 0 1 62.69291 468.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -2245,10 +4618,10 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 642.0236 cm
+1 0 0 1 62.69291 462.0236 cm
 Q
 q
-1 0 0 1 62.69291 630.0236 cm
+1 0 0 1 62.69291 450.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -2271,10 +4644,10 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 624.0236 cm
+1 0 0 1 62.69291 444.0236 cm
 Q
 q
-1 0 0 1 62.69291 612.0236 cm
+1 0 0 1 62.69291 432.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -2297,10 +4670,10 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 606.0236 cm
+1 0 0 1 62.69291 426.0236 cm
 Q
 q
-1 0 0 1 62.69291 594.0236 cm
+1 0 0 1 62.69291 414.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -2323,10 +4696,10 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 588.0236 cm
+1 0 0 1 62.69291 408.0236 cm
 Q
 q
-1 0 0 1 62.69291 576.0236 cm
+1 0 0 1 62.69291 396.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -2349,23 +4722,23 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 576.0236 cm
+1 0 0 1 62.69291 396.0236 cm
 Q
 q
-1 0 0 1 62.69291 558.0236 cm
+1 0 0 1 62.69291 378.0236 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (1.2 Geology Polygons \(or Multipolygons\):) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (4.2 Geology Polygons \(or Multipolygons\):) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 552.0236 cm
+1 0 0 1 62.69291 372.0236 cm
 Q
 q
-1 0 0 1 62.69291 552.0236 cm
+1 0 0 1 62.69291 372.0236 cm
 Q
 q
-1 0 0 1 62.69291 528.0236 cm
+1 0 0 1 62.69291 348.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -2388,10 +4761,10 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 522.0236 cm
+1 0 0 1 62.69291 342.0236 cm
 Q
 q
-1 0 0 1 62.69291 438.0236 cm
+1 0 0 1 62.69291 258.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -2413,10 +4786,10 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 432.0236 cm
+1 0 0 1 62.69291 252.0236 cm
 Q
 q
-1 0 0 1 62.69291 273.0236 cm
+1 0 0 1 62.69291 93.02362 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -2663,23 +5036,45 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 273.0236 cm
+1 0 0 1 62.69291 93.02362 cm
 Q
 q
-1 0 0 1 62.69291 255.0236 cm
+1 0 0 1 56.69291 773.1969 cm
+q
+BT 1 0 0 1 0 2 Tm 198.1449 0 Td 12 TL /F1 10 Tf 0 0 0 rg (map2loop Package) Tj T* -198.1449 0 Td ET
+Q
+Q
+q
+1 0 0 1 56.69291 56.69291 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (1.3 Fault Polylines:) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 238.1649 0 Td (6) Tj T* -238.1649 0 Td ET
+Q
+Q
+ 
+endstream
+endobj
+44 0 obj
+<<
+/Length 10319
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+q
+1 0 0 1 62.69291 741.0236 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (4.3 Fault Polylines:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 249.0236 cm
+1 0 0 1 62.69291 735.0236 cm
 Q
 q
-1 0 0 1 62.69291 249.0236 cm
+1 0 0 1 62.69291 735.0236 cm
 Q
 q
-1 0 0 1 62.69291 237.0236 cm
+1 0 0 1 62.69291 723.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -2702,10 +5097,10 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 231.0236 cm
+1 0 0 1 62.69291 717.0236 cm
 Q
 q
-1 0 0 1 62.69291 219.0236 cm
+1 0 0 1 62.69291 705.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -2728,10 +5123,10 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 213.0236 cm
+1 0 0 1 62.69291 699.0236 cm
 Q
 q
-1 0 0 1 62.69291 144.0236 cm
+1 0 0 1 62.69291 630.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -2848,23 +5243,23 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 144.0236 cm
+1 0 0 1 62.69291 630.0236 cm
 Q
 q
-1 0 0 1 62.69291 126.0236 cm
+1 0 0 1 62.69291 612.0236 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (1.4 Bedding Points:) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (4.4 Bedding Points:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 120.0236 cm
+1 0 0 1 62.69291 606.0236 cm
 Q
 q
-1 0 0 1 62.69291 120.0236 cm
+1 0 0 1 62.69291 606.0236 cm
 Q
 q
-1 0 0 1 62.69291 108.0236 cm
+1 0 0 1 62.69291 594.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -2887,43 +5282,21 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 108.0236 cm
+1 0 0 1 62.69291 594.0236 cm
 Q
 q
-1 0 0 1 62.69291 92.02362 cm
+1 0 0 1 62.69291 578.0236 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (Attributes:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 56.69291 773.1969 cm
-q
-BT 1 0 0 1 0 2 Tm 198.1449 0 Td 12 TL /F1 10 Tf 0 0 0 rg (map2loop Package) Tj T* -198.1449 0 Td ET
-Q
-Q
-q
-1 0 0 1 56.69291 56.69291 cm
-q
-0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 238.1649 0 Td (5) Tj T* -238.1649 0 Td ET
-Q
-Q
- 
-endstream
-endobj
-49 0 obj
-<<
-/Length 9679
->>
-stream
-1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
-q
-1 0 0 1 62.69291 668.8661 cm
+1 0 0 1 62.69291 485.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
-BT 1 0 0 1 0 71.15748 Tm  T* ET
+BT 1 0 0 1 0 80 Tm  T* ET
 q
 1 0 0 1 20 84 cm
 Q
@@ -3065,20 +5438,20 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 650.8661 cm
+1 0 0 1 62.69291 467.0236 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (1.5 Mineral Deposits: \(Optional\)) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (4.5 Mineral Deposits: \(Optional\)) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 644.8661 cm
+1 0 0 1 62.69291 461.0236 cm
 Q
 q
-1 0 0 1 62.69291 644.8661 cm
+1 0 0 1 62.69291 461.0236 cm
 Q
 q
-1 0 0 1 62.69291 632.8661 cm
+1 0 0 1 62.69291 449.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -3101,17 +5474,17 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 632.8661 cm
+1 0 0 1 62.69291 449.0236 cm
 Q
 q
-1 0 0 1 62.69291 616.8661 cm
+1 0 0 1 62.69291 433.0236 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (Attributes:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 523.8661 cm
+1 0 0 1 62.69291 340.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -3257,20 +5630,20 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 505.8661 cm
+1 0 0 1 62.69291 322.0236 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (1.6 Fold Axial Trace Polylines: \(Optional\)) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (4.6 Fold Axial Trace Polylines: \(Optional\)) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 499.8661 cm
+1 0 0 1 62.69291 316.0236 cm
 Q
 q
-1 0 0 1 62.69291 499.8661 cm
+1 0 0 1 62.69291 316.0236 cm
 Q
 q
-1 0 0 1 62.69291 487.8661 cm
+1 0 0 1 62.69291 304.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -3293,17 +5666,17 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 487.8661 cm
+1 0 0 1 62.69291 304.0236 cm
 Q
 q
-1 0 0 1 62.69291 471.8661 cm
+1 0 0 1 62.69291 288.0236 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (Attributes:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 432.8661 cm
+1 0 0 1 62.69291 249.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -3371,31 +5744,31 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 399.8661 cm
+1 0 0 1 62.69291 216.0236 cm
 q
-BT 1 0 0 1 0 3.5 Tm 21 TL /F2 17.5 Tf 0 0 0 rg (2\) Defining ) Tj /F4 17.5 Tf (map2loop) Tj /F2 17.5 Tf ( parameters:) Tj T* ET
+BT 1 0 0 1 0 3.5 Tm 21 TL /F2 17.5 Tf 0 0 0 rg (5\) Defining ) Tj /F4 17.5 Tf (map2loop) Tj /F2 17.5 Tf ( parameters:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 381.8661 cm
+1 0 0 1 62.69291 198.0236 cm
 q
 BT 1 0 0 1 0 2 Tm 12 TL /F2 10 Tf 0 0 0 rg (There are four types of parameters we need to define in order to use ) Tj /F4 10 Tf (map2loop) Tj /F2 10 Tf (:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 222.8661 cm
+1 0 0 1 62.69291 117.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
-BT 1 0 0 1 0 146 Tm  T* ET
+BT 1 0 0 1 0 68 Tm  T* ET
 q
-1 0 0 1 20 150 cm
+1 0 0 1 20 72 cm
 Q
 q
-1 0 0 1 20 150 cm
+1 0 0 1 20 72 cm
 Q
 q
-1 0 0 1 20 126 cm
+1 0 0 1 20 48 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -3417,10 +5790,10 @@ Q
 Q
 Q
 q
-1 0 0 1 20 120 cm
+1 0 0 1 20 42 cm
 Q
 q
-1 0 0 1 20 84 cm
+1 0 0 1 20 6 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -3442,8 +5815,40 @@ Q
 Q
 Q
 q
-1 0 0 1 20 78 cm
+1 0 0 1 20 0 cm
 Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 56.69291 773.1969 cm
+q
+BT 1 0 0 1 0 2 Tm 198.1449 0 Td 12 TL /F1 10 Tf 0 0 0 rg (map2loop Package) Tj T* -198.1449 0 Td ET
+Q
+Q
+q
+1 0 0 1 56.69291 56.69291 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 238.1649 0 Td (7) Tj T* -238.1649 0 Td ET
+Q
+Q
+ 
+endstream
+endobj
+45 0 obj
+<<
+/Length 7046
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+q
+1 0 0 1 62.69291 672.0236 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 0 68 Tm  T* ET
 q
 1 0 0 1 20 42 cm
 q
@@ -3499,33 +5904,34 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 189.8661 cm
+1 0 0 1 62.69291 654.0236 cm
 q
-BT 1 0 0 1 0 3.5 Tm 21 TL /F2 17.5 Tf 0 0 0 rg (2.1 paths) Tj T* ET
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (5.1 paths) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 171.8661 cm
+1 0 0 1 62.69291 636.0236 cm
 q
 BT 1 0 0 1 0 2 Tm 12 TL /F1 10 Tf 0 0 0 rg (These is passed to the ) Tj /F3 10 Tf (map2loop) Tj /F1 10 Tf ( Project\(\) method.) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 153.8661 cm
+1 0 0 1 62.69291 618.0236 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Examples:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 135.8661 cm
+1 0 0 1 62.69291 600.0236 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (Remote WFS layers: See Example 1 Notebook) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 110.442 cm
+1 0 0 1 62.69291 552.1167 cm
 q
 q
 .468391 0 0 .468391 0 0 cm
@@ -3535,73 +5941,31 @@ q
 .662745 .662745 .662745 RG
 .5 w
 .960784 .960784 .862745 rg
-n -6 -6 1002 36 re B*
+n -6 -6 1002 84 re B*
 Q
 q
-BT 1 0 0 1 0 14 Tm 12 TL /F5 10 Tf 0 0 0 rg (proj=Project\(geology_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS) Tj (&) Tj (version=1.0.0) Tj (&) Tj (request=GetFeature) Tj (&) Tj (typeName=loop:geol_500k) Tj (&) Tj (bbox={}) Tj (&) Tj (srs=EPSG:28350',) Tj T* (            fault_file='http:// etc.',) Tj T* ET
-Q
-Q
-Q
-Q
-Q
-q
-1 0 0 1 56.69291 773.1969 cm
-q
-BT 1 0 0 1 0 2 Tm 198.1449 0 Td 12 TL /F1 10 Tf 0 0 0 rg (map2loop Package) Tj T* -198.1449 0 Td ET
-Q
-Q
-q
-1 0 0 1 56.69291 56.69291 cm
-q
-0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 238.1649 0 Td (6) Tj T* -238.1649 0 Td ET
-Q
-Q
- 
-endstream
-endobj
-50 0 obj
-<<
-/Length 6196
->>
-stream
-1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
-q
-1 0 0 1 62.69291 691.8236 cm
-q
-q
-1 0 0 1 0 0 cm
-q
-1 0 0 1 6.6 6.6 cm
-q
-.662745 .662745 .662745 RG
-.5 w
-.960784 .960784 .862745 rg
-n -6 -6 468.6898 60 re B*
-Q
-q
-BT 1 0 0 1 0 38 Tm 12 TL /F5 10 Tf 0 0 0 rg (            structure_file='http:// etc.',) Tj T* (            mindep_file='http:// etc.,) Tj T* (            metadata="http://anyurl.org/mydata.hjson',) Tj T* (            remote=True\)) Tj T* ET
+BT 1 0 0 1 0 62 Tm 12 TL /F5 10 Tf 0 0 0 rg (proj=Project\(geology_file = 'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS) Tj (&) Tj (version=1.0.0) Tj (&) Tj (request=GetFeature) Tj (&) Tj (typeName=loop:geol_500k) Tj (&) Tj (bbox={}) Tj (&) Tj (srs=EPSG:28350',) Tj T* (            fault_file='http:// etc.',) Tj T* (            structure_file='http:// etc.',) Tj T* (            mindep_file='http:// etc.,) Tj T* (            metadata="http://anyurl.org/mydata.hjson',) Tj T* (            remote=True\)) Tj T* ET
 Q
 Q
 Q
 Q
 Q
 q
-1 0 0 1 62.69291 671.8236 cm
+1 0 0 1 62.69291 532.1167 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (where remote=True signifies that WFS-served data will be accessed.) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 641.8236 cm
+1 0 0 1 62.69291 502.1167 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 14 Tm /F2 10 Tf 12 TL 1.219213 Tw (Standard Australia State Geological Surveys datasets, we have predefined the paths for all data) Tj T* 0 Tw (and the following code is sufficient: See Example 2 Notebook) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 592.4814 cm
+1 0 0 1 62.69291 452.7745 cm
 q
 q
 .840289 0 0 .840289 0 0 cm
@@ -3622,14 +5986,14 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 572.4814 cm
+1 0 0 1 62.69291 432.7745 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (Local GIS layers: see Example 3 notebook) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 455.2814 cm
+1 0 0 1 62.69291 315.5745 cm
 q
 q
 1 0 0 1 0 0 cm
@@ -3650,29 +6014,30 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 423.2814 cm
+1 0 0 1 62.69291 283.5745 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 14 Tm /F1 10 Tf 12 TL .936235 Tw (where remote=False signifies that local GIS files will be accessed. Paths can be relative or absolute, or) Tj T* 0 Tw (even a URL, however for URLs, the components of the shapefile or TAB file have to be zipped up.) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 390.2814 cm
+1 0 0 1 62.69291 265.5745 cm
 q
-BT 1 0 0 1 0 3.5 Tm 21 TL /F2 17.5 Tf 0 0 0 rg (2.2 Layer field codes:) Tj T* ET
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (5.2 Layer field codes:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 288.2814 cm
+1 0 0 1 62.69291 163.5745 cm
 q
 BT 1 0 0 1 0 86 Tm .066988 Tw 12 TL /F1 10 Tf 0 0 0 rg (You will need to create or modify an ) Tj /F3 10 Tf (hjson) Tj /F1 10 Tf ( format file that provides the names of fields and some text flags) Tj T* 0 Tw 1.646651 Tw (that tell ) Tj /F3 10 Tf (map2loop) Tj /F1 10 Tf ( where and what specific information can be retrieved from these layers. These are) Tj T* 0 Tw 1.556098 Tw (stored in an hjson format text file the path of which is passed to the ) Tj /F3 10 Tf (map2loop) Tj /F1 10 Tf ( Project\(\) method. The) Tj T* 0 Tw .188409 Tw (easiest way to get started is to use a jupyter notebook allows you to reduce errors by providing a primitive) Tj T* 0 Tw 3.03811 Tw (GUI for creating an ) Tj /F3 10 Tf (hjson) Tj /F1 10 Tf ( config file and associated python script, named: ) Tj /F2 10 Tf (Utility 1 - Config file) Tj T* 0 Tw -0.046328 Tw (generator.ipynb) Tj /F1 10 Tf (. Alternatively if you are brave you can edit the values to the right of the colon in each row) Tj T* 0 Tw .412765 Tw (of an existing ) Tj /F3 10 Tf (hjson) Tj /F1 10 Tf ( file. For example to specify that the field in the geospatial layer that contains bedding) Tj T* 0 Tw (dip information is called ) Tj /F2 10 Tf (MYDIP) Tj /F1 10 Tf (, replace the appropriate code in the ) Tj /F3 10 Tf (hjson) Tj /F1 10 Tf ( file below with:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 282.2814 cm
+1 0 0 1 62.69291 157.5745 cm
 Q
 q
-1 0 0 1 62.69291 270.2814 cm
+1 0 0 1 62.69291 145.5745 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -3689,54 +6054,12 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 270.2814 cm
+1 0 0 1 62.69291 145.5745 cm
 Q
 q
-1 0 0 1 62.69291 216.2814 cm
+1 0 0 1 62.69291 91.57448 cm
 q
 BT 1 0 0 1 0 38 Tm .22186 Tw 12 TL /F1 10 Tf 0 0 0 rg (Some verification is carried out by ) Tj /F3 10 Tf (map2loop) Tj /F1 10 Tf ( to ensure the required parameters have been defined. In the) Tj T* 0 Tw .038988 Tw (following section ) Tj /F3 10 Tf (field) Tj /F1 10 Tf ( refers to a field name in a geospatial layer; ) Tj /F3 10 Tf (text) Tj /F1 10 Tf ( refers to some text in the contents of) Tj T* 0 Tw 1.234431 Tw (a field for a specific geometric object. You shouldn't use the same field for different codes as this may) Tj T* 0 Tw (cause problems.) Tj T* ET
-Q
-Q
-q
-1 0 0 1 62.69291 152.459 cm
-q
-q
-.511194 0 0 .511194 0 0 cm
-q
-1 0 0 1 6.6 12.91094 cm
-q
-.662745 .662745 .662745 RG
-.5 w
-.960784 .960784 .862745 rg
-n -6 -6 582 108 re B*
-Q
-q
-0 0 0 rg
-BT 1 0 0 1 0 86 Tm /F5 10 Tf 12 TL ({) Tj T* (    # Orientations-----------------------------) Tj T* (    "d": "DIP",  # field that contains dip information) Tj T* (    "dd": "DIP_DIR",  # field that contains dip direction information) Tj T* (    "sf": "FEATURE",  # field that contains information on type of structure) Tj T* (    # text to search for in field defined by sf code to show that this is a bedding measurement) Tj T* (    "bedding": "Bed",) Tj T* (    # flag to determine measurement convention \(currently "strike" or "dip direction"\)) Tj T* ET
-Q
-Q
-Q
-Q
-Q
-q
-1 0 0 1 62.69291 119.3082 cm
-q
-q
-.511194 0 0 .511194 0 0 cm
-q
-1 0 0 1 6.6 12.91094 cm
-q
-.662745 .662745 .662745 RG
-.5 w
-.960784 .960784 .862745 rg
-n -6 -6 654 48 re B*
-Q
-q
-0 0 0 rg
-BT 1 0 0 1 0 26 Tm /F5 10 Tf 12 TL (    "otype": "dip direction",) Tj T* (    "bo": "TYPE",  # field that contains type of foliation) Tj T* (    # text to search for in field defined by bo code to show that this is an overturned bedding measurement) Tj T* ET
-Q
-Q
-Q
 Q
 Q
 q
@@ -3749,20 +6072,20 @@ q
 1 0 0 1 56.69291 56.69291 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 238.1649 0 Td (7) Tj T* -238.1649 0 Td ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 238.1649 0 Td (8) Tj T* -238.1649 0 Td ET
 Q
 Q
  
 endstream
 endobj
-51 0 obj
+46 0 obj
 <<
-/Length 6341
+/Length 6401
 >>
 stream
 1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
 q
-1 0 0 1 62.69291 427.2906 cm
+1 0 0 1 62.69291 359.813 cm
 q
 q
 .511194 0 0 .511194 0 0 cm
@@ -3772,30 +6095,31 @@ q
 .662745 .662745 .662745 RG
 .5 w
 .960784 .960784 .862745 rg
-n -6 -6 918 636 re B*
+n -6 -6 918 768 re B*
 Q
 q
 0 0 0 rg
-BT 1 0 0 1 0 614 Tm /F5 10 Tf 12 TL (    "btype": "overturned",) Tj T* (    # Stratigraphy-----------------------------) Tj T* (    "g": "GROUP_",  # field that contains coarser stratigraphic coding) Tj T* (    # field that contains alternate coarser stratigraphic coding if "g" is blank) Tj T* (    "g2": "SUPERSUITE",) Tj T* (    "c": "UNITNAME",  # field that contains finer stratigraphic coding) Tj T* (    "ds": "DESCRIPTN",  # field that contains information about lithology) Tj T* (    # field that contains alternate stratigraphic coding \(not used??\)) Tj T* (    "u": "CODE",) Tj T* (    "r1": "ROCKTYPE1",  # field that contains  extra lithology information) Tj T* (    "r2": "ROCKTYPE2",  # field that contains even more lithology information) Tj T* (    "sill": "sill",  # text to search for in field defined by ds code to show that this is a sill) Tj T* (    # text to search for in field defined by r1 code to show that this is an intrusion) Tj T* (    "intrusive": "intrusive", # text to search for in field defined by ds code to show that this is an volcanic \(not intrusion\) "volcanic": "volcanic",) Tj T* (    # Mineral Deposits-----------------------------) Tj T* (    "msc": "SITE_CODE",  # field that contains site code of deposit) Tj T* (    "msn": "SHORT_NAME",  # field that contains short name of deposit) Tj T* (    "mst": "SITE_TYPE_",  # field that contains site type of deposit) Tj T* (    "mtc": "TARGET_COM",  # field that contains target commodity of deposit) Tj T* (    "mscm": "SITE_COMMO",  # field that contains site commodity of deposit) Tj T* (    "mcom": "COMMODITY_",  # field that contains commodity group of deposit) Tj T* (    # text to search for in field defined by mst code that shows site to ignore) Tj T* (    "minf": "Infrastructure",) Tj T* (    # Timing-----------------------------) Tj T* (    "min": "MIN_AGE_MA",  # field that contains minimum age of unit defined by ccode) Tj T* (    "max": "MAX_AGE_MA",  # field that contains maximum age of unit defined by ccode) Tj T* (    #faults and folds-----------------------------) Tj T* (    "f": "FEATURE",  # field that contains information on type of structure) Tj T* (    # text to search for in field defined by f code to show that this is a fault) Tj T* (    "fault": "Fault",) Tj T* (    "ff": "FEATURE",  # field that contains information on type of structure) Tj T* (    # text to search for in field defined by f code to show that this is a fold axial trace) Tj T* (    "fold": "Fold axial trace",) Tj T* (    "fdip": "DIP",               # field for numeric fault dip value) Tj T* (    # text to search for in field defined by fdip to show that this has no known dip) Tj T* (    "fdipnull": "0",) Tj T* (    "fdipdir": "DIP_DIR",        # field for text fault dip direction value) Tj T* (    # flag for text fault dip direction type num e.g. 045 or alpha e.g. southeast) Tj T* (    "fdipdir_flag": "alpha",) Tj T* (    "fdipest": "DIP_EST",        # field for text fault dip estimate value) Tj T* (    # text to search for in field defined by fdipest to give fault dip estimate in increasing steepness) Tj T* (    "fdipest_vals": "gentle,moderate,steep",) Tj T* (    # field that contains information on name of fault \(not used??\)) Tj T* (    "n": "NAME",) Tj T* (    "t": "TYPE",  # field that contains information on type of fold) Tj T* (    # text to search for in field defined by t to show that this is a syncline) Tj T* (    "syn": "syncline",) Tj T* (    # ids-----------------------------) Tj T* (    "o": "OBJECTID",  # field that contains unique id of geometry object) Tj T* (    "gi": "GEOPNT_ID",  # field that contains unique id of structure point) Tj T* (    "deposit_dist": 500) Tj T* (}) Tj T* ET
+BT 1 0 0 1 0 746 Tm /F5 10 Tf 12 TL ({) Tj T* (    # Orientations-----------------------------) Tj T* (    "d": "DIP",  # field that contains dip information) Tj T* (    "dd": "DIP_DIR",  # field that contains dip direction information) Tj T* (    "sf": "FEATURE",  # field that contains information on type of structure) Tj T* (    # text to search for in field defined by sf code to show that this is a bedding measurement) Tj T* (    "bedding": "Bed",) Tj T* (    # flag to determine measurement convention \(currently "strike" or "dip direction"\)) Tj T* (    "otype": "dip direction",) Tj T* (    "bo": "TYPE",  # field that contains type of foliation) Tj T* (    # text to search for in field defined by bo code to show that this is an overturned bedding measurement) Tj T* (    "btype": "overturned",) Tj T* (    # Stratigraphy-----------------------------) Tj T* (    "g": "GROUP_",  # field that contains coarser stratigraphic coding) Tj T* (    # field that contains alternate coarser stratigraphic coding if "g" is blank) Tj T* (    "g2": "SUPERSUITE",) Tj T* (    "c": "UNITNAME",  # field that contains finer stratigraphic coding) Tj T* (    "ds": "DESCRIPTN",  # field that contains information about lithology) Tj T* (    # field that contains alternate stratigraphic coding \(not used??\)) Tj T* (    "u": "CODE",) Tj T* (    "r1": "ROCKTYPE1",  # field that contains  extra lithology information) Tj T* (    "r2": "ROCKTYPE2",  # field that contains even more lithology information) Tj T* (    "sill": "sill",  # text to search for in field defined by ds code to show that this is a sill) Tj T* (    # text to search for in field defined by r1 code to show that this is an intrusion) Tj T* (    "intrusive": "intrusive", # text to search for in field defined by ds code to show that this is an volcanic \(not intrusion\) "volcanic": "volcanic",) Tj T* (    # Mineral Deposits-----------------------------) Tj T* (    "msc": "SITE_CODE",  # field that contains site code of deposit) Tj T* (    "msn": "SHORT_NAME",  # field that contains short name of deposit) Tj T* (    "mst": "SITE_TYPE_",  # field that contains site type of deposit) Tj T* (    "mtc": "TARGET_COM",  # field that contains target commodity of deposit) Tj T* (    "mscm": "SITE_COMMO",  # field that contains site commodity of deposit) Tj T* (    "mcom": "COMMODITY_",  # field that contains commodity group of deposit) Tj T* (    # text to search for in field defined by mst code that shows site to ignore) Tj T* (    "minf": "Infrastructure",) Tj T* (    # Timing-----------------------------) Tj T* (    "min": "MIN_AGE_MA",  # field that contains minimum age of unit defined by ccode) Tj T* (    "max": "MAX_AGE_MA",  # field that contains maximum age of unit defined by ccode) Tj T* (    #faults and folds-----------------------------) Tj T* (    "f": "FEATURE",  # field that contains information on type of structure) Tj T* (    # text to search for in field defined by f code to show that this is a fault) Tj T* (    "fault": "Fault",) Tj T* (    "ff": "FEATURE",  # field that contains information on type of structure) Tj T* (    # text to search for in field defined by f code to show that this is a fold axial trace) Tj T* (    "fold": "Fold axial trace",) Tj T* (    "fdip": "DIP",               # field for numeric fault dip value) Tj T* (    # text to search for in field defined by fdip to show that this has no known dip) Tj T* (    "fdipnull": "0",) Tj T* (    "fdipdir": "DIP_DIR",        # field for text fault dip direction value) Tj T* (    # flag for text fault dip direction type num e.g. 045 or alpha e.g. southeast) Tj T* (    "fdipdir_flag": "alpha",) Tj T* (    "fdipest": "DIP_EST",        # field for text fault dip estimate value) Tj T* (    # text to search for in field defined by fdipest to give fault dip estimate in increasing steepness) Tj T* (    "fdipest_vals": "gentle,moderate,steep",) Tj T* (    # field that contains information on name of fault \(not used??\)) Tj T* (    "n": "NAME",) Tj T* (    "t": "TYPE",  # field that contains information on type of fold) Tj T* (    # text to search for in field defined by t to show that this is a syncline) Tj T* (    "syn": "syncline",) Tj T* (    # ids-----------------------------) Tj T* (    "o": "OBJECTID",  # field that contains unique id of geometry object) Tj T* (    "gi": "GEOPNT_ID",  # field that contains unique id of structure point) Tj T* (    "deposit_dist": 500) Tj T* (}) Tj T* ET
 Q
 Q
 Q
 Q
 Q
 q
-1 0 0 1 62.69291 394.2906 cm
+1 0 0 1 62.69291 339.813 cm
 q
-BT 1 0 0 1 0 3.5 Tm 21 TL /F2 17.5 Tf 0 0 0 rg (2.3 ROI, Projection, output paths) Tj T* ET
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (5.3 ROI, Projection, output paths) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 352.2906 cm
+1 0 0 1 62.69291 297.813 cm
 q
 BT 1 0 0 1 0 26 Tm .509461 Tw 12 TL /F1 10 Tf 0 0 0 rg (A data output path which points to a new or existing directory \(a new directory will be created if needed\),) Tj T* 0 Tw .46436 Tw (bounding box and Coordinate Reference System information to define the extent of the model. This is be) Tj T* 0 Tw (passed to the ) Tj /F3 10 Tf (map2loop) Tj /F1 10 Tf ( update_config\(\) method) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 163.0906 cm
+1 0 0 1 62.69291 108.613 cm
 q
 q
 1 0 0 1 0 0 cm
@@ -3816,13 +6140,35 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 149.0906 cm
+1 0 0 1 62.69291 94.613 cm
 Q
 q
-1 0 0 1 62.69291 149.0906 cm
+1 0 0 1 62.69291 94.613 cm
 Q
 q
-1 0 0 1 62.69291 137.0906 cm
+1 0 0 1 56.69291 773.1969 cm
+q
+BT 1 0 0 1 0 2 Tm 198.1449 0 Td 12 TL /F1 10 Tf 0 0 0 rg (map2loop Package) Tj T* -198.1449 0 Td ET
+Q
+Q
+q
+1 0 0 1 56.69291 56.69291 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 238.1649 0 Td (9) Tj T* -238.1649 0 Td ET
+Q
+Q
+ 
+endstream
+endobj
+47 0 obj
+<<
+/Length 9558
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+q
+1 0 0 1 62.69291 741.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -3845,10 +6191,10 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 131.0906 cm
+1 0 0 1 62.69291 735.0236 cm
 Q
 q
-1 0 0 1 62.69291 119.0906 cm
+1 0 0 1 62.69291 723.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -3871,32 +6217,10 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 113.0906 cm
-Q
-q
-1 0 0 1 56.69291 773.1969 cm
-q
-BT 1 0 0 1 0 2 Tm 198.1449 0 Td 12 TL /F1 10 Tf 0 0 0 rg (map2loop Package) Tj T* -198.1449 0 Td ET
-Q
-Q
-q
-1 0 0 1 56.69291 56.69291 cm
-q
-0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 238.1649 0 Td (8) Tj T* -238.1649 0 Td ET
-Q
-Q
- 
-endstream
-endobj
-52 0 obj
-<<
-/Length 8893
->>
-stream
-1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
-q
 1 0 0 1 62.69291 717.0236 cm
+Q
+q
+1 0 0 1 62.69291 681.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -3919,23 +6243,24 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 717.0236 cm
+1 0 0 1 62.69291 681.0236 cm
 Q
 q
-1 0 0 1 62.69291 684.0236 cm
+1 0 0 1 62.69291 663.0236 cm
 q
-BT 1 0 0 1 0 3.5 Tm 21 TL /F2 17.5 Tf 0 0 0 rg (2.4 Full list of update_config flags:) Tj T* ET
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (5.4 Full list of update_config flags:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 666.0236 cm
+1 0 0 1 62.69291 647.0236 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (Project flags:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 357.0236 cm
+1 0 0 1 62.69291 338.0236 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -4227,35 +6552,36 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 324.0236 cm
+1 0 0 1 62.69291 320.0236 cm
 q
-BT 1 0 0 1 0 3.5 Tm 21 TL /F2 17.5 Tf 0 0 0 rg (2.5 Calculation control parameters) Tj T* ET
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (5.5 Calculation control parameters) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 282.0236 cm
+1 0 0 1 62.69291 278.0236 cm
 q
 BT 1 0 0 1 0 26 Tm .237318 Tw 12 TL /F1 10 Tf 0 0 0 rg (These control the specific functionality of ) Tj /F3 10 Tf (map2loop) Tj /F1 10 Tf (: what to calculate, what decimation factors to apply to) Tj T* 0 Tw -0.099349 Tw (the augmented data outputs, what resolution interpolations to use etc. These are passed to the ) Tj /F3 10 Tf (map2looop) Tj /F1 10 Tf  T* 0 Tw (project run\(\) method:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 264.0236 cm
+1 0 0 1 62.69291 260.0236 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (proj.run\(\)) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 234.0236 cm
+1 0 0 1 62.69291 230.0236 cm
 q
 BT 1 0 0 1 0 14 Tm 2.053318 Tw 12 TL /F1 10 Tf 0 0 0 rg (This method performs the data processing steps of the ) Tj /F3 10 Tf (map2loop) Tj /F1 10 Tf ( workflow, and can be modified by) Tj T* 0 Tw (including the following parameters [defaults]\(data type\):) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 228.0236 cm
+1 0 0 1 62.69291 224.0236 cm
 Q
 q
-1 0 0 1 62.69291 102.0236 cm
+1 0 0 1 62.69291 98.02362 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -4380,15 +6706,15 @@ q
 1 0 0 1 56.69291 56.69291 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 238.1649 0 Td (9) Tj T* -238.1649 0 Td ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 235.3849 0 Td (10) Tj T* -235.3849 0 Td ET
 Q
 Q
  
 endstream
 endobj
-53 0 obj
+48 0 obj
 <<
-/Length 11089
+/Length 11434
 >>
 stream
 1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
@@ -4931,28 +7257,29 @@ q
 1 0 0 1 62.69291 261.0236 cm
 Q
 q
-1 0 0 1 62.69291 228.0236 cm
+1 0 0 1 62.69291 243.0236 cm
 q
-BT 1 0 0 1 0 3.5 Tm 21 TL /F2 17.5 Tf 0 0 0 rg (2.6 Calculation workflow parameters) Tj T* ET
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F2 10 Tf 12 TL (5.6 Calculation workflow parameters) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 216.0236 cm
+1 0 0 1 62.69291 237.0236 cm
 Q
 q
-1 0 0 1 62.69291 90.02362 cm
+1 0 0 1 62.69291 93.02362 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
 BT 1 0 0 1 0 2 Tm  T* ET
 q
-1 0 0 1 20 120 cm
+1 0 0 1 20 138 cm
 Q
 q
-1 0 0 1 20 120 cm
+1 0 0 1 20 138 cm
 Q
 q
-1 0 0 1 20 96 cm
+1 0 0 1 20 114 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -4974,10 +7301,10 @@ Q
 Q
 Q
 q
-1 0 0 1 20 90 cm
+1 0 0 1 20 108 cm
 Q
 q
-1 0 0 1 20 66 cm
+1 0 0 1 20 84 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -4999,10 +7326,10 @@ Q
 Q
 Q
 q
-1 0 0 1 20 60 cm
+1 0 0 1 20 78 cm
 Q
 q
-1 0 0 1 20 48 cm
+1 0 0 1 20 66 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -5024,10 +7351,10 @@ Q
 Q
 Q
 q
-1 0 0 1 20 42 cm
+1 0 0 1 20 60 cm
 Q
 q
-1 0 0 1 20 18 cm
+1 0 0 1 20 36 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
@@ -5042,6 +7369,31 @@ q
 1 0 0 1 23 -3 cm
 q
 BT 1 0 0 1 0 14 Tm 1.62784 Tw 12 TL /F2 10 Tf 0 0 0 rg (fold_axial_traces) Tj /F1 10 Tf (: Add dip info either side of fold axial trace to enhance second order folds) Tj T* 0 Tw ([False] \(bool\)) Tj T* ET
+Q
+Q
+q
+Q
+Q
+Q
+q
+1 0 0 1 20 30 cm
+Q
+q
+1 0 0 1 20 18 cm
+q
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 10.5 0 Td (\177) Tj T* -10.5 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+BT 1 0 0 1 0 2 Tm 12 TL /F2 10 Tf 0 0 0 rg (stereonets) Tj /F1 10 Tf (: Calculate stereonets to define supergroups [True] \(bool\)) Tj T* ET
 Q
 Q
 q
@@ -5066,7 +7418,7 @@ Q
 q
 1 0 0 1 23 -3 cm
 q
-BT 1 0 0 1 0 2 Tm 12 TL /F2 10 Tf 0 0 0 rg (stereonets) Tj /F1 10 Tf (: Calculate stereonets to define supergroups [True] \(bool\)) Tj T* ET
+BT 1 0 0 1 0 2 Tm 12 TL /F2 10 Tf 0 0 0 rg (formation_thickness) Tj /F1 10 Tf (: Calculate formation thickness [True] \(bool\)) Tj T* ET
 Q
 Q
 q
@@ -5087,49 +7439,24 @@ q
 1 0 0 1 56.69291 56.69291 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 235.3849 0 Td (10) Tj T* -235.3849 0 Td ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 235.3849 0 Td (11) Tj T* -235.3849 0 Td ET
 Q
 Q
  
 endstream
 endobj
-54 0 obj
+49 0 obj
 <<
-/Length 4189
+/Length 3841
 >>
 stream
 1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
 q
-1 0 0 1 62.69291 691.8661 cm
+1 0 0 1 62.69291 706.8661 cm
 q
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
 BT 1 0 0 1 0 2 Tm  T* ET
-q
-1 0 0 1 20 66 cm
-Q
-q
-1 0 0 1 20 54 cm
-q
-0 0 0 rg
-BT /F1 10 Tf 12 TL ET
-q
-1 0 0 1 6 -3 cm
-q
-0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 10.5 0 Td (\177) Tj T* -10.5 0 Td ET
-Q
-Q
-q
-1 0 0 1 23 -3 cm
-q
-BT 1 0 0 1 0 2 Tm 12 TL /F2 10 Tf 0 0 0 rg (formation_thickness) Tj /F1 10 Tf (: Calculate formation thickness [True] \(bool\)) Tj T* ET
-Q
-Q
-q
-Q
-Q
-Q
 q
 1 0 0 1 20 48 cm
 Q
@@ -5213,17 +7540,17 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 691.8661 cm
+1 0 0 1 62.69291 706.8661 cm
 Q
 q
-1 0 0 1 62.69291 673.8661 cm
+1 0 0 1 62.69291 688.8661 cm
 q
 0 0 0 rg
 BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Individual workflow parameters can be overwritten AFTER the call to proj.update_config\(\) as follows:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 640.6661 cm
+1 0 0 1 62.69291 655.6661 cm
 q
 q
 1 0 0 1 0 0 cm
@@ -5244,19 +7571,19 @@ Q
 Q
 Q
 q
-1 0 0 1 62.69291 607.6661 cm
+1 0 0 1 62.69291 622.6661 cm
 q
-BT 1 0 0 1 0 3.5 Tm 21 TL /F2 17.5 Tf 0 0 0 rg (3\) Example minimum code:) Tj T* ET
+BT 1 0 0 1 0 3.5 Tm 21 TL /F2 17.5 Tf 0 0 0 rg (6. Example minimum code:) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 577.6661 cm
+1 0 0 1 62.69291 592.6661 cm
 q
 BT 1 0 0 1 0 14 Tm .538221 Tw 12 TL /F1 10 Tf 0 0 0 rg (An example minimum code to run ) Tj /F3 10 Tf (map2loop) Tj /F1 10 Tf ( with mostly default settings might look like this \(and see the) Tj T* 0 Tw (notebook ) Tj /F2 10 Tf (Example 3 - Local Source Data.ipynb) Tj /F1 10 Tf (\):) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 244.4661 cm
+1 0 0 1 62.69291 259.4661 cm
 q
 q
 1 0 0 1 0 0 cm
@@ -5286,76 +7613,81 @@ q
 1 0 0 1 56.69291 56.69291 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 235.3849 0 Td (11) Tj T* -235.3849 0 Td ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 235.3849 0 Td (12) Tj T* -235.3849 0 Td ET
 Q
 Q
  
 endstream
 endobj
-55 0 obj
+50 0 obj
 <<
-/Nums [ 0 56 0 R 1 57 0 R 2 58 0 R 3 59 0 R 4 60 0 R 
-  5 61 0 R 6 62 0 R 7 63 0 R 8 64 0 R 9 65 0 R 
-  10 66 0 R ]
+/Nums [ 0 51 0 R 1 52 0 R 2 53 0 R 3 54 0 R 4 55 0 R 
+  5 56 0 R 6 57 0 R 7 58 0 R 8 59 0 R 9 60 0 R 
+  10 61 0 R 11 62 0 R ]
 >>
 endobj
-56 0 obj
+51 0 obj
 <<
 /S /D /St 1
 >>
 endobj
-57 0 obj
+52 0 obj
 <<
 /S /D /St 2
 >>
 endobj
-58 0 obj
+53 0 obj
 <<
 /S /D /St 3
 >>
 endobj
-59 0 obj
+54 0 obj
 <<
 /S /D /St 4
 >>
 endobj
-60 0 obj
+55 0 obj
 <<
 /S /D /St 5
 >>
 endobj
-61 0 obj
+56 0 obj
 <<
 /S /D /St 6
 >>
 endobj
-62 0 obj
+57 0 obj
 <<
 /S /D /St 7
 >>
 endobj
-63 0 obj
+58 0 obj
 <<
 /S /D /St 8
 >>
 endobj
-64 0 obj
+59 0 obj
 <<
 /S /D /St 9
 >>
 endobj
-65 0 obj
+60 0 obj
 <<
 /S /D /St 10
 >>
 endobj
-66 0 obj
+61 0 obj
 <<
 /S /D /St 11
 >>
 endobj
+62 0 obj
+<<
+/S /D /St 12
+>>
+endobj
 xref
-0 67
+0 63
 0000000000 65535 f 
 0000000073 00000 n 
 0000000147 00000 n 
@@ -5372,67 +7704,63 @@ xref
 0000002003 00000 n 
 0000002271 00000 n 
 0000002477 00000 n 
-0000002666 00000 n 
-0000002891 00000 n 
-0000003011 00000 n 
-0000003217 00000 n 
-0000003423 00000 n 
-0000003529 00000 n 
-0000003735 00000 n 
-0000003941 00000 n 
-0000004147 00000 n 
-0000004353 00000 n 
-0000004559 00000 n 
-0000004765 00000 n 
-0000004871 00000 n 
-0000005145 00000 n 
-0000005220 00000 n 
+0000002683 00000 n 
+0000002889 00000 n 
+0000003095 00000 n 
+0000003215 00000 n 
+0000003421 00000 n 
+0000003627 00000 n 
+0000003733 00000 n 
+0000003939 00000 n 
+0000004145 00000 n 
+0000004351 00000 n 
+0000004557 00000 n 
+0000004763 00000 n 
+0000004869 00000 n 
+0000005143 00000 n 
+0000005217 00000 n 
 0000005335 00000 n 
-0000005506 00000 n 
-0000005612 00000 n 
-0000005776 00000 n 
-0000005930 00000 n 
-0000006078 00000 n 
-0000006202 00000 n 
-0000006339 00000 n 
-0000006487 00000 n 
-0000006639 00000 n 
-0000006788 00000 n 
-0000006938 00000 n 
-0000007065 00000 n 
-0000007200 00000 n 
-0000015558 00000 n 
-0000026716 00000 n 
-0000034852 00000 n 
-0000043384 00000 n 
-0000054054 00000 n 
-0000063785 00000 n 
-0000070033 00000 n 
-0000076426 00000 n 
-0000085371 00000 n 
-0000096513 00000 n 
-0000100754 00000 n 
-0000100892 00000 n 
-0000100926 00000 n 
-0000100960 00000 n 
-0000100994 00000 n 
-0000101028 00000 n 
-0000101062 00000 n 
-0000101096 00000 n 
-0000101130 00000 n 
-0000101164 00000 n 
-0000101198 00000 n 
-0000101233 00000 n 
+0000005509 00000 n 
+0000005615 00000 n 
+0000005782 00000 n 
+0000005935 00000 n 
+0000006083 00000 n 
+0000006209 00000 n 
+0000006351 00000 n 
+0000015047 00000 n 
+0000026179 00000 n 
+0000038049 00000 n 
+0000049951 00000 n 
+0000061686 00000 n 
+0000071879 00000 n 
+0000082251 00000 n 
+0000089349 00000 n 
+0000095802 00000 n 
+0000105412 00000 n 
+0000116899 00000 n 
+0000120792 00000 n 
+0000120940 00000 n 
+0000120974 00000 n 
+0000121008 00000 n 
+0000121042 00000 n 
+0000121076 00000 n 
+0000121110 00000 n 
+0000121144 00000 n 
+0000121178 00000 n 
+0000121212 00000 n 
+0000121246 00000 n 
+0000121281 00000 n 
+0000121316 00000 n 
 trailer
 <<
 /ID 
-[<d414438116bbf7015bed9d4ba1e0a2fe><d414438116bbf7015bed9d4ba1e0a2fe>]
+[<ada782305635435ca2de141066cde4f9><ada782305635435ca2de141066cde4f9>]
 % ReportLab generated PDF document -- digest (http://www.reportlab.com)
 
 /Info 28 0 R
 /Root 27 0 R
-/Size 67
+/Size 63
 >>
 startxref
-101268
+121351
 %%EOF
