@@ -8,7 +8,7 @@ map2loop Package
 ================
 
 map2loop is a map deconstruction library to provide inputs to Loop ([Loop3d.org](https://loop3d.org/)). 
-The development of map2loop is lead by **Mark Jessell** at The University of Western Australia. **Yohan de Rose** at Monash University is now making it better.
+The development of map2loop is lead by **Mark Jessell** at The University of Western Australia. **Yohan de Rose** at Monash University is now making it better. Standalone map2model cpp code from Vitaliy provides fault/fault and fault/strat relationships.   
 
 1. What it does:
 ################
@@ -42,12 +42,92 @@ Any bugs/feature requests/comments please create a new issue: https://github.com
 
 - Acknowledgements
 
-*The Loop platform is an open source 3D probabilistic geological and geophysical modelling platform, initiated by Geoscience Australia and the OneGeology consortium. The project is funded by Australian territory, State and Federal Geological Surveys, the Australian Research Council and the MinEx Collaborative Research Centre.*
+
+2. Installation
+###############
+
+You will need some flavour of conda (a python package manager, https://docs.anaconda.com/anaconda/install/index.html, as well as Python ≥ 3.6
+
+**2.1 Run**
+
+To just use map2loop, issue the following
+::
+
+  conda install -c conda-forge -c loop3d map2loop -y
 
 
-2. map2loop outputs:
+**2.2 Development**
+
+If you want to tinker yourself/contribute, clone the source code with
+
+::
+
+  git clone https://github.com/Loop3D/map2loop-2.git
+
+Or get the source + example notebooks with
+
+::
+
+  git clone https://github.com/Loop3D/map2loop-2.git
+  git clone --single-branch --branch yohan https://github.com/Loop3D/map2loop2-notebooks
+
+Navigate into map2loop-2, and issue the following to install map2loop and its dependencies. _Note_: The 'develop' flag makes your source changes take effect on saving, so you only need to run this once
+
+::
+
+  python setup.py develop
+
+**2.3 Building with Docker**
+
+Fair warning, we recommend conda to almost everyone. With great software development power comes great environment setup inconvenience. You'll need to download and install the [docker containerisation software](https://docs.docker.com/get-docker/), and the docker and docker-compose CLI.
+
+Development 
+
+a. Clone this repo and navigate inside as per above
+b. Run the following and click on the Jupyter server forwarded link to access and edit the notebooks
+
+::
+
+  docker-compose up --build
+
+c. To hop into a bash shell in a running container, open a terminal and issue
+
+::
+
+  bash
+  docker ps
+   
+
+   Find the container name or ID and then run
+
+::
+
+  bash
+  docker exec -it <container_NAMEorID> bash
+  # Probably -> docker exec -it  map2loop-2_dev_1 bash
+
+**2.4 Usage**
+
+Our notebooks at https://github.com/Loop3D/map2loop2-notebooks cover use cases in more detail, but here is an example of processing Loop's South Australia remote geospatial data in just 20 lines of Python.
+
+First, lets import map2loop and define a bounding box. You can use GIS software to find one or use [Loop's Graphical User Interface](https://loop3d.github.io/downloads.html) for the best experience and complete toolset. Remember what projection your coordinates are in!
+
+**2.5 Known Issues and FAQs**
+
+- Developing with docker on Windows means you won't have GPU passthrough and can’t use a discrete graphics card in the container even if you have one.
+- If Jupyter links require a token or password, it may mean port 8888 is already in use. To fix, either make docker map to another port on the host ie -p 8889:8888 or stop any other instances on 8888.
+- Sometimes the submodules misbehave. Ensure you specify the recurse-submodules flag with an 's' as opposed to recurse-submodule, and double-check your .git directory is clean, see https://github.com/Loop3D/map2loop-2/issues/41
+   
+**2.6 Links**
+
+https://loop3d.github.io/   
+   
+https://github.com/Loop3D/LoopStructural   
+   
+https://github.com/Loop3D/map2loop2-notebooks   
+   
+3. map2loop outputs:
 ####################
-
 
 map2loop outputs:
 -----------------
@@ -156,174 +236,167 @@ loop2model:
 
 Does not deal with sills yet.  
 
-  Standalone map2model cpp code from Vitaliy provides fault/fault and fault/strat relationships   
-
 Requirements
 
   See dependencies.txt file
 
-
 Simplified calculation schemes      
 
-1)	Topology 
+**3.1 Topology**
 
-  a.	Stratigraphic relationships   
+  a. Stratigraphic relationships   
 
-    i.	Adjacency relationships between neighbouring geological polygons based on formation and group   
-    ii.	Directed graph based on these relationships and relative age of formations and groups   
-    iii.	Edges attributed by type of contact (intrusive, stratigraphic, fault)   
-     
-  b.	Fault relationships   
+    i. Adjacency relationships between neighbouring geological polygons based on formation and group   
+    ii. Directed graph based on these relationships and relative age of formations and groups   
+    iii. Edges attributed by type of contact (intrusive, stratigraphic, fault)   
 
-    i.	Relative ages of faults longer than a specified length estimated from truncation relationships   
-    ii.	Directed graph based on these relationships   
-    iii.	Cyclic relationships removed (A truncates B; B truncates C; C truncates A)   
-     
-  c.	Fault-stratigraphy relationships  
+  b. Fault relationships   
 
-    i.	Adjacency matrices of relative ages of faults longer than a specified length and formations and groups based on truncation relationships   
-     
-2)	Position Data  
+    i. Relative ages of faults longer than a specified length estimated from truncation relationships   
+    ii. Directed graph based on these relationships   
+    iii. Cyclic relationships removed (A truncates B; B truncates C; C truncates A)   
 
-  a.	DTM   
+  c. Fault-stratigraphy relationships  
 
-    i.	DTM downloaded for defined bounding box from SRTM server   
-    ii.	Re-projected to local EPSG-defined projection system   
-     
-  b.	Basal contacts   
+    i. Adjacency matrices of relative ages of faults longer than a specified length and formations and groups based on truncation relationships  
+ 
+**3.2 Position information**
 
-    i.	Formation based on stratigraphic relationship (assigned to younger formation)   
-    ii.	X,Y from contact nodes with optional decimation   
-    iii.	Z from DTM   
-    iv.	Nodes that are defined by faults are removed   
-     
-  c.	Igneous contacts 
+  a. Digital Terrain Model (DTM)
+
+    i. DTM downloaded for defined bounding box from SRTM server   
+    ii. Re-projected to local EPSG-defined projection system   
+
+  b. Basal contacts
+
+    i. Formation based on stratigraphic relationship (assigned to younger formation)   
+    ii. X,Y from contact nodes with optional decimation   
+    iii. Z from DTM   
+    iv. Nodes that are defined by faults are removed   
+
+  c. Igneous contacts
    
-    i.	Formation based on intrusive unit   
-    ii.	X,Y from contact nodes with optional decimation   
-    iii.	Z from DTM   
-    iv.	Nodes that are defined by faults are removed   
-     
-  d.	Faults   
+    i. Formation based on intrusive unit   
+    ii. X,Y from contact nodes with optional decimation   
+    iii. Z from DTM   
+    iv. Nodes that are defined by faults are removed   
 
-    i.	Fault name based on id of fault   
-    ii.	Optional removal of faults below a certain fault-tip to fault-tip distance   
-    iii.	X,Y from fault nodes with optional decimation   
-    iv.	Z from DTM   
-     
-  e.	Fold axial traces 
+  d. Faults
 
-    i.	Fold axial trace name based on id of fold axial trace   
-    ii.	X,Y from fold axial trace nodes with optional decimation   
-    iii.	Z from DTM   
-     
-  f.	Local formation thickness  
+    i. Fault name based on id of fault   
+    ii. Optional removal of faults below a certain fault-tip to fault-tip distance   
+    iii. X,Y from fault nodes with optional decimation   
+    iv. Z from DTM   
 
-    i.	X,Y from basal contact nodes   
-    ii.	Z from DTM   
-    iii.	Thickness from distance from normal to local contact orientation to stratigraphically next upper contact polyline in the taking into account the local orientation of bedding estimated from the interpolation of basal contacts and primary orientation data   
-    iv.	Normalised formation thickness calculated for each node based on division by median of thicknesses for each formation   
-     
-  g.	Local fault displacement   
+  e. Fold axial traces
 
-    i.	X,Y from fault contact nodes   
-    ii.	Z from DTM   
-    iii.	Displacement calculated by finding distance between equivalent stratigraphic contacts either side of the fault   
-     
-3)	Gradient data   
-     
-  a.	Primary dip/dip direction 
+    i. Fold axial trace name based on id of fold axial trace   
+    ii. X,Y from fold axial trace nodes with optional decimation   
+    iii. Z from DTM   
 
-    i.	Orientations of bedding, but filter out dip = 0   
-    ii.	X,Y from primary data with optional decimation   
-    iii.	Add Z from DTM   
-    iv.	Add geology polygon formation info   
-     
-  b.	Fault orientations   
+  f. Local formation thickness
+
+    i. X,Y from basal contact nodes   
+    ii. Z from DTM   
+    iii. Thickness from distance from normal to local contact orientation to stratigraphically next upper contact polyline in the taking into account the local orientation of bedding estimated from the interpolation of basal contacts and primary orientation data   
+    iv. Normalised formation thickness calculated for each node based on division by median of thicknesses for each formation   
+
+  g. Local fault displacement
+
+    i. X,Y from fault contact nodes   
+    ii. Z from DTM   
+    iii. Displacement calculated by finding distance between equivalent stratigraphic contacts either side of the fault   
+
+**3.3 Gradient information**
+
+  a. Primary dip/dip direction 
+
+    i. Orientations of bedding, but filter out dip = 0   
+    ii. X,Y from primary data with optional decimation   
+    iii. Add Z from DTM   
+    iv. Add geology polygon formation info   
+
+  b. Fault orientations   
   
-    i.	Normal to fault tips for azimuth   
-    ii.	X,Y from midpoint between fault tips   
-    iii.	Dip as user-defined conceptual constraint   
-     
-  c.	Near-Fold Axial Trace orientations 
+    i. Normal to fault tips for azimuth   
+    ii. X,Y from midpoint between fault tips   
+    iii. Dip as user-defined conceptual constraint   
 
-    i.	X,Y step out normal to fat from local nodes of fold axial trace polyline with optional decimation   
-    ii.	Add Z from DTM   
-    iii.	Dip direction from local normal to fat and sign of fold axis   
-    iv.	Dip arbitrarily set by user   
-  
+  c. Near-Fold Axial Trace orientations 
+
+    i. X,Y step out normal to fat from local nodes of fold axial trace polyline with optional decimation   
+    ii. Add Z from DTM   
+    iii. Dip direction from local normal to fat and sign of fold axis   
+    iv. Dip arbitrarily set by user   
+
   d. Near-fault orientations  
 
-    i.	X,Y step out normal to fault from local nodes of fault polyline with optional decimation   
-    ii.	Add Z from DTM   
-    iii.	Dip and dip direction from interpolation of basal contacts and primary orientation data   
-    iv.	Add geology polygon formation info   
+    i. X,Y step out normal to fault from local nodes of fault polyline with optional decimation   
+    ii. Add Z from DTM   
+    iii. Dip and dip direction from interpolation of basal contacts and primary orientation data   
+    iv. Add geology polygon formation info   
+
+  e. Empty series orientations   
   
-  e.	Empty series orientations   
-     
-  f.	Igneous contacts   
+  f. Igneous contacts   
 
-    i.	X,Y from local nodes of igneous contact polyline with optional decimation   
-    ii.	Add Z from DTM   
-    iii.	Dip and polarity arbitrarily defined by user   
-    iv.	Dip direction from local normal to igneous contact interpolation of basal contacts   
-    v.	Add geology polygon formation info   
+    i. X,Y from local nodes of igneous contact polyline with optional decimation   
+    ii. Add Z from DTM   
+    iii. Dip and polarity arbitrarily defined by user   
+    iv. Dip direction from local normal to igneous contact interpolation of basal contacts   
+    v. Add geology polygon formation info   
 
-Inputs  
-
-Minimum map2loop inputs:  
+**3.4 Minimum map2loop inputs**
   
-1.	EPSG coordinate reference system for input data (metre-based projection like UTM)   
+  3.4.1 EPSG coordinate reference system for input data (metre-based projection like UTM)   
    
-2.	Max/min coordinates of area of interest   
+  3.4.2 Max/min coordinates of area of interest   
    
-3.	Geology polygons:  
+  3.4.3 Geology polygons:  
    
-  -a.	All polygons are watertight   
-  -b.	Polygons stop on faults   
-  -c.	Polygons have as attributes:   
+    -a. All polygons are watertight   
+    -b. Polygons stop on faults   
+    -c. Polygons have as attributes:   
 
-    -i.	Object ID   
-    -ii.	Stratigraphic code   
-    -iii.	Stratigraphic group   
-    -iv.	One of more fields that describe if sill, if igneous, if volcanic   
-    -v.	    Min_age field   
-    -vi.	Max_age field (can be same as Min_age field, and can be simple numerical ordering (bigger number is older))   
+      -i. Object ID   
+      -ii. Stratigraphic code   
+      -iii. Stratigraphic group   
+      -iv. One of more fields that describe if sill, if igneous, if volcanic   
+      -v.     Min_age field   
+      -vi. Max_age field (can be same as Min_age field, and can be simple numerical ordering (bigger number is older))   
    
-4.	Fault/Fold Axial Trace Polylines: 
+  3.4.4 Fault/Fold Axial Trace Polylines: 
 
-  -a.	Faults terminate on other faults but do not cross   
-  -b.	Faults/Folds have as attributes: 
+    -a. Faults terminate on other faults but do not cross   
+    -b. Faults/Folds have as attributes: 
 
-    -i.	Object ID   
-    -ii.	Field that determines if polyline is fault or fold axial trace   
-    -iii.	Field that determine type of fold axial trace e.g. syncline or anticline)
-    -iv.    Faults can have dip/dip direction info   
+      -i. Object ID   
+      -ii. Field that determines if polyline is fault or fold axial trace   
+      -iii. Field that determine type of fold axial trace e.g. syncline or anticline)
+      -iv.    Faults can have dip/dip direction info   
      
-5.	Bedding orientations:   
+  3.4.5 Bedding orientations:   
+  
+    -a. Assumes dip/dip direction or dip/strike data   
+    -b. Orientations have as attributes: 
+      
+      -i. Dip   
+      -ii. Dip Direction or strike  
 
-  -a.	Assumes dip/dip direction or dip/strike data   
-  -b.	Orientations have as attributes: 
-    
-    -i.	Dip   
-    -ii.	Dip Direction or strike  
-
-3. Using *map2loop* with your own or standard datasets
+4. Using *map2loop* with your own or standard datasets
 ######################################################
 
-
 In order to deconstruct a map with *map2loop*, we need to undertake the following steps:
-  1. Ensure that we have sufficient correctly formatted data, with sufficient information to allow the calculations to work. 
+  a. Ensure that we have sufficient correctly formatted data, with sufficient information to allow the calculations to work. 
 
-  2. Once we have these data, we then need to define a set of parameters that inform *map2loop* about this data, and the details of the calculations to undertaken. Use the notebook **Utility 1 - Config file generator.ipynb** to make this slightly less painful.
+  b. Once we have these data, we then need to define a set of parameters that inform *map2loop* about this data, and the details of the calculations to undertaken. Use the notebook **Utility 1 - Config file generator.ipynb** to make this slightly less painful.
 
-  3. Finally, once we have the data and *map2loop* control parameters sorted, we are ready to create a small python script to test the system.
-
+  c. Finally, once we have the data and *map2loop* control parameters sorted, we are ready to create a small python script to test the system.
    
-4. Minimum *map2loop* data requirements:  
+5. Minimum *map2loop* data requirements:  
 ########################################
 
-**4.1 Vector Geospatial File Data Formats:**
+**5.1 Vector Geospatial File Data Formats:**
 
 'DXF': 'raw', 'CSV': 'raw', 'OpenFileGDB': 'r', 'ESRIJSON': 'r', 'ESRI Shapefile': 'raw', 'GeoJSON': 'rw', 'GeoJSONSeq': 'rw', 'GPKG': 'rw', 'GML': 'raw',  'MapInfo File': 'raw'
 
@@ -339,7 +412,7 @@ r=read, a=append, w=write
 
 - fold axial trace layer (optional)
   
-**4.2 Geology Polygons (or Multipolygons):**
+**5.2 Geology Polygons (or Multipolygons):**
 
 - no gaps or overlaps between polygons, nodes from neighbouring polygons coincide (we have code to fix errors when the mismatch is smaller than the minimum node spacing).
 
@@ -356,8 +429,7 @@ r=read, a=append, w=write
     - Litho Code to help detemrine if this is a sill-like body (str) {'sill'}
     - Unique ID of polygon (str) {'o'}
 
-   
-**4.3 Fault Polylines:**
+**5.3 Fault Polylines:**
 
 - single polyline per fault (no multipolylines)
 - nodes on faulted boundaries coincident with geology polygon nodes
@@ -367,7 +439,7 @@ r=read, a=append, w=write
     - Dip of fault (str or float) {'fdip'}
     - Dip Direction of Fault (str or float) {'fdipdir'}
 
-**4.4 Bedding Points:**
+**5.4 Bedding Points:**
 
 - single points (no multipoints)
 
@@ -378,7 +450,7 @@ Attributes:
   - Code to show what type of foliation: Bedding, S1 etc. (str) {'sf'}
   - Code to say this unit is overturned (str) {'bo'}
 
-**4.5 Mineral Deposits: (Optional)**
+**5.5 Mineral Deposits: (Optional)**
 
 - single points (no multipoints)
 
@@ -389,7 +461,7 @@ Attributes:
   - Code to show what main commodity: Fe, Iron, etc. (str) {'mtc'}
   - Code to show what main commodity class: Industrial, Metal, etc. (str) {'mcom'}
   
-**4.6 Fold Axial Trace Polylines: (Optional)**
+**5.6 Fold Axial Trace Polylines: (Optional)**
 
 - single polyline per trace (no multipolylines)
 
@@ -398,7 +470,7 @@ Attributes:
   - Code that defines fold as syncline (str) {'syn'}
 
 
-5) Defining *map2loop* parameters:
+6) Defining *map2loop* parameters:
 ##################################
 
 There are four types of parameters we need to define in order to use *map2loop*:
@@ -408,12 +480,11 @@ There are four types of parameters we need to define in order to use *map2loop*:
   - **d) Parameters that control the specific functioning** of *map2loop*: what to calculate, what decimation factors to apply to the augmented data outputs, what resolution interpolations to use etc. These is passed to the map2looop project.run() method.
 
 
-**5.1 paths**
+**6.1 paths**
 
 These is passed to the *map2loop* Project() method.
 
 Examples:
-
    
 **Remote WFS layers: See Example 1 Notebook**
 ::
@@ -448,8 +519,7 @@ where remote=True signifies that WFS-served data will be accessed.
 
 where remote=False signifies that local GIS files will be accessed. Paths can be relative or absolute, or even a URL, however for URLs, the components of the shapefile or TAB file have to be zipped up.
 
-**5.2 Layer field codes:**
-
+**6.2 Layer field codes:**
 
 You will need to create or modify an *hjson* format file that provides the names of fields and some text flags that tell *map2loop* where and what specific information can be retrieved from these layers. These are stored in an hjson format text file the path of which is passed to the *map2loop* Project() method. The easiest way to get started is to use a jupyter notebook allows you to reduce errors by providing a primitive GUI for creating an *hjson* config file and associated python script, named: **Utility 1 - Config file generator.ipynb**. Alternatively if you are brave you can edit the values to the right of the colon in each row of an existing *hjson* file. For example to specify that the field in the geospatial layer that contains bedding dip information is called **MYDIP**, replace the appropriate code in the *hjson* file below with:
 
@@ -522,7 +592,7 @@ Some verification is carried out by *map2loop* to ensure the required parameters
       "deposit_dist": 500
   }
 
-**5.3 ROI, Projection, output paths**
+**6.3 ROI, Projection, output paths**
 
 A data output path which points to a new or existing directory (a new directory will be created if needed), bounding box and Coordinate Reference System information to define the extent of the model. This is be passed to the *map2loop* update_config() method
 ::
@@ -548,8 +618,7 @@ A data output path which points to a new or existing directory (a new directory 
 
 - where quiet controls whether we allow or block print statements and matplotlib figures. Use 'none' to quiet nothing, 'all' to quiet everything, 'no-figures' to disable plots and allow text output. Defaults to 'none' 
 
-**5.4 Full list of update_config flags:**
-
+**6.4 Full list of update_config flags:**
 
 Project flags:
  - **out_dir** Path to write output files to. :type out_dir: string
@@ -564,7 +633,7 @@ Project flags:
  - **run_flags** Global dictionary that defines custom params such as decimation and minimum fault length, see Section 2.4  :type run_flags: dict, optional
  - **\**kwargs**
 
-**5.5 Calculation control parameters**
+**6.5 Calculation control parameters**
 
 These control the specific functionality of *map2loop*: what to calculate, what decimation factors to apply to the augmented data outputs, what resolution interpolations to use etc. These are passed to the *map2looop* project run() method:
 
@@ -598,7 +667,7 @@ This method performs the data processing steps of the *map2loop* workflow, and c
   - **use_fat**:  Use fold axial trace info to add near-axis bedding info  [True]  (bool)
   - **use_interpolations**: Use all interpolated dips for modelling [True]  (bool)
 
-**5.6 Calculation workflow parameters** 
+**6.6 Calculation workflow parameters** 
 
   - **seismic_section**: Add data from a single seismic section (paths hardwired for the moment) [False] (bool)
   - **cover_map**: Add data from a depth to basement grid (paths hardwired for the moment) [False] (bool)
@@ -609,7 +678,6 @@ This method performs the data processing steps of the *map2loop* workflow, and c
   - **polarity**: Calculate bedding polarity (doesn't work!!) [False] (bool)
   - **strat_offset**: Calculate stratigraphic offset across faults [True] (bool)
   - **contact_dips**: Add fixed or interpolated dips to contacts [True] (bool)
-   
 
 Individual workflow parameters can be overwritten AFTER the call to proj.update_config() as follows:
 
@@ -617,7 +685,7 @@ Individual workflow parameters can be overwritten AFTER the call to proj.update_
 
   proj.workflow['contact_dips'] = False
 
-6. Example minimum code:
+7. Example minimum code:
 ########################
 
 An example minimum code to run *map2loop* with mostly default settings might look like this (and see the notebook **Example 3 - Local Source Data.ipynb**):
@@ -650,3 +718,125 @@ An example minimum code to run *map2loop* with mostly default settings might loo
 
   proj.run()
 
+8. Pseudocode for key calculations
+##################################
+
+::
+
+  save_basal_contacts
+  
+              explode geology polgyons so interior holes become distinct polygonsPolygons
+              for each polygonPolygon:
+                          build list of polygonsPolygons and their atributes odelling 
+              load sorted stratigraphy from csv file
+              for each polygonPolygon in list:
+                    if not intrusive:
+                          if polygonPolygon Code found in sorted stratigraphy:
+                                for each polygonPolygon in list:
+                                      if two polygonsPolygons are not the same:
+                                            if two polygonsPolygons are neighbours:
+                                                   if second polygonPolygon is not a sill:
+                                                        add neigbour to list
+                                if first polygonPolygon has neighbours:
+                                      for each neighbour:
+                                            if neighbour polygonPolygon Code found in sorted stratigraphy:
+                                                  if neighbour older than first polygonPolygon:
+                                                        calculate intersection of two polygonsPolygons:
+                                                              if intersection is a multilinestring:
+                                                                    for all line segments in linestring:
+                                                                          save out segment with x,y,z Code
+                                                                          build dictionary of basal contacts and dictionary of decimated basal contacts
+                                                                          
+              return dictionary of basal contacts and dictionary of decimated basal contacts
+
+::
+
+  save_basal_no_faults
+  
+              load fault linestrings as GeoDataBase
+              create polygonPolygonal buffer aorund odell all faults
+              clip basal contacts to polygonPolygonal buffer
+              make copy of clipped contacts
+              for each clipped basal contact polylinePolyline:
+                    if polylinePolyline is GEOMETRYCOLLECTION:
+                          remove from copy of clipped basal contacts
+                    else:
+                          add to dictionary
+                          
+              build GeoDataFrame from remaining clipped basal contacts and save out as shapefile
+
+::
+
+  save_fold_axial_traces_orientations
+        
+              load   geology polygonsPolygons as GeoDataFrame
+              load interpolated contacts as array
+              load   polylinesPolylines as GeoDataFrame
+              for each polylinePolyline:
+                    for each line segment in   polylinePolyline:
+                          if fold axial trace:
+                                if passes decimate test:
+                                      calculate azimuth of line segment
+                                      calculate points either side of line segment
+                                      find closest interpolated contact
+                                      if interpolated contact is sub-parallel to fold axial trace:
+                                            save orientation data either side of segment and related x,y,z,Code to csv file
+
+::
+  
+  interpolate_contacts
+        
+              create grid of positions for interpolation, or use predefined list of points
+              for each linestring from basal contacts:
+                    if passes decimation test:
+                          for each line segment in linestring:
+                                calculate direction cosines of line segment and save to file as csv with x,y,z,etc
+              
+              interpolate direction cosines of contact segments
+              
+              save interpolated contacts to csv files as direction cosines and azimuth info with x,y,z,etc
+
+::
+
+  interpolate_orientations
+        
+              subset points to those wanted
+              create grid of positions for interpolation, or use predefined list of points
+              for each point from orientations:
+                     calculate direction cosines of orientations 
+                     
+              interpolate direction cosines of orientations
+              
+              save interpolated orientations to csv files as direction cosines and dip,azimuth info with x,y,z,etc
+
+::
+
+  join_contacts_and_orientations
+        
+              for each orientation in grid:
+                    rescale contact direction cosines with z cosine of orientations
+                    save out rescaled x,y direction cosines from contacts with z direction cosine from orientations and positional x,y,z,Code
+
+::
+
+  calc_thickness
+        
+              load basal contacts as vectors from csv file
+              load interpolated bedding orientations from csv file
+              load basal contacts as geopandas GeoDataFrame of polylinesPolylines
+              load sorted stratigraphy from csv file
+              calculate distance matrix of all orientations to all contacts
+              
+              for each contact line segment:
+                    if orientations within buffer range to contact:
+                          calculate average of all orientation direction cosines within range
+                          calculate line normal to contact and intersecting its mid-point
+                          for all basal contact polylinesPolylines:
+                                if polylinePolyline Group is one stratigraphically one unit higher:
+                                      if contact normal line intersects polylinePolyline:
+                                            if distance between intersection and contact mid-point less than 2 x buffer:
+                                                  store info
+                          from list of possible intersections, select one closest to contact mid-point
+                          if closest is less than maximumum allowed thickness:
+                                save thickness and location to csv file
+ 
