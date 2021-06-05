@@ -689,7 +689,7 @@ class Config(object):
                 f.write(ostr)
 
         if (self.spacing < 0):
-            self.spacing = -(bbox[2] - bbox[0]) / spacing
+            self.spacing = -(bbox[2] - bbox[0]) / self.spacing
         self.x = int((bbox[2] - bbox[0]) / self.spacing) + 1
         self.y = int((bbox[3] - bbox[1]) / self.spacing) + 1
         x = self.x
