@@ -654,7 +654,7 @@ This method performs the data processing steps of the *map2loop* workflow, and c
   - **fault_dip**:  default fault dip [90] In degrees (int)
   - **fold_decimate**: Save every nth fold axial trace data point. 0 means save all data. [5]  (int)
   - **interpolation_scheme**: What interpolation method to use of scipy_rbf (radial basis) or scipy_idw (inverse distance weighted).  ['scipy_rbf'] (str)
-  - **interpolation_spacing**: Interpolation grid spacing in meters. Used to interpolation bedding orientations [500] In metres. (int)
+  - **interpolation_spacing**: Interpolation grid spacing in meters. Used to interpolation bedding orientations [500] In metres or if a negative value defines fixed number of grid points in x & y (int)
   - **intrusion_mode**: 1 to exclude all intrusions from basal contacts, [0] to only exclude sills.  [0]  (int)
   - **max_thickness_allowed**:  when estimating local formation thickness [10000] in metres.  (int)
   - **min_fault_length**: Min fault length to be considered. In metres.  [5000] In meters. (int)
@@ -699,7 +699,7 @@ An example minimum code to run *map2loop* with mostly default settings might loo
               structure_file="source/bedding_points.shp",
               mindep_file="source/mindep_points.shp",
               metadata="source/meta.hjson" 
-              dtm_file="./source_data/terr50_gagg_gb_all.tif",
+              dtm_file="http://services.ga.gov.au/gis/services/DEM_SRTM_1Second_over_Bathymetry_Topography/MapServer/WCSServer?",
               )
 
   proj.update_config(
