@@ -492,14 +492,14 @@ class Project(object):
                 self.config.create_fold_axial_trace_points(
                     self.run_flags['fold_decimate'], self.run_flags['fat_step'], self.run_flags['close_dip'])
 
-            # Prepocess model inputs
+            # Preprocess model inputs
             inputs = ('')
             if (self.workflow['model_engine'] == 'geomodeller'):
                 inputs = ('invented_orientations', 'intrusive_orientations',
                           'fat_orientations', 'fault_tip_contacts',
                           'contact_orientations')
             elif (self.workflow['model_engine'] == 'loopstructural'):
-                inputs = ('invented_orientations', 'fat_orientations',
+                inputs = ('invented_orientations', 'fat_orientations','intrusive_orientations',
                           'contact_orientations')
             elif (self.workflow['model_engine'] == 'gempy'):
                 inputs = ('invented_orientations', 'interpolated_orientations',

@@ -657,7 +657,7 @@ class Config(object):
         group_girdle = m2l_utils.plot_bedding_stereonets(
             orientations, self.geology, self.c_l, quiet_interp)
         super_groups, self.use_gcode3 = Topology.super_groups_and_groups(
-            group_girdle, self.tmp_path, misorientation)
+            group_girdle, self.tmp_path, misorientation,self.c_l)
         # print(super_groups)
         # print(self.geology['GROUP_'].unique())
         bbox = self.bbox

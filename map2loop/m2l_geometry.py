@@ -1474,6 +1474,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
             os.path.join(output_path, 'ign_orientations_'+pluton_form+'.csv'), ",")
         all_orientations = pd.concat(
             [all_orientations, intrusive_orientations], sort=False)
+        print(len(intrusive_orientations),' intrusive orientations merged.')
     elif('intrusive_orientations' in inputs and not os.path.exists(os.path.join(output_path, 'ign_orientations_'+pluton_form+'.csv'))):
         print('No intrusive orientations available for merging.')
 
@@ -1619,9 +1620,33 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
             # ostr = str(a_sort[1]['index'])+","+str(a_sort[1]['group number'])+","+str(a_sort[1]['index in group'])+","+str(a_sort[1]['number in group'])+","+a_sort[0]+","+a_sort[1]['group']+",erode\n"
             fas.write(ostr)
     fas.close()
+    
+    #add extra column for stratigraphy to specify intrsuve or strata (sed or volc)
+    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), ",")
 
-    # Update orientation info
+    intrusive_contacts = pd.read_csv(os.path.join(output_path, 'ign_contacts.csv'), ",")
 
+    geol = gpd.read_file(os.path.join(tmp_path, 'geol_clip.shp')) 
+    geol = geol.drop_duplicates(subset=c_l['c'], keep="first")
+
+    geol=geol.set_index(c_l['c'])
+
+    slist=[]
+    for ind,unit in all_sorts.iterrows():
+
+        if(c_l['intrusive'] in geol.loc[unit['code'].replace("_"," ")][c_l['r1']] 
+            and c_l['sill'] not in geol.loc[unit['code'].replace("_"," ")][c_l['ds']]):
+            slist.append('intrusion')
+        else:
+            slist.append('sediment')
+            
+
+    all_sorts.insert(6, "strat_type", slist, True)
+    all_sorts.to_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'),index=False)
+    all_sorts=all_sorts.set_index('code')
+   # Update orientation info
+
+    
     fao = open(os.path.join(output_path, 'orientations_clean.csv'), "w")
     fao.write('X,Y,Z,azimuth,dip,polarity,formation\n')
     all_sort_codes = set(all_sorts.index)

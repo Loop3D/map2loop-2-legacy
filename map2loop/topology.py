@@ -908,7 +908,7 @@ class Topology(object):
 
         gp_fault_rel.to_csv(gp_fault_rel_path)
 
-    def super_groups_and_groups(group_girdle, tmp_path, misorientation):
+    def super_groups_and_groups(group_girdle, tmp_path, misorientation, c_l):
         group_girdle = pd.DataFrame.from_dict(group_girdle, orient='index')
         group_girdle.columns = ['plunge', 'bearing', 'num orientations']
         group_girdle.sort_values(
@@ -920,9 +920,25 @@ class Topology(object):
         super_group = pd.DataFrame([[group_girdle[0:1].index[0], 'Super_Group_0', l, m, n]], columns=[
                                    'Group', 'Super_Group', 'l', 'm', 'n'])
         super_group.set_index('Group', inplace=True)
+
+        geol = gpd.read_file(os.path.join(tmp_path, 'geol_clip.shp')) 
+        geol = geol.drop_duplicates(subset=c_l['c'], keep="first")
+        geol=geol.set_index(c_l['g'])
+        
+        
         sg_index = 0
         for i in range(1, len(group_girdle)):
-            if(group_girdle.iloc[i]['num orientations'] > 3):
+            if(c_l['intrusive'] in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][c_l['r1']] 
+            and c_l['sill'] not in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][c_l['ds']]):
+                sg_index = sg_index+1
+                #print('not found',sg_index)
+                sgname = 'Super_Group_'+str(sg_index)
+                super_group_new = pd.DataFrame(
+                    [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
+                super_group_new.set_index('Group', inplace=True)
+                super_group = super_group.append(super_group_new)
+
+            elif(group_girdle.iloc[i]['num orientations'] > 3):
                 l, m, n = m2l_utils.ddd2dircos(
                     group_girdle.iloc[i]['plunge'], group_girdle.iloc[i]['bearing'])
 
