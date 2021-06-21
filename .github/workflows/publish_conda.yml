@@ -19,7 +19,7 @@ jobs:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
     - name: setup anaconda
-    - uses: conda-incubator/setup-miniconda@v2
+      uses: conda-incubator/setup-miniconda@v2
       with:
         python-version: ${{ matrix.python }} 
         activate-environment: loop    
