@@ -30,15 +30,14 @@ jobs:
       run: |
         python --version
         conda install -c conda-forge conda-build scikit-build numpy cython
-        cd conda
         conda config --set anaconda_upload yes
-        conda build -c anaconda -c conda-forge -c loop3d --output-folder . .
-#     - name: upload
-#       shell: powershell
+        conda build -c anaconda -c conda-forge -c loop3d --output-folder . conda
+    - name: upload
+      shell: powershell
       
-#       run: | 
-#         conda install anaconda-client
-#         anaconda upload --label main win-64/*.tar.bz2 
+      run: | 
+        conda install anaconda-client
+        anaconda upload --label main win-64/*.tar.bz2 
 #   unix_package:
 #     runs-on: ubuntu-latest
 #     steps:
