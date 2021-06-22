@@ -11,8 +11,10 @@ from tqdm import tqdm
 import geopandas as gpd
 import pandas as pd
 import numpy as np
+import networkx as nx
 from shapely.geometry import Polygon
 from matplotlib import pyplot as plt
+from map2loop.topology import Topology
 from map2loop import (
     geology_loopdata,
     structure_loopdata,
@@ -512,6 +514,11 @@ class Project(object):
             pbar.update(10)
 
             self.config.save_cmap()
+
+            # Combine multiple outputs into single graph
+
+            Gloop=Topology.make_Loop_graph(self.config.tmp_path,self.config.output_path)
+            nx.write_gml(Gloop, os.path.join(self.config.output_path,'loop.gml'))
 
             #self.config.update_projectfile()
             self.config.export_png()

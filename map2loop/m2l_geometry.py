@@ -1705,7 +1705,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
                 .format(a_s['code'], median_th, 'nan', "guess")
             fs.write(ostr)
     fs.close()
-
+ 
     # add colours (hardwired to GSWA or the moment
     # if(clut_path  == ''):
     # asc = pd.read_csv(os.path.join(tmp_path,'all_sorts_clean.csv'),",")

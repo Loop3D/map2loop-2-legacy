@@ -415,6 +415,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
         geol_clip = gpd.overlay(geology, polygo, how='intersection')
 
         if(len(geol_clip) > 0 ):
+            """
             geol_gaps=check_gaps(geol_clip)
             if(len(geol_gaps)>0):
                 warnings.warn('Gaps between geology polygons, consider editing geology layer or rounding vertices')
@@ -429,6 +430,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                 #geol_overlaps.to_file(os.path.join(tmp_path,'geology_overlaps.shp'))
             else:
                 print("No overlaps between geology polygons")
+            """
             geol_clip.crs = dst_crs
             geol_file = os.path.join(tmp_path,'geol_clip.shp')
             geol_clip.to_file(geol_file)

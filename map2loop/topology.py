@@ -925,7 +925,6 @@ class Topology(object):
         geol = geol.drop_duplicates(subset=c_l['c'], keep="first")
         geol=geol.set_index(c_l['g'])
         
-        
         sg_index = 0
         for i in range(1, len(group_girdle)):
             if(c_l['intrusive'] in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][c_l['r1']] 
@@ -1054,3 +1053,125 @@ class Topology(object):
             print('no cycles')
 
         nx.write_gml(Gp, os.path.join(graph_path, 'ASUD_strat.gml'))
+    
+    ####################################
+    # combine multuiple outputs into single graph
+    #
+    # make_Loop_graph(tmp_path,output_path)
+    # tmp_path path to tmp directory
+    # output_path path to output directory
+    #
+    # Returns networkx graph
+    ####################################
+
+    def make_Loop_graph(tmp_path,output_path):
+        Gloop=nx.DiGraph()
+        
+        # Load faults and stratigraphy
+        Gf = nx.read_gml(os.path.join(tmp_path, 'fault_network.gml'))
+        Astrat = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), ",")
+
+        # add formation stratigraphy to graph as nodes
+        Astrat=Astrat.set_index('code')
+        for ind,s in Astrat.iterrows():
+            Gloop.add_node(s.name,color=s['colour'],ntype="formation",
+                                    group=s['group'],
+                                    strat_type=s['strat_type'],
+                                    uctype=s['uctype'],
+                                    group_number=s['group number'],
+                                    index_in_group=s['index in group'],
+                                    number_in_group=s['number in group']
+                        )
+        
+        # add formation-formation stratigraphy to graph as edges
+        i=0
+        for ind,s in Astrat.iterrows():
+            if ind != Astrat.index[-1]:
+                Gloop.add_edge(Astrat.iloc[i].name,Astrat.iloc[i+1].name)
+                Gloop[Astrat.iloc[i].name][Astrat.iloc[i+1].name]['etype']='formation_formation'
+            i=i+1
+
+        #dd faults to graph as nodes
+        for n in Gf.nodes:
+            Gloop.add_node(n,ntype="fault")
+
+        for e in Gf.edges:
+            Gloop.add_edge(e[0],e[1])
+            Gloop[e[0]][e[1]]['angle']=Gf.edges[e]['angle']
+            Gloop[e[0]][e[1]]['topol']=Gf.edges[e]['topol']
+            Gloop[e[0]][e[1]]['etype']='fault_fault'
+        
+        #add formation-fault edges to graph
+        Af_s = pd.read_csv(os.path.join(output_path, 'unit-fault-relationships.csv'), ",")
+        for ind,s in Af_s.iterrows():
+            if(s['code'] in Gloop.nodes):
+                for col in Af_s.columns[1:]:
+                    if(col in Gloop.nodes):
+                        if(Af_s.loc[ind,col]==1):
+                            Gloop.add_edge(col,s['code'])
+                            Gloop[col][s['code']]['etype']='fault_formation'
+                    
+        #add fault dimension info to fault nodes
+        Af_d = pd.read_csv(os.path.join(output_path, 'fault_dimensions.csv'), ",")
+        Af_d=Af_d.set_index('Fault')
+        
+        for n in Gloop.nodes:
+            if("Fault" in n):
+                if( Af_d.loc[n].name in Gloop.nodes):
+                    Gloop.nodes[n]['HorizontalRadius']=Af_d.loc[n]['HorizontalRadius']
+                    Gloop.nodes[n]['VerticalRadius']=Af_d.loc[n]['VerticalRadius']
+                    Gloop.nodes[n]['InfluenceDistance']=Af_d.loc[n]['InfluenceDistance']
+                    Gloop.nodes[n]['incLength']=Af_d.loc[n]['incLength']
+                    Gloop.nodes[n]['colour']=Af_d.loc[n]['colour']
+
+        #add fult orientaiton info to fault nodes
+        Af_o = pd.read_csv(os.path.join(output_path, 'fault_orientations.csv'), ",")
+        Af_o=Af_o.drop_duplicates(subset="formation")
+        Af_o=Af_o.set_index('formation')
+        for n in Gloop.nodes:
+            if( "Fault" in n):
+                if( Af_o.loc[n].name in Gloop.nodes):
+                    Gloop.nodes[n]['Dip']=Af_o.loc[n]['dip']
+                    Gloop.nodes[n]['DipDirection']=Af_o.loc[n]['DipDirection']
+                    Gloop.nodes[n]['DipPolarity']=Af_o.loc[n]['DipPolarity']
+                
+        #add formation thickness info to formation nodes
+        As_t = pd.read_csv(os.path.join(output_path, 'formation_summary_thicknesses.csv'), ",")
+        As_t=As_t.set_index('formation')
+        #display(As_t)
+
+        for n in Gloop.nodes:
+            if(not "Fault" in n):   
+                if( As_t.loc[n].name in Gloop.nodes):
+                    if(np.isnan(As_t.loc[n]['thickness std'])):
+                        Gloop.nodes[n]['thickness_std']=-1
+                    else:
+                        Gloop.nodes[n]['thickness_std']=As_t.loc[n]['thickness std']
+                    Gloop.nodes[n]['thickness_median']=As_t.loc[n]['thickness median']
+                    Gloop.nodes[n]['thickness_method']=As_t.loc[n]['method']
+
+        #add groups as nodes and group-formation as edges
+        for ind,s in Astrat.iterrows():
+            if(not s['group'] in Gloop.nodes):
+                Gloop.add_node(s['group'],ntype="group")
+            if(s['group'] != s.name):
+                Gloop.add_edge(s['group'],s.name)
+                #print(s['group'],s.name)
+                Gloop[s['group']][s.name]['etype']='group_formation'
+        
+        #add supergroups as nodes and supergroup-group relationships as edges
+        sgi=0
+        supergroups = {}
+        with open(os.path.join(tmp_path, 'super_groups.csv')) as sgf:
+            lines = sgf.readlines()
+            for l in lines:
+                Gloop.add_node('supergroup_{}'.format(sgi),ntype="supergroup")
+                for g in l.split(','):
+                    g = g.replace('-', '_').replace(' ', '_').rstrip()
+                    if (g):
+                        supergroups[g] = 'supergroup_{}'.format(sgi)
+                        Gloop.add_edge(supergroups[g],g)
+                        Gloop[supergroups[g]][g]['etype']='supergroup_group'
+                sgi += 1
+        
+        return(Gloop)
