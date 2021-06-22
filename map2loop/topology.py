@@ -1082,7 +1082,7 @@ class Topology(object):
                                     index_in_group=s['index in group'],
                                     number_in_group=s['number in group']
                         )
-        
+            
         # add formation-formation stratigraphy to graph as edges
         i=0
         for ind,s in Astrat.iterrows():
@@ -1149,15 +1149,13 @@ class Topology(object):
                     Gloop.nodes[n]['thickness_median']=As_t.loc[n]['thickness median']
                     Gloop.nodes[n]['thickness_method']=As_t.loc[n]['method']
 
-
-        #add groups as nodes and group-formation as edges
-        for ind,s in Astrat.iterrows():  
-            if(not s['group']+'_gp' in Gloop.nodes()):
+        # add group-formation stratigraphy to graph as edges
+        for ind,s in Astrat.iterrows():
+            if(not s['group']+'_gp'  in Gloop.nodes()):
                 Gloop.add_node(s['group']+'_gp',ntype="group")
-                Gloop.add_edge(s['group']+'_gp',s.name)
-                #print(s['group'],s.name)
-                Gloop[s['group']+'_gp'][s.name]['etype']='group_formation'
-        
+            Gloop.add_edge(s['group']+'_gp',s.name)
+            Gloop[s['group']+'_gp'][s.name]['etype']="group_formation"
+
         #add supergroups as nodes and supergroup-group relationships as edges
         sgi=0
         supergroups = {}
