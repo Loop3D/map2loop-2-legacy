@@ -1149,10 +1149,10 @@ class Topology(object):
                     Gloop.nodes[n]['thickness_median']=As_t.loc[n]['thickness median']
                     Gloop.nodes[n]['thickness_method']=As_t.loc[n]['method']
 
+
         #add groups as nodes and group-formation as edges
-        for ind,s in Astrat.iterrows():
-                
-            if(s['group'] != s.name):
+        for ind,s in Astrat.iterrows():  
+            if(not s['group']+'_gp' in Gloop.nodes()):
                 Gloop.add_node(s['group']+'_gp',ntype="group")
                 Gloop.add_edge(s['group']+'_gp',s.name)
                 #print(s['group'],s.name)
@@ -1169,9 +1169,11 @@ class Topology(object):
                     g = g.replace('-', '_').replace(' ', '_').rstrip()
                     if (g):
                         supergroups[g] = 'supergroup_{}'.format(sgi)
-                        if(g in Gloop.nodes()):
-                            Gloop.add_edge(supergroups[g],g)
-                            Gloop[supergroups[g]][g]['etype']='supergroup_group'
+                        print(g+'_gp')
+                        if(g+'_gp' in Gloop.nodes()):
+                            Gloop.add_edge(supergroups[g],g+'_gp')
+                            Gloop[supergroups[g]][g+'_gp']['etype']='supergroup_group'
                 sgi += 1
         
         return(Gloop)
+        
