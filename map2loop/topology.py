@@ -1170,8 +1170,10 @@ class Topology(object):
                     g = g.replace('-', '_').replace(' ', '_').rstrip()
                     if (g):
                         supergroups[g] = 'supergroup_{}'.format(sgi)
-                        Gloop.add_edge(supergroups[g],g)
-                        Gloop[supergroups[g]][g]['etype']='supergroup_group'
+                        if(g in Gloop.nodes()):
+                            Gloop.add_edge(supergroups[g],g)
+                            Gloop[supergroups[g]][g]['etype']='supergroup_group'
                 sgi += 1
         
         return(Gloop)
+        
