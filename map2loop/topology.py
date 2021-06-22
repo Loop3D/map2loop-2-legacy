@@ -1124,7 +1124,7 @@ class Topology(object):
                     Gloop.nodes[n]['incLength']=Af_d.loc[n]['incLength']
                     Gloop.nodes[n]['colour']=Af_d.loc[n]['colour']
 
-        #add fult orientaiton info to fault nodes
+        #add fult orientation info to fault nodes
         Af_o = pd.read_csv(os.path.join(output_path, 'fault_orientations.csv'), ",")
         Af_o=Af_o.drop_duplicates(subset="formation")
         Af_o=Af_o.set_index('formation')
@@ -1138,7 +1138,6 @@ class Topology(object):
         #add formation thickness info to formation nodes
         As_t = pd.read_csv(os.path.join(output_path, 'formation_summary_thicknesses.csv'), ",")
         As_t=As_t.set_index('formation')
-        #display(As_t)
 
         for n in Gloop.nodes:
             if(not "Fault" in n):   
@@ -1152,12 +1151,12 @@ class Topology(object):
 
         #add groups as nodes and group-formation as edges
         for ind,s in Astrat.iterrows():
-            if(not s['group'] in Gloop.nodes):
-                Gloop.add_node(s['group'],ntype="group")
+                
             if(s['group'] != s.name):
-                Gloop.add_edge(s['group'],s.name)
+                Gloop.add_node(s['group']+'_gp',ntype="group")
+                Gloop.add_edge(s['group']+'_gp',s.name)
                 #print(s['group'],s.name)
-                Gloop[s['group']][s.name]['etype']='group_formation'
+                Gloop[s['group']+'_gp'][s.name]['etype']='group_formation'
         
         #add supergroups as nodes and supergroup-group relationships as edges
         sgi=0
@@ -1176,4 +1175,3 @@ class Topology(object):
                 sgi += 1
         
         return(Gloop)
-        
