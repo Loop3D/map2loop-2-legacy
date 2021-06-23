@@ -1101,15 +1101,6 @@ class Topology(object):
             Gloop[e[0]][e[1]]['topol']=Gf.edges[e]['topol']
             Gloop[e[0]][e[1]]['etype']='fault_fault'
         
-        #add formation-fault edges to graph
-        Af_s = pd.read_csv(os.path.join(output_path, 'unit-fault-relationships.csv'), ",")
-        for ind,s in Af_s.iterrows():
-            if(s['code'] in Gloop.nodes):
-                for col in Af_s.columns[1:]:
-                    if(col in Gloop.nodes):
-                        if(Af_s.loc[ind,col]==1):
-                            Gloop.add_edge(col,s['code'])
-                            Gloop[col][s['code']]['etype']='fault_formation'
                     
         #add fault dimension info to fault nodes
         Af_d = pd.read_csv(os.path.join(output_path, 'fault_dimensions.csv'), ",")
@@ -1156,6 +1147,16 @@ class Topology(object):
             Gloop.add_edge(s['group']+'_gp',s.name)
             Gloop[s['group']+'_gp'][s.name]['etype']="group_formation"
 
+        #add group-fault edges to graph
+        Af_s = pd.read_csv(os.path.join(output_path, 'group-fault-relationships.csv'), ",")
+        for ind,s in Af_s.iterrows():
+            if(s['group']+'_gp' in Gloop.nodes):
+                for col in Af_s.columns[1:]:
+                    if(col in Gloop.nodes):
+                        if(Af_s.loc[ind,col]==1):
+                            Gloop.add_edge(col,s['group']+'_gp')
+                            Gloop[col][s['group']+'_gp']['etype']='fault_group'
+
         #add supergroups as nodes and supergroup-group relationships as edges
         sgi=0
         supergroups = {}
@@ -1173,5 +1174,4 @@ class Topology(object):
                             Gloop[supergroups[g]][g+'_gp']['etype']='supergroup_group'
                 sgi += 1
         
-        return(Gloop)
-        
+        return(Gloop)        
