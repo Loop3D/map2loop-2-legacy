@@ -1157,6 +1157,16 @@ class Topology(object):
                             Gloop.add_edge(col,s['group']+'_gp')
                             Gloop[col][s['group']+'_gp']['etype']='fault_group'
 
+        #add group-group edges to graph
+        Ag_g = pd.read_csv(os.path.join(tmp_path, 'groups_clean.csv'),header=None,index_col=None)
+        i=0
+        for ind,g in Ag_g.iterrows():
+            if ind != Ag_g.index[-1]:
+                print(Ag_g.iloc[i][0]+'_gp',Ag_g.iloc[i+1][0]+'_gp')
+                Gloop.add_edge(Ag_g.iloc[i][0]+'_gp',Ag_g.iloc[i+1][0]+'_gp')
+                Gloop[Ag_g.iloc[i][0]+'_gp'][Ag_g.iloc[i+1][0]+'_gp']['etype']='group_group'
+            i=i+1
+
         #add supergroups as nodes and supergroup-group relationships as edges
         sgi=0
         supergroups = {}
