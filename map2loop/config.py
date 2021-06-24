@@ -29,7 +29,7 @@ class Config(object):
     a region of interest (bounding box or polygon) and some execution flags.
     """
 
-    def __init__(self,
+    def __init__(self, 
                  project_path,
                  overwrite,
                  geology_file,
