@@ -519,7 +519,8 @@ class Project(object):
 
             Gloop=Topology.make_Loop_graph(self.config.tmp_path,self.config.output_path)
             nx.write_gml(Gloop, os.path.join(self.config.output_path,'loop.gml'))
-
+            Topology.colour_Loop_graph(self.config.output_path)
+            
             #self.config.update_projectfile()
             self.config.export_png()
 
