@@ -1074,7 +1074,7 @@ class Topology(object):
         # add formation stratigraphy to graph as nodes
         Astrat=Astrat.set_index('code')
         for ind,s in Astrat.iterrows():
-            Gloop.add_node(s.name,color=s['colour'],ntype="formation",
+            Gloop.add_node(s.name,s_colour=s['colour'],ntype="formation",
                                     group=s['group'],
                                     strat_type=s['strat_type'],
                                     uctype=s['uctype'],
@@ -1113,7 +1113,7 @@ class Topology(object):
                     Gloop.nodes[n]['VerticalRadius']=Af_d.loc[n]['VerticalRadius']
                     Gloop.nodes[n]['InfluenceDistance']=Af_d.loc[n]['InfluenceDistance']
                     Gloop.nodes[n]['incLength']=Af_d.loc[n]['incLength']
-                    Gloop.nodes[n]['colour']=Af_d.loc[n]['colour']
+                    Gloop.nodes[n]['f_colour']=Af_d.loc[n]['colour']
 
         #add fult orientation info to fault nodes
         Af_o = pd.read_csv(os.path.join(output_path, 'fault_orientations.csv'), ",")
@@ -1185,3 +1185,33 @@ class Topology(object):
                 sgi += 1
         
         return(Gloop)        
+    
+    def colour_Loop_graph(output_path):
+        with open(os.path.join(output_path,'loop.gml')) as graph:
+            new_graph=open(os.path.join(output_path,'loop_colour.gml'),"w")
+            lines = graph.readlines()
+            for l in lines:
+                if("s_colour" in l ):
+                    new_graph.write('    '+l.strip().replace("s_colour","graphics [ fill ")+' ]\n')
+                elif("f_colour" in l):
+                    new_graph.write('    '+l.strip().replace("f_colour",'graphics [ type "ellipse" fill ')+' ]\n')
+                elif('ntype "supergroup"' in l):
+                    new_graph.write('    graphics [ type "triangle" fill "#FF0000" ]\n')
+                elif('ntype "group"' in l):
+                    new_graph.write('    graphics [ type "triangle" fill "#FF9900" ]\n')
+                    new_graph.write(l)
+                elif('etype "formation_formation"' in l):
+                    new_graph.write('    graphics [ style "line" arrow "last" fill "#0066FF" ]\n')
+                    new_graph.write(l)
+                elif('etype "fault_group"' in l):
+                    new_graph.write('    graphics [ style "line" arrow "last" fill "#666600" ]\n')
+                    new_graph.write(l)
+                elif('etype "fault_fault"' in l):
+                    new_graph.write('    graphics [ style "line" arrow "last" fill "#000000" ]\n')
+                    new_graph.write(l)
+                elif('etype "group_formation"' in l):
+                    new_graph.write('    graphics [ style "line" arrow "last" fill "#FF6600" ]\n')
+                    new_graph.write(l)
+                else:
+                    new_graph.write(l)
+            new_graph.close()

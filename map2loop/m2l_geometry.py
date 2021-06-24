@@ -3107,7 +3107,7 @@ def process_sills(output_path, geol_clip, dtm, dtb, dtb_null, cover_map, contact
                     LineStringC = geol.geometry.intersection(sill.geometry)
                     if(LineStringC.wkt.split(" ")[0] == 'MULTIPOLYGON' or
                        LineStringC.wkt.split(" ")[0] == 'POLYGON'):  # ignore polygon intersections for now, worry about them later!
-                        print(ageol[c_l['o']], "debug:",
+                        print(geol[c_l['o']], "debug:",
                               LineStringC.geometry.type)
                         continue
 
@@ -3178,7 +3178,7 @@ def process_sills(output_path, geol_clip, dtm, dtb, dtb_null, cover_map, contact
                                                     app_thickness = m2l_utils.ptsdist(
                                                         line.coords[1][0], line.coords[1][1], midx, midy)
                                                     if(app_thickness < buffer*2):
-                                                        if(min_dist > app_thicknss):
+                                                        if(min_dist > app_thickness):
                                                             min_dist = app_thickness
                                                 app_thickness = min_dist
                                                 est_thickness = app_thickness * \

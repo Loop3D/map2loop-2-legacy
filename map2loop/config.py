@@ -3,6 +3,7 @@ import sys
 import time
 import shutil
 import random
+import fiona
 
 import numpy as np
 import pandas as pd
@@ -36,6 +37,10 @@ class Config(object):
                  fold_file,
                  structure_file,
                  mindep_file,
+                 section_files,
+                 drillhole_file,
+                 dtb_grid_file,
+                 cover_map_file,
                  bbox_3d,
                  polygon,
                  step_out,
@@ -143,6 +148,10 @@ class Config(object):
         self.fault_file = fault_file
         self.fold_file = fold_file
         self.mindep_file = mindep_file
+        self.section_files = section_files
+        self.drillhole_file = drillhole_file
+        self.dtb_grid_file = dtb_grid_file
+        self.cover_map_file = cover_map_file
 
         disable_quiet_mode()
 
@@ -392,15 +401,19 @@ class Config(object):
         quiet_m2m = False
         if self.quiet == 'all':
             quiet_m2m = True
+         
+        
+
         if self.mindeps is not None:
             run_log = map2model.run(self.graph_path, self.geology_file_csv,
                                     self.fault_file_csv, self.mindep_file_csv,
-                                    self.bbox_3d, self.c_l, quiet_m2m,
+                                    self.bbox_3d, self.c_l,# quiet_m2m,
                                     deposits)
         else:
             run_log = map2model.run(self.graph_path, self.geology_file_csv,
                                     self.fault_file_csv, "", self.bbox_3d,
-                                    self.c_l, quiet_m2m, deposits)
+                                    self.c_l, #quiet_m2m, 
+                                    deposits)
 
         print(run_log)
 
@@ -517,7 +530,9 @@ class Config(object):
                 self.bbox_3d["maxx"], self.bbox_3d["maxy"]
             ]
             m2l_utils.get_local_dtm(self.dtm_file, source, self.dtm_crs, bbox)
-
+        print(self.dtm_file,
+                                self.dtm_reproj_file,
+                                self.dtm_crs, self.proj_crs)
         m2l_utils.reproject_dtm(self.dtm_file,
                                 self.dtm_reproj_file,
                                 self.dtm_crs, self.proj_crs)
@@ -538,32 +553,36 @@ class Config(object):
         Topology.save_group(Topology, self.G, self.tmp_path, self.glabels,
                             self.geol_clip, self.c_l, quiet_topology)
 
-    def calc_depth_grid(self, dtb):
+    def calc_depth_grid(self, cover_workflow):
         dtm = self.dtm
 
-        if dtb == "":
+        if ( not self.dtb_grid_file):
             self.dtb = 0
             self.dtb_null = 0
 
             print("dtb and dtb_null set to 0")
             return
+        
+        dtb_null=self.run_flags['dtb_null'] 
+        cover_dip=self.run_flags['cover_dip'] 
+        cover_spacing=self.run_flags['cover_spacing']
 
         # TODO: DTB need to be defined, every function call bellow here that has a False boolean is referencing to the workflow['cover_map'] flag
         # dtb_grid = os.path.join(data_path,'young_cover_grid.tif') #obviously hard-wired for the moment
-        # dtb_null = '-2147483648' #obviously hard-wired for the moment
+        #dtb_null = '-2147483648' #obviously hard-wired for the moment
         # cover_map_path = os.path.join(data_path,'Young_Cover_FDS_MGA_clean.shp') #obviously hard-wired for the moment
-        # dtb_clip = os.path.join(output_path,'young_cover_grid_clip.tif') #obviously hard-wired for the moment
-        # cover_dip = 10 # dip of cover away from contact
-        # cover_spacing = 5000 # of contact grid in metres
+        dtb_clip = os.path.join(self.output_path,'young_cover_grid_clip.tif') # dtb grid clipped to cover map
+        #cover_dip = 10 # dip of cover away from contact  #obviously hard-wired for the moment
+        #cover_spacing = 5000 # of contact grid in metres  #obviously hard-wired for the moment
 
-        dtb_raw = rasterio.open(dtb_grid)
+        #dtb_raw = rasterio.open(dtb_grid_file)
 
-        cover = gpd.read_file(cover_map_path)
+        cover = gpd.read_file(self.cover_map_file)
 
-        with fiona.open(cover_map_path, "r") as shapefile:
+        with fiona.open(self.cover_map_file, "r") as shapefile:
             shapes = [feature["geometry"] for feature in shapefile]
 
-        with rasterio.open(dtb_grid) as src:
+        with rasterio.open(self.dtb_grid_file) as src:
             out_image, out_transform = rasterio.mask.mask(src,
                                                           shapes,
                                                           crop=True)
@@ -581,15 +600,15 @@ class Config(object):
 
         dtb = rasterio.open(dtb_clip)
 
-        m2l_geometry.process_cover(output_path,
+        m2l_geometry.process_cover(self.output_path,
                                    dtm,
                                    dtb,
                                    dtb_null,
                                    cover,
-                                   workflow['cover_map'],
+                                   cover_workflow,
                                    cover_dip,
-                                   bbox,
-                                   proj_crs,
+                                   self.bbox,
+                                   self.proj_crs,
                                    cover_spacing,
                                    contact_decimate=3,
                                    use_vector=True,
@@ -791,55 +810,55 @@ class Config(object):
                                      self.pluton_form, pluton_dip,
                                      contact_decimate, self.c_l)
 
-    def extract_section_features(self, seismic_line_file, seismic_bbox_file,
-                                 seismic_interp_file):
-        # Extract faults and basal contacts of groups from seismic section
+    def extract_section_features(self, section_files):
+        # Extract faults and basal contacts of groups from seismic sections
         # input geology file (if local)
 
-        seismic_line_file = seismic_line_file
-        seismic_line = gpd.read_file(seismic_line_file)  # import map
-        seismic_line.plot(figsize=(10, 10), edgecolor='#000000',
-                          linewidth=0.2)  # display map
-        display(seismic_line)
+        for section in section_files:
+            seismic_line_file = section[0]
+            seismic_line = gpd.read_file(seismic_line_file)  # import map
+            seismic_line.plot(figsize=(10, 10), edgecolor='#000000',
+                            linewidth=0.2)  # display map
+            display(seismic_line)
 
-        # input geology file (if local)
-        seismic_bbox_file = seismic_bbox_file
-        seismic_bbox = gpd.read_file(seismic_bbox_file)  # import map
-        seismic_bbox.set_index('POSITION', inplace=True)
+            # input geology file (if local)
+            seismic_bbox_file = section[1]
+            seismic_bbox = gpd.read_file(seismic_bbox_file)  # import map
+            seismic_bbox.set_index('POSITION', inplace=True)
 
-        # input geology file (if local)
-        seismic_interp_file = seismic_interp_file
-        seismic_interp = gpd.read_file(seismic_interp_file)  # import map
-        seismic_interp.plot(column='FEATURE',
-                            figsize=(10, 10),
-                            edgecolor='#000000',
-                            linewidth=0.5)  # display map
-        display(seismic_interp)
+            # input geology file (if local)
+            seismic_interp_file = section[2]
+            seismic_interp = gpd.read_file(seismic_interp_file)  # import map
+            seismic_interp.plot(column='FEATURE',
+                                figsize=(10, 10),
+                                edgecolor='#000000',
+                                linewidth=0.5)  # display map
+            print(seismic_interp)
 
-        surface_cut = 2000
+            surface_cut = 2000
 
-        m2l_geometry.extract_section(self.tmp_path, self.output_path,
-                                     seismic_line, seismic_bbox,
-                                     seismic_interp, self.dtm, self.dtb,
-                                     self.dtb_null, False, surface_cut)
+            m2l_geometry.extract_section(self.tmp_path, self.output_path,
+                                        seismic_line, seismic_bbox,
+                                        seismic_interp, self.dtm, self.dtb,
+                                        self.dtb_null, False, surface_cut)
 
-        contacts = pd.read_csv(os.path.join(self.output_path, 'contacts4.csv'),
-                               ", ")
-        seismic_contacts = pd.read_csv(
-            os.path.join(self.output_path, 'seismic_base.csv'), ", ")
-        all_contacts = pd.concat([contacts, seismic_contacts], sort=False)
-        all_contacts.to_csv(os.path.join(self.output_path, 'contacts4.csv'),
+            contacts = pd.read_csv(os.path.join(self.output_path, 'contacts4.csv'),
+                                ", ")
+            seismic_contacts = pd.read_csv(
+                os.path.join(self.output_path, 'seismic_base.csv'), ", ")
+            all_contacts = pd.concat([contacts, seismic_contacts], sort=False)
+            all_contacts.to_csv(os.path.join(self.output_path, 'contacts4.csv'),
+                                index=None,
+                                header=True)
+
+            faults = pd.read_csv(os.path.join(self.output_path, 'faults.csv'),
+                                ", ")
+            seismic_faults = pd.read_csv(
+                os.path.join(self.output_path, 'seismic_faults.csv'), ", ")
+            all_faults = pd.concat([faults, seismic_faults], sort=False)
+            all_faults.to_csv(os.path.join(self.output_path, 'faults.csv'),
                             index=None,
                             header=True)
-
-        faults = pd.read_csv(os.path.join(self.output_path, 'faults.csv'),
-                             ", ")
-        seismic_faults = pd.read_csv(
-            os.path.join(self.output_path, 'seismic_faults.csv'), ", ")
-        all_faults = pd.concat([faults, seismic_faults], sort=False)
-        all_faults.to_csv(os.path.join(self.output_path, 'faults.csv'),
-                          index=None,
-                          header=True)
 
     def propagate_contact_dips(self, contact_dip,
                                contact_orientation_decimate):
@@ -999,3 +1018,17 @@ class Config(object):
         except Exception as e:
             print(e)
             print("WARNING: Could not save geology graphic")
+    
+    def extract_drillholes(self,drillhole_file):
+        dhdb_file=drillhole_file #input drill hole file (if local)
+        dh = gpd.read_file(dhdb_file,bbox=self.bbox)
+        if(len(dh)>0):
+            dh=dh[['X','Y','Z','formation']]
+            contacts=pd.read_csv(os.path.join(self.tmp_path,'contacts4.csv'))
+            all_contacts=pd.concat([contacts,dh],sort=False)
+            all_contacts.reset_index(inplace=True)
+            all_contacts.drop(labels='index', axis=1, inplace=True)
+            all_contacts.to_csv(os.path.join(self.tmp_path,'contacts4.csv'), index = None, header=True)
+            print(len(dh),'drillhole contacts added')
+        else:
+            print('No drillhole data for merging.')
