@@ -353,6 +353,8 @@ class Project(object):
                 'fault_decimate': 5,
                 'min_fault_length': 5000,
                 'fault_dip': 90,
+                'fault_orientation_clusters':2,
+                'fault_length_clusters':2,
                 'pluton_dip': 45,
                 'pluton_form': 'domes',
                 'dist_buffer': 10,
@@ -543,7 +545,7 @@ class Project(object):
 
             # Combine multiple outputs into single graph
 
-            Gloop=Topology.make_Loop_graph(self.config.tmp_path,self.config.output_path)
+            Gloop=Topology.make_Loop_graph(self.config.tmp_path,self.config.output_path,self.run_flags['fault_orientation_clusters'],self.run_flags['fault_length_clusters'],)
             nx.write_gml(Gloop, os.path.join(self.config.output_path,'loop.gml'))
             Topology.colour_Loop_graph(self.config.output_path)
 

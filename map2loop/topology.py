@@ -1064,7 +1064,7 @@ class Topology(object):
     # Returns networkx graph
     ####################################
 
-    def make_Loop_graph(tmp_path,output_path):
+    def make_Loop_graph(tmp_path,output_path,fault_orientation_clusters,fault_length_clusters):
         Gloop=nx.DiGraph()
         
         # Load faults and stratigraphy
@@ -1161,12 +1161,12 @@ class Topology(object):
         faults['m']=m
         faults['n']=n    
 
-        k_means_o = cluster.KMeans(n_clusters=2, max_iter=50, random_state=1)
+        k_means_o = cluster.KMeans(n_clusters=fault_orientation_clusters, max_iter=50, random_state=1)
         k_means_o.fit(faults) 
         labels_o = k_means_o.labels_
         clusters_o=pd.DataFrame(labels_o, columns=['cluster_o'])
 
-        k_means_l = cluster.KMeans(n_clusters=2, max_iter=50, random_state=1)
+        k_means_l = cluster.KMeans(n_clusters=fault_length_clusters, max_iter=50, random_state=1)
         k_means_l.fit(fault_l) 
         labels_l = k_means_l.labels_
         clusters_l=pd.DataFrame(labels_l, columns=['cluster_l'])
