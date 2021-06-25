@@ -27,7 +27,7 @@ from map2loop import (
 
 from map2loop.config import Config
 from map2loop.m2l_utils import display, enable_quiet_mode, disable_quiet_mode, print
-
+from map2loop.m2l_geometry import combine_point_data
 
 class Project(object):
     """A high level object implementation of the map2loop workflow."""
@@ -548,7 +548,7 @@ class Project(object):
             Gloop=Topology.make_Loop_graph(self.config.tmp_path,self.config.output_path,self.run_flags['fault_orientation_clusters'],self.run_flags['fault_length_clusters'],)
             nx.write_gml(Gloop, os.path.join(self.config.output_path,'loop.gml'))
             Topology.colour_Loop_graph(self.config.output_path)
-
+            combine_point_data(self.config.output_path)
             #self.config.update_projectfile()
             self.config.export_png()
 

@@ -3205,3 +3205,56 @@ def process_sills(output_path, geol_clip, dtm, dtb, dtb_null, cover_map, contact
 
     sills_df = pd.DataFrame.from_dict(sill_dict, orient='index')
     sills_df.to_csv(os.path.join(output_path, 'sills.csv'))
+
+def combine_point_data(output_path):
+    Afaults = pd.read_csv(os.path.join(output_path, 'faults.csv'), ",")
+    Afault_displacements = pd.read_csv(os.path.join(output_path, 'fault_displacements3.csv'), ",")
+    Afaults_strat_displacements = pd.read_csv(os.path.join(output_path, 'fault_strat_offset3.csv'), ",")
+    Acontacts = pd.read_csv(os.path.join(output_path, 'contacts_clean.csv'), ",")
+    Aorientations = pd.read_csv(os.path.join(output_path, 'orientations_clean.csv'), ",")
+
+    d={'formation':'name'}
+    Afaults.rename(columns = d, inplace = True)
+    Afaults['type']='fault_geom'
+    Afaults['Param1']=None
+    Afaults['Param2']=None
+    Afaults['Param3']=None
+    Afaults['Param4']=None
+    Afaults = Afaults[['type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+
+
+    d={'fname':'name','apparent_displacement':'Param1', 'vertical_displacement':'Param2',
+        'downthrow_dir':'Param3'}
+    Afault_displacements.rename(columns = d, inplace = True)
+    Afault_displacements['type']='fault_displacement'
+    Afault_displacements['Param4']=None
+    Afault_displacements['Z']=None
+    Afault_displacements = Afault_displacements[['type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+
+    d={'id':'name','left_fm':'Param1', 'right_fm':'Param2',
+        'min_offset':'Param3','strat_offset':'Param4'}
+    Afaults_strat_displacements.rename(columns = d, inplace = True)
+    Afaults_strat_displacements['type']='fault_strat_displacement'
+    Afaults_strat_displacements['Z']=None
+    Afaults_strat_displacements = Afaults_strat_displacements[['type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+
+    d={'formation':'name'}
+    Acontacts.drop(labels='index', axis=1,inplace = True)
+    Acontacts.rename(columns = d, inplace = True)
+    Acontacts['type']='contact'
+    Acontacts['Param1']=None
+    Acontacts['Param2']=None
+    Acontacts['Param3']=None
+    Acontacts['Param4']=None
+    Acontacts = Acontacts[['type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+
+    d={'formation':'name','azimuth':'Param1', 'dip':'Param2',
+        'polarity':'Param3'}
+    Aorientations.rename(columns = d, inplace = True)
+    Aorientations['type']='orientation'
+    Aorientations['Param4']=None
+    Aorientations = Aorientations[['type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+
+    all_points=pd.concat([Afaults,Afault_displacements,Afaults_strat_displacements,Acontacts,Aorientations])
+
+    all_points.to_csv(os.path.join(output_path, 'all_points.csv'),index=False)
