@@ -1076,11 +1076,11 @@ class Topology(object):
         for ind,s in Astrat.iterrows():
             Gloop.add_node(s.name,s_colour=s['colour'],ntype="formation",
                                     group=s['group'],
-                                    strat_type=s['strat_type'],
+                                    StratType=s['strat_type'],
                                     uctype=s['uctype'],
-                                    group_number=s['group number'],
-                                    index_in_group=s['index in group'],
-                                    number_in_group=s['number in group']
+                                    GroupNumber=s['group number'],
+                                    IndexInGroup=s['index in group'],
+                                    NumberInGroup=s['number in group']
                         )
             
         # add formation-formation stratigraphy to graph as edges
@@ -1091,41 +1091,111 @@ class Topology(object):
                 Gloop[Astrat.iloc[i].name][Astrat.iloc[i+1].name]['etype']='formation_formation'
             i=i+1
 
-        #dd faults to graph as nodes
+        #add faults to graph as nodes
         for n in Gf.nodes:
             Gloop.add_node(n,ntype="fault")
 
+        #add fault centroid to node     
+        Afgeom = pd.read_csv(os.path.join(output_path, 'faults.csv'), ",")
+
+        pd.to_numeric(Afgeom["X"], downcast="float")
+        pd.to_numeric(Afgeom["Y"], downcast="float")
+        pd.to_numeric(Afgeom["Z"], downcast="float")
+
+        for n in Gloop.nodes:
+            if( "Fault" in n):
+                subset=Afgeom[Afgeom['formation']==n]
+                Gloop.nodes[n]['Xmean']=subset['X'].mean()
+                Gloop.nodes[n]['Ymean']=subset['Y'].mean()
+                Gloop.nodes[n]['Zmean']=subset['Z'].mean()
+
         for e in Gf.edges:
             Gloop.add_edge(e[0],e[1])
-            Gloop[e[0]][e[1]]['angle']=Gf.edges[e]['angle']
-            Gloop[e[0]][e[1]]['topol']=Gf.edges[e]['topol']
+            Gloop[e[0]][e[1]]['Angle']=Gf.edges[e]['angle']
+            Gloop[e[0]][e[1]]['Topol']=Gf.edges[e]['topol']
             Gloop[e[0]][e[1]]['etype']='fault_fault'
         
                     
         #add fault dimension info to fault nodes
         Af_d = pd.read_csv(os.path.join(output_path, 'fault_dimensions.csv'), ",")
+        fault_l=pd.DataFrame(Af_d['Fault'])
         Af_d=Af_d.set_index('Fault')
-        
+        fault_l=fault_l.set_index('Fault')
+        fault_l['incLength']=Af_d['incLength']
+
         for n in Gloop.nodes:
             if("Fault" in n):
                 if( Af_d.loc[n].name in Gloop.nodes):
                     Gloop.nodes[n]['HorizontalRadius']=Af_d.loc[n]['HorizontalRadius']
                     Gloop.nodes[n]['VerticalRadius']=Af_d.loc[n]['VerticalRadius']
                     Gloop.nodes[n]['InfluenceDistance']=Af_d.loc[n]['InfluenceDistance']
-                    Gloop.nodes[n]['incLength']=Af_d.loc[n]['incLength']
+                    Gloop.nodes[n]['IncLength']=Af_d.loc[n]['incLength']
                     Gloop.nodes[n]['f_colour']=Af_d.loc[n]['colour']
 
-        #add fult orientation info to fault nodes
+        #add fault orientation info and clustering on orientation and length to fault nodes
         Af_o = pd.read_csv(os.path.join(output_path, 'fault_orientations.csv'), ",")
         Af_o=Af_o.drop_duplicates(subset="formation")
         Af_o=Af_o.set_index('formation')
+
+        pd.to_numeric(Af_o["dip"], downcast="float")
+        pd.to_numeric(Af_o["DipDirection"], downcast="float")
+        
+        from sklearn import cluster
+
+        def convert_dd_lmn(dip, dipdir):
+            r_dd=np.radians(dipdir)
+            r_90_dip=np.radians(90-dip)
+            sin_dd=np.sin(r_dd)
+            cos_dd=np.cos(r_dd)
+            
+            cos_90_dip=np.cos(r_90_dip)
+            sin_90_dip=np.sin(r_90_dip)
+            
+            l=sin_dd*cos_90_dip
+            m=cos_dd*cos_90_dip
+            n=sin_90_dip
+            return(l, m, n)
+
+        l,m,n=convert_dd_lmn(Af_o['dip'],Af_o['DipDirection']) 
+        faults=pd.DataFrame(l,columns=['l'])
+        faults['m']=m
+        faults['n']=n    
+
+        k_means_o = cluster.KMeans(n_clusters=2, max_iter=50, random_state=1)
+        k_means_o.fit(faults) 
+        labels_o = k_means_o.labels_
+        clusters_o=pd.DataFrame(labels_o, columns=['cluster_o'])
+
+        k_means_l = cluster.KMeans(n_clusters=2, max_iter=50, random_state=1)
+        k_means_l.fit(fault_l) 
+        labels_l = k_means_l.labels_
+        clusters_l=pd.DataFrame(labels_l, columns=['cluster_l'])
+
+        Af_o=Af_o.reset_index()
+        Af_o['cluster_o']=clusters_o['cluster_o']
+        Af_o['cluster_l']=clusters_l['cluster_l']
+        Af_o=Af_o.set_index(keys='formation')
+        Af_o.to_csv(os.path.join(output_path, 'fault_clusters.csv'))
         for n in Gloop.nodes:
             if( "Fault" in n):
                 if( Af_o.loc[n].name in Gloop.nodes):
                     Gloop.nodes[n]['Dip']=Af_o.loc[n]['dip']
                     Gloop.nodes[n]['DipDirection']=Af_o.loc[n]['DipDirection']
                     Gloop.nodes[n]['DipPolarity']=Af_o.loc[n]['DipPolarity']
-                
+                    Gloop.nodes[n]['OrientationCluster']=Af_o.loc[n]['cluster_o']
+                    Gloop.nodes[n]['LengthCluster']=Af_o.loc[n]['cluster_l']
+        
+        #add centrality measures to fault nodes
+        
+        Gfcc=nx.closeness_centrality(Gf)
+        Gfbc=nx.betweenness_centrality(Gf)
+
+        for n in Gloop.nodes:
+            if("Fault" in n):
+                Gloop.nodes[n]['ClosenessCentrality']=Gfcc[n]
+                Gloop.nodes[n]['BetweennessCentrality']=Gfbc[n]
+        
+
         #add formation thickness info to formation nodes
         As_t = pd.read_csv(os.path.join(output_path, 'formation_summary_thicknesses.csv'), ",")
         As_t=As_t.set_index('formation')
@@ -1134,11 +1204,11 @@ class Topology(object):
             if(not "Fault" in n):   
                 if( As_t.loc[n].name in Gloop.nodes):
                     if(np.isnan(As_t.loc[n]['thickness std'])):
-                        Gloop.nodes[n]['thickness_std']=-1
+                        Gloop.nodes[n]['ThicknessStd']=-1
                     else:
-                        Gloop.nodes[n]['thickness_std']=As_t.loc[n]['thickness std']
-                    Gloop.nodes[n]['thickness_median']=As_t.loc[n]['thickness median']
-                    Gloop.nodes[n]['thickness_method']=As_t.loc[n]['method']
+                        Gloop.nodes[n]['ThicknessStd']=As_t.loc[n]['thickness std']
+                    Gloop.nodes[n]['ThicknessMedian']=As_t.loc[n]['thickness median']
+                    Gloop.nodes[n]['ThicknessMethod']=As_t.loc[n]['method']
 
         # add group-formation stratigraphy to graph as edges
         for ind,s in Astrat.iterrows():
@@ -1215,3 +1285,5 @@ class Topology(object):
                 else:
                     new_graph.write(l)
             new_graph.close()
+
+
