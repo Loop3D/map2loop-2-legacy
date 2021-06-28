@@ -1232,9 +1232,9 @@ class Topology(object):
         i=0
         for ind,g in Ag_g.iterrows():
             if ind != Ag_g.index[-1]:
-                print(Ag_g.iloc[i][0]+'_gp',Ag_g.iloc[i+1][0]+'_gp')
-                Gloop.add_edge(Ag_g.iloc[i][0]+'_gp',Ag_g.iloc[i+1][0]+'_gp')
-                Gloop[Ag_g.iloc[i][0]+'_gp'][Ag_g.iloc[i+1][0]+'_gp']['etype']='group_group'
+                if(Ag_g.iloc[i][0]+'_gp' in Gloop.nodes and Ag_g.iloc[i+1][0]+'_gp' in Gloop.nodes):
+                    Gloop.add_edge(Ag_g.iloc[i][0]+'_gp',Ag_g.iloc[i+1][0]+'_gp')
+                    Gloop[Ag_g.iloc[i][0]+'_gp'][Ag_g.iloc[i+1][0]+'_gp']['etype']='group_group'
             i=i+1
 
         #add supergroups as nodes and supergroup-group relationships as edges
