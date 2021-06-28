@@ -549,7 +549,7 @@ class Project(object):
             nx.write_gml(Gloop, os.path.join(self.config.output_path,'loop.gml'))
             Topology.colour_Loop_graph(self.config.output_path)
             combine_point_data(self.config.output_path)
-            #self.config.update_projectfile()
+            self.config.update_projectfile()
             self.config.export_png()
 
         disable_quiet_mode()
