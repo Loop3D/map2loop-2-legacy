@@ -9,7 +9,7 @@ jobs:
     runs-on: windows-2016
     strategy:
       matrix:
-        python: ['3.6']
+        python: ['3.8']
     steps:
     - uses: actions/checkout@v2
     - name: submodules
@@ -29,13 +29,14 @@ jobs:
         ANACONDA_API_TOKEN: ${{ secrets.CONDA }}
       run: |
         conda install -c conda-forge conda-build scikit-build numpy cython
+        conda config --set anaconda_upload yes
         conda build -c anaconda -c conda-forge -c loop3d --output-folder . conda
-    - name: upload
-      shell: powershell
+#     - name: upload
+#       shell: powershell
       
-      run: | 
-        conda install anaconda-client
-        anaconda upload --label main win-64/*.tar.bz2 
+#       run: | 
+#         conda install anaconda-client
+#         anaconda upload --label main win-64/*.tar.bz2 
 #   unix_package:
 #     runs-on: ubuntu-latest
 #     steps:
