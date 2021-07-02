@@ -38,9 +38,9 @@ requirements:
     - loopprojectfile
     - cftime=1.4.0
 
-test:
-  imports:
-    - map2loop
+# test:
+#   imports:
+#     - map2loop
 
 about:
   home: "https://github.com/Loop3D/map2loop-2"
