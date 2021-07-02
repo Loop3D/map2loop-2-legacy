@@ -30,9 +30,11 @@ jobs:
         conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda
     - name: upload
       shell: powershell
+      env:
+        ANACONDA_API_TOKEN: ${{ secrets.CONDA }}
       run: | 
         conda install anaconda-client
-        anaconda -v -t  ${{ secrets.CONDA }} upload --label main conda/win-64/*.tar.bz2 --force
+        anaconda upload --label main win-64/*.tar.bz2 
 #   unix_package:
 #     runs-on: ubuntu-latest
 #     steps:
