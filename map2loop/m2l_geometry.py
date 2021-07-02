@@ -737,7 +737,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                                             print('found_dip', fault_dip)
                                     i = i+1
                             else:
-                                if(flt[c_l['fdip']] == -999):  # random flag
+                                if(flt[c_l['fdip']] == -999 or fault_dip_var == -999):  # random flag
                                     fault_dip = random.randint(60, 90)
                                 else:
                                     fault_dip = fault_dip_var
@@ -749,6 +749,8 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                         if(c_l['fdipdir_flag'] == 'num' and not str(flt[c_l['fdipdir']]) == 'None' and not str(int(flt[c_l['fdipdir']])) == c_l['fdipnull'] ):  # numeric dip direction defined
                             azimuth = flt[c_l['fdipdir']]
                         # alpha dip direction defined or no numeric dd defined
+                        elif(flt[c_l['fdip']] == -999 or fault_dip_var == -999):
+                            azimuth=azimuth
                         elif (not str(flt[c_l['fdipdir']]) == 'None' and not str(int(flt[c_l['fdip']])) == c_l['fdipnull']):
                             dotprod = degrees(acos(
                                 (-lsx*dip_dirs[flt[c_l['fdipdir']]][0])+(lsy*dip_dirs[flt[c_l['fdipdir']]][1])))
