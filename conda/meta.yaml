@@ -1,5 +1,5 @@
 {% set name = "map2loop" %}
-{% set data = load_setup_py_data() %}
+{% set data = "1.72" %}
 
 package:
   name: "{{ name|lower }}"
