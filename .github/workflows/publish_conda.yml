@@ -27,7 +27,6 @@ jobs:
       shell: powershell
       run: |
         conda install -c conda-forge conda-build scikit-build numpy cython
-        conda config --set anaconda_upload yes
         conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda
     - name: upload
       shell: powershell
