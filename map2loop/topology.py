@@ -937,7 +937,7 @@ class Topology(object):
                 super_group_new.set_index('Group', inplace=True)
                 super_group = super_group.append(super_group_new)
 
-            elif(group_girdle.iloc[i]['num orientations'] > 3):
+            elif(group_girdle.iloc[i]['num orientations'] > 5):
                 l, m, n = m2l_utils.ddd2dircos(
                     group_girdle.iloc[i]['plunge'], group_girdle.iloc[i]['bearing'])
 
@@ -1092,8 +1092,9 @@ class Topology(object):
             i=i+1
 
         #add faults to graph as nodes
-        for n in Gf.nodes:
-            Gloop.add_node(n,ntype="fault")
+        Af_d = pd.read_csv(os.path.join(output_path, 'fault_dimensions.csv'), ",")
+        for ind,f in Af_d.iterrows():
+            Gloop.add_node(f['Fault'],ntype="fault")
 
         #add fault centroid to node     
         Afgeom = pd.read_csv(os.path.join(output_path, 'faults.csv'), ",")
@@ -1192,8 +1193,13 @@ class Topology(object):
 
         for n in Gloop.nodes:
             if("Fault" in n):
-                Gloop.nodes[n]['ClosenessCentrality']=Gfcc[n]
-                Gloop.nodes[n]['BetweennessCentrality']=Gfbc[n]
+                if(n in Gfcc.keys()):
+                    Gloop.nodes[n]['ClosenessCentrality']=Gfcc[n]
+                    Gloop.nodes[n]['BetweennessCentrality']=Gfbc[n]
+                else:
+                    Gloop.nodes[n]['ClosenessCentrality']=-1
+                    Gloop.nodes[n]['BetweennessCentrality']=-1
+
         
 
         #add formation thickness info to formation nodes
