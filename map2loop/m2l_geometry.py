@@ -3261,7 +3261,10 @@ def combine_point_data(output_path):
 
     all_points=pd.concat([Afaults,Afault_displacements,Afaults_strat_displacements,Acontacts,Aorientations])
 
-    all_points.to_csv(os.path.join(output_path, 'all_points.csv'),index=False)
+    point_data=all_points.fillna( -99)
+    point_data=point_data.to_dict('records')
+
+    return(point_data)
 
 def fault_filter(output_path,filter,cutoff,relationship,median_cutoff):
     if(filter=='StratOffset'):

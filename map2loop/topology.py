@@ -1064,7 +1064,7 @@ class Topology(object):
     # Returns networkx graph
     ####################################
 
-    def make_Loop_graph(tmp_path,output_path,fault_orientation_clusters,fault_length_clusters):
+    def make_Loop_graph(tmp_path,output_path,fault_orientation_clusters,fault_length_clusters,point_data):
         Gloop=nx.DiGraph()
         
         # Load faults and stratigraphy
@@ -1082,7 +1082,7 @@ class Topology(object):
                                     IndexInGroup=s['index in group'],
                                     NumberInGroup=s['number in group']
                         )
-            
+        
         # add formation-formation stratigraphy to graph as edges
         i=0
         for ind,s in Astrat.iterrows():
@@ -1207,7 +1207,7 @@ class Topology(object):
         As_t=As_t.set_index('formation')
 
         for n in Gloop.nodes:
-            if(not "Fault" in n):   
+            if(not "Fault" in n and not "Point_data" in n):   
                 if( As_t.loc[n].name in Gloop.nodes):
                     if(np.isnan(As_t.loc[n]['thickness std'])):
                         Gloop.nodes[n]['ThicknessStd']=-1
@@ -1260,6 +1260,9 @@ class Topology(object):
                             Gloop[supergroups[g]][g+'_gp']['etype']='supergroup_group'
                 sgi += 1
         
+        # add all geolocated data to a single unconnected node
+        Gloop.add_node('Point_data',ntype='points',data=point_data)
+
         return(Gloop)        
     
     def colour_Loop_graph(output_path):
