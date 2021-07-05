@@ -14,6 +14,8 @@ from map2loop import m2l_interpolation
 import numpy as np
 import os
 import random
+import networkx as nx
+import statistics
 
 ####################################################
 # Export orientation data in csv format with heights and strat code added
@@ -3260,3 +3262,66 @@ def combine_point_data(output_path):
     all_points=pd.concat([Afaults,Afault_displacements,Afaults_strat_displacements,Acontacts,Aorientations])
 
     all_points.to_csv(os.path.join(output_path, 'all_points.csv'),index=False)
+
+def fault_filter(output_path,filter,cutoff,relationship,median_cutoff):
+    if(filter=='StratOffset'):
+        Afaults_strat_displacements = pd.read_csv(os.path.join(output_path, 'fault_strat_offset3.csv'), ",")
+        faults=Afaults_strat_displacements.drop_duplicates(subset='id')
+        Afaults_strat_displacements=Afaults_strat_displacements.set_index('id')
+        median_offset=[]
+        fault_list=[]
+        for ind,fault in faults.iterrows():
+            strat_offset=[]
+            for ind2,f in Afaults_strat_displacements.iterrows():
+                if(fault['id']==ind2):
+                    strat_offset.append(f['strat_offset'])
+            fault_list.append(fault['id'])
+            median_offset.append(statistics.mean(strat_offset))
+        median=statistics.median(median_offset)
+
+        nodes_ignore=[]
+        nodes_use=[]
+
+        for f in range(0,len(fault_list)):
+            if(median_offset[f]<median):
+                nodes_ignore.append(fault_list[f])
+            else:
+                nodes_use.append(fault_list[f])
+
+        print("ignore\n",nodes_ignore,"use\n",nodes_use)
+    else:
+        Gloop = nx.read_gml(os.path.join(output_path, 'loop.gml'))
+
+        nodes_all=[]
+        if(median_cutoff):
+            for v in Gloop.nodes():
+                if(Gloop.nodes[v]['ntype']=='fault'):
+                    nodes_all.append(Gloop.nodes[v][filter])
+
+            cutoff=statistics.median(nodes_all)
+            print("median",cutoff)
+
+        print("all fnodes",len(nodes_all))
+
+        nodes_ignore=[]
+        nodes_use=[]
+        for v in Gloop.nodes():
+            if(relationship=='le'):
+                if(Gloop.nodes[v]['ntype']=='fault' and Gloop.nodes[v][filter]<=cutoff):
+                    nodes_ignore.append(v)
+                elif(Gloop.nodes[v]['ntype']=='fault'):
+                    nodes_use.append(v)
+            else:
+                if(Gloop.nodes[v]['ntype']=='fault' and Gloop.nodes[v][filter]>cutoff):
+                    nodes_ignore.append(v)
+                elif(Gloop.nodes[v]['ntype']=='fault'):
+                    nodes_use.append(v)
+
+        print(filter,relationship, cutoff,median_cutoff)
+        print("\nignore")
+        display(nodes_ignore)
+        print("use")
+        display(nodes_use)
+
+        return(nodes_ignore)
+        
