@@ -3288,7 +3288,6 @@ def fault_filter(output_path,filter,cutoff,relationship,median_cutoff):
             else:
                 nodes_use.append(fault_list[f])
 
-        print("ignore\n",nodes_ignore,"use\n",nodes_use)
     else:
         Gloop = nx.read_gml(os.path.join(output_path, 'loop.gml'))
 
@@ -3299,9 +3298,6 @@ def fault_filter(output_path,filter,cutoff,relationship,median_cutoff):
                     nodes_all.append(Gloop.nodes[v][filter])
 
             cutoff=statistics.median(nodes_all)
-            print("median",cutoff)
-
-        print("all fnodes",len(nodes_all))
 
         nodes_ignore=[]
         nodes_use=[]
@@ -3317,11 +3313,4 @@ def fault_filter(output_path,filter,cutoff,relationship,median_cutoff):
                 elif(Gloop.nodes[v]['ntype']=='fault'):
                     nodes_use.append(v)
 
-        print(filter,relationship, cutoff,median_cutoff)
-        print("\nignore")
-        display(nodes_ignore)
-        print("use")
-        display(nodes_use)
-
         return(nodes_ignore)
-        
