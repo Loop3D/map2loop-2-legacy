@@ -1279,6 +1279,9 @@ class Topology(object):
                 elif('ntype "group"' in l):
                     new_graph.write('    graphics [ type "triangle" fill "#FF9900" ]\n')
                     new_graph.write(l)
+                elif('ntype "points"' in l):
+                    new_graph.write('    graphics [ type "octagon" fill "#00FF00" ]\n')
+                    new_graph.write(l)
                 elif('etype "formation_formation"' in l):
                     new_graph.write('    graphics [ style "line" arrow "last" fill "#0066FF" ]\n')
                     new_graph.write(l)
