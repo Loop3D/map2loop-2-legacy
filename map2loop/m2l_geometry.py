@@ -3267,32 +3267,38 @@ def combine_point_data(output_path):
     return(point_data)
 
 def fault_filter(output_path,filter,cutoff,relationship,median_cutoff):
+    Gloop = nx.read_gml(os.path.join(output_path, 'loop.gml'))
+    
     if(filter=='StratOffset'):
-        Afaults_strat_displacements = pd.read_csv(os.path.join(output_path, 'fault_strat_offset3.csv'), ",")
-        faults=Afaults_strat_displacements.drop_duplicates(subset='id')
-        Afaults_strat_displacements=Afaults_strat_displacements.set_index('id')
+        points=Gloop.nodes['Point_data']
+        points_df=pd.DataFrame.from_dict(points['data'])
+        Afaults_strat_displacements=points_df[points_df['type']=='fault_strat_displacement']
+        Afaults_strat_displacements=Afaults_strat_displacements.set_index('name')
+        
+        faults = [n for n,v in Gloop.nodes(data=True) if v['ntype'] == 'fault']  
+
         median_offset=[]
         fault_list=[]
-        for ind,fault in faults.iterrows():
+        for fault in faults:
             strat_offset=[]
             for ind2,f in Afaults_strat_displacements.iterrows():
-                if(fault['id']==ind2):
-                    strat_offset.append(f['strat_offset'])
-            fault_list.append(fault['id'])
+                if(fault==ind2):
+                    strat_offset.append(f['Param4'])
+            fault_list.append(fault)
             median_offset.append(statistics.mean(strat_offset))
         median=statistics.median(median_offset)
-
         nodes_ignore=[]
         nodes_use=[]
 
         for f in range(0,len(fault_list)):
+
             if(median_offset[f]<median):
                 nodes_ignore.append(fault_list[f])
             else:
                 nodes_use.append(fault_list[f])
 
+                
     else:
-        Gloop = nx.read_gml(os.path.join(output_path, 'loop.gml'))
 
         nodes_all=[]
         if(median_cutoff):
@@ -3315,5 +3321,5 @@ def fault_filter(output_path,filter,cutoff,relationship,median_cutoff):
                     nodes_ignore.append(v)
                 elif(Gloop.nodes[v]['ntype']=='fault'):
                     nodes_use.append(v)
-
-        return(nodes_ignore)
+    
+    return(nodes_ignore)
