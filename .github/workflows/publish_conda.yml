@@ -1,40 +1,59 @@
 name: publish_conda
 
 on:
-  push:
-    branches:
-      - master
+   push
 jobs:
-  windows:
-    runs-on: windows-2016
+  conda-deploy:
+    name: Uploading to Loop3d for python ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        python: ['3.8']
+        os: ["ubuntu-latest",  "windows-latest"] #"macos-latest",
+        python-version: ["3.7"]
     steps:
-    - uses: actions/checkout@v2
-    - name: submodules
-      shell: bash -l {0}
-      run: |
-        git submodule update --init --recursive
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
-    - name: setup anaconda
-      uses: conda-incubator/setup-miniconda@v2
-      with:
-        python-version: ${{ matrix.python }} 
-        activate-environment: loop    
-    - name: Build package
-      shell: powershell
-      run: |
-        conda install -c conda-forge conda-build scikit-build numpy cython
-        conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda
-    - name: upload
-      shell: powershell
-      env:
-        ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
-      run: | 
-        conda install anaconda-client
-        anaconda upload --label main conda/win-64/*.tar.bz2 
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+    
+      - uses: actions/checkout@v2
+      - name: update submodules
+#       shell: bash -l {0}
+        run: |
+            git submodule update --init --recursive
+      - name: Add msbuild to PATH
+        if: matrix.os == 'windows-latest'
+        uses: microsoft/setup-msbuild@v1.0.2  
+      - name: Conda build'
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA }}
+        shell: bash -l {0}
+        run: |
+           conda install -c conda-forge conda-build scikit-build numpy=1.20 cython anaconda-client -y
+           conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda
+           conda install anaconda-client -y
+      - name: upload windows
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA }}
+        if: matrix.os == 'windows-latest'
+        shell: bash -l {0}
+        run: |
+           anaconda upload --label main conda/win-64/*.tar.bz2 
+      - name: upload linux
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA }}
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash -l {0}
+        run: |
+           anaconda upload --label main conda/linux-64/*.tar.bz2 
+      - name: upload macosx
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA }}
+        if: matrix.os == 'macos-latest'
+        shell: bash -l {0}
+        run: |
+            anaconda upload --label main conda/osx-64/*.tar.bz2
 #   unix_package:
 #     runs-on: ubuntu-latest
 #     steps:
