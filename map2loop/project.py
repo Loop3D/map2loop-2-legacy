@@ -367,7 +367,9 @@ class Project(object):
                 'fat_step': 750,
                 'close_dip': -999,
                 'use_interpolations': True,
-                'use_fat': True
+                'use_fat': True,
+                'use_roi_clip': False,
+                'roi_clip_path':''
             }
 
         # And copy in any new settings from the user

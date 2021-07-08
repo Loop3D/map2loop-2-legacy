@@ -140,7 +140,8 @@ class Config(object):
         # TODO: Allow for input as a polygon, not just a bounding box.
         structure_file, geology_file, fault_file, mindep_file, fold_file, c_l = m2l_map_checker.check_map(
             structure_file, geology_file, fault_file, mindep_file, fold_file,
-            self.tmp_path, self.bbox, c_l, proj_crs, self.local, drift_prefix)
+            self.tmp_path, self.bbox, c_l, proj_crs, self.local, drift_prefix, 
+            self.run_flags['use_roi_clip'], self.run_flags['roi_clip_path'])
 
         # Process and store workflow params
         self.geology_file = geology_file

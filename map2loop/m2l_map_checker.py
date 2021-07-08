@@ -37,17 +37,19 @@ def explode_polylines(indf, c_l, dst_crs):
     return outdf
 
 
-def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, tmp_path, bbox, c_l, dst_crs, local_paths, drift_prefix):
+def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, tmp_path, bbox, c_l, dst_crs, local_paths, drift_prefix,use_roi_clip,roi_clip_path):
 
     # print(gpd.read_file(geology_file).columns)
     # print(gpd.read_file(fault_file).columns)
     # print(gpd.read_file(fold_file).columns)
     # print(gpd.read_file(mindep_file).columns)
-
-    y_point_list = [bbox[1], bbox[1], bbox[3], bbox[3], bbox[1]]
-    x_point_list = [bbox[0], bbox[2], bbox[2], bbox[0], bbox[0]]
-    bbox_geom = Polygon(zip(x_point_list, y_point_list))
-    polygo = gpd.GeoDataFrame(index=[0], crs=dst_crs, geometry=[bbox_geom])
+    if(use_roi_clip):
+        polygo=gpd.read_file(roi_clip_path)
+    else:
+        y_point_list = [bbox[1], bbox[1], bbox[3], bbox[3], bbox[1]]
+        x_point_list = [bbox[0], bbox[2], bbox[2], bbox[0], bbox[0]]
+        bbox_geom = Polygon(zip(x_point_list, y_point_list))
+        polygo = gpd.GeoDataFrame(index=[0], crs=dst_crs, geometry=[bbox_geom])
 
     m2l_errors = []
     m2l_warnings = []
@@ -308,12 +310,15 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                 if(c_l['fault'].lower() in flt[c_l['f']].lower()):
                     if(flt.geometry.type == 'LineString'):
                         flt_ls = LineString(flt.geometry)
-                        dlsx = flt_ls.coords[0][0] - \
-                            flt_ls.coords[len(flt_ls.coords)-1][0]
-                        dlsy = flt_ls.coords[0][1] - \
-                            flt_ls.coords[len(flt_ls.coords)-1][1]
-                        strike = sqrt((dlsx*dlsx)+(dlsy*dlsy))
-                        lengths.append(strike)
+                        if(len(flt_ls.coords)>0):
+                            dlsx = flt_ls.coords[0][0] - \
+                                flt_ls.coords[len(flt_ls.coords)-1][0]
+                            dlsy = flt_ls.coords[0][1] - \
+                                flt_ls.coords[len(flt_ls.coords)-1][1]
+                            strike = sqrt((dlsx*dlsx)+(dlsy*dlsy))
+                            lengths.append(strike)
+                        else:
+                            lengths.append(0)
                         #print(flt)
             faults_explode['f_length'] = lengths
             faults_explode = faults_explode[faults_explode['f_length'] > 500]
