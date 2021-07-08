@@ -630,7 +630,7 @@ Project flags:
  - **quiet** Allow or block print statements and matplotlib figures, 'None' to quiet nothing, 'all' to quiet everything, 'no-figures' to disable plots and allow text output. Defaults to 'None' :type quiet: string, optional
  - **clut_path** Path to custom map colours file :type clut_path: string, optional
  - **model_engine** Which modelling engine to use and set associated flags for, defaults to loopstructural :type model_engine: string, optional
- - **run_flags** Global dictionary that defines custom params such as decimation and minimum fault length, see Section 2.4  :type run_flags: dict, optional
+ - **run_flags** Global dictionary that defines custom params such as decimation and minimum fault length, see below :type run_flags: dict, optional
  - **\**kwargs**
 
 **6.5 Calculation control parameters**
@@ -725,23 +725,23 @@ An example minimum code to run *map2loop* with mostly default settings might loo
 
   save_basal_contacts
   
-              explode geology polgyons so interior holes become distinct polygonsPolygons
-              for each polygonPolygon:
-                          build list of polygonsPolygons and their atributes odelling 
+              explode geology polgyons so interior holes become distinct Polygons
+              for each Polygon:
+                          build list of Polygons and their atributes modelling 
               load sorted stratigraphy from csv file
-              for each polygonPolygon in list:
+              for each Polygon in list:
                     if not intrusive:
-                          if polygonPolygon Code found in sorted stratigraphy:
-                                for each polygonPolygon in list:
-                                      if two polygonsPolygons are not the same:
-                                            if two polygonsPolygons are neighbours:
-                                                   if second polygonPolygon is not a sill:
+                          if Polygon Code found in sorted stratigraphy:
+                                for each Polygon in list:
+                                      if two Polygons are not the same:
+                                            if two Polygons are neighbours:
+                                                   if second Polygon is not a sill:
                                                         add neigbour to list
-                                if first polygonPolygon has neighbours:
+                                if first Polygon has neighbours:
                                       for each neighbour:
-                                            if neighbour polygonPolygon Code found in sorted stratigraphy:
-                                                  if neighbour older than first polygonPolygon:
-                                                        calculate intersection of two polygonsPolygons:
+                                            if neighbour Polygon Code found in sorted stratigraphy:
+                                                  if neighbour older than first Polygon:
+                                                        calculate intersection of two Polygons:
                                                               if intersection is a multilinestring:
                                                                     for all line segments in linestring:
                                                                           save out segment with x,y,z Code
@@ -754,11 +754,11 @@ An example minimum code to run *map2loop* with mostly default settings might loo
   save_basal_no_faults
   
               load fault linestrings as GeoDataBase
-              create polygonPolygonal buffer aorund odell all faults
-              clip basal contacts to polygonPolygonal buffer
+              create Polygonal buffer aorund modell all faults
+              clip basal contacts to Polygonal buffer
               make copy of clipped contacts
-              for each clipped basal contact polylinePolyline:
-                    if polylinePolyline is GEOMETRYCOLLECTION:
+              for each clipped basal contact Polyline:
+                    if Polyline is GEOMETRYCOLLECTION:
                           remove from copy of clipped basal contacts
                     else:
                           add to dictionary
@@ -769,11 +769,11 @@ An example minimum code to run *map2loop* with mostly default settings might loo
 
   save_fold_axial_traces_orientations
         
-              load   geology polygonsPolygons as GeoDataFrame
+              load   geology Polygons as GeoDataFrame
               load interpolated contacts as array
-              load   polylinesPolylines as GeoDataFrame
-              for each polylinePolyline:
-                    for each line segment in   polylinePolyline:
+              load   Polylines as GeoDataFrame
+              for each Polyline:
+                    for each line segment in   Polyline:
                           if fold axial trace:
                                 if passes decimate test:
                                       calculate azimuth of line segment
@@ -823,7 +823,7 @@ An example minimum code to run *map2loop* with mostly default settings might loo
         
               load basal contacts as vectors from csv file
               load interpolated bedding orientations from csv file
-              load basal contacts as geopandas GeoDataFrame of polylinesPolylines
+              load basal contacts as geopandas GeoDataFrame of Polylines
               load sorted stratigraphy from csv file
               calculate distance matrix of all orientations to all contacts
               
@@ -831,9 +831,9 @@ An example minimum code to run *map2loop* with mostly default settings might loo
                     if orientations within buffer range to contact:
                           calculate average of all orientation direction cosines within range
                           calculate line normal to contact and intersecting its mid-point
-                          for all basal contact polylinesPolylines:
-                                if polylinePolyline Group is one stratigraphically one unit higher:
-                                      if contact normal line intersects polylinePolyline:
+                          for all basal contact Polylines:
+                                if Polyline Group is one stratigraphically one unit higher:
+                                      if contact normal line intersects Polyline:
                                             if distance between intersection and contact mid-point less than 2 x buffer:
                                                   store info
                           from list of possible intersections, select one closest to contact mid-point

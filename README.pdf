@@ -314,7 +314,7 @@ endobj
 endobj
 41 0 obj
 <<
-/Author () /CreationDate (D:20210604144741-08'00') /Creator (\(unspecified\)) /Keywords () /ModDate (D:20210604144741-08'00') /Producer (ReportLab PDF Library - www.reportlab.com) 
+/Author () /CreationDate (D:20210708113825-08'00') /Creator (\(unspecified\)) /Keywords () /ModDate (D:20210708113825-08'00') /Producer (ReportLab PDF Library - www.reportlab.com) 
   /Subject (\(unspecified\)) /Title (map2loop Package) /Trapped /False
 >>
 endobj
@@ -6490,7 +6490,7 @@ endstream
 endobj
 63 0 obj
 <<
-/Length 7803
+/Length 7797
 >>
 stream
 1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
@@ -6871,7 +6871,7 @@ Q
 q
 1 0 0 1 23 -3 cm
 q
-BT 1 0 0 1 0 14 Tm .51498 Tw 12 TL /F2 10 Tf 0 0 0 rg (run_flags) Tj /F1 10 Tf ( Global dictionary that defines custom params such as decimation and minimum fault) Tj T* 0 Tw (length, see Section 2.4 :type run_flags: dict, optional) Tj T* ET
+BT 1 0 0 1 0 14 Tm .51498 Tw 12 TL /F2 10 Tf 0 0 0 rg (run_flags) Tj /F1 10 Tf ( Global dictionary that defines custom params such as decimation and minimum fault) Tj T* 0 Tw (length, see below :type run_flags: dict, optional) Tj T* ET
 Q
 Q
 q
@@ -6980,7 +6980,7 @@ endstream
 endobj
 65 0 obj
 <<
-/Length 11138
+/Length 11205
 >>
 stream
 1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
@@ -7336,7 +7336,7 @@ Q
 q
 1 0 0 1 23 -3 cm
 q
-BT 1 0 0 1 0 14 Tm 2.907752 Tw 12 TL /F2 10 Tf 0 0 0 rg (interpolation_spacing) Tj /F1 10 Tf (: Interpolation grid spacing in meters. Used to interpolation bedding) Tj T* 0 Tw (orientations [500] In metres. \(int\)) Tj T* ET
+BT 1 0 0 1 0 14 Tm 2.907752 Tw 12 TL /F2 10 Tf 0 0 0 rg (interpolation_spacing) Tj /F1 10 Tf (: Interpolation grid spacing in meters. Used to interpolation bedding) Tj T* 0 Tw (orientations [500] In metres or if a negative value defines fixed number of grid points in x & y \(int\)) Tj T* ET
 Q
 Q
 q
@@ -7672,7 +7672,7 @@ endstream
 endobj
 66 0 obj
 <<
-/Length 6117
+/Length 6196
 >>
 stream
 1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
@@ -7955,21 +7955,21 @@ BT 1 0 0 1 0 14 Tm .538221 Tw 12 TL /F1 10 Tf 0 0 0 rg (An example minimum code 
 Q
 Q
 q
-1 0 0 1 62.69291 113.6236 cm
+1 0 0 1 62.69291 241.7027 cm
 q
 q
-1 0 0 1 0 0 cm
+.606153 0 0 .606153 0 0 cm
 q
-1 0 0 1 6.6 6.6 cm
+1 0 0 1 6.6 10.88834 cm
 q
 .662745 .662745 .662745 RG
 .5 w
 .960784 .960784 .862745 rg
-n -6 -6 468.6898 324 re B*
+n -6 -6 774 324 re B*
 Q
 q
 0 0 0 rg
-BT 1 0 0 1 0 302 Tm /F4 10 Tf 12 TL (from map2loop.project import Project) Tj T*  T* (proj=Project\(geology_file="source/geology_polygons.shp",) Tj T* (            fault_file="source/fault_polylines.shp",) Tj T* (            fold_file="source/fold_polylines.shp",) Tj T* (            structure_file="source/bedding_points.shp",) Tj T* (            mindep_file="source/mindep_points.shp",) Tj T* (            metadata="source/meta.hjson") Tj T* (            dtm_file="./source_data/terr50_gagg_gb_all.tif",) Tj T* (            \)) Tj T*  T* (proj.update_config\() Tj T* (                    out_dir='./model-test',) Tj T* (                    bbox_3d={) Tj T* (                        "minx": mbbox.total_bounds[0], #500000,) Tj T* (                        "miny": mbbox.total_bounds[1], #7490000,) Tj T* (                        "maxx": mbbox.total_bounds[2], #545000,) Tj T* (                        "maxy": mbbox.total_bounds[3], #7520000,) Tj T* (                        "base": -4800,) Tj T* (                        "top": 1200,) Tj T* (                        "local': True) Tj T* (                    },) Tj T* (                    proj_crs={'init': 'EPSG:28350'}) Tj T* (                    \)) Tj T*  T* (proj.run\(\)) Tj T* ET
+BT 1 0 0 1 0 302 Tm /F4 10 Tf 12 TL (from map2loop.project import Project) Tj T*  T* (proj=Project\(geology_file="source/geology_polygons.shp",) Tj T* (            fault_file="source/fault_polylines.shp",) Tj T* (            fold_file="source/fold_polylines.shp",) Tj T* (            structure_file="source/bedding_points.shp",) Tj T* (            mindep_file="source/mindep_points.shp",) Tj T* (            metadata="source/meta.hjson") Tj T* (            dtm_file="http://services.ga.gov.au/gis/services/DEM_SRTM_1Second_over_Bathymetry_Topography/MapServer/WCSServer?",) Tj T* (            \)) Tj T*  T* (proj.update_config\() Tj T* (                    out_dir='./model-test',) Tj T* (                    bbox_3d={) Tj T* (                        "minx": mbbox.total_bounds[0], #500000,) Tj T* (                        "miny": mbbox.total_bounds[1], #7490000,) Tj T* (                        "maxx": mbbox.total_bounds[2], #545000,) Tj T* (                        "maxy": mbbox.total_bounds[3], #7520000,) Tj T* (                        "base": -4800,) Tj T* (                        "top": 1200,) Tj T* (                        "local': True) Tj T* (                    },) Tj T* (                    proj_crs={'init': 'EPSG:28350'}) Tj T* (                    \)) Tj T*  T* (proj.run\(\)) Tj T* ET
 Q
 Q
 Q
@@ -7993,7 +7993,7 @@ endstream
 endobj
 67 0 obj
 <<
-/Length 6149
+/Length 5992
 >>
 stream
 1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
@@ -8018,7 +8018,7 @@ n -6 -6 906 312 re B*
 Q
 q
 0 0 0 rg
-BT 1 0 0 1 0 290 Tm /F4 10 Tf 12 TL (save_basal_contacts) Tj T*  T* (            explode geology polgyons so interior holes become distinct polygonsPolygons) Tj T* (            for each polygonPolygon:) Tj T* (                        build list of polygonsPolygons and their atributes odelling) Tj T* (            load sorted stratigraphy from csv file) Tj T* (            for each polygonPolygon in list:) Tj T* (                  if not intrusive:) Tj T* (                        if polygonPolygon Code found in sorted stratigraphy:) Tj T* (                              for each polygonPolygon in list:) Tj T* (                                    if two polygonsPolygons are not the same:) Tj T* (                                          if two polygonsPolygons are neighbours:) Tj T* (                                                 if second polygonPolygon is not a sill:) Tj T* (                                                      add neigbour to list) Tj T* (                              if first polygonPolygon has neighbours:) Tj T* (                                    for each neighbour:) Tj T* (                                          if neighbour polygonPolygon Code found in sorted stratigraphy:) Tj T* (                                                if neighbour older than first polygonPolygon:) Tj T* (                                                      calculate intersection of two polygonsPolygons:) Tj T* (                                                            if intersection is a multilinestring:) Tj T* (                                                                  for all line segments in linestring:) Tj T* (                                                                        save out segment with x,y,z Code) Tj T* (                                                                        build dictionary of basal contacts and dictionary of decimated basal contacts) Tj T*  T* (            return dictionary of basal contacts and dictionary of decimated basal contacts) Tj T* ET
+BT 1 0 0 1 0 290 Tm /F4 10 Tf 12 TL (save_basal_contacts) Tj T*  T* (            explode geology polgyons so interior holes become distinct Polygons) Tj T* (            for each Polygon:) Tj T* (                        build list of Polygons and their atributes modelling) Tj T* (            load sorted stratigraphy from csv file) Tj T* (            for each Polygon in list:) Tj T* (                  if not intrusive:) Tj T* (                        if Polygon Code found in sorted stratigraphy:) Tj T* (                              for each Polygon in list:) Tj T* (                                    if two Polygons are not the same:) Tj T* (                                          if two Polygons are neighbours:) Tj T* (                                                 if second Polygon is not a sill:) Tj T* (                                                      add neigbour to list) Tj T* (                              if first Polygon has neighbours:) Tj T* (                                    for each neighbour:) Tj T* (                                          if neighbour Polygon Code found in sorted stratigraphy:) Tj T* (                                                if neighbour older than first Polygon:) Tj T* (                                                      calculate intersection of two Polygons:) Tj T* (                                                            if intersection is a multilinestring:) Tj T* (                                                                  for all line segments in linestring:) Tj T* (                                                                        save out segment with x,y,z Code) Tj T* (                                                                        build dictionary of basal contacts and dictionary of decimated basal contacts) Tj T*  T* (            return dictionary of basal contacts and dictionary of decimated basal contacts) Tj T* ET
 Q
 Q
 Q
@@ -8039,7 +8039,7 @@ n -6 -6 576 168 re B*
 Q
 q
 0 0 0 rg
-BT 1 0 0 1 0 146 Tm /F4 10 Tf 12 TL (save_basal_no_faults) Tj T*  T* (            load fault linestrings as GeoDataBase) Tj T* (            create polygonPolygonal buffer aorund odell all faults) Tj T* (            clip basal contacts to polygonPolygonal buffer) Tj T* (            make copy of clipped contacts) Tj T* (            for each clipped basal contact polylinePolyline:) Tj T* (                  if polylinePolyline is GEOMETRYCOLLECTION:) Tj T* (                        remove from copy of clipped basal contacts) Tj T* (                  else:) Tj T* (                        add to dictionary) Tj T*  T* (            build GeoDataFrame from remaining clipped basal contacts and save out as shapefile) Tj T* ET
+BT 1 0 0 1 0 146 Tm /F4 10 Tf 12 TL (save_basal_no_faults) Tj T*  T* (            load fault linestrings as GeoDataBase) Tj T* (            create Polygonal buffer aorund modell all faults) Tj T* (            clip basal contacts to Polygonal buffer) Tj T* (            make copy of clipped contacts) Tj T* (            for each clipped basal contact Polyline:) Tj T* (                  if Polyline is GEOMETRYCOLLECTION:) Tj T* (                        remove from copy of clipped basal contacts) Tj T* (                  else:) Tj T* (                        add to dictionary) Tj T*  T* (            build GeoDataFrame from remaining clipped basal contacts and save out as shapefile) Tj T* ET
 Q
 Q
 Q
@@ -8060,7 +8060,7 @@ n -6 -6 738 180 re B*
 Q
 q
 0 0 0 rg
-BT 1 0 0 1 0 158 Tm /F4 10 Tf 12 TL (save_fold_axial_traces_orientations) Tj T*  T* (            load   geology polygonsPolygons as GeoDataFrame) Tj T* (            load interpolated contacts as array) Tj T* (            load   polylinesPolylines as GeoDataFrame) Tj T* (            for each polylinePolyline:) Tj T* (                  for each line segment in   polylinePolyline:) Tj T* (                        if fold axial trace:) Tj T* (                              if passes decimate test:) Tj T* (                                    calculate azimuth of line segment) Tj T* (                                    calculate points either side of line segment) Tj T* (                                    find closest interpolated contact) Tj T* (                                    if interpolated contact is sub-parallel to fold axial trace:) Tj T* (                                          save orientation data either side of segment and related x,y,z,Code to csv file) Tj T* ET
+BT 1 0 0 1 0 158 Tm /F4 10 Tf 12 TL (save_fold_axial_traces_orientations) Tj T*  T* (            load   geology Polygons as GeoDataFrame) Tj T* (            load interpolated contacts as array) Tj T* (            load   Polylines as GeoDataFrame) Tj T* (            for each Polyline:) Tj T* (                  for each line segment in   Polyline:) Tj T* (                        if fold axial trace:) Tj T* (                              if passes decimate test:) Tj T* (                                    calculate azimuth of line segment) Tj T* (                                    calculate points either side of line segment) Tj T* (                                    find closest interpolated contact) Tj T* (                                    if interpolated contact is sub-parallel to fold axial trace:) Tj T* (                                          save orientation data either side of segment and related x,y,z,Code to csv file) Tj T* ET
 Q
 Q
 Q
@@ -8126,7 +8126,7 @@ endstream
 endobj
 68 0 obj
 <<
-/Length 2982
+/Length 2948
 >>
 stream
 1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
@@ -8187,7 +8187,7 @@ n -6 -6 720 252 re B*
 Q
 q
 0 0 0 rg
-BT 1 0 0 1 0 230 Tm /F4 10 Tf 12 TL (calc_thickness) Tj T*  T* (            load basal contacts as vectors from csv file) Tj T* (            load interpolated bedding orientations from csv file) Tj T* (            load basal contacts as geopandas GeoDataFrame of polylinesPolylines) Tj T* (            load sorted stratigraphy from csv file) Tj T* (            calculate distance matrix of all orientations to all contacts) Tj T*  T* (            for each contact line segment:) Tj T* (                  if orientations within buffer range to contact:) Tj T* (                        calculate average of all orientation direction cosines within range) Tj T* (                        calculate line normal to contact and intersecting its mid-point) Tj T* (                        for all basal contact polylinesPolylines:) Tj T* (                              if polylinePolyline Group is one stratigraphically one unit higher:) Tj T* (                                    if contact normal line intersects polylinePolyline:) Tj T* (                                          if distance between intersection and contact mid-point less than 2 x buffer:) Tj T* (                                                store info) Tj T* (                        from list of possible intersections, select one closest to contact mid-point) Tj T* (                        if closest is less than maximumum allowed thickness:) Tj T* (                              save thickness and location to csv file) Tj T* ET
+BT 1 0 0 1 0 230 Tm /F4 10 Tf 12 TL (calc_thickness) Tj T*  T* (            load basal contacts as vectors from csv file) Tj T* (            load interpolated bedding orientations from csv file) Tj T* (            load basal contacts as geopandas GeoDataFrame of Polylines) Tj T* (            load sorted stratigraphy from csv file) Tj T* (            calculate distance matrix of all orientations to all contacts) Tj T*  T* (            for each contact line segment:) Tj T* (                  if orientations within buffer range to contact:) Tj T* (                        calculate average of all orientation direction cosines within range) Tj T* (                        calculate line normal to contact and intersecting its mid-point) Tj T* (                        for all basal contact Polylines:) Tj T* (                              if Polyline Group is one stratigraphically one unit higher:) Tj T* (                                    if contact normal line intersects Polyline:) Tj T* (                                          if distance between intersection and contact mid-point less than 2 x buffer:) Tj T* (                                                store info) Tj T* (                        from list of possible intersections, select one closest to contact mid-point) Tj T* (                        if closest is less than maximumum allowed thickness:) Tj T* (                              save thickness and location to csv file) Tj T* ET
 Q
 Q
 Q
@@ -8363,32 +8363,32 @@ xref
 0000088539 00000 n 
 0000095808 00000 n 
 0000103592 00000 n 
-0000111447 00000 n 
-0000112808 00000 n 
-0000123999 00000 n 
-0000130168 00000 n 
-0000136369 00000 n 
-0000139403 00000 n 
-0000139594 00000 n 
-0000139628 00000 n 
-0000139662 00000 n 
-0000139696 00000 n 
-0000139730 00000 n 
-0000139764 00000 n 
-0000139798 00000 n 
-0000139832 00000 n 
-0000139866 00000 n 
-0000139900 00000 n 
-0000139935 00000 n 
-0000139970 00000 n 
-0000140005 00000 n 
-0000140040 00000 n 
-0000140075 00000 n 
-0000140110 00000 n 
+0000111441 00000 n 
+0000112802 00000 n 
+0000124060 00000 n 
+0000130308 00000 n 
+0000136352 00000 n 
+0000139352 00000 n 
+0000139543 00000 n 
+0000139577 00000 n 
+0000139611 00000 n 
+0000139645 00000 n 
+0000139679 00000 n 
+0000139713 00000 n 
+0000139747 00000 n 
+0000139781 00000 n 
+0000139815 00000 n 
+0000139849 00000 n 
+0000139884 00000 n 
+0000139919 00000 n 
+0000139954 00000 n 
+0000139989 00000 n 
+0000140024 00000 n 
+0000140059 00000 n 
 trailer
 <<
 /ID 
-[<cb2f34b7d3cf6c9074c054e4427f08e4><cb2f34b7d3cf6c9074c054e4427f08e4>]
+[<0192e2a97b8a2d7dc88a755d29d546e9><0192e2a97b8a2d7dc88a755d29d546e9>]
 % ReportLab generated PDF document -- digest (http://www.reportlab.com)
 
 /Info 41 0 R
@@ -8396,5 +8396,5 @@ trailer
 /Size 86
 >>
 startxref
-140145
+140094
 %%EOF
