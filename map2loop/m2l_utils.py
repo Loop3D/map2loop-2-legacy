@@ -879,9 +879,8 @@ def plot_bedding_stereonets(orientations_clean, geology, c_l, quiet):
         text = ax.text(2.2, 1.37, "All data", color='b')
         plt.show()
     group_girdle = {}
-
+ 
     for gp in groups:
-
         all_orientations = orientations[orientations[c_l['g']] == gp]
         if(len(all_orientations) == 1):
             print("----------------------------------------------------------------------------------------------------------------------")

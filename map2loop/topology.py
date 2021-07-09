@@ -1162,19 +1162,23 @@ class Topology(object):
         faults['m']=m
         faults['n']=n    
 
-        k_means_o = cluster.KMeans(n_clusters=fault_orientation_clusters, max_iter=50, random_state=1)
-        k_means_o.fit(faults) 
-        labels_o = k_means_o.labels_
-        clusters_o=pd.DataFrame(labels_o, columns=['cluster_o'])
+        if(len(Af_d)>=fault_orientation_clusters):
+            k_means_o = cluster.KMeans(n_clusters=fault_orientation_clusters, max_iter=50, random_state=1)
+            k_means_o.fit(faults) 
+            labels_o = k_means_o.labels_
+            clusters_o=pd.DataFrame(labels_o, columns=['cluster_o'])
 
-        k_means_l = cluster.KMeans(n_clusters=fault_length_clusters, max_iter=50, random_state=1)
-        k_means_l.fit(fault_l) 
-        labels_l = k_means_l.labels_
-        clusters_l=pd.DataFrame(labels_l, columns=['cluster_l'])
-
+        if(len(Af_d)>=fault_length_clusters):
+            k_means_l = cluster.KMeans(n_clusters=fault_length_clusters, max_iter=50, random_state=1)
+            k_means_l.fit(fault_l) 
+            labels_l = k_means_l.labels_
+            clusters_l=pd.DataFrame(labels_l, columns=['cluster_l'])
+ 
         Af_o=Af_o.reset_index()
-        Af_o['cluster_o']=clusters_o['cluster_o']
-        Af_o['cluster_l']=clusters_l['cluster_l']
+        if(len(Af_d)>=fault_orientation_clusters):
+            Af_o['cluster_o']=clusters_o['cluster_o']
+        if(len(Af_d)>=fault_length_clusters):
+            Af_o['cluster_l']=clusters_l['cluster_l']
         Af_o=Af_o.set_index(keys='formation')
         Af_o.to_csv(os.path.join(output_path, 'fault_clusters.csv'))
         for n in Gloop.nodes:
@@ -1183,8 +1187,15 @@ class Topology(object):
                     Gloop.nodes[n]['Dip']=Af_o.loc[n]['dip']
                     Gloop.nodes[n]['DipDirection']=Af_o.loc[n]['DipDirection']
                     Gloop.nodes[n]['DipPolarity']=Af_o.loc[n]['DipPolarity']
-                    Gloop.nodes[n]['OrientationCluster']=Af_o.loc[n]['cluster_o']
-                    Gloop.nodes[n]['LengthCluster']=Af_o.loc[n]['cluster_l']
+                    if(len(Af_d)>=fault_orientation_clusters):
+                        Gloop.nodes[n]['OrientationCluster']=Af_o.loc[n]['cluster_o']
+                    else:
+                        Gloop.nodes[n]['OrientationCluster']=-1
+                    if(len(Af_d)>=fault_length_clusters):
+                        Gloop.nodes[n]['LengthCluster']=Af_o.loc[n]['cluster_l']
+                    else:
+                        Gloop.nodes[n]['LengthCluster']=-1
+                       
         
         #add centrality measures to fault nodes
         
