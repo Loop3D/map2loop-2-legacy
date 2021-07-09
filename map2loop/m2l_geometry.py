@@ -746,7 +746,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                         else:
                            # specific dip defined
                             fault_dip = flt[c_l['fdip']]
-                        
+
                         #print(c_l['fdipdir_flag'] ,str(flt[c_l['fdipdir']]), flt[c_l['fdip']] , c_l['fdipnull'])
                         if(c_l['fdipdir_flag'] == 'num' and not str(flt[c_l['fdipdir']]) == 'None' and not str(int(flt[c_l['fdipdir']])) == c_l['fdipnull'] ):  # numeric dip direction defined
                             azimuth = flt[c_l['fdipdir']]
@@ -2040,7 +2040,7 @@ def calc_thickness_with_grid(tmp_path, output_path, buffer, max_thickness_allowe
 
                                     true_thick = slope_length * \
                                         sin(radians(surf_dip))
-                                    if(not isnan(true_thick) and true_thick > 0):
+                                    if(not isnan(true_thick) and true_thick > 0 and true_thick < max_thickness_allowed):
                                         ostr = "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n"\
                                             .format(cx[k], cy[k], ctextcode[k], min_dist, int(true_thick), cl[k], cm[k], p1.x, p1.y, p2.x, p2.y, dip_mean, 'full', slope_dip, slope_length, delz, zbase, zcross)
                                         # ostr = str(cx[k])+','+str(cy[k])+','+ctextcode[k]+','+str(int(true_thick))+\
@@ -2174,7 +2174,7 @@ def calc_min_thickness_with_grid(tmp_path, output_path, buffer, max_thickness_al
 
                                         true_thick = slope_length * \
                                             sin(radians(surf_dip))
-                                        if(not isnan(true_thick)):
+                                        if(not isnan(true_thick) and true_thick > 0 and true_thick < max_thickness_allowed):
                                             ostr = "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n"\
                                                 .format(cx[k], cy[k], ctextcode[k], min_dist, int(true_thick), cl[k], cm[k], p1.x, p1.y, p2.x, p2.y, dip_mean, 'min', slope_dip, slope_length, delz, zbase, zcross)
                                             # ostr = str(cx[k])+','+str(cy[k])+','+ctextcode[k]+','+str(int(true_thick))+\

@@ -317,8 +317,9 @@ def get_dtm_topography_org(path_out, minlong, maxlong, minlat, maxlat):
 
 def get_local_dtm(dtm_file, geotif_file, dst_crs, bbox):
     # get project extent
-    y_point_list = [bbox[1], bbox[1], bbox[3], bbox[3], bbox[3]]
-    x_point_list = [bbox[0], bbox[2], bbox[2], bbox[0], bbox[0]]
+    outstep=500 # to ensure all of dtm is availabel after clpping
+    y_point_list = [bbox[1]-outstep, bbox[1]-outstep, bbox[3]+outstep, bbox[3]+outstep, bbox[3]+outstep]
+    x_point_list = [bbox[0]-outstep, bbox[2]+outstep, bbox[2]+outstep, bbox[0]-outstep, bbox[0]-outstep]
     bbox_geom = Polygon(zip(x_point_list, y_point_list))
     # shapes = Polygon(zip(x_point_list, y_point_list)) # this should require to pass CRS along
     mbbox = gpd.GeoDataFrame(index=[0], crs=dst_crs, geometry=[bbox_geom])
