@@ -342,7 +342,7 @@ class Config(object):
                                   0, 255), random.randint(0, 255)))
 
                 self.colour_dict[key] = colour
-                print(key, colour)
+                #print(key, colour)
 
         except Exception as e:
             # Otherwise, just append a random set

@@ -752,6 +752,11 @@ def dircos2ddd(l, m, n):
     else:
         dipdir = 90
     dip = 90-degrees(asin(n))
+    if(dip>90):
+        dip=180-dip
+        dipdir=dipdir+180
+    dipdir=dipdir%360
+
     return(dip, dipdir)
 
 ####################################################
