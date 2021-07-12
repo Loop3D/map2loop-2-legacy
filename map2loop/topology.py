@@ -608,10 +608,42 @@ class Topology(object):
 
         if not quiet:
             nx.draw(G, with_labels=True, font_weight='bold')
-        nx.write_gml(G, os.path.join(tmp_path, "fault_network.gml"))
+        
+        GD = G.copy()
+        edges = list(G.edges)
+        cycles = list(nx.simple_cycles(G))
+ 
+        for i in range(0, len(edges)):  # remove first edge from fault cycle
+            for j in range(0, len(cycles)):
+                if (edges[i][0] == cycles[j][0]
+                        and edges[i][1] == cycles[j][1]):
+                            if GD.has_edge(edges[i][0],edges[i][1]):
+                                    GD.remove_edge(edges[i][0],edges[i][1])
+                                    print('fault cycle removed:',edges[i][0],edges[i][1])
+
+
+
+        g=open(os.path.join(graph_path,'fault-fault-intersection.txt'),"r")
+        contents =g.readlines()
+        for line in contents:
+            parts=line.split(",")
+            f1='Fault_'+parts[1]
+            f1=f1.replace(" ","")
+            for fn in range(int((len(parts)-2)/3)):
+                f2='Fault_'+parts[2+(fn*3)].replace("{","").replace("(","")
+                f2=f2.replace(" ","")
+                topol=parts[3+(fn*3)].replace(" ","")
+                angle=parts[4+(fn*3)].replace("}","").replace(")","")
+                angle=angle.replace(" ","").replace("}","").replace(")","").rstrip()
+                if GD.has_edge(f1,f2):
+                    GD[f1][f2]['angle']=angle
+                    GD[f1][f2]['topol']=topol
+
+
+        nx.write_gml(GD, os.path.join(tmp_path, "fault_network.gml"))
 
         try:
-            print('cycles', list(nx.simple_cycles(G)))
+            print('cycles', list(nx.simple_cycles(GD)))
         except:
             print('no cycles')
 
@@ -876,7 +908,7 @@ class Topology(object):
 
         gp_fault_rel.to_csv(gp_fault_rel_path)
 
-    def super_groups_and_groups(group_girdle, tmp_path, misorientation):
+    def super_groups_and_groups(group_girdle, tmp_path, misorientation, c_l):
         group_girdle = pd.DataFrame.from_dict(group_girdle, orient='index')
         group_girdle.columns = ['plunge', 'bearing', 'num orientations']
         group_girdle.sort_values(
@@ -888,9 +920,24 @@ class Topology(object):
         super_group = pd.DataFrame([[group_girdle[0:1].index[0], 'Super_Group_0', l, m, n]], columns=[
                                    'Group', 'Super_Group', 'l', 'm', 'n'])
         super_group.set_index('Group', inplace=True)
+
+        geol = gpd.read_file(os.path.join(tmp_path, 'geol_clip.shp')) 
+        geol = geol.drop_duplicates(subset=c_l['c'], keep="first")
+        geol=geol.set_index(c_l['g'])
+        
         sg_index = 0
         for i in range(1, len(group_girdle)):
-            if(group_girdle.iloc[i]['num orientations'] > 3):
+            if(c_l['intrusive'] in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][c_l['r1']] 
+            and c_l['sill'] not in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][c_l['ds']]):
+                sg_index = sg_index+1
+                #print('not found',sg_index)
+                sgname = 'Super_Group_'+str(sg_index)
+                super_group_new = pd.DataFrame(
+                    [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
+                super_group_new.set_index('Group', inplace=True)
+                super_group = super_group.append(super_group_new)
+
+            elif(group_girdle.iloc[i]['num orientations'] > 5):
                 l, m, n = m2l_utils.ddd2dircos(
                     group_girdle.iloc[i]['plunge'], group_girdle.iloc[i]['bearing'])
 
@@ -1006,3 +1053,260 @@ class Topology(object):
             print('no cycles')
 
         nx.write_gml(Gp, os.path.join(graph_path, 'ASUD_strat.gml'))
+    
+    ####################################
+    # combine multuiple outputs into single graph
+    #
+    # make_Loop_graph(tmp_path,output_path)
+    # tmp_path path to tmp directory
+    # output_path path to output directory
+    #
+    # Returns networkx graph
+    ####################################
+
+    def make_Loop_graph(tmp_path,output_path,fault_orientation_clusters,fault_length_clusters,point_data):
+        Gloop=nx.DiGraph()
+        
+        # Load faults and stratigraphy
+        Gf = nx.read_gml(os.path.join(tmp_path, 'fault_network.gml'))
+        Astrat = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), ",")
+
+        # add formation stratigraphy to graph as nodes
+        Astrat=Astrat.set_index('code')
+        for ind,s in Astrat.iterrows():
+            Gloop.add_node(s.name,s_colour=s['colour'],ntype="formation",
+                                    group=s['group'],
+                                    StratType=s['strat_type'],
+                                    uctype=s['uctype'],
+                                    GroupNumber=s['group number'],
+                                    IndexInGroup=s['index in group'],
+                                    NumberInGroup=s['number in group']
+                        )
+        
+        # add formation-formation stratigraphy to graph as edges
+        i=0
+        for ind,s in Astrat.iterrows():
+            if ind != Astrat.index[-1]:
+                Gloop.add_edge(Astrat.iloc[i].name,Astrat.iloc[i+1].name)
+                Gloop[Astrat.iloc[i].name][Astrat.iloc[i+1].name]['etype']='formation_formation'
+            i=i+1
+
+        #add faults to graph as nodes
+        Af_d = pd.read_csv(os.path.join(output_path, 'fault_dimensions.csv'), ",")
+        for ind,f in Af_d.iterrows():
+            Gloop.add_node(f['Fault'],ntype="fault")
+
+        #add fault centroid to node     
+        Afgeom = pd.read_csv(os.path.join(output_path, 'faults.csv'), ",")
+
+        pd.to_numeric(Afgeom["X"], downcast="float")
+        pd.to_numeric(Afgeom["Y"], downcast="float")
+        pd.to_numeric(Afgeom["Z"], downcast="float")
+
+        for n in Gloop.nodes:
+            if( "Fault" in n):
+                subset=Afgeom[Afgeom['formation']==n]
+                Gloop.nodes[n]['Xmean']=subset['X'].mean()
+                Gloop.nodes[n]['Ymean']=subset['Y'].mean()
+                Gloop.nodes[n]['Zmean']=subset['Z'].mean()
+
+        for e in Gf.edges:
+            Gloop.add_edge(e[0],e[1])
+            Gloop[e[0]][e[1]]['Angle']=Gf.edges[e]['angle']
+            Gloop[e[0]][e[1]]['Topol']=Gf.edges[e]['topol']
+            Gloop[e[0]][e[1]]['etype']='fault_fault'
+        
+                    
+        #add fault dimension info to fault nodes
+        Af_d = pd.read_csv(os.path.join(output_path, 'fault_dimensions.csv'), ",")
+        fault_l=pd.DataFrame(Af_d['Fault'])
+        Af_d=Af_d.set_index('Fault')
+        fault_l=fault_l.set_index('Fault')
+        fault_l['incLength']=Af_d['incLength']
+
+        for n in Gloop.nodes:
+            if("Fault" in n):
+                if( Af_d.loc[n].name in Gloop.nodes):
+                    Gloop.nodes[n]['HorizontalRadius']=Af_d.loc[n]['HorizontalRadius']
+                    Gloop.nodes[n]['VerticalRadius']=Af_d.loc[n]['VerticalRadius']
+                    Gloop.nodes[n]['InfluenceDistance']=Af_d.loc[n]['InfluenceDistance']
+                    Gloop.nodes[n]['IncLength']=Af_d.loc[n]['incLength']
+                    Gloop.nodes[n]['f_colour']=Af_d.loc[n]['colour']
+
+        #add fault orientation info and clustering on orientation and length to fault nodes
+        Af_o = pd.read_csv(os.path.join(output_path, 'fault_orientations.csv'), ",")
+        Af_o=Af_o.drop_duplicates(subset="formation")
+        Af_o=Af_o.set_index('formation')
+
+        pd.to_numeric(Af_o["dip"], downcast="float")
+        pd.to_numeric(Af_o["DipDirection"], downcast="float")
+        
+        from sklearn import cluster
+
+        def convert_dd_lmn(dip, dipdir):
+            r_dd=np.radians(dipdir)
+            r_90_dip=np.radians(90-dip)
+            sin_dd=np.sin(r_dd)
+            cos_dd=np.cos(r_dd)
+            
+            cos_90_dip=np.cos(r_90_dip)
+            sin_90_dip=np.sin(r_90_dip)
+            
+            l=sin_dd*cos_90_dip
+            m=cos_dd*cos_90_dip
+            n=sin_90_dip
+            return(l, m, n)
+
+        l,m,n=convert_dd_lmn(Af_o['dip'],Af_o['DipDirection']) 
+        faults=pd.DataFrame(l,columns=['l'])
+        faults['m']=m
+        faults['n']=n    
+
+        if(len(Af_d)>=fault_orientation_clusters):
+            k_means_o = cluster.KMeans(n_clusters=fault_orientation_clusters, max_iter=50, random_state=1)
+            k_means_o.fit(faults) 
+            labels_o = k_means_o.labels_
+            clusters_o=pd.DataFrame(labels_o, columns=['cluster_o'])
+
+        if(len(Af_d)>=fault_length_clusters):
+            k_means_l = cluster.KMeans(n_clusters=fault_length_clusters, max_iter=50, random_state=1)
+            k_means_l.fit(fault_l) 
+            labels_l = k_means_l.labels_
+            clusters_l=pd.DataFrame(labels_l, columns=['cluster_l'])
+ 
+        Af_o=Af_o.reset_index()
+        if(len(Af_d)>=fault_orientation_clusters):
+            Af_o['cluster_o']=clusters_o['cluster_o']
+        if(len(Af_d)>=fault_length_clusters):
+            Af_o['cluster_l']=clusters_l['cluster_l']
+        Af_o=Af_o.set_index(keys='formation')
+        Af_o.to_csv(os.path.join(output_path, 'fault_clusters.csv'))
+        for n in Gloop.nodes:
+            if( "Fault" in n):
+                if( Af_o.loc[n].name in Gloop.nodes):
+                    Gloop.nodes[n]['Dip']=Af_o.loc[n]['dip']
+                    Gloop.nodes[n]['DipDirection']=Af_o.loc[n]['DipDirection']
+                    Gloop.nodes[n]['DipPolarity']=Af_o.loc[n]['DipPolarity']
+                    if(len(Af_d)>=fault_orientation_clusters):
+                        Gloop.nodes[n]['OrientationCluster']=Af_o.loc[n]['cluster_o']
+                    else:
+                        Gloop.nodes[n]['OrientationCluster']=-1
+                    if(len(Af_d)>=fault_length_clusters):
+                        Gloop.nodes[n]['LengthCluster']=Af_o.loc[n]['cluster_l']
+                    else:
+                        Gloop.nodes[n]['LengthCluster']=-1
+                       
+        
+        #add centrality measures to fault nodes
+        
+        Gfcc=nx.closeness_centrality(Gf)
+        Gfbc=nx.betweenness_centrality(Gf)
+
+        for n in Gloop.nodes:
+            if("Fault" in n):
+                if(n in Gfcc.keys()):
+                    Gloop.nodes[n]['ClosenessCentrality']=Gfcc[n]
+                    Gloop.nodes[n]['BetweennessCentrality']=Gfbc[n]
+                else:
+                    Gloop.nodes[n]['ClosenessCentrality']=-1
+                    Gloop.nodes[n]['BetweennessCentrality']=-1
+
+        
+
+        #add formation thickness info to formation nodes
+        As_t = pd.read_csv(os.path.join(output_path, 'formation_summary_thicknesses.csv'), ",")
+        As_t=As_t.set_index('formation')
+
+        for n in Gloop.nodes:
+            if(not "Fault" in n and not "Point_data" in n):   
+                if( As_t.loc[n].name in Gloop.nodes):
+                    if(np.isnan(As_t.loc[n]['thickness std'])):
+                        Gloop.nodes[n]['ThicknessStd']=-1
+                    else:
+                        Gloop.nodes[n]['ThicknessStd']=As_t.loc[n]['thickness std']
+                    Gloop.nodes[n]['ThicknessMedian']=As_t.loc[n]['thickness median']
+                    Gloop.nodes[n]['ThicknessMethod']=As_t.loc[n]['method']
+
+        # add group-formation stratigraphy to graph as edges
+        for ind,s in Astrat.iterrows():
+            if(not s['group']+'_gp'  in Gloop.nodes()):
+                Gloop.add_node(s['group']+'_gp',ntype="group")
+            Gloop.add_edge(s['group']+'_gp',s.name)
+            Gloop[s['group']+'_gp'][s.name]['etype']="group_formation"
+
+        #add group-fault edges to graph
+        Af_s = pd.read_csv(os.path.join(output_path, 'group-fault-relationships.csv'), ",")
+        for ind,s in Af_s.iterrows():
+            if(s['group']+'_gp' in Gloop.nodes):
+                for col in Af_s.columns[1:]:
+                    if(col in Gloop.nodes):
+                        if(Af_s.loc[ind,col]==1):
+                            Gloop.add_edge(col,s['group']+'_gp')
+                            Gloop[col][s['group']+'_gp']['etype']='fault_group'
+
+        #add group-group edges to graph
+        Ag_g = pd.read_csv(os.path.join(tmp_path, 'groups_clean.csv'),header=None,index_col=None)
+        i=0
+        for ind,g in Ag_g.iterrows():
+            if ind != Ag_g.index[-1]:
+                if(Ag_g.iloc[i][0]+'_gp' in Gloop.nodes and Ag_g.iloc[i+1][0]+'_gp' in Gloop.nodes):
+                    Gloop.add_edge(Ag_g.iloc[i][0]+'_gp',Ag_g.iloc[i+1][0]+'_gp')
+                    Gloop[Ag_g.iloc[i][0]+'_gp'][Ag_g.iloc[i+1][0]+'_gp']['etype']='group_group'
+            i=i+1
+
+        #add supergroups as nodes and supergroup-group relationships as edges
+        sgi=0
+        supergroups = {}
+        with open(os.path.join(tmp_path, 'super_groups.csv')) as sgf:
+            lines = sgf.readlines()
+            for l in lines:
+                Gloop.add_node('supergroup_{}'.format(sgi),ntype="supergroup")
+                for g in l.split(','):
+                    g = g.replace('-', '_').replace(' ', '_').rstrip()
+                    if (g):
+                        supergroups[g] = 'supergroup_{}'.format(sgi)
+                        print(g+'_gp')
+                        if(g+'_gp' in Gloop.nodes()):
+                            Gloop.add_edge(supergroups[g],g+'_gp')
+                            Gloop[supergroups[g]][g+'_gp']['etype']='supergroup_group'
+                sgi += 1
+        
+        # add all geolocated data to a single unconnected node
+        Gloop.add_node('Point_data',ntype='points',data=point_data)
+
+        return(Gloop)        
+    
+    def colour_Loop_graph(output_path):
+        with open(os.path.join(output_path,'loop.gml')) as graph:
+            new_graph=open(os.path.join(output_path,'loop_colour.gml'),"w")
+            lines = graph.readlines()
+            for l in lines:
+                if("s_colour" in l ):
+                    new_graph.write('    '+l.strip().replace("s_colour","graphics [ fill ")+' ]\n')
+                elif("f_colour" in l):
+                    new_graph.write('    '+l.strip().replace("f_colour",'graphics [ type "ellipse" fill ')+' ]\n')
+                elif('ntype "supergroup"' in l):
+                    new_graph.write('    graphics [ type "triangle" fill "#FF0000" ]\n')
+                elif('ntype "group"' in l):
+                    new_graph.write('    graphics [ type "triangle" fill "#FF9900" ]\n')
+                    new_graph.write(l)
+                elif('ntype "points"' in l):
+                    new_graph.write('    graphics [ type "octagon" fill "#00FF00" ]\n')
+                    new_graph.write(l)
+                elif('etype "formation_formation"' in l):
+                    new_graph.write('    graphics [ style "line" arrow "last" fill "#0066FF" ]\n')
+                    new_graph.write(l)
+                elif('etype "fault_group"' in l):
+                    new_graph.write('    graphics [ style "line" arrow "last" fill "#666600" ]\n')
+                    new_graph.write(l)
+                elif('etype "fault_fault"' in l):
+                    new_graph.write('    graphics [ style "line" arrow "last" fill "#000000" ]\n')
+                    new_graph.write(l)
+                elif('etype "group_formation"' in l):
+                    new_graph.write('    graphics [ style "line" arrow "last" fill "#FF6600" ]\n')
+                    new_graph.write(l)
+                else:
+                    new_graph.write(l)
+            new_graph.close()
+
+

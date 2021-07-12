@@ -37,17 +37,19 @@ def explode_polylines(indf, c_l, dst_crs):
     return outdf
 
 
-def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, tmp_path, bbox, c_l, dst_crs, local_paths, drift_prefix):
+def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, tmp_path, bbox, c_l, dst_crs, local_paths, drift_prefix,use_roi_clip,roi_clip_path):
 
     # print(gpd.read_file(geology_file).columns)
     # print(gpd.read_file(fault_file).columns)
     # print(gpd.read_file(fold_file).columns)
     # print(gpd.read_file(mindep_file).columns)
-
-    y_point_list = [bbox[1], bbox[1], bbox[3], bbox[3], bbox[1]]
-    x_point_list = [bbox[0], bbox[2], bbox[2], bbox[0], bbox[0]]
-    bbox_geom = Polygon(zip(x_point_list, y_point_list))
-    polygo = gpd.GeoDataFrame(index=[0], crs=dst_crs, geometry=[bbox_geom])
+    if(use_roi_clip):
+        polygo=gpd.read_file(roi_clip_path)
+    else:
+        y_point_list = [bbox[1], bbox[1], bbox[3], bbox[3], bbox[1]]
+        x_point_list = [bbox[0], bbox[2], bbox[2], bbox[0], bbox[0]]
+        bbox_geom = Polygon(zip(x_point_list, y_point_list))
+        polygo = gpd.GeoDataFrame(index=[0], crs=dst_crs, geometry=[bbox_geom])
 
     m2l_errors = []
     m2l_warnings = []
@@ -308,15 +310,19 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                 if(c_l['fault'].lower() in flt[c_l['f']].lower()):
                     if(flt.geometry.type == 'LineString'):
                         flt_ls = LineString(flt.geometry)
-                        dlsx = flt_ls.coords[0][0] - \
-                            flt_ls.coords[len(flt_ls.coords)-1][0]
-                        dlsy = flt_ls.coords[0][1] - \
-                            flt_ls.coords[len(flt_ls.coords)-1][1]
-                        strike = sqrt((dlsx*dlsx)+(dlsy*dlsy))
-                        lengths.append(strike)
-                        # print(flt)
+                        if(len(flt_ls.coords)>0):
+                            dlsx = flt_ls.coords[0][0] - \
+                                flt_ls.coords[len(flt_ls.coords)-1][0]
+                            dlsy = flt_ls.coords[0][1] - \
+                                flt_ls.coords[len(flt_ls.coords)-1][1]
+                            strike = sqrt((dlsx*dlsx)+(dlsy*dlsy))
+                            lengths.append(strike)
+                        else:
+                            lengths.append(0)
+                        #print(flt)
+
             faults_explode['f_length'] = lengths
-            faults_explode = faults_explode[faults_explode['f_length'] > 2500]
+            faults_explode = faults_explode[faults_explode['f_length'] > 500]
 
             show_metadata(faults_explode, "fault layer")
         else:
@@ -414,23 +420,24 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
         geol_clip = gpd.overlay(geology, polygo, how='intersection')
 
-        if(len(geol_clip) > 0):
-            geol_gaps = check_gaps(geol_clip)
-            if(len(geol_gaps) > 0):
-                warnings.warn(
-                    'Gaps between geology polygons, consider editing geology layer or rounding vertices')
-                display(geol_gaps)
-                # geol_gaps.to_file(os.path.join(tmp_path,'geology_gaps.shp'))
+        if(len(geol_clip) > 0 ):
+            """
+            geol_gaps=check_gaps(geol_clip)
+            if(len(geol_gaps)>0):
+                warnings.warn('Gaps between geology polygons, consider editing geology layer or rounding vertices')
+                print(geol_gaps)
+                #geol_gaps.to_file(os.path.join(tmp_path,'geology_gaps.shp'))
             else:
                 print("No gaps between geology polygons")
-            geol_overlaps = check_overlaps(geol_clip)
-            if(len(geol_overlaps) > 0):
-                warnings.warn(
-                    'Overlaps between geology polygons, consider editing geology layer or rounding vertices')
-                display(geol_overlaps)
-                # geol_overlaps.to_file(os.path.join(tmp_path,'geology_overlaps.shp'))
+            geol_overlaps=check_overlaps(geol_clip)
+            if(len(geol_overlaps)>0):
+                warnings.warn('Overlaps between geology polygons, consider editing geology layer or rounding vertices')
+                print(geol_overlaps)
+                #geol_overlaps.to_file(os.path.join(tmp_path,'geology_overlaps.shp'))
+
             else:
                 print("No overlaps between geology polygons")
+            """
             geol_clip.crs = dst_crs
             geol_file = os.path.join(tmp_path, 'geol_clip.shp')
             geol_clip.to_file(geol_file)

@@ -14,6 +14,8 @@ from . import m2l_interpolation
 import numpy as np
 import os
 import random
+import networkx as nx
+import statistics
 
 ####################################################
 # Export orientation data in csv format with heights and strat code added
@@ -618,7 +620,11 @@ def save_contacts_with_faults_removed(path_fault, path_out, dist_buffer, ls_dict
 #########################################
 
 
+<<<<<<< july2021
+def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fault_decimate, fault_min_len, fault_dip_var):
+=======
 def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fault_decimate, fault_min_len, fault_dip):
+>>>>>>> master
 
     f = open(os.path.join(output_path, 'faults.csv'), "w")
     f.write("X,Y,Z,formation\n")
@@ -655,7 +661,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                         flt_ls.coords[len(flt_ls.coords)-1][1]
                     strike = sqrt((dlsx*dlsx)+(dlsy*dlsy))
                     if(strike > fault_min_len):
-
+                       
                         i = 0
                         saved = 0
                         for afs in flt_ls.coords:
@@ -723,9 +729,14 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
 
                         # if(flt[c_l['o']] == '-1'):
                         #print(flt[c_l['o']],  int(flt[c_l['fdip']]), c_l['fdipnull'],str(flt[c_l['fdipest']]))
+<<<<<<< july2021
+                        fault_dip=90.0
+                        if( int(flt[c_l['fdip']]) == int(c_l['fdipnull'])):  # null specifc dip defined
+=======
 
                         # null specifc dip defined
                         if(int(flt[c_l['fdip']]) == int(c_l['fdipnull'])):
+>>>>>>> master
                             # dip estimate defined
                             if(not str(flt[c_l['fdipest']]) == '-999'):
                                 i = 0
@@ -738,19 +749,25 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                                             print('found_dip', fault_dip)
                                     i = i+1
                             else:
-                                if(flt[c_l['fdip']] == -999):  # random flag
+                                if(flt[c_l['fdip']] == -999 or fault_dip_var == -999):  # random flag
                                     fault_dip = random.randint(60, 90)
                                 else:
-                                    fault_dip = 90
+                                    fault_dip = fault_dip_var
                         else:
                            # specific dip defined
+<<<<<<< july2021
+                            fault_dip = flt[c_l['fdip']]
+=======
                             fault_dip = int(flt[c_l['fdip']])
+>>>>>>> master
 
                         #print(c_l['fdipdir_flag'] ,str(flt[c_l['fdipdir']]), flt[c_l['fdip']] , c_l['fdipnull'])
                         # numeric dip direction defined
                         if(c_l['fdipdir_flag'] == 'num' and not str(flt[c_l['fdipdir']]) == 'None' and not str(int(flt[c_l['fdipdir']])) == c_l['fdipnull']):
                             azimuth = flt[c_l['fdipdir']]
                         # alpha dip direction defined or no numeric dd defined
+                        elif(flt[c_l['fdip']] == -999 or fault_dip_var == -999):
+                            azimuth=azimuth
                         elif (not str(flt[c_l['fdipdir']]) == 'None' and not str(int(flt[c_l['fdip']])) == c_l['fdipnull']):
                             dotprod = degrees(acos(
                                 (-lsx*dip_dirs[flt[c_l['fdipdir']]][0])+(lsy*dip_dirs[flt[c_l['fdipdir']]][1])))
@@ -1476,6 +1493,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
             os.path.join(output_path, 'ign_orientations_'+pluton_form+'.csv'), ",")
         all_orientations = pd.concat(
             [all_orientations, intrusive_orientations], sort=False)
+        print(len(intrusive_orientations),' intrusive orientations merged.')
     elif('intrusive_orientations' in inputs and not os.path.exists(os.path.join(output_path, 'ign_orientations_'+pluton_form+'.csv'))):
         print('No intrusive orientations available for merging.')
 
@@ -1621,9 +1639,33 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
             # ostr = str(a_sort[1]['index'])+","+str(a_sort[1]['group number'])+","+str(a_sort[1]['index in group'])+","+str(a_sort[1]['number in group'])+","+a_sort[0]+","+a_sort[1]['group']+",erode\n"
             fas.write(ostr)
     fas.close()
+    
+    #add extra column for stratigraphy to specify intrsuve or strata (sed or volc)
+    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), ",")
 
-    # Update orientation info
+    intrusive_contacts = pd.read_csv(os.path.join(output_path, 'ign_contacts.csv'), ",")
 
+    geol = gpd.read_file(os.path.join(tmp_path, 'geol_clip.shp')) 
+    geol = geol.drop_duplicates(subset=c_l['c'], keep="first")
+
+    geol=geol.set_index(c_l['c'])
+
+    slist=[]
+    for ind,unit in all_sorts.iterrows():
+
+        if(c_l['intrusive'] in geol.loc[unit['code'].replace("_"," ")][c_l['r1']] 
+            and c_l['sill'] not in geol.loc[unit['code'].replace("_"," ")][c_l['ds']]):
+            slist.append('intrusion')
+        else:
+            slist.append('sediment')
+            
+
+    all_sorts.insert(6, "strat_type", slist, True)
+    all_sorts.to_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'),index=False)
+    all_sorts=all_sorts.set_index('code')
+   # Update orientation info
+
+    
     fao = open(os.path.join(output_path, 'orientations_clean.csv'), "w")
     fao.write('X,Y,Z,azimuth,dip,polarity,formation\n')
     all_sort_codes = set(all_sorts.index)
@@ -1682,7 +1724,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
                 .format(a_s['code'], median_th, 'nan', "guess")
             fs.write(ostr)
     fs.close()
-
+ 
     # add colours (hardwired to GSWA or the moment
     # if(clut_path  == ''):
     # asc = pd.read_csv(os.path.join(tmp_path,'all_sorts_clean.csv'),",")
@@ -2013,7 +2055,7 @@ def calc_thickness_with_grid(tmp_path, output_path, buffer, max_thickness_allowe
 
                                     true_thick = slope_length * \
                                         sin(radians(surf_dip))
-                                    if(not isnan(true_thick) and true_thick > 0):
+                                    if(not isnan(true_thick) and true_thick > 0 and true_thick < max_thickness_allowed):
                                         ostr = "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n"\
                                             .format(cx[k], cy[k], ctextcode[k], min_dist, int(true_thick), cl[k], cm[k], p1.x, p1.y, p2.x, p2.y, dip_mean, 'full', slope_dip, slope_length, delz, zbase, zcross)
                                         # ostr = str(cx[k])+','+str(cy[k])+','+ctextcode[k]+','+str(int(true_thick))+\
@@ -2147,7 +2189,7 @@ def calc_min_thickness_with_grid(tmp_path, output_path, buffer, max_thickness_al
 
                                         true_thick = slope_length * \
                                             sin(radians(surf_dip))
-                                        if(not isnan(true_thick)):
+                                        if(not isnan(true_thick) and true_thick > 0 and true_thick < max_thickness_allowed):
                                             ostr = "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n"\
                                                 .format(cx[k], cy[k], ctextcode[k], min_dist, int(true_thick), cl[k], cm[k], p1.x, p1.y, p2.x, p2.y, dip_mean, 'min', slope_dip, slope_length, delz, zbase, zcross)
                                             # ostr = str(cx[k])+','+str(cy[k])+','+ctextcode[k]+','+str(int(true_thick))+\
@@ -2176,7 +2218,6 @@ def normalise_thickness(output_path):
         output_path, 'formation_thicknesses.csv'), sep=',')
 
     codes = thickness.formation.unique()
-
     f = open(os.path.join(output_path, 'formation_thicknesses_norm.csv'), 'w')
     f.write('x,y,formation,app_th,thickness,norm_th\n')
     fs = open(os.path.join(output_path, 'formation_summary_thicknesses.csv'), 'w')
@@ -2185,22 +2226,24 @@ def normalise_thickness(output_path):
         is_code = thickness.formation.str.contains(code, regex=False)
         all_thick = thickness[is_code]
         all_thick2 = all_thick[all_thick["thickness"] != 0]
-        if((len(all_thick2) > 0)):
-            print(code, all_thick2.loc[:, "thickness"].median(
-            ), all_thick2.loc[:, "thickness"].std())
+        thicknesses=np.asarray(all_thick2.loc[:, "thickness"], dtype = float)
+
+        if((len(all_thick2) > 2)):
+            med = np.median(thicknesses)
+            std = np.std(thicknesses)            
+            print(code, med,std)
             ostr = "{},{},{},{}\n"\
-                .format(code, all_thick2.loc[:, "thickness"].median(), all_thick2.loc[:, "thickness"].std(), all_thick2.iloc[0]['type'])
+                .format(code, med, std, all_thick2.iloc[0]['type'])
             # ostr = str(code)+","+str(all_thick2.loc[:,"thickness"].median())+","+str(all_thick2.loc[:,"thickness"].std())+"\n"
             fs.write(ostr)
-            med = all_thick2.loc[:, "thickness"].median()
-            std = all_thick2.loc[:, "thickness"].std()
+
 
             thick = all_thick2.to_numpy()
 
             for i in range(len(thick)):
                 if(med > 0):
                     ostr = "{},{},{},{},{},{}\n"\
-                        .format(thick[i, 0], thick[i, 1], thick[i, 2], thick[i, 3], thick[i, 4], thick[i, 4]/med)
+                        .format(thick[i, 0], thick[i, 1], thick[i, 2], thick[i, 3], thick[i, 4], thicknesses[i]/med)
                     # ostr = str(thick[i,0])+","+str(thick[i,1])+","+str(thick[i,2])+","+str(thick[i,3])+","+str(thick[i,3]/med)+"\n"
                     f.write(ostr)
     f.close()
@@ -3084,7 +3127,7 @@ def process_sills(output_path, geol_clip, dtm, dtb, dtb_null, cover_map, contact
                     LineStringC = geol.geometry.intersection(sill.geometry)
                     if(LineStringC.wkt.split(" ")[0] == 'MULTIPOLYGON' or
                        LineStringC.wkt.split(" ")[0] == 'POLYGON'):  # ignore polygon intersections for now, worry about them later!
-                        print(ageol[c_l['o']], "debug:",
+                        print(geol[c_l['o']], "debug:",
                               LineStringC.geometry.type)
                         continue
 
@@ -3155,7 +3198,7 @@ def process_sills(output_path, geol_clip, dtm, dtb, dtb_null, cover_map, contact
                                                     app_thickness = m2l_utils.ptsdist(
                                                         line.coords[1][0], line.coords[1][1], midx, midy)
                                                     if(app_thickness < buffer*2):
-                                                        if(min_dist > app_thicknss):
+                                                        if(min_dist > app_thickness):
                                                             min_dist = app_thickness
                                                 app_thickness = min_dist
                                                 est_thickness = app_thickness * \
@@ -3182,3 +3225,196 @@ def process_sills(output_path, geol_clip, dtm, dtb, dtb_null, cover_map, contact
 
     sills_df = pd.DataFrame.from_dict(sill_dict, orient='index')
     sills_df.to_csv(os.path.join(output_path, 'sills.csv'))
+
+def combine_point_data(output_path):
+    Afaults = pd.read_csv(os.path.join(output_path, 'faults.csv'), ",")
+    Afault_displacements = pd.read_csv(os.path.join(output_path, 'fault_displacements3.csv'), ",")
+    Afaults_strat_displacements = pd.read_csv(os.path.join(output_path, 'fault_strat_offset3.csv'), ",")
+    Acontacts = pd.read_csv(os.path.join(output_path, 'contacts_clean.csv'), ",")
+    Aorientations = pd.read_csv(os.path.join(output_path, 'orientations_clean.csv'), ",")
+
+    d={'formation':'name'}
+    Afaults.rename(columns = d, inplace = True)
+    Afaults['type']='fault_geom'
+    Afaults['Param1']=None
+    Afaults['Param2']=None
+    Afaults['Param3']=None
+    Afaults['Param4']=None
+    Afaults = Afaults[['type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+
+
+    d={'fname':'name','apparent_displacement':'Param1', 'vertical_displacement':'Param2',
+        'downthrow_dir':'Param3'}
+    Afault_displacements.rename(columns = d, inplace = True)
+    Afault_displacements['type']='fault_displacement'
+    Afault_displacements['Param4']=None
+    Afault_displacements['Z']=None
+    Afault_displacements = Afault_displacements[['type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+
+    d={'id':'name','left_fm':'Param1', 'right_fm':'Param2',
+        'min_offset':'Param3','strat_offset':'Param4'}
+    Afaults_strat_displacements.rename(columns = d, inplace = True)
+    Afaults_strat_displacements['type']='fault_strat_displacement'
+    Afaults_strat_displacements['Z']=None
+    Afaults_strat_displacements = Afaults_strat_displacements[['type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+
+    d={'formation':'name'}
+    Acontacts.drop(labels='index', axis=1,inplace = True)
+    Acontacts.rename(columns = d, inplace = True)
+    Acontacts['type']='contact'
+    Acontacts['Param1']=None
+    Acontacts['Param2']=None
+    Acontacts['Param3']=None
+    Acontacts['Param4']=None
+    Acontacts = Acontacts[['type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+
+    d={'formation':'name','azimuth':'Param1', 'dip':'Param2',
+        'polarity':'Param3'}
+    Aorientations.rename(columns = d, inplace = True)
+    Aorientations['type']='orientation'
+    Aorientations['Param4']=None
+    Aorientations = Aorientations[['type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+
+    all_points=pd.concat([Afaults,Afault_displacements,Afaults_strat_displacements,Acontacts,Aorientations])
+
+    point_data=all_points.fillna( -99)
+    point_data=point_data.to_dict('records')
+
+    return(point_data)
+
+def fault_filter(output_path,filter,cutoff,relationship,median_cutoff):
+    Gloop = nx.read_gml(os.path.join(output_path, 'loop.gml'))
+    
+    if(filter=='StratOffset'):
+        points=Gloop.nodes['Point_data']
+        points_df=pd.DataFrame.from_dict(points['data'])
+        Afaults_strat_displacements=points_df[points_df['type']=='fault_strat_displacement']
+        Afaults_strat_displacements=Afaults_strat_displacements.set_index('name')
+        
+        faults = [n for n,v in Gloop.nodes(data=True) if v['ntype'] == 'fault']  
+
+        median_offset=[]
+        fault_list=[]
+        for fault in faults:
+            strat_offset=[]
+            for ind2,f in Afaults_strat_displacements.iterrows():
+                if(fault==ind2):
+                    strat_offset.append(f['Param4'])
+            fault_list.append(fault)
+            median_offset.append(statistics.mean(strat_offset))
+        median=statistics.median(median_offset)
+        nodes_ignore=[]
+        nodes_use=[]
+
+        for f in range(0,len(fault_list)):
+
+            if(median_offset[f]<median):
+                nodes_ignore.append(fault_list[f])
+            else:
+                nodes_use.append(fault_list[f])
+
+                
+    else:
+
+        nodes_all=[]
+        if(median_cutoff):
+            for v in Gloop.nodes():
+                if(Gloop.nodes[v]['ntype']=='fault'):
+                    nodes_all.append(Gloop.nodes[v][filter])
+
+            cutoff=statistics.median(nodes_all)
+
+        nodes_ignore=[]
+        nodes_use=[]
+        for v in Gloop.nodes():
+            if(relationship=='le'):
+                if(Gloop.nodes[v]['ntype']=='fault' and Gloop.nodes[v][filter]<=cutoff):
+                    nodes_ignore.append(v)
+                elif(Gloop.nodes[v]['ntype']=='fault'):
+                    nodes_use.append(v)
+            else:
+                if(Gloop.nodes[v]['ntype']=='fault' and Gloop.nodes[v][filter]>cutoff):
+                    nodes_ignore.append(v)
+                elif(Gloop.nodes[v]['ntype']=='fault'):
+                    nodes_use.append(v)
+    
+    return(nodes_ignore)
+
+def lmn_from_line_dip(x1,y1,z1,x2,y2,z2,dip):
+    """[Calculate direction cosines of a plane defined by a 3D line defined by the local contact orientationa and a known dip]
+       [returns direction cosines of 2 possible planes or -999s if no solution possible]
+
+    Args:
+        x1 ([float]): [x position of start of contact 3D line segment]
+        y1 ([float]): [y position of start of contact 3D line segment]
+        z1 ([float]): [z position of start of contact 3D line segment]
+        x2 ([float]): [x position of start of contact 3D line segment]
+        y2 ([float]): [y position of start of contact 3D line segment]
+        z2 ([float]): [z position of start of contact 3D line segment]
+        dip ([float]): [estimated dip of plane]
+    Returns:
+        l1 ([float]): [solution 1 of l direction cosine of plane that contains 3D line segment and has a dip of dip with horizontal]
+        m1 ([float]): [solution 1 of m direction cosine of plane that contains 3D line segment and has a dip of dip with horizontal]
+        n1 ([float]): [solution 1 of n direction cosine of plane that contains 3D line segment and has a dip of dip with horizontal]
+        l2 ([float]): [solution 2 of l direction cosine of plane that contains 3D line segment and has a dip of dip with horizontal]
+        m2 ([float]): [solution 2 of m direction cosine of plane that contains 3D line segment and has a dip of dip with horizontal]
+        n2 ([float]): [solution 2 of n direction cosine of plane that contains 3D line segment and has a dip of dip with horizontal]
+     """
+    C=cos(radians(dip))
+    Z1=-99
+    while(Z1==-99 and dip <91):
+        try:
+            Z1 = (C**2*(-(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1)) 
+                  - sqrt(C**4*(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1)**2 
+                  - 4*C**2*(x1**2 - 2*x1*x2 + x2**2 + y1**2 - 2*y1*y2 + y2**2)*(C**2*abs(x2*y1 - x1*y2)**2 + C**2*x1**2*z2**2 - 2*C**2*x1*x2*z1*z2 
+                  + C**2*x2**2*z1**2 + C**2*y1**2*z2**2 - 2*C**2*y1*y2*z1*z2 + C**2*y2**2*z1**2 - x1**2*y2**2 + 2*x1*x2*y1*y2 
+                  - x2**2*y1**2)))/(2*C**2*(x1**2 - 2*x1*x2 + x2**2 + y1**2 - 2*y1*y2 + y2**2))
+        except:
+            dip=dip+1
+            C=cos(radians(dip))
+    if(Z1==-99):
+        print("lmn_from_line_dip: no solution")
+        return(-999,-999,-999,-999,-999,-999)
+    Z2=-99
+    while(Z2==-99 and dip <91):
+        try:    
+            Z2 = (sqrt(C**4*(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1)**2 
+                 - 4*C**2*(x1**2 - 2*x1*x2 + x2**2 + y1**2 - 2*y1*y2 + y2**2)*(C**2*abs(x2*y1 - x1*y2)**2 + C**2*x1**2*z2**2 - 2*C**2*x1*x2*z1*z2 
+                 + C**2*x2**2*z1**2 + C**2*y1**2*z2**2 - 2*C**2*y1*y2*z1*z2 + C**2*y2**2*z1**2 - x1**2*y2**2 + 2*x1*x2*y1*y2 - x2**2*y1**2)) 
+                 - C**2*(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1))/(2*C**2*(x1**2 
+                 - 2*x1*x2 + x2**2 + y1**2 - 2*y1*y2 + y2**2))
+        except:
+            dip=dip+1
+            C=cos(radians(dip))
+    if(Z2==-99):
+        print("lmn_from_line_dip: no solution")
+        return(-999,-999,-999,-999,-999,-999)
+
+
+    vector1 = [x2 - x1, y2 - y1, z2 - z1]
+    vector2 = [0 - x1, 0 - y1, Z1 - z1]
+    cross_product = [vector1[1] * vector2[2] - vector1[2] * vector2[1], 
+                     -1 * vector1[0] * vector2[2] - vector1[2] * vector2[0], 
+                     vector1[0] * vector2[1] - vector1[1] * vector2[0]]
+    d = cross_product[0] * x1 - cross_product[1] * y1 + cross_product[2] * z1
+
+    a = cross_product[0]
+    b = cross_product[1]
+    c = cross_product[2]
+    d = d
+    l1,m1,n1=a/sqrt(a**2+b**2+c**2),b/sqrt(a**2+b**2+c**2),c/sqrt(a**2+b**2+c**2)
+
+    vector1 = [x2 - x1, y2 - y1, z2 - z1]
+    vector2 = [0 - x1, 0 - y1, Z2 - z1]
+    cross_product = [vector1[1] * vector2[2] - vector1[2] * vector2[1], 
+                    -1 * vector1[0] * vector2[2] - vector1[2] * vector2[0], 
+                    vector1[0] * vector2[1] - vector1[1] * vector2[0]]
+    d = cross_product[0] * x1 - cross_product[1] * y1 + cross_product[2] * z1
+
+    a = cross_product[0]
+    b = cross_product[1]
+    c = cross_product[2]
+    d = d
+    l2,m2,n2=a/sqrt(a**2+b**2+c**2),b/sqrt(a**2+b**2+c**2),c/sqrt(a**2+b**2+c**2)
+
+    return(l1,m1,n1,l2,m2,n2)

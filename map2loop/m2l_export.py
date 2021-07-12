@@ -1644,8 +1644,10 @@ def display_LS_map(model, dtm, geol_clip, faults_clip, dst_crs, use_cmap, cmap,
 
 def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs):
     if loopFilename is None:
-        loopFilename = os.path.join(output_path.split(
-            '/')[0], output_path.split('/')[0] + '.loop3d')
+        from pathlib import Path
+        output_path_clean = Path(output_path)
+
+        loopFilename = os.path.join(output_path_clean.name,output_path_clean.name+ '.loop3d')
         resp = LoopProjectFile.CreateBasic(loopFilename)
         if resp['errorFlag']:
             print(resp['errorString'])

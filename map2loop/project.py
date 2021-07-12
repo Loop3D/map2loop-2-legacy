@@ -11,8 +11,10 @@ from tqdm import tqdm
 import geopandas as gpd
 import pandas as pd
 import numpy as np
+import networkx as nx
 from shapely.geometry import Polygon
 from matplotlib import pyplot as plt
+from .topology import Topology
 from . import (
     geology_loopdata,
     structure_loopdata,
@@ -25,7 +27,7 @@ from . import (
 
 from .config import Config
 from .m2l_utils import display, enable_quiet_mode, disable_quiet_mode, print
-
+from .m2l_geometry import combine_point_data
 
 class Project(object):
     """A high level object implementation of the map2loop workflow."""
@@ -39,6 +41,10 @@ class Project(object):
         structure_file=None,
         dtm_file=None,
         mindep_file=None,
+        section_files=None,
+        drillhole_file=None,
+        dtb_grid_file=None,
+        cover_map_file=None,
         metadata=None,
     ):
         """Creates project that defines the shared source data.
@@ -57,6 +63,14 @@ class Project(object):
         :type structure_file: string, optional
         :param mindep_file: Local path or URL to mineral deposit source data, defaults to None
         :type mindep_file: string, optional
+        :param section_files: Local path or URL to one or more sets of three geological section source data files, defaults to None
+        :type section_files: list of strings, optional
+        :param drillhole_file: Local path or URL to drillhole source data, defaults to None
+        :type drillhole_file: string, optional
+        :param dtb_grid_file: Local path or URL to depth to basement data, defaults to None
+        :type dtb_grid_file: string, optional
+        :param cover_map_file: Local path or URL to map of limit of cover source data, defaults to None
+        :type cover_map_file: string, optional
         :param metadata: File that describes the attributes (column names) in given local or remote sources, defaults to None
         :type metadata: string, optional
         """
@@ -95,6 +109,10 @@ class Project(object):
         self.fold_file = fold_file
         self.structure_file = structure_file
         self.mindep_file = mindep_file
+        self.section_files = section_files
+        self.drillhole_file = drillhole_file
+        self.dtb_grid_file = dtb_grid_file
+        self.cover_map_file = cover_map_file
 
         meta_error = "When using your own local files or remote data, pass the path or url to a valid metadata file (.json or .hjson) that describes your input column names.\n"
         meta_error += "You can find an example config here https://gist.github.com/yohanderose/a127c29cb88529f049a5bafc881bb1a0"
@@ -164,7 +182,8 @@ class Project(object):
                 'formation_thickness': True,
                 'polarity': False,
                 'strat_offset': False,
-                'contact_dips': True
+                'contact_dips': True,
+                'drillholes': False
             })
         elif (workflow['model_engine'] == 'loopstructural'):
             workflow.update({
@@ -176,7 +195,8 @@ class Project(object):
                 'formation_thickness': True,
                 'polarity': False,
                 'strat_offset': True,
-                'contact_dips': True
+                'contact_dips': True,
+                'drillholes': False
             })
         elif (workflow['model_engine'] == 'gempy'):
             workflow.update({
@@ -188,8 +208,9 @@ class Project(object):
                 'formation_thickness': False,
                 'polarity': False,
                 'strat_offset': False,
-                'contact_dips': False
-            })
+                'contact_dips': True,
+                'drillholes': False
+           })
         elif (workflow['model_engine'] == 'noddy'):
             workflow.update({
                 'seismic_section': False,
@@ -200,7 +221,8 @@ class Project(object):
                 'formation_thickness': False,
                 'polarity': False,
                 'strat_offset': False,
-                'contact_dips': False
+                'contact_dips': True,
+                'drillholes': False
             })
         else:
             workflow.update(
@@ -213,7 +235,8 @@ class Project(object):
                     "formation_thickness": True,
                     "polarity": False,
                     "strat_offset": True,
-                    "contact_dips": False,
+                    'contact_dips': True,
+                    'drillholes': False
                 }
             )
 
@@ -318,6 +341,9 @@ class Project(object):
                 'aus': True,
                 'deposits': "Fe,Cu,Au,NONE",
                 'dtb': '',
+                'dtb_null':-2147483648,
+                'cover_dip':10,
+                'cover_spacing':5000,
                 'orientation_decimate': 0,
                 'contact_decimate': 5,
                 'intrusion_mode': 0,
@@ -327,6 +353,8 @@ class Project(object):
                 'fault_decimate': 5,
                 'min_fault_length': 5000,
                 'fault_dip': 90,
+                'fault_orientation_clusters':2,
+                'fault_length_clusters':2,
                 'pluton_dip': 45,
                 'pluton_form': 'domes',
                 'dist_buffer': 10,
@@ -339,7 +367,9 @@ class Project(object):
                 'fat_step': 750,
                 'close_dip': -999,
                 'use_interpolations': True,
-                'use_fat': True
+                'use_fat': True,
+                'use_roi_clip': False,
+                'roi_clip_path':''
             }
 
         # And copy in any new settings from the user
@@ -357,7 +387,8 @@ class Project(object):
                   'run_flags': self.run_flags}
         self.config = Config(out_dir, overwrite, self.geology_file,
                              self.fault_file, self.fold_file,
-                             self.structure_file, self.mindep_file, bbox_3d,
+                             self.structure_file, self.mindep_file, self.section_files,self.drillhole_file, 
+                             self.dtb_grid_file,self.cover_map_file,bbox_3d,
                              polygon, step_out, dtm_crs, proj_crs, self.local,
                              self.quiet, self.loopFilename, self.c_l, **kwargs)
 
@@ -452,7 +483,7 @@ class Project(object):
             self.config.join_features()
             pbar.update(10)
 
-            self.config.calc_depth_grid(self.run_flags['dtb'])
+            self.config.calc_depth_grid(self.workflow['cover_map'])
             pbar.update(10)
 
             self.config.export_orientations(
@@ -473,11 +504,9 @@ class Project(object):
                                         self.run_flags['contact_decimate'])
             pbar.update(20)
 
-            # Seismic section is in the hamersely model area
+            # Seismic section 
             if (self.workflow['seismic_section']):
-                self.config.extract_section_features(seismic_line_file="",
-                                                     seismic_bbox_file="",
-                                                     seismic_interp_file="")
+                self.config.extract_section_features(self.section_files)
 
             if self.workflow["contact_dips"]:
                 self.config.propagate_contact_dips(
@@ -492,14 +521,17 @@ class Project(object):
                 self.config.create_fold_axial_trace_points(
                     self.run_flags['fold_decimate'], self.run_flags['fat_step'], self.run_flags['close_dip'])
 
-            # Prepocess model inputs
+            if (self.workflow['drillholes']):
+                self.config.extract_drillholes(self,self.drillhole_file)
+
+            # Preprocess model inputs
             inputs = ('')
             if (self.workflow['model_engine'] == 'geomodeller'):
                 inputs = ('invented_orientations', 'intrusive_orientations',
                           'fat_orientations', 'fault_tip_contacts',
                           'contact_orientations')
             elif (self.workflow['model_engine'] == 'loopstructural'):
-                inputs = ('invented_orientations', 'fat_orientations',
+                inputs = ('invented_orientations', 'fat_orientations','intrusive_orientations',
                           'contact_orientations')
             elif (self.workflow['model_engine'] == 'gempy'):
                 inputs = ('invented_orientations', 'interpolated_orientations',
@@ -513,7 +545,13 @@ class Project(object):
 
             self.config.save_cmap()
 
-            self.config.update_projectfile()
+            # Combine multiple outputs into single graph
+
+            point_data=combine_point_data(self.config.output_path)
+            Gloop=Topology.make_Loop_graph(self.config.tmp_path,self.config.output_path,self.run_flags['fault_orientation_clusters'],self.run_flags['fault_length_clusters'],point_data)
+            nx.write_gml(Gloop, os.path.join(self.config.output_path,'loop.gml'))
+            Topology.colour_Loop_graph(self.config.output_path)
+            #self.config.update_projectfile()
             self.config.export_png()
 
         disable_quiet_mode()

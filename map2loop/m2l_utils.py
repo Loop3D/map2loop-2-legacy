@@ -317,8 +317,9 @@ def get_dtm_topography_org(path_out, minlong, maxlong, minlat, maxlat):
 
 def get_local_dtm(dtm_file, geotif_file, dst_crs, bbox):
     # get project extent
-    y_point_list = [bbox[1], bbox[1], bbox[3], bbox[3], bbox[3]]
-    x_point_list = [bbox[0], bbox[2], bbox[2], bbox[0], bbox[0]]
+    outstep=500 # to ensure all of dtm is availabel after clpping
+    y_point_list = [bbox[1]-outstep, bbox[1]-outstep, bbox[3]+outstep, bbox[3]+outstep, bbox[3]+outstep]
+    x_point_list = [bbox[0]-outstep, bbox[2]+outstep, bbox[2]+outstep, bbox[0]-outstep, bbox[0]-outstep]
     bbox_geom = Polygon(zip(x_point_list, y_point_list))
     # shapes = Polygon(zip(x_point_list, y_point_list)) # this should require to pass CRS along
     mbbox = gpd.GeoDataFrame(index=[0], crs=dst_crs, geometry=[bbox_geom])
@@ -752,6 +753,11 @@ def dircos2ddd(l, m, n):
     else:
         dipdir = 90
     dip = 90-degrees(asin(n))
+    if(dip>90):
+        dip=180-dip
+        dipdir=dipdir+180
+    dipdir=dipdir%360
+
     return(dip, dipdir)
 
 ####################################################
@@ -874,9 +880,8 @@ def plot_bedding_stereonets(orientations_clean, geology, c_l, quiet):
         text = ax.text(2.2, 1.37, "All data", color='b')
         plt.show()
     group_girdle = {}
-
+ 
     for gp in groups:
-
         all_orientations = orientations[orientations[c_l['g']] == gp]
         if(len(all_orientations) == 1):
             print("----------------------------------------------------------------------------------------------------------------------")
