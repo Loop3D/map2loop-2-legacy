@@ -5,11 +5,11 @@ import sys
 import os
 
 
-def process(package):
+def process(python_version):
     try:
 
-        command = 'conda build --py 3.6 --py 3.7 --py 3.8 --py 3.9 {}'.format(
-            package)
+        command = 'conda build --py {} .'.format(
+            python_version)
         p = Popen(
             command.split(), stdin=PIPE, stdout=PIPE, stderr=PIPE)
     except Exception as e:
@@ -25,10 +25,13 @@ def build(packages):
             sys.exit(
                 "Make sure each package directory is at the same level as this script.")
 
-    print("Building " + " ".join(packages))
+    python_versions = [3.6, 3.7, 3.8, 3.9]
+    print("Building " + " ".join(packages),
+          "for python versions {}".format(python_versions))
+
     with ThreadPoolExecutor(15) as executor:
         output = list(
-            tqdm.tqdm(executor.map(process, packages), total=len(packages)))
+            tqdm.tqdm(executor.map(process, python_versions), total=len(packages)))
 
         for message in output:
             lines = message.split('\\n')
@@ -79,4 +82,4 @@ if __name__ == "__main__":
                               [:-2]) + '/conda-bld/'
 
     build(packages)
-    upload(root_buildpath)
+    # upload(root_buildpath)

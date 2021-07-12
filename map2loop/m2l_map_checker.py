@@ -2,12 +2,12 @@ import os
 import sys
 import geopandas as gpd
 from shapely.geometry import LineString, Polygon, MultiLineString
-from map2loop import m2l_utils
+from . import m2l_utils
 import warnings
 import numpy as np
 import pandas as pd
 from math import sqrt
-from map2loop.m2l_utils import print
+from .m2l_utils import print
 from shapely.wkt import loads
 import re
 from osgeo import ogr
@@ -320,6 +320,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                         else:
                             lengths.append(0)
                         #print(flt)
+
             faults_explode['f_length'] = lengths
             faults_explode = faults_explode[faults_explode['f_length'] > 500]
 
@@ -357,7 +358,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
         except Exception as e:
             m2l_warnings.append('no mindeps for analysis')
-            mindeps=0
+            mindeps = 0
 
         else:
             mindeps = mindeps.replace(r'^\s+$', np.nan, regex=True)
@@ -433,13 +434,13 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                 warnings.warn('Overlaps between geology polygons, consider editing geology layer or rounding vertices')
                 print(geol_overlaps)
                 #geol_overlaps.to_file(os.path.join(tmp_path,'geology_overlaps.shp'))
+
             else:
                 print("No overlaps between geology polygons")
             """
             geol_clip.crs = dst_crs
-            geol_file = os.path.join(tmp_path,'geol_clip.shp')
+            geol_file = os.path.join(tmp_path, 'geol_clip.shp')
             geol_clip.to_file(geol_file)
-
 
         if(len(orientations) > 0):
             structure_file = os.path.join(tmp_path, 'structure_clip.shp')
@@ -448,7 +449,6 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             orientations[c_l['d']] = pd.to_numeric(orientations[c_l['d']])
 
             orientations.to_file(structure_file)
-
 
         try:
             if(len(mindeps) > 0):
@@ -557,17 +557,18 @@ def round_vertices(layer_file, precision, output_file):
     layer_file.geometry = layer_file.geometry.apply(
         lambda x: loads(re.sub(simpledec, mround, x.wkt)))
     layer_file.to_file(output_file)
-    print("rounded file written to ",output_file)
-    #https://gis.stackexchange.com/questions/321518/rounding-coordinates-to-5-decimals-in-geopandas
+    print("rounded file written to ", output_file)
+    # https://gis.stackexchange.com/questions/321518/rounding-coordinates-to-5-decimals-in-geopandas
+
 
 def densify(geom):
     wkt = geom.wkt  # Get wkt
-    geom = ogr.CreateGeometryFromWkt(wkt) 
-    geom.Segmentize(spacing)  #Modify the geometry such it has no segment longer than the given (maximum) length.
+    geom = ogr.CreateGeometryFromWkt(wkt)
+    # Modify the geometry such it has no segment longer than the given (maximum) length.
+    geom.Segmentize(spacing)
     wkt2 = geom.ExportToWkt()
     new = loads(wkt2)
     return new
 
-#spacing=500
+# spacing=500
 #shapefile['geometry'] = shapefile['geometry'].map(densify)
-

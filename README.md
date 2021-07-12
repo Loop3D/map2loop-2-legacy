@@ -63,7 +63,7 @@ Fair warning, we recommend conda to almost everyone. With great software develop
    docker exec -it <container_NAMEorID> bash
    # Probably -> docker exec -it  map2loop-2_dev_1 bash
    ```
-
+ 
 ## Usage
 
 Our notebooks cover use cases in more detail, but here is an example of processing Loop's South Australia remote geospatial data in just 20 lines of Python.
