@@ -620,11 +620,7 @@ def save_contacts_with_faults_removed(path_fault, path_out, dist_buffer, ls_dict
 #########################################
 
 
-<<<<<<< july2021
 def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fault_decimate, fault_min_len, fault_dip_var):
-=======
-def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fault_decimate, fault_min_len, fault_dip):
->>>>>>> master
 
     f = open(os.path.join(output_path, 'faults.csv'), "w")
     f.write("X,Y,Z,formation\n")
@@ -729,14 +725,8 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
 
                         # if(flt[c_l['o']] == '-1'):
                         #print(flt[c_l['o']],  int(flt[c_l['fdip']]), c_l['fdipnull'],str(flt[c_l['fdipest']]))
-<<<<<<< july2021
                         fault_dip=90.0
                         if( int(flt[c_l['fdip']]) == int(c_l['fdipnull'])):  # null specifc dip defined
-=======
-
-                        # null specifc dip defined
-                        if(int(flt[c_l['fdip']]) == int(c_l['fdipnull'])):
->>>>>>> master
                             # dip estimate defined
                             if(not str(flt[c_l['fdipest']]) == '-999'):
                                 i = 0
@@ -755,11 +745,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                                     fault_dip = fault_dip_var
                         else:
                            # specific dip defined
-<<<<<<< july2021
-                            fault_dip = flt[c_l['fdip']]
-=======
                             fault_dip = int(flt[c_l['fdip']])
->>>>>>> master
 
                         #print(c_l['fdipdir_flag'] ,str(flt[c_l['fdipdir']]), flt[c_l['fdip']] , c_l['fdipnull'])
                         # numeric dip direction defined
@@ -3042,7 +3028,7 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
 # Save out dip info along basal contacts, dip defined, dip direction normal to local vector
 ##########################################################
 def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_path, output_path, dtm, dtb,
-                                         dtb_null, cover_map, contact_decimate, c_l, contact_dip, dip_grid, spacing, bbox):
+                                         dtb_null, cover_map, contact_decimate, c_l, contact_dip, dip_grid, spacing, bbox,polarity_grid):
 
     interpolated_combo_file = os.path.join(tmp_path, 'combo_full.csv')
     # orientations = pd.read_csv(interpolated_combo_file)
@@ -3069,39 +3055,39 @@ def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_
                             midy = lasty+((line.coords[0][1]-lasty)/2)
                             lastx = line.coords[0][0]
                             lasty = line.coords[0][1]
-
-                            if(first_in_line):
-                                found_code = ''
-                                for indx, apoly in geol_clip.iterrows():
-                                    testpt = Point((midx-m, midy+l))
-                                    if(apoly.geometry.contains(testpt)):
-                                        found_code = apoly[c_l['c']]
-                                        break
-                                if(not found_code == ''):
-                                    polarity = 0
-                                else:
-                                    polarity = 1
-                                first_in_line = False
+                            valid_polygons=geol_clip[geol_clip[c_l['c']].str.replace(' ','_').replace("-", "_")==contact['unitname']]
+                            #if(first_in_line):
+                            #found_code = None
+                            #print(contact['unitname'],len(geol_clip),len(valid_polygons))
+                            #for indx, apoly in valid_polygons.iterrows():
+                            #    testpt = Point((midx-m, midy+l))
+                            #    if(apoly.geometry.contains(testpt)):
+                            #        found_code = apoly[c_l['c']]
+                            #        break
+                            #print("found_code=",found_code)
+                            #first_in_line = False
 
                             dip, dipdir = m2l_utils.dircos2ddd(-m, l, 0)
 
-                            if(polarity == 1):
+                            r = int((midy-bbox[1])/spacing)
+                            c = int((midx-bbox[0])/spacing)
+                            if(polarity_grid[r, c]<0):
                                 dipdir = fmod(dipdir+180, 360)
+                                polarity=0
+                            else:
+                                polarity=1
 
                             locations = [(midx, midy)]
 
                             height = m2l_utils.value_from_dtm_dtb(
                                 dtm, dtb, dtb_null, cover_map, locations)
                             if(contact_dip == -999):
-
-                                r = int((midy-bbox[1])/spacing)
-                                c = int((midx-bbox[0])/spacing)
                                 dip = dip_grid[r, c]
                             else:
                                 dip = contact_dip
                             if(dip != -999):
                                 ostr = "{},{},{},{},{},{},{}\n"\
-                                    .format(midx, midy, height, dipdir, str(dip), '1', str(contact[c_l['c']]).replace(" ", "_").replace("-", "_"))
+                                    .format(midx, midy, height, dipdir, str(dip), polarity, str(contact[c_l['c']]).replace(" ", "_").replace("-", "_"))
                                 # ostr = str(midx)+','+str(midy)+','+str(height)+','+str(dipdir)+','+str(contact_dip)+',1,'+str(contact[c_l['c']]).replace(" ","_").replace("-","_")+'\n'
                                 f.write(ostr)
 

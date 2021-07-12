@@ -720,13 +720,15 @@ class Config(object):
         dip_dir_grid = np.ones((y, x))
         dip_dir_grid = dip_dir_grid * -999
         contact_grid = np.ones((y, x))
-        contact_grid = dip_dir_grid * -999
+        contact_grid = dip_dir_grid * -999        
+        polarity_grid = np.ones((y, x))
+        polarity_grid = polarity_grid * -999
         for row in combo_interp:
             r = int((row[1] - bbox[1]) / self.spacing)
             c = int((row[0] - bbox[0]) / self.spacing)
             dip_grid[r, c] = float(row[5])
             dip_dir_grid[r, c] = float(row[6])
-
+            polarity_grid[r,c]=float(row[4])
         for row in contact_interp:
             r = int((row[1] - bbox[1]) / self.spacing)
             c = int((row[0] - bbox[0]) / self.spacing)
@@ -734,6 +736,7 @@ class Config(object):
 
         self.dip_grid = dip_grid
         self.dip_dir_grid = dip_dir_grid
+        self.polarity_grid = polarity_grid
 
         if self.quiet == 'None':
             print('interpolated dips')
@@ -875,7 +878,7 @@ class Config(object):
             contacts, orientations, self.geol_clip, self.tmp_path,
             self.output_path, self.dtm, self.dtb, self.dtb_null, False,
             contact_orientation_decimate, self.c_l, contact_dip, self.dip_grid,
-            self.spacing, self.bbox)
+            self.spacing, self.bbox,self.polarity_grid)
 
     def calc_thickness(self, contact_decimate, null_scheme, thickness_buffer,
                        max_thickness_allowed, cl):

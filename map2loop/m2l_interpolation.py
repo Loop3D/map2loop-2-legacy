@@ -1480,15 +1480,15 @@ def interpolate_orientation_grid(structures, calc, xcoords, ycoords, c_l):
         else:
             dipdir[i] = a_pt[1][c_l['dd']]
 
-        # this code is in the wrong place, it needs its own loop after l,m,n calculated...
-        if(structures.iloc[i][c_l['bo']] == c_l['btype']):
-            l[i] = -l[i]
-            m[i] = -m[i]
-            n[i] = -n[i]
         i = i+1
 
     for i in range(0, npts):
         l[i], m[i], n[i] = m2l_utils.ddd2dircos(dip[i], dipdir[i])
+        # this code is now in the right place?
+        if(structures.iloc[i][c_l['bo']] == c_l['btype']):
+            l[i] = -l[i]
+            m[i] = -m[i]
+            n[i] = -n[i]
 
     ZIl, ZIm, ZIn = call_interpolator_grid(
         calc, x, y, l, m, n, xcoords, ycoords)
