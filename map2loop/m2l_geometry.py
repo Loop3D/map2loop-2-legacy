@@ -3324,3 +3324,82 @@ def fault_filter(output_path,filter,cutoff,relationship,median_cutoff):
                     nodes_use.append(v)
     
     return(nodes_ignore)
+
+def lmn_from_line_dip(x1,y1,z1,x2,y2,z2,dip):
+    """[Calculate direction cosines of a plane defined by a 3D line defined by the local contact orientationa and a known dip]
+       [returns direction cosines of 2 possible planes or -999s if no solution possible]
+
+    Args:
+        x1 ([float]): [x position of start of contact 3D line segment]
+        y1 ([float]): [y position of start of contact 3D line segment]
+        z1 ([float]): [z position of start of contact 3D line segment]
+        x2 ([float]): [x position of start of contact 3D line segment]
+        y2 ([float]): [y position of start of contact 3D line segment]
+        z2 ([float]): [z position of start of contact 3D line segment]
+        dip ([float]): [estimated dip of plane]
+    Returns:
+        l1 ([float]): [solution 1 of l direction cosine of plane that contains 3D line segment and has a dip of dip with horizontal]
+        m1 ([float]): [solution 1 of m direction cosine of plane that contains 3D line segment and has a dip of dip with horizontal]
+        n1 ([float]): [solution 1 of n direction cosine of plane that contains 3D line segment and has a dip of dip with horizontal]
+        l2 ([float]): [solution 2 of l direction cosine of plane that contains 3D line segment and has a dip of dip with horizontal]
+        m2 ([float]): [solution 2 of m direction cosine of plane that contains 3D line segment and has a dip of dip with horizontal]
+        n2 ([float]): [solution 2 of n direction cosine of plane that contains 3D line segment and has a dip of dip with horizontal]
+     """
+    C=cos(radians(dip))
+    Z1=-99
+    while(Z1==-99 and dip <91):
+        try:
+            Z1 = (C**2*(-(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1)) 
+                  - sqrt(C**4*(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1)**2 
+                  - 4*C**2*(x1**2 - 2*x1*x2 + x2**2 + y1**2 - 2*y1*y2 + y2**2)*(C**2*abs(x2*y1 - x1*y2)**2 + C**2*x1**2*z2**2 - 2*C**2*x1*x2*z1*z2 
+                  + C**2*x2**2*z1**2 + C**2*y1**2*z2**2 - 2*C**2*y1*y2*z1*z2 + C**2*y2**2*z1**2 - x1**2*y2**2 + 2*x1*x2*y1*y2 
+                  - x2**2*y1**2)))/(2*C**2*(x1**2 - 2*x1*x2 + x2**2 + y1**2 - 2*y1*y2 + y2**2))
+        except:
+            dip=dip+1
+            C=cos(radians(dip))
+    if(Z1==-99):
+        print("lmn_from_line_dip: no solution")
+        return(-999,-999,-999,-999,-999,-999)
+    Z2=-99
+    while(Z2==-99 and dip <91):
+        try:    
+            Z2 = (sqrt(C**4*(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1)**2 
+                 - 4*C**2*(x1**2 - 2*x1*x2 + x2**2 + y1**2 - 2*y1*y2 + y2**2)*(C**2*abs(x2*y1 - x1*y2)**2 + C**2*x1**2*z2**2 - 2*C**2*x1*x2*z1*z2 
+                 + C**2*x2**2*z1**2 + C**2*y1**2*z2**2 - 2*C**2*y1*y2*z1*z2 + C**2*y2**2*z1**2 - x1**2*y2**2 + 2*x1*x2*y1*y2 - x2**2*y1**2)) 
+                 - C**2*(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1))/(2*C**2*(x1**2 
+                 - 2*x1*x2 + x2**2 + y1**2 - 2*y1*y2 + y2**2))
+        except:
+            dip=dip+1
+            C=cos(radians(dip))
+    if(Z2==-99):
+        print("lmn_from_line_dip: no solution")
+        return(-999,-999,-999,-999,-999,-999)
+
+
+    vector1 = [x2 - x1, y2 - y1, z2 - z1]
+    vector2 = [0 - x1, 0 - y1, Z1 - z1]
+    cross_product = [vector1[1] * vector2[2] - vector1[2] * vector2[1], 
+                     -1 * vector1[0] * vector2[2] - vector1[2] * vector2[0], 
+                     vector1[0] * vector2[1] - vector1[1] * vector2[0]]
+    d = cross_product[0] * x1 - cross_product[1] * y1 + cross_product[2] * z1
+
+    a = cross_product[0]
+    b = cross_product[1]
+    c = cross_product[2]
+    d = d
+    l1,m1,n1=a/sqrt(a**2+b**2+c**2),b/sqrt(a**2+b**2+c**2),c/sqrt(a**2+b**2+c**2)
+
+    vector1 = [x2 - x1, y2 - y1, z2 - z1]
+    vector2 = [0 - x1, 0 - y1, Z2 - z1]
+    cross_product = [vector1[1] * vector2[2] - vector1[2] * vector2[1], 
+                    -1 * vector1[0] * vector2[2] - vector1[2] * vector2[0], 
+                    vector1[0] * vector2[1] - vector1[1] * vector2[0]]
+    d = cross_product[0] * x1 - cross_product[1] * y1 + cross_product[2] * z1
+
+    a = cross_product[0]
+    b = cross_product[1]
+    c = cross_product[2]
+    d = d
+    l2,m2,n2=a/sqrt(a**2+b**2+c**2),b/sqrt(a**2+b**2+c**2),c/sqrt(a**2+b**2+c**2)
+
+    return(l1,m1,n1,l2,m2,n2)
