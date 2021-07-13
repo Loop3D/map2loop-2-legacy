@@ -7,7 +7,7 @@ from pandas import DataFrame
 from geopandas import GeoDataFrame
 import geopandas as gpd
 import pandas as pd
-from math import acos, sqrt, cos, sin, degrees, radians, fabs, atan2, fmod, isnan, atan
+from math import acos, sqrt, cos, sin, degrees, radians, fabs, atan2, fmod, isnan, atan, asin
 from . import m2l_utils
 from .m2l_utils import print
 from . import m2l_interpolation
@@ -3053,9 +3053,7 @@ def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_
                                 lastx, lasty, line.coords[0][0], line.coords[0][1])
                             midx = lastx+((line.coords[0][0]-lastx)/2)
                             midy = lasty+((line.coords[0][1]-lasty)/2)
-                            lastx = line.coords[0][0]
-                            lasty = line.coords[0][1]
-                            valid_polygons=geol_clip[geol_clip[c_l['c']].str.replace(' ','_').replace("-", "_")==contact['unitname']]
+                            #valid_polygons=geol_clip[geol_clip[c_l['c']].str.replace(' ','_').replace("-", "_")==contact['unitname']]
                             #if(first_in_line):
                             #found_code = None
                             #print(contact['unitname'],len(geol_clip),len(valid_polygons))
@@ -3066,7 +3064,6 @@ def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_
                             #        break
                             #print("found_code=",found_code)
                             #first_in_line = False
-
                             dip, dipdir = m2l_utils.dircos2ddd(-m, l, 0)
 
                             r = int((midy-bbox[1])/spacing)
@@ -3083,13 +3080,53 @@ def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_
                                 dtm, dtb, dtb_null, cover_map, locations)
                             if(contact_dip == -999):
                                 dip = dip_grid[r, c]
+                                if(not dip==-999):  
+                                    if(dip>90):
+                                        dip=180-dip                        
+                                    locations1=[(lastx,lasty)]
+                                    height1 = m2l_utils.value_from_dtm_dtb(
+                                        dtm, dtb, dtb_null, cover_map, locations1)                  
+                                    locations2=[(line.coords[0][0], line.coords[0][1])]                  
+                                    height2 = m2l_utils.value_from_dtm_dtb(
+                                        dtm, dtb, dtb_null, cover_map, locations2) 
+                                    l1,m1,n1,l2,m2,n2=lmn_from_line_dip(lastx,lasty,height1,line.coords[0][0], line.coords[0][1],height2,dip)
+                                    if(not l1==-999):
+                                        if(polarity==0):
+                                            dotproduct1=acos(m*l1-l*m1)
+                                            dotproduct2=acos(m*l2-l*m2)
+                                        else:
+                                            dotproduct1=acos(-(m*l1-l*m1))
+                                            dotproduct2=acos(-(m*l2-l*m2))
+                                        if(dotproduct1<dotproduct2):
+                                            dip=90-degrees(asin(n1))
+                                            lc=l1/sqrt(l1**2+m1**2)
+                                            mc=m1/sqrt(l1**2+m1**2)
+
+                                        else:
+                                            dip=90-degrees(asin(n2))
+                                            lc=l2/sqrt(l2**2+m2**2)
+                                            mc=m2/sqrt(l2**2+m2**2)
+                                        d,dipdir=m2l_utils.dircos2ddd(lc, mc, 0)
+                                        if(dip>90):
+                                            dip=180-dip
+                                        #print("orig_fdip=",dip_grid[r, c], "new_dips=",dip,90-degrees(asin(n1)),90-degrees(asin(n2)))
+                                    else:
+                                        dip=dip_grid[r, c]
+                                else:
+                                    dip=90
+
+                                
+                                
                             else:
                                 dip = contact_dip
+                                
                             if(dip != -999):
                                 ostr = "{},{},{},{},{},{},{}\n"\
                                     .format(midx, midy, height, dipdir, str(dip), polarity, str(contact[c_l['c']]).replace(" ", "_").replace("-", "_"))
                                 # ostr = str(midx)+','+str(midy)+','+str(height)+','+str(dipdir)+','+str(contact_dip)+',1,'+str(contact[c_l['c']]).replace(" ","_").replace("-","_")+'\n'
                                 f.write(ostr)
+                            lastx = line.coords[0][0]
+                            lasty = line.coords[0][1]
 
                     else:
                         lastx = line.coords[0][0]
@@ -3346,12 +3383,20 @@ def lmn_from_line_dip(x1,y1,z1,x2,y2,z2,dip):
         m2 ([float]): [solution 2 of m direction cosine of plane that contains 3D line segment and has a dip of dip with horizontal]
         n2 ([float]): [solution 2 of n direction cosine of plane that contains 3D line segment and has a dip of dip with horizontal]
      """
+    x1=float(x1)
+    y1=float(y1)
+    z1=float(z1)
+    x2=float(x2)
+    y2=float(y2)
+    z2=float(z2)
+
+    dip_orig=dip
     C=cos(radians(dip))
     Z1=-99
     while(Z1==-99 and dip <91):
         try:
             Z1 = (C**2*(-(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1)) 
-                  - sqrt(C**4*(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1)**2 
+                  - sqrt(C**4.0*(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1)**2 
                   - 4*C**2*(x1**2 - 2*x1*x2 + x2**2 + y1**2 - 2*y1*y2 + y2**2)*(C**2*abs(x2*y1 - x1*y2)**2 + C**2*x1**2*z2**2 - 2*C**2*x1*x2*z1*z2 
                   + C**2*x2**2*z1**2 + C**2*y1**2*z2**2 - 2*C**2*y1*y2*z1*z2 + C**2*y2**2*z1**2 - x1**2*y2**2 + 2*x1*x2*y1*y2 
                   - x2**2*y1**2)))/(2*C**2*(x1**2 - 2*x1*x2 + x2**2 + y1**2 - 2*y1*y2 + y2**2))
@@ -3359,12 +3404,14 @@ def lmn_from_line_dip(x1,y1,z1,x2,y2,z2,dip):
             dip=dip+1
             C=cos(radians(dip))
     if(Z1==-99):
-        print("lmn_from_line_dip: no solution")
+        print("no solution",x1,y1,z1,x2,y2,z2,dip_orig)
         return(-999,-999,-999,-999,-999,-999)
+    
+    C=cos(radians(dip))
     Z2=-99
     while(Z2==-99 and dip <91):
         try:    
-            Z2 = (sqrt(C**4*(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1)**2 
+            Z2 = (sqrt(C**4.0*(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1)**2 
                  - 4*C**2*(x1**2 - 2*x1*x2 + x2**2 + y1**2 - 2*y1*y2 + y2**2)*(C**2*abs(x2*y1 - x1*y2)**2 + C**2*x1**2*z2**2 - 2*C**2*x1*x2*z1*z2 
                  + C**2*x2**2*z1**2 + C**2*y1**2*z2**2 - 2*C**2*y1*y2*z1*z2 + C**2*y2**2*z1**2 - x1**2*y2**2 + 2*x1*x2*y1*y2 - x2**2*y1**2)) 
                  - C**2*(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1))/(2*C**2*(x1**2 
@@ -3373,7 +3420,7 @@ def lmn_from_line_dip(x1,y1,z1,x2,y2,z2,dip):
             dip=dip+1
             C=cos(radians(dip))
     if(Z2==-99):
-        print("lmn_from_line_dip: no solution")
+        print("no solution",x1,y1,z1,x2,y2,z2,dip_orig)
         return(-999,-999,-999,-999,-999,-999)
 
 
