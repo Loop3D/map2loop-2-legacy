@@ -3035,7 +3035,7 @@ def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_
 
     f = open(os.path.join(output_path, 'contact_orientations.csv'), 'w')
     f.write("X,Y,Z,azimuth,dip,polarity,formation\n")
-    for index, contact in contacts.iterrows():
+    for index, contact in contacts[:-1].iterrows():
         i = 0
         # print(contact[c_l['c']])
         first = True
@@ -3119,8 +3119,8 @@ def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_
                                 
                             else:
                                 dip = contact_dip
-                                
-                            if(dip != -999):
+                            gap=m2l_utils.ptsdist(lastx, lasty, line.coords[0][0], line.coords[0][1])    
+                            if(dip != -999 and gap<2000):
                                 ostr = "{},{},{},{},{},{},{}\n"\
                                     .format(midx, midy, height, dipdir, str(dip), polarity, str(contact[c_l['c']]).replace(" ", "_").replace("-", "_"))
                                 # ostr = str(midx)+','+str(midy)+','+str(height)+','+str(dipdir)+','+str(contact_dip)+',1,'+str(contact[c_l['c']]).replace(" ","_").replace("-","_")+'\n'
@@ -3451,3 +3451,23 @@ def lmn_from_line_dip(x1,y1,z1,x2,y2,z2,dip):
     l2,m2,n2=a/sqrt(a**2+b**2+c**2),b/sqrt(a**2+b**2+c**2),c/sqrt(a**2+b**2+c**2)
 
     return(l1,m1,n1,l2,m2,n2)
+
+def update_fault_layer(tmp_path,output_path,c_l):
+    faults=gpd.read_file(tmp_path+'/faults_clip.shp')
+    faults['name']='Fault_'+faults[c_l['o']]
+    #display(faults)
+    Gloop=nx.read_gml(output_path+'/loop.gml')
+    fnodes_all=[]
+    for v in Gloop.nodes():
+        if(Gloop.nodes[v]['ntype']=='fault'):
+            fnodes_all.append(v)
+    fault_nodes=Gloop.subgraph(fnodes_all)
+    fault_data=pd.DataFrame.from_dict(dict(fault_nodes.nodes(data=True)), orient='index')
+    fault_data['name']=fault_data.index
+    columns={'ntype': 'ntype', 'Xmean': 'Xmean', 'Ymean': 'Ymean', 'Zmean': 'Zmean', 'HorizontalRadius': 'HzRad', 'VerticalRadius': 'Vrad', 'InfluenceDistance': 'NDist', 
+             'IncLength': 'IncLength', 'f_colour': 'colour', 'Dip': 'Dip_1', 'DipDirection': 'DipDir', 'DipPolarity': 'Polarity', 
+             'OrientationCluster': 'OCluster', 'LengthCluster': 'LCluster', 'ClosenessCentrality': 'CCentral', 'BetweennessCentrality':'BCentral'}
+    fault_data=fault_data.rename(columns =columns, inplace = False)
+    new_faults=faults.merge(fault_data,on='name')
+    new_faults.crs=faults.crs
+    new_faults.to_file(tmp_path+'/faults_clip_data.shp')
