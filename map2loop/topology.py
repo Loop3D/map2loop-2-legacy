@@ -982,15 +982,15 @@ class Topology(object):
 
         sg2 = set(super_group['Super_Group'])
         super_groups = []
+        if(cover_map):
+            super_groups.append(['cover'])
         for s in sg2:
             temp = []
             for ind, sg in super_group.iterrows():
                 if(s == sg['Super_Group']):
                     temp.append(ind)
             super_groups.append(temp)
-        if(cover_map):
-            super_groups.append(['cover'])
-
+ 
         f = open(os.path.join(tmp_path, 'super_groups.csv'), 'w')
         for sg in super_groups:
             for s in sg:
