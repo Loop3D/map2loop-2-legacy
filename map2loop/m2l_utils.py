@@ -186,8 +186,11 @@ def value_from_dtm_dtb(dtm, dtb, dtb_null, cover_map, locations):
                             "[", "").replace("]", ""))
                 else:
                     return(-999)
-            value_dtb = bilinear_interpolation(
-                delx, dely, zvals[2], zvals[3], zvals[0], zvals[1])
+            if(zvals[0]<-10000 or zvals[1]<-10000 or zvals[2]<-10000 or zvals[3]<-10000  ):
+                value_dtb=0
+            else:
+                value_dtb = bilinear_interpolation(
+                    delx, dely, zvals[2], zvals[3], zvals[0], zvals[1])
 
             return(str(value_dtm-value_dtb))
         else:

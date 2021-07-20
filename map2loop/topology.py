@@ -908,7 +908,7 @@ class Topology(object):
 
         gp_fault_rel.to_csv(gp_fault_rel_path)
 
-    def super_groups_and_groups(group_girdle, tmp_path, misorientation, c_l):
+    def super_groups_and_groups(group_girdle, tmp_path, misorientation, c_l,cover_map):
         group_girdle = pd.DataFrame.from_dict(group_girdle, orient='index')
         group_girdle.columns = ['plunge', 'bearing', 'num orientations']
         group_girdle.sort_values(
@@ -977,6 +977,8 @@ class Topology(object):
         for ind, sg in super_group.iterrows():
             clean = ind.replace(" ", "_").replace("-", "_")
             use_gcode3.append(clean)
+        if(cover_map):
+            use_gcode3.append('cover')
 
         sg2 = set(super_group['Super_Group'])
         super_groups = []
@@ -986,6 +988,8 @@ class Topology(object):
                 if(s == sg['Super_Group']):
                     temp.append(ind)
             super_groups.append(temp)
+        if(cover_map):
+            super_groups.append(['cover'])
 
         f = open(os.path.join(tmp_path, 'super_groups.csv'), 'w')
         for sg in super_groups:

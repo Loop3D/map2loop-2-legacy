@@ -173,7 +173,9 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                         m2l_warnings.append(''+str(nans)+' NaN/blank found in column "'+str(
                             c_l[code])+'" of geology file, replacing with 0')
                         geology[c_l[code]].fillna("0", inplace=True)
+            print('drift_prefix',drift_prefix)
             for drift in drift_prefix:
+                print('drift',drift)
                 geology = geology[~geology[c_l['u']].str.startswith(drift)]
 
             show_metadata(geology, "geology layer")
@@ -561,7 +563,7 @@ def round_vertices(layer_file, precision, output_file):
     # https://gis.stackexchange.com/questions/321518/rounding-coordinates-to-5-decimals-in-geopandas
 
 
-def densify(geom):
+def densify(geom,spacing):
     wkt = geom.wkt  # Get wkt
     geom = ogr.CreateGeometryFromWkt(wkt)
     # Modify the geometry such it has no segment longer than the given (maximum) length.

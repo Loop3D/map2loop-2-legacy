@@ -196,7 +196,9 @@ class Project(object):
                 'polarity': False,
                 'strat_offset': True,
                 'contact_dips': True,
-                'drillholes': False
+                'drillholes': False,
+                'cover_contacts':True,
+                'cover_orientations':True
             })
         elif (workflow['model_engine'] == 'gempy'):
             workflow.update({
@@ -487,21 +489,21 @@ class Project(object):
             pbar.update(10)
 
             self.config.export_orientations(
-                self.run_flags['orientation_decimate'])
+                self.run_flags['orientation_decimate'],self.workflow['cover_map'])
             pbar.update(10)
             self.config.export_contacts(
-                self.run_flags['contact_decimate'], self.run_flags['intrusion_mode'])
+                self.run_flags['contact_decimate'], self.run_flags['intrusion_mode'],self.workflow['cover_map'])
             pbar.update(10)
             self.config.test_interpolation(self.run_flags['interpolation_spacing'],
                                            self.run_flags['misorientation'],
-                                           self.run_flags['interpolation_scheme'])
+                                           self.run_flags['interpolation_scheme'],self.workflow['cover_map'])
             pbar.update(10)
 
             # TODO: make all these internal, the config class already has the run_flags dictionary
             self.config.export_faults(self.run_flags['fault_decimate'], self.run_flags['min_fault_length'],
-                                      self.run_flags['fault_dip'])
+                                      self.run_flags['fault_dip'],self.workflow['cover_map'])
             self.config.process_plutons(self.run_flags['pluton_dip'], self.run_flags['pluton_form'], self.run_flags['dist_buffer'],
-                                        self.run_flags['contact_decimate'])
+                                        self.run_flags['contact_decimate'],self.workflow['cover_map'])
             pbar.update(20)
 
             # Seismic section 
@@ -510,16 +512,16 @@ class Project(object):
 
             if self.workflow["contact_dips"]:
                 self.config.propagate_contact_dips(
-                    self.run_flags['contact_dip'], self.run_flags['contact_orientation_decimate'])
+                    self.run_flags['contact_dip'], self.run_flags['contact_orientation_decimate'],self.workflow['cover_map'])
 
             if (self.workflow['formation_thickness']):
                 self.config.calc_thickness(self.run_flags['contact_decimate'], self.run_flags['null_scheme'],
                                            self.run_flags['thickness_buffer'],
-                                           self.run_flags['max_thickness_allowed'], self.c_l)
+                                           self.run_flags['max_thickness_allowed'], self.c_l,self.workflow['cover_map'])
 
             if self.workflow["fold_axial_traces"]:
                 self.config.create_fold_axial_trace_points(
-                    self.run_flags['fold_decimate'], self.run_flags['fat_step'], self.run_flags['close_dip'])
+                    self.run_flags['fold_decimate'], self.run_flags['fat_step'], self.run_flags['close_dip'],self.workflow['cover_map'])
 
             if (self.workflow['drillholes']):
                 self.config.extract_drillholes(self,self.drillhole_file)
@@ -532,7 +534,7 @@ class Project(object):
                           'contact_orientations')
             elif (self.workflow['model_engine'] == 'loopstructural'):
                 inputs = ('invented_orientations', 'fat_orientations','intrusive_orientations',
-                          'contact_orientations')
+                          'contact_orientations','cover_orientations','cover_contacts')
             elif (self.workflow['model_engine'] == 'gempy'):
                 inputs = ('invented_orientations', 'interpolated_orientations',
                           'fat_orientations', 'contact_orientations')
@@ -543,7 +545,7 @@ class Project(object):
                                     self.run_flags['use_fat'])
             pbar.update(10)
 
-            self.config.save_cmap()
+            self.config.save_cmap(self.workflow['cover_map'])
 
             # Combine multiple outputs into single graph
 

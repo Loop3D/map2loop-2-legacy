@@ -1618,6 +1618,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     fas = open(os.path.join(tmp_path, 'all_sorts_clean.csv'), "w")
     fas.write(
         'index,group number,index in group,number in group,code,group,uctype\n')
+
     for a_sort in all_sorts.iterrows():
         if(a_sort[1]['group'] not in no_contacts):
             ostr = "{},{},{},{},{},{},{}\n"\
@@ -1639,7 +1640,9 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     slist=[]
     for ind,unit in all_sorts.iterrows():
 
-        if(c_l['intrusive'] in geol.loc[unit['code'].replace("_"," ")][c_l['r1']] 
+        if(unit['code']=='cover'):
+            slist.append('cover')
+        elif(c_l['intrusive'] in geol.loc[unit['code'].replace("_"," ")][c_l['r1']] 
             and c_l['sill'] not in geol.loc[unit['code'].replace("_"," ")][c_l['ds']]):
             slist.append('intrusion')
         else:
@@ -2819,7 +2822,7 @@ def fault_strat_offset(path_out, c_l, dst_crs, fm_thick_file, all_sorts_file, fa
 def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, bbox, dst_crs, spacing, contact_decimate, use_vector, use_grid):
 
     if(use_grid and use_vector):  # assumes a grid of depth to cover, with a defined null value for no cover, and a vector description of cover limits
-
+        print("use_vector, use_grid",use_vector, use_grid)
         nx = int((bbox[2]-bbox[0])/spacing)
         ny = int((bbox[3]-bbox[1])/spacing)
         x = np.linspace(bbox[0], bbox[2], nx)
@@ -2829,18 +2832,19 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
         df = pd.DataFrame({'X': xi, 'Y': yi})
         df['coords'] = list(zip(df['X'], df['Y']))
         df['coords'] = df['coords'].apply(Point)
+        df['cover']=1
         cover_pts = gpd.GeoDataFrame(df, geometry='coords')
         cover_pts.crs = dst_crs
 
         actual_cover = gpd.sjoin(cover_pts, cover, how="left", op="within")
 
         actual_cover["index_right"] = actual_cover["index_right"].fillna(0)
-
-        allpts = open(os.path.join(output_path, '/cover_grid.csv'), "w")
+        print("df,actual_cover",len(df),len(actual_cover))
+        allpts = open(os.path.join(output_path, 'cover_grid.csv'), "w")
         allpts.write('X,Y,Z,formation\n')
-
+        actual_cover.to_csv('cover.csv')
         for indx, pt in actual_cover.iterrows():
-            if(pt['index_right'] > 0):
+            if(pt['Id'] == 0):
                 locations = [(pt['X'], pt['Y'])]
                 height = m2l_utils.value_from_dtm_dtb(
                     dtm, dtb, dtb_null, cover_map, locations)
@@ -2854,10 +2858,12 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
             coords = extract_poly_coords(cpoly.geometry, 0)
             k = 0
             for pt in coords['exterior_coords']:
-                # decimate to reduce number of points, but also take second and third point of a series               locations = [(pt[0],pt[1])]
+                # decimate to reduce number of points, but also take second and third point of a series               
                 if(m2l_utils.mod_safe(k, contact_decimate) == 0 or k == int((len(coords['exterior_coords'])-1)/2) or k == len(coords['exterior_coords'])-1):
                     if(pt[0] > bbox[0] and pt[0] < bbox[2] and
                             pt[1] > bbox[1] and pt[1] < bbox[3]):
+                        
+                        locations = [(pt[0],pt[1])]
 
                         height = m2l_utils.value_from_dtm_dtb(
                             dtm, dtb, dtb_null, False, locations)
@@ -2870,10 +2876,12 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                 for i in range(0, len(coords['interior_coords']), 2):
                     for pts in coords['interior_coords'][i+1:i+2]:
                         for pt in pts:
-                            # decimate to reduce number of points, but also take second and third point of a series               locations = [(pt[0],pt[1])]
+                            # decimate to reduce number of points, but also take second and third point of a series               
                             if(m2l_utils.mod_safe(k, contact_decimate) == 0 or k == int((len(coords['interior_coords'])-1)/2) or k == len(coords['interior_coords'])-1):
                                 if(pt[0] > bbox[0] and pt[0] < bbox[2] and
                                         pt[1] > bbox[1] and pt[1] < bbox[3]):
+                                    
+                                    locations = [(pt[0],pt[1])]
 
                                     height = m2l_utils.value_from_dtm_dtb(
                                         dtm, dtb, dtb_null, False, locations)
@@ -2885,10 +2893,10 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                 k = k+1
 
         allpts.close()
-        print("cover grid saved out as", os.path.join(
-            output_path, 'cover_grid.csv'))
+        print("cover grid saved out as", os.path.join(output_path, 'cover_grid.csv'))
 
     elif(use_grid and not use_vector):  # assumes a grid of depth to cover, with a defined null value for no cover, but no vector description of cover limits
+        print("use_vector, use_grid",use_vector, use_grid)
 
         nx = int((bbox[2]-bbox[0])/spacing)
         ny = int((bbox[3]-bbox[1])/spacing)
@@ -2906,7 +2914,7 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
         allpts.write('X,Y,Z,formation\n')
 
         for indx, pt in cover_pts.iterrows():
-            if(pt['index_right'] > 0):
+            if(pt['Id'] == 0):
                 locations = [(pt['X'], pt['Y'])]
                 height = m2l_utils.value_from_dtm_dtb(
                     dtm, dtb, dtb_null, cover_map, locations)
@@ -2925,6 +2933,7 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
 
         for indx, cpoly in cover.iterrows():
             # need toignore points outside bbox and make poly os bbox
+
             coords = extract_poly_coords(cpoly.geometry, 0)
             k = 0
             first = True
@@ -2933,7 +2942,8 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                     lastx = pt[0]
                     lasty = pt[1]
                     first = False
-                # decimate to reduce number of points, but also take second and third point of a series               locations = [(pt[0],pt[1])]
+                # decimate to reduce number of points, but also take second and third point of a series               
+                locations = [(pt[0],pt[1])]
                 if(m2l_utils.mod_safe(k, contact_decimate) == 0 or k == int((len(coords['exterior_coords'])-1)/2) or k == len(coords['exterior_coords'])-1):
                     if(pt[0] > bbox[0] and pt[0] < bbox[2] and
                             pt[1] > bbox[1] and pt[1] < bbox[3]):
@@ -2947,14 +2957,19 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
 
                             locations = [(pt[0], pt[1])]
                             height = m2l_utils.value_from_dtm_dtb(
-                                dtm, dtb, dtb_null, False, locations)
+                                dtm, dtb, dtb_null, cover_map, locations)
                             # normal to line segment
                             azimuth = (180+degrees(atan2(lsy, -lsx))) % 360
                             # pt just a bit in/out from line
                             testpx = pt[0]-lsy
                             testpy = pt[1]+lsx
-
-                            if Polygon(cpoly.geometry).contains(Point(testpx, testpy)):
+                            
+                            df = pd.DataFrame({'point': ['apoint'],'X': [testpx],'Y': [testpy]})
+                            gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.X, df.Y))
+                            gdf.crs=dst_crs
+                            point_within = gpd.sjoin(gdf, cover, op='within')
+                            if(len(point_within)>0):
+                                #if Polygon(cpoly.geometry).contains(Point(testpx, testpy)):
                                 azimuth = (azimuth) % 360
                             else:
                                 azimuth = (azimuth-180) % 360
@@ -2973,7 +2988,8 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                                 lastx = pt[0]
                                 lasty = pt[1]
                                 first = False
-                            # decimate to reduce number of points, but also take second and third point of a series               locations = [(pt[0],pt[1])]
+                            # decimate to reduce number of points, but also take second and third point of a series               
+                            locations = [(pt[0],pt[1])]
                             if(m2l_utils.mod_safe(k, contact_decimate) == 0 or k == int((len(coords['interior_coords'])-1)/2) or k == len(coords['interior_coords'])-1):
                                 if(pt[0] > bbox[0] and pt[0] < bbox[2] and
                                         pt[1] > bbox[1] and pt[1] < bbox[3]):
@@ -2990,15 +3006,19 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
 
                                         locations = [(pt[0], pt[1])]
                                         height = m2l_utils.value_from_dtm_dtb(
-                                            dtm, dtb, dtb_null, False, locations)
+                                            dtm, dtb, dtb_null, cover_map, locations)
                                         # normal to line segment
                                         azimuth = (
                                             180+degrees(atan2(lsy, -lsx))) % 360
                                         # pt just a bit in/out from line
                                         testpx = pt[0]-lsy
                                         testpy = pt[1]+lsx
-
-                                        if Polygon(cpoly.geometry).contains(Point(testpx, testpy)):
+                                        df = pd.DataFrame({'point': ['apoint'],'X': [testpx],'Y': [testpy]})
+                                        gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.X, df.Y))
+                                        gdf.crs=dst_crs
+                                        point_within = gpd.sjoin(gdf, cover, op='within')
+                                        if(len(point_within)>0):
+                                            #if Polygon(cpoly.geometry).contains(Point(testpx, testpy)):
                                             azimuth = (azimuth) % 360
                                         else:
                                             azimuth = (azimuth-180) % 360
