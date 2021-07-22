@@ -612,7 +612,7 @@ class Config(object):
                                    self.bbox,
                                    self.proj_crs,
                                    cover_spacing,
-                                   contact_decimate=3,
+                                   self.run_flags['contact_decimate'],
                                    use_vector=True,
                                    use_grid=True)
         self.dtb=dtb

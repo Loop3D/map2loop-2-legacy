@@ -2842,7 +2842,7 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
         print("df,actual_cover",len(df),len(actual_cover))
         allpts = open(os.path.join(output_path, 'cover_grid.csv'), "w")
         allpts.write('X,Y,Z,formation\n')
-        actual_cover.to_csv('cover.csv')
+        #actual_cover.to_csv('cover.csv')
         for indx, pt in actual_cover.iterrows():
             if(pt['Id'] == 0):
                 locations = [(pt['X'], pt['Y'])]
@@ -3049,7 +3049,7 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
 ##########################################################
 def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_path, output_path, dtm, dtb,
                                          dtb_null, cover_map, contact_decimate, c_l, contact_dip, dip_grid, spacing, bbox,polarity_grid):
-
+    print('contact_decimate:',contact_decimate)
     interpolated_combo_file = os.path.join(tmp_path, 'combo_full.csv')
     # orientations = pd.read_csv(interpolated_combo_file)
 
