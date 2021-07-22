@@ -1281,7 +1281,15 @@ class Topology(object):
         
         with rasterio.open(dtm_file) as dtm:
             dtm_data = dtm.read(1)
-            Gloop.add_node('DTM_data',ntype='dtm',data=str(dtm_data.tolist()),shape=str(dtm_data.shape))
+            bounds = dtm.bounds
+            minx = bounds.left
+            miny = bounds.bottom
+            maxx = bounds.right
+            maxy = bounds.top
+            xscale = (maxx-minx)/dtm_data.shape[1]
+            yscale = (maxy-miny)/dtm_data.shape[0]
+            Gloop.add_node('DTM_data',ntype='dtm',data=str(dtm_data.tolist()),shape=str(dtm_data.shape),
+                            minx=minx,miny=miny,maxx=maxx,maxy=maxy,xscale=xscale,yscale=yscale)
         
         Abbox = pd.read_csv(os.path.join(tmp_path, 'bbox.csv'), ",")
         Gloop.add_node('bbox',ntype='bbox',data=str(Abbox.values.tolist()))
