@@ -3269,12 +3269,13 @@ def process_sills(output_path, geol_clip, dtm, dtb, dtb_null, cover_map, contact
     sills_df = pd.DataFrame.from_dict(sill_dict, orient='index')
     sills_df.to_csv(os.path.join(output_path, 'sills.csv'))
 
-def combine_point_data(output_path):
+def combine_point_data(output_path,tmp_path):
     Afaults = pd.read_csv(os.path.join(output_path, 'faults.csv'), ",")
     Afault_displacements = pd.read_csv(os.path.join(output_path, 'fault_displacements3.csv'), ",")
     Afaults_strat_displacements = pd.read_csv(os.path.join(output_path, 'fault_strat_offset3.csv'), ",")
     Acontacts = pd.read_csv(os.path.join(output_path, 'contacts_clean.csv'), ",")
     Aorientations = pd.read_csv(os.path.join(output_path, 'orientations_clean.csv'), ",")
+    Araw_contacts = pd.read_csv(os.path.join(tmp_path, 'raw_contacts.csv'), ",")
 
     d={'formation':'name'}
     Afaults.rename(columns = d, inplace = True)
@@ -3311,6 +3312,12 @@ def combine_point_data(output_path):
     Acontacts['Param4']=None
     Acontacts = Acontacts[['type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
 
+    d={'formation':'name','group':'Param1','angle':'Param2', 'lsx':'Param3',
+        'lsy':'Param4'}
+    Araw_contacts.rename(columns = d, inplace = True)
+    Araw_contacts['type']='raw_contact'
+    Araw_contacts = Araw_contacts[['type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+
     d={'formation':'name','azimuth':'Param1', 'dip':'Param2',
         'polarity':'Param3'}
     Aorientations.rename(columns = d, inplace = True)
@@ -3318,7 +3325,7 @@ def combine_point_data(output_path):
     Aorientations['Param4']=None
     Aorientations = Aorientations[['type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
 
-    all_points=pd.concat([Afaults,Afault_displacements,Afaults_strat_displacements,Acontacts,Aorientations])
+    all_points=pd.concat([Afaults,Afault_displacements,Afaults_strat_displacements,Acontacts,Aorientations,Araw_contacts])
 
     point_data=all_points.fillna( -99)
     point_data=point_data.to_dict('records')

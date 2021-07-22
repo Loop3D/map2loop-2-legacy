@@ -11,6 +11,7 @@ from shapely.ops import split
 from shapely.geometry import Point, LineString, MultiLineString, GeometryCollection, Polygon
 from math import degrees, atan2, acos, degrees
 import warnings
+import rasterio
 
 from . import m2l_utils
 from .m2l_utils import display, print
@@ -1068,7 +1069,7 @@ class Topology(object):
     # Returns networkx graph
     ####################################
 
-    def make_Loop_graph(tmp_path,output_path,fault_orientation_clusters,fault_length_clusters,point_data):
+    def make_Loop_graph(tmp_path,output_path,fault_orientation_clusters,fault_length_clusters,point_data,dtm_file,dst_crs):
         Gloop=nx.DiGraph()
         
         # Load faults and stratigraphy
@@ -1277,7 +1278,15 @@ class Topology(object):
         
         # add all geolocated data to a single unconnected node
         Gloop.add_node('Point_data',ntype='points',data=point_data)
-
+        
+        with rasterio.open(dtm_file) as dtm:
+            dtm_data = dtm.read(1)
+            Gloop.add_node('DTM_data',ntype='dtm',data=str(dtm_data.tolist()),shape=str(dtm_data.shape))
+        
+        Abbox = pd.read_csv(os.path.join(tmp_path, 'bbox.csv'), ",")
+        Gloop.add_node('bbox',ntype='bbox',data=str(Abbox.values.tolist()))
+        
+        Gloop.add_node('dst_crs',ntype='dst_crs',data=str(dst_crs))
         return(Gloop)        
     
     def colour_Loop_graph(output_path):
@@ -1291,10 +1300,11 @@ class Topology(object):
                     new_graph.write('    '+l.strip().replace("f_colour",'graphics [ type "ellipse" fill ')+' ]\n')
                 elif('ntype "supergroup"' in l):
                     new_graph.write('    graphics [ type "triangle" fill "#FF0000" ]\n')
+                    new_graph.write(l)
                 elif('ntype "group"' in l):
                     new_graph.write('    graphics [ type "triangle" fill "#FF9900" ]\n')
                     new_graph.write(l)
-                elif('ntype "points"' in l):
+                elif('ntype "points"' in l or 'ntype "dtm"' in l or 'ntype "bbox"' in l or 'ntype "dst_crs"' in l ):
                     new_graph.write('    graphics [ type "octagon" fill "#00FF00" ]\n')
                     new_graph.write(l)
                 elif('etype "formation_formation"' in l):

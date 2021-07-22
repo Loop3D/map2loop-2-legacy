@@ -549,8 +549,9 @@ class Project(object):
 
             # Combine multiple outputs into single graph
 
-            point_data=combine_point_data(self.config.output_path)
-            Gloop=Topology.make_Loop_graph(self.config.tmp_path,self.config.output_path,self.run_flags['fault_orientation_clusters'],self.run_flags['fault_length_clusters'],point_data)
+            point_data=combine_point_data(self.config.output_path,self.config.tmp_path)
+            Gloop=Topology.make_Loop_graph(self.config.tmp_path,self.config.output_path,self.run_flags['fault_orientation_clusters'],
+                                           self.run_flags['fault_length_clusters'],point_data,os.path.normcase(self.config.dtm_reproj_file),self.config.proj_crs)
             nx.write_gml(Gloop, os.path.join(self.config.output_path,'loop.gml'))
             Topology.colour_Loop_graph(self.config.output_path)
             update_fault_layer(self.config.tmp_path,self.config.output_path,self.c_l)
