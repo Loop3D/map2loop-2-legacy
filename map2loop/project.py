@@ -548,10 +548,27 @@ class Project(object):
             self.config.save_cmap(self.workflow['cover_map'])
 
             # Combine multiple outputs into single graph
-
+            config_out={
+                'project_path':os.path.normcase(self.config.project_path),
+                'geology_file':os.path.normcase(self.config.geology_file),
+                'fault_file':os.path.normcase(self.config.fault_file),
+                'fold_file':os.path.normcase(self.config.fold_file),
+                'structure_file':os.path.normcase(self.config.structure_file),
+                'mindep_file':os.path.normcase(self.config.mindep_file),
+                'section_files':self.config.section_files,
+                'drillhole_file':self.config.drillhole_file,
+                'dtb_grid_file':self.config.dtb_grid_file,
+                'cover_map_file':self.config.cover_map_file,
+                'bbox_3d':self.config.bbox_3d,
+                'step_out':self.config.step_out,
+                'dtm_crs':self.config.dtm_crs,
+                'proj_crs':self.config.proj_crs,
+                'local':self.config.local
+            }
             point_data=combine_point_data(self.config.output_path,self.config.tmp_path)
             Gloop=Topology.make_Loop_graph(self.config.tmp_path,self.config.output_path,self.run_flags['fault_orientation_clusters'],
-                                           self.run_flags['fault_length_clusters'],point_data,os.path.normcase(self.config.dtm_reproj_file),self.config.proj_crs)
+                                           self.run_flags['fault_length_clusters'],point_data,os.path.normcase(self.config.dtm_reproj_file),self.config.proj_crs,
+                                           self.config.c_l,self.config.run_flags,config_out)
             nx.write_gml(Gloop, os.path.join(self.config.output_path,'loop.gml'))
             Topology.colour_Loop_graph(self.config.output_path)
             update_fault_layer(self.config.tmp_path,self.config.output_path,self.c_l)

@@ -1060,7 +1060,7 @@ class Topology(object):
         nx.write_gml(Gp, os.path.join(graph_path, 'ASUD_strat.gml'))
     
     ####################################
-    # combine multuiple outputs into single graph
+    # combine multiple outputs into single graph
     #
     # make_Loop_graph(tmp_path,output_path)
     # tmp_path path to tmp directory
@@ -1069,7 +1069,7 @@ class Topology(object):
     # Returns networkx graph
     ####################################
 
-    def make_Loop_graph(tmp_path,output_path,fault_orientation_clusters,fault_length_clusters,point_data,dtm_file,dst_crs):
+    def make_Loop_graph(tmp_path,output_path,fault_orientation_clusters,fault_length_clusters,point_data,dtm_file,dst_crs,c_l,run_flags,config):
         Gloop=nx.DiGraph()
         
         # Load faults and stratigraphy
@@ -1287,6 +1287,8 @@ class Topology(object):
         Gloop.add_node('bbox',ntype='bbox',data=str(Abbox.values.tolist()))
         
         Gloop.add_node('dst_crs',ntype='dst_crs',data=str(dst_crs))
+
+        Gloop.add_node('metadata',ntype='metadata',run_flags=str(run_flags),c_l=str(c_l),config=str(config))
         return(Gloop)        
     
     def colour_Loop_graph(output_path):
@@ -1304,7 +1306,7 @@ class Topology(object):
                 elif('ntype "group"' in l):
                     new_graph.write('    graphics [ type "triangle" fill "#FF9900" ]\n')
                     new_graph.write(l)
-                elif('ntype "points"' in l or 'ntype "dtm"' in l or 'ntype "bbox"' in l or 'ntype "dst_crs"' in l ):
+                elif('ntype "points"' in l or 'ntype "metadata"' in l or 'ntype "dtm"' in l or 'ntype "bbox"' in l or 'ntype "dst_crs"' in l ):
                     new_graph.write('    graphics [ type "octagon" fill "#00FF00" ]\n')
                     new_graph.write(l)
                 elif('etype "formation_formation"' in l):
