@@ -1069,7 +1069,7 @@ class Topology(object):
     # Returns networkx graph
     ####################################
 
-    def make_Loop_graph(tmp_path,output_path,fault_orientation_clusters,fault_length_clusters,point_data,dtm_file,dst_crs,c_l,run_flags,config):
+    def make_Loop_graph(tmp_path,output_path,fault_orientation_clusters,fault_length_clusters,point_data,dtm_file,dst_crs,c_l,run_flags,config,bbox):
         Gloop=nx.DiGraph()
         
         # Load faults and stratigraphy
@@ -1291,8 +1291,7 @@ class Topology(object):
             Gloop.add_node('DTM_data',ntype='dtm',data=str(dtm_data.tolist()),shape=str(dtm_data.shape),
                             minx=minx,miny=miny,maxx=maxx,maxy=maxy,xscale=xscale,yscale=yscale)
         
-        Abbox = pd.read_csv(os.path.join(tmp_path, 'bbox.csv'), ",")
-        Gloop.add_node('bbox',ntype='bbox',data=str(Abbox.values.tolist()))
+        Gloop.add_node('bbox',ntype='bbox',data=str(bbox))
         
         Gloop.add_node('dst_crs',ntype='dst_crs',data=str(dst_crs))
 
