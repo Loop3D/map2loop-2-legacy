@@ -1642,22 +1642,50 @@ def display_LS_map(model, dtm, geol_clip, faults_clip, dst_crs, use_cmap, cmap,
                          linewidth=0.7)
 
 
-def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs):
+def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs, overwrite=False):
     if loopFilename is None:
         from pathlib import Path
         output_path_clean = Path(output_path)
-
         loopFilename = os.path.join(output_path_clean.name,output_path_clean.name+ '.loop3d')
-        resp = LoopProjectFile.CreateBasic(loopFilename)
+
+    # Check that file exist and check version matches
+    overwriteVersionMismatchedFile = False
+    existingExtents = None
+    if os.path.isfile(loopFilename):
+        resp = LoopProjectFile.Get(loopFilename,'version')
         if resp['errorFlag']:
             print(resp['errorString'])
         else:
-            LoopProjectFile.Set(loopFilename, "extents", geodesic=[0, 1, -180, -179],
-                                utm=[1, 1, bbox['maxy'], bbox['miny'],
-                                     bbox['maxx'], bbox['minx']],
+            if resp['value'] != LoopProjectFile.LoopVersion():
+                if overwrite:
+                    print("Overwriting version mismatched loop project file")
+                    overwriteVersionMismatchedFile = True
+                    resp = LoopProjectFile.Get(loopFilename,'extents')
+                    if not resp['errorFlag']:
+                        existingExtents = resp['value']
+                else:
+                    print("(ERROR) LoopProjectFile version mismatch, export to loop project file aborted")
+                    return
+
+    # If file does not exist or overwriting a version mismatched file create one
+    if not os.path.isfile(loopFilename) or overwriteVersionMismatchedFile:
+        resp = LoopProjectFile.CreateBasic(loopFilename)
+        if resp['errorFlag']:
+            print(resp['errorString'])
+            print('(ERROR) Cannot continue with loop project file export')
+            return
+        else:
+            if existingExtents == None:
+                # Without meaningful geodesic and utm zone values set extents to a non-conflicting
+                # location in the pacific
+                LoopProjectFile.Set(loopFilename, "extents", geodesic=[-180, -179, 0, 1],
+                                utm=[1, 1, bbox['maxx'], bbox['minx'],
+                                bbox['maxy'], bbox['miny']],
                                 depth=[bbox['top'], bbox['base']],
-                                spacing=[1000, 1000, 10],
+                                spacing=[1000, 1000, 500],
                                 preference="utm")
+            else:
+                LoopProjectFile.Set(loopFilename,'extents',**existingExtents)
 
     form2supergroup = pd.read_csv(
         os.path.join(tmp_path, 'all_sorts_clean.csv'),
