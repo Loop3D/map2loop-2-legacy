@@ -1663,6 +1663,7 @@ def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs, o
                     resp = LoopProjectFile.Get(loopFilename,'extents')
                     if not resp['errorFlag']:
                         existingExtents = resp['value']
+                    os.remove(loopFilename)
                 else:
                     print("(ERROR) LoopProjectFile version mismatch, export to loop project file aborted")
                     return
