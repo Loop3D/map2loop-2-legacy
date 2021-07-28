@@ -928,8 +928,10 @@ class Topology(object):
         
         sg_index = 0
         for i in range(1, len(group_girdle)):
-            if(c_l['intrusive'] in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][c_l['r1']] 
-            and c_l['sill'] not in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][c_l['ds']]):
+            #if(c_l['intrusive'] in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][c_l['r1']] 
+            #and c_l['sill'] not in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][c_l['ds']]):
+            if(c_l['intrusive'] in geol.loc[group_girdle.iloc[i].name][c_l['r1']] 
+            and c_l['sill'] not in geol.loc[group_girdle.iloc[i].name][c_l['ds']]):
                 sg_index = sg_index+1
                 #print('not found',sg_index)
                 sgname = 'Super_Group_'+str(sg_index)
@@ -1060,7 +1062,7 @@ class Topology(object):
         nx.write_gml(Gp, os.path.join(graph_path, 'ASUD_strat.gml'))
     
     ####################################
-    # combine multiple outputs into single graph
+    # combine multiple outputs into single graph that contains all infor needed by LoopStructural
     #
     # make_Loop_graph(tmp_path,output_path)
     # tmp_path path to tmp directory
@@ -1298,9 +1300,9 @@ class Topology(object):
         Gloop.add_node('metadata',ntype='metadata',run_flags=str(run_flags),c_l=str(c_l),config=str(config))
         return(Gloop)        
     
-    def colour_Loop_graph(output_path):
-        with open(os.path.join(output_path,'loop.gml')) as graph:
-            new_graph=open(os.path.join(output_path,'loop_colour.gml'),"w")
+    def colour_Loop_graph(output_path,prefix):
+        with open(os.path.join(output_path,prefix+'.gml')) as graph:
+            new_graph=open(os.path.join(output_path,prefix+'_colour.gml'),"w")
             lines = graph.readlines()
             for l in lines:
                 if("s_colour" in l ):
@@ -1322,6 +1324,9 @@ class Topology(object):
                 elif('etype "fault_group"' in l):
                     new_graph.write('    graphics [ style "line" arrow "last" fill "#666600" ]\n')
                     new_graph.write(l)
+                elif('etype "fault_formation"' in l):
+                    new_graph.write('    graphics [ style "line" arrow "last" fill "#0066FF" ]\n')
+                    new_graph.write(l)
                 elif('etype "fault_fault"' in l):
                     new_graph.write('    graphics [ style "line" arrow "last" fill "#000000" ]\n')
                     new_graph.write(l)
@@ -1333,3 +1338,27 @@ class Topology(object):
             new_graph.close()
 
 
+    ####################################
+    # combine multiple outputs into single graph that describes map and its relationship to deposits
+    #
+    # make_complete_Loop_graph(tmp_path,output_path)
+    # tmp_path path to tmp directory
+    # output_path path to output directory
+    #
+    # Returns networkx graph
+    ####################################
+
+    def make_complete_Loop_graph(Gloop,tmp_path,output_path,fault_orientation_clusters,fault_length_clusters,point_data,dtm_file,dst_crs,c_l,run_flags,config,bbox):
+        
+
+        #add group-fault edges to graph
+        Af_s = pd.read_csv(os.path.join(output_path, 'unit-fault-relationships.csv'), ",")
+        for ind,s in Af_s.iterrows():
+            if(s['code'] in Gloop.nodes):
+                for col in Af_s.columns[1:]:
+                    if(col in Gloop.nodes):
+                        if(Af_s.loc[ind,col]==1):
+                            Gloop.add_edge(col,s['code'])
+                            Gloop[col][s['code']]['etype']='fault_formation'
+
+        return(Gloop)

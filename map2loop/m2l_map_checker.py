@@ -37,12 +37,17 @@ def explode_polylines(indf, c_l, dst_crs):
     return outdf
 
 
-def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, tmp_path, bbox, c_l, dst_crs, local_paths, drift_prefix,use_roi_clip,roi_clip_path):
+def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, tmp_path, bbox, c_l, dst_crs, local_paths, drift_prefix,use_roi_clip,roi_clip_path,bbox_3d):
 
     # print(gpd.read_file(geology_file).columns)
     # print(gpd.read_file(fault_file).columns)
     # print(gpd.read_file(fold_file).columns)
     # print(gpd.read_file(mindep_file).columns)
+    m2l_errors = []
+    m2l_warnings = []
+    if(bbox[3]<bbox[1] or bbox[2]<bbox[0] or bbox_3d['top']<bbox_3d['base']):
+        m2l_errors.append(
+                'bounding box has negative range for x or y or z')
     if(use_roi_clip):
         polygo=gpd.read_file(roi_clip_path)
     else:
@@ -51,8 +56,6 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
         bbox_geom = Polygon(zip(x_point_list, y_point_list))
         polygo = gpd.GeoDataFrame(index=[0], crs=dst_crs, geometry=[bbox_geom])
 
-    m2l_errors = []
-    m2l_warnings = []
     for file_name in (structure_file, geology_file, fault_file, fold_file):
         if not file_name.startswith("http") and not os.path.isfile(file_name):
             m2l_errors.append('file '+file_name+' not found')
@@ -165,8 +168,8 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
                     geology[c_l[code]].str.replace(",", " ")
                     if(code == 'c' or code == 'g' or code == 'g2'):
-                        geology[c_l[code]].str.replace(" ", "_")
-                        geology[c_l[code]].str.replace("-", "_")
+                        geology[c_l[code]]=geology[c_l[code]].str.replace(" ", "_")
+                        geology[c_l[code]]=geology[c_l[code]].str.replace("-", "_")
 
                     nans = geology[c_l[code]].isnull().sum()
                     if(nans > 0):
@@ -449,7 +452,6 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             orientations.crs = dst_crs
             orientations[c_l['dd']] = pd.to_numeric(orientations[c_l['dd']])
             orientations[c_l['d']] = pd.to_numeric(orientations[c_l['d']])
-
             orientations.to_file(structure_file)
 
         try:

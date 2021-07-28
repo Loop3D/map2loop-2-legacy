@@ -1575,6 +1575,11 @@ def interpolate_contacts_grid(contacts, calc, xcoords_group, ycoords_group):
 def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spacing, dst_crs, scheme, super_groups, c_l):
     geology = gpd.read_file(geology_file, bbox=bbox)
     structures_code = gpd.read_file(structure_file, bbox=bbox)
+    
+    is_bed = structures_code[c_l['sf']].str.contains(
+        c_l['bedding'], regex=False)
+
+    structures_code = structures_code[is_bed]    
     contacts = gpd.read_file(basal_contacts, bbox=bbox)
 
     geology[c_l['g']].fillna(geology[c_l['g2']], inplace=True)
@@ -1604,6 +1609,7 @@ def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spac
     first_supergroup = True
     # avoids massive memory rbf calcs by splitting calc into (non-threaded) chunks, maybe try dask + masks??
     split = 100000
+    print('split',split,'bsh[0]',bsh[0],'bsh[1]',bsh[1],'spacing',spacing,'xdim',bbox[2]-bbox[0],'ydim',bbox[3]-bbox[1])
     for i in np.arange(0, bsh[0]*bsh[1], split):
         min = i
         max = i+split

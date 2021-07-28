@@ -132,17 +132,16 @@ class Config(object):
         self.proj_crs = proj_crs
 
         self.loop_projectfile = loopFilename
+        drift_prefix = self.run_flags['drift_prefix']
 
         # Check input maps for missing values
-        drift_prefix = kwargs.get('drift_prefix', ['None'])
-        drift_prefix=['NEO','TRI']
         self.local = local
         #       - Check if fold file is always the same as fault or needs to be seperated
         # TODO: Allow for input as a polygon, not just a bounding box.
         structure_file, geology_file, fault_file, mindep_file, fold_file, c_l = m2l_map_checker.check_map(
             structure_file, geology_file, fault_file, mindep_file, fold_file,
             self.tmp_path, self.bbox, c_l, proj_crs, self.local, drift_prefix, 
-            self.run_flags['use_roi_clip'], self.run_flags['roi_clip_path'])
+            self.run_flags['use_roi_clip'], self.run_flags['roi_clip_path'],self.bbox_3d)
 
         # Process and store workflow params
         self.geology_file = geology_file
@@ -228,11 +227,19 @@ class Config(object):
             structures.to_file(self.structure_file)
 
         # Structures
-        list1 = [
+        try:
+            list1 = [
+            'geometry', self.c_l['d'], self.c_l['dd'], self.c_l['sf'],
+            self.c_l['bo'],self.c_l['sl']
+            ]
+        except:
+            list1 = [
             'geometry', self.c_l['d'], self.c_l['dd'], self.c_l['sf'],
             self.c_l['bo']
-        ]
+            ]
+
         list2 = list(set(list1))
+        print(list2)
         sub_pts = self.structures[list2]
         structure_code = gpd.sjoin(sub_pts,
                                    self.geol_clip,
@@ -251,7 +258,8 @@ class Config(object):
         is_bed = structure_code[self.c_l['sf']].str.contains(
             self.c_l['bedding'], regex=False)
 
-        structure_clip = structure_code[is_bed]
+        #structure_clip = structure_code[is_bed]
+        structure_clip=structure_code.copy()
         structure_clip.crs = self.proj_crs
 
         if (self.c_l['otype'] == 'strike'):

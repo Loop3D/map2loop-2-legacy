@@ -862,7 +862,10 @@ def plot_bedding_stereonets(orientations_clean, geology, c_l, quiet):
 
     orientations = gpd.sjoin(
         orientations_clean, geology, how="left", op="within")
+    is_bed = orientations[c_l['sf']].str.contains(
+        c_l['bedding'], regex=False)
 
+    orientations = orientations[is_bed] 
     groups = geology[c_l['g']].unique()
     codes = geology[c_l['c']].unique()
     print("All observations n=", len(orientations_clean))

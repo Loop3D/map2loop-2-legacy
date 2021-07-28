@@ -371,7 +371,8 @@ class Project(object):
                 'use_interpolations': True,
                 'use_fat': True,
                 'use_roi_clip': False,
-                'roi_clip_path':''
+                'roi_clip_path':'',
+                'drift_prefix':'None'
             }
 
         # And copy in any new settings from the user
@@ -570,8 +571,11 @@ class Project(object):
                                            self.run_flags['fault_length_clusters'],point_data,os.path.normcase(self.config.dtm_reproj_file),self.config.proj_crs,
                                            self.config.c_l,self.config.run_flags,config_out,self.config.bbox_3d)
             nx.write_gml(Gloop, os.path.join(self.config.output_path,'loop.gml'))
-            Topology.colour_Loop_graph(self.config.output_path)
+            Topology.colour_Loop_graph(self.config.output_path,'loop')
+            #Gloop2=Topology.make_complete_Loop_graph(Gloop,self.config.tmp_path,self.config.output_path)
+            #nx.write_gml(Gloop2, os.path.join(self.config.output_path,'loop_complete.gml'))
             update_fault_layer(self.config.tmp_path,self.config.output_path,self.c_l)
+            #Topology.colour_Loop_graph(self.config.output_path,'loop_complete')
             #self.config.update_projectfile()
             self.config.export_png()
 

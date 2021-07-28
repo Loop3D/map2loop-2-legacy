@@ -37,10 +37,15 @@ import statistics
 
 
 def save_orientations(structures, path_out, c_l, orientation_decimate, dtm, dtb, dtb_null, cover_map):
+
+    is_bed = structures[c_l['sf']].str.contains(
+        c_l['bedding'], regex=False)
+
+    structure_clip = structures[is_bed]    
     i = 0
     f = open(os.path.join(path_out, 'orientations.csv'), "w")
     f.write("X,Y,Z,azimuth,dip,polarity,formation\n")
-    for indx, apoint in structures.iterrows():
+    for indx, apoint in structure_clip.iterrows():
         if(not str(apoint[c_l['r1']]) == 'None'):
             if(not str(apoint[c_l['r1']]) == 'nan'):
 
@@ -68,6 +73,50 @@ def save_orientations(structures, path_out, c_l, orientation_decimate, dtm, dtb,
                     i = i+1
 
     f.close()
+    
+    try:
+        if(not c_l['sl']=='None'):
+            sl_code_list=['S1','S2','S3','S4','S5','S0/S1','S1/S2','S2/S3','S3/S4','S4/S5','F1','F2','F3','F4','F5']
+            f = open(os.path.join(path_out, 'secondary_orientations.csv'), "w")
+            f.write("X,Y,Z,type,azimuth,dip,polarity,formation\n")
+            for indx, apoint in structures.iterrows():
+                if(not str(apoint[c_l['r1']]) == 'None'):
+                    if(not str(apoint[c_l['r1']]) == 'nan'):
+
+                        if(not c_l['intrusive'] in apoint[c_l['r1']]):
+                            if(apoint[c_l['d']] != 0 and m2l_utils.mod_safe(i, orientation_decimate) == 0):
+                                locations = [
+                                    (apoint['geometry'].x, apoint['geometry'].y)]
+                                if(apoint['geometry'].x > dtm.bounds[0] and apoint['geometry'].x < dtm.bounds[2] and
+                                        apoint['geometry'].y > dtm.bounds[1] and apoint['geometry'].y < dtm.bounds[3]):
+                                    height = m2l_utils.value_from_dtm_dtb(
+                                        dtm, dtb, dtb_null, cover_map, locations)
+                                    if(c_l['otype'] == 'strike'):
+                                        dipdir = apoint[c_l['dd']]+90
+                                    else:
+                                        dipdir = apoint[c_l['dd']]
+                                    polarity = 1
+                                    index=0
+                                    sl_codes_test=c_l['sl_codes'].split(',')
+                                    sl_code_found=''
+                                    for sli in sl_codes_test:
+                                        #print(index,sli,apoint[c_l['sl']])
+                                        if(apoint[c_l['sl']]==sli):
+                                            sl_code_found=sl_code_list[index]
+                                            #print(index,"apoint[c_l['sl']]",apoint[c_l['sl']],"c_l['sl']",c_l['sl'],'sl_code_found',sl_code_found)
+                                            break
+                                        index=index+1
+                                    if(not sl_code_found==''):
+                                        ostr = "{},{},{},{},{},{},{},{}\n"\
+                                            .format(apoint['geometry'].x, apoint['geometry'].y, height, sl_code_found,dipdir, apoint[c_l['d']],
+                                                polarity, apoint[c_l['c']].replace(" ", "_").replace("-", "_"))
+                                        # ostr = str(apoint['geometry'].x)+","+str(apoint['geometry'].y)+","+height+","+str(dipdir)+","+str(apoint[c_l['d']])+",1,"+str(apoint[c_l['c']].replace(" ","_").replace("-","_"))+"\n"
+                                        f.write(ostr)
+                            i = i+1
+
+        f.close()
+    except:
+        print("no secondary structure data available")
     print(i, 'orientations saved to', os.path.join(path_out, 'orientations.csv'))
 
 ####################################################
@@ -1452,15 +1501,19 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
 def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, use_fat, pluton_form, inputs, workflow, c_l):
 
     contacts = pd.read_csv(os.path.join(output_path, 'contacts4.csv'), ",")
+    contacts['type']='strat'
     all_orientations = pd.read_csv(os.path.join(
         output_path, 'orientations.csv'), ",")
+    all_orientations['type']='observed'
     intrusive_contacts = pd.read_csv(
         os.path.join(output_path, 'ign_contacts.csv'), ",")
+    intrusive_contacts['type']='intrusive'
     all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts2.csv'), ",")
 
     if('invented_orientations' in inputs and os.path.exists(os.path.join(output_path, 'empty_series_orientations.csv'))):
         invented_orientations = pd.read_csv(
             os.path.join(output_path, 'empty_series_orientations.csv'), ",")
+        invented_orientations['type']='invented'
         all_orientations = pd.concat(
             [all_orientations, invented_orientations], sort=False)
     elif('invented_orientations' in inputs and not os.path.exists(os.path.join(output_path, 'empty_series_orientations.csv'))):
@@ -1469,6 +1522,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     if('interpolated_orientations' in inputs and os.path.exists(os.path.join(tmp_path, 'combo_full.csv'))):
         interpolated_orientations = pd.read_csv(
             os.path.join(tmp_path, 'combo_full.csv'), ",")
+        interpolated_orientations['type']='interpolated'
         all_orientations = pd.concat(
             [all_orientations, interpolated_orientations.iloc[::2, :]], sort=False)
     elif('interpolated_orientations' in inputs and not os.path.exists(os.path.join(tmp_path, 'combo_full.csv'))):
@@ -1477,6 +1531,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     if('intrusive_orientations' in inputs and os.path.exists(os.path.join(output_path, 'ign_orientations_'+pluton_form+'.csv'))):
         intrusive_orientations = pd.read_csv(
             os.path.join(output_path, 'ign_orientations_'+pluton_form+'.csv'), ",")
+        intrusive_orientations['type']='intrusive'
         all_orientations = pd.concat(
             [all_orientations, intrusive_orientations], sort=False)
         print(len(intrusive_orientations),' intrusive orientations merged.')
@@ -1486,6 +1541,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     if('fat_orientations' in inputs and os.path.exists(os.path.join(output_path, 'fold_axial_trace_orientations2.csv'))):
         fat_orientations = pd.read_csv(
             os.path.join(output_path, 'fold_axial_trace_orientations2.csv'), ",")
+        fat_orientations['type']='fold_axial_trace'
         all_orientations = pd.concat(
             [all_orientations, fat_orientations], sort=False)
     elif('fat_orientations' in inputs and not os.path.exists(os.path.join(output_path, 'fold_axial_trace_orientations2.csv'))):
@@ -1494,6 +1550,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     if('near_fault_orientations' in inputs and os.path.exists(os.path.join(tmp_path, 'ex_f_combo_full.csv'))):
         near_fault_orientations = pd.read_csv(
             os.path.join(tmp_path, 'ex_f_combo_full.csv'), ",")
+        near_fault_orientations['type']='near_fault'
         all_orientations = pd.concat(
             [all_orientations, near_fault_orientations], sort=False)
     elif('near_fault_orientations' in inputs and not os.path.exists(os.path.join(tmp_path, 'ex_f_combo_full.csv'))):
@@ -1502,6 +1559,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     if('cover_orientations' in inputs and os.path.exists(os.path.join(output_path, 'cover_orientations.csv'))):
         cover_orientations = pd.read_csv(
             os.path.join(output_path, 'cover_orientations.csv'), ",")
+        cover_orientations['type']='cover'
         all_orientations = pd.concat(
             [all_orientations, cover_orientations], sort=False)
     elif('cover_orientations' in inputs and not os.path.exists(os.path.join(output_path, 'cover_orientations.csv'))):
@@ -1510,6 +1568,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     if('contact_orientations' in inputs and os.path.exists(os.path.join(output_path, 'contact_orientations.csv'))):
         contact_orientations = pd.read_csv(
             os.path.join(output_path, 'contact_orientations.csv'), ",")
+        contact_orientations['type']='contact_orientations'
         all_orientations = pd.concat(
             [all_orientations, contact_orientations], sort=False)
     elif('contact_orientations' in inputs and not os.path.exists(os.path.join(output_path, 'contact_orientations.csv'))):
@@ -1527,6 +1586,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     if('cover_contacts' in inputs and os.path.exists(os.path.join(output_path, 'cover_grid.csv'))):
         cover_contacts = pd.read_csv(os.path.join(
             output_path, 'cover_grid.csv'), ",")
+        cover_contacts['type']='cover_contact'
         all_contacts = pd.concat([all_contacts, cover_contacts], sort=False)
     elif('cover_contacts' in inputs and not os.path.exists(os.path.join(output_path, 'cover_grid.csv'))):
         print('No cover grid contacts available for merging.')
@@ -1534,6 +1594,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     if('fault_tip_contacts' in inputs):
         fault_tip_contacts = pd.read_csv(
             os.path.join(output_path, 'fault_tip_contacts.csv'), ",")
+        fault_tip_contacts['type']='fault_tip_contacts'
         all_contacts = pd.concat(
             [all_contacts, fault_tip_contacts], sort=False)
     elif('fault_tip_contacts' in inputs and not os.path.exists(os.path.join(output_path, 'fault_tip_contacts.csv'))):
@@ -1636,14 +1697,14 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     geol = geol.drop_duplicates(subset=c_l['c'], keep="first")
 
     geol=geol.set_index(c_l['c'])
-
     slist=[]
     for ind,unit in all_sorts.iterrows():
-
         if(unit['code']=='cover'):
             slist.append('cover')
-        elif(c_l['intrusive'] in geol.loc[unit['code'].replace("_"," ")][c_l['r1']] 
-            and c_l['sill'] not in geol.loc[unit['code'].replace("_"," ")][c_l['ds']]):
+        #elif(c_l['intrusive'] in geol.loc[unit['code'].replace("_"," ")][c_l['r1']] 
+        #    and c_l['sill'] not in geol.loc[unit['code'].replace("_"," ")][c_l['ds']]):
+        elif(c_l['intrusive'] in geol.loc[unit['code']][c_l['r1']] 
+            and c_l['sill'] not in geol.loc[unit['code']][c_l['ds']]):
             slist.append('intrusion')
         else:
             slist.append('sediment')
@@ -1656,7 +1717,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
 
     
     fao = open(os.path.join(output_path, 'orientations_clean.csv'), "w")
-    fao.write('X,Y,Z,azimuth,dip,polarity,formation\n')
+    fao.write('X,Y,Z,azimuth,dip,polarity,formation,type\n')
     all_sort_codes = set(all_sorts.index)
     # display(no_contacts,unique_contacts,all_sorts,all_sort_contacts)
 
@@ -1667,8 +1728,8 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
                 continue
                 # print('dud orientation:',ano[1]['formation'])
             else:
-                ostr = "{},{},{},{},{},{},{}\n"\
-                    .format(ano['X'], ano['Y'], ano['Z'], ano['azimuth'], ano['dip'], ano['polarity'], ano['formation'])
+                ostr = "{},{},{},{},{},{},{},{}\n"\
+                    .format(ano['X'], ano['Y'], ano['Z'], ano['azimuth'], ano['dip'], ano['polarity'], ano['formation'],ano['type'])
                 # ostr = str(ano['X'])+","+str(ano['Y'])+","+str(ano['Z'])+","+\
                 #     str(ano['azimuth'])+","+str(ano['dip'])+","+str(ano['polarity'])+","+ano['formation']+"\n"
                 fao.write(ostr)
