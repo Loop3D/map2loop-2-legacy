@@ -3336,6 +3336,10 @@ def combine_point_data(output_path,tmp_path):
     Afaults_strat_displacements = pd.read_csv(os.path.join(output_path, 'fault_strat_offset3.csv'), ",")
     Acontacts = pd.read_csv(os.path.join(output_path, 'contacts_clean.csv'), ",")
     Aorientations = pd.read_csv(os.path.join(output_path, 'orientations_clean.csv'), ",")
+    if(os.path.exists(os.path.join(output_path, 'secondary_orientations.csv'))):
+        Asecondaryorientations = pd.read_csv(os.path.join(output_path, 'secondary_orientations.csv'), ",")
+    else:
+        Asecondaryorientations=None
     Araw_contacts = pd.read_csv(os.path.join(tmp_path, 'raw_contacts.csv'), ",")
 
     d={'formation':'name'}
@@ -3345,7 +3349,8 @@ def combine_point_data(output_path,tmp_path):
     Afaults['Param2']=None
     Afaults['Param3']=None
     Afaults['Param4']=None
-    Afaults = Afaults[['type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+    Afaults['source']='calc'
+    Afaults = Afaults[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
 
 
     d={'fname':'name','apparent_displacement':'Param1', 'vertical_displacement':'Param2',
@@ -3354,14 +3359,16 @@ def combine_point_data(output_path,tmp_path):
     Afault_displacements['type']='fault_displacement'
     Afault_displacements['Param4']=None
     Afault_displacements['Z']=None
-    Afault_displacements = Afault_displacements[['type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+    Afault_displacements['source']='calc'
+    Afault_displacements = Afault_displacements[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
 
     d={'id':'name','left_fm':'Param1', 'right_fm':'Param2',
         'min_offset':'Param3','strat_offset':'Param4'}
     Afaults_strat_displacements.rename(columns = d, inplace = True)
     Afaults_strat_displacements['type']='fault_strat_displacement'
     Afaults_strat_displacements['Z']=None
-    Afaults_strat_displacements = Afaults_strat_displacements[['type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+    Afaults_strat_displacements['source']='calc'
+    Afaults_strat_displacements = Afaults_strat_displacements[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
 
     d={'formation':'name'}
     Acontacts.drop(labels='index', axis=1,inplace = True)
@@ -3371,22 +3378,34 @@ def combine_point_data(output_path,tmp_path):
     Acontacts['Param2']=None
     Acontacts['Param3']=None
     Acontacts['Param4']=None
-    Acontacts = Acontacts[['type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+    Acontacts = Acontacts[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
 
     d={'formation':'name','group':'Param1','angle':'Param2', 'lsx':'Param3',
         'lsy':'Param4'}
     Araw_contacts.rename(columns = d, inplace = True)
     Araw_contacts['type']='raw_contact'
-    Araw_contacts = Araw_contacts[['type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+    Araw_contacts['source']='raw_contact'
+    Araw_contacts = Araw_contacts[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
 
     d={'formation':'name','azimuth':'Param1', 'dip':'Param2',
         'polarity':'Param3'}
     Aorientations.rename(columns = d, inplace = True)
     Aorientations['type']='orientation'
     Aorientations['Param4']=None
-    Aorientations = Aorientations[['type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+    Aorientations = Aorientations[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
 
-    all_points=pd.concat([Afaults,Afault_displacements,Afaults_strat_displacements,Acontacts,Aorientations,Araw_contacts])
+
+    if(Asecondaryorientations):
+        d={'formation':'name','azimuth':'Param1', 'dip':'Param2',
+        'polarity':'Param3'}
+        Asecondaryorientations.rename(columns = d, inplace = True)
+        Asecondaryorientations['type']='orientation'
+        Asecondaryorientations['Param4']=None
+        Asecondaryorientations = Asecondaryorientations[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+
+        all_points=pd.concat([Afaults,Afault_displacements,Afaults_strat_displacements,Acontacts,Aorientations,Asecondaryorientations,Araw_contacts])
+    else:
+        all_points=pd.concat([Afaults,Afault_displacements,Afaults_strat_displacements,Acontacts,Aorientations,Araw_contacts])
 
     point_data=all_points.fillna( -99)
     point_data=point_data.to_dict('records')
