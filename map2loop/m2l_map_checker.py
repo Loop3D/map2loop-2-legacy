@@ -48,6 +48,13 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
     if(bbox[3]<bbox[1] or bbox[2]<bbox[0] or bbox_3d['top']<bbox_3d['base']):
         m2l_errors.append(
                 'bounding box has negative range for x or y or z')
+    
+    f=open(tmp_path+'/bbox.csv','w')
+    f.write('minx,miny,maxx,maxy,lower,upper\n')
+    ostr='{},{},{},{},{},{}\n'.format(bbox[0],bbox[1],bbox[2],bbox[3],bbox_3d['base'],bbox_3d['top'])
+    f.write(ostr)
+    f.close()
+
     if(use_roi_clip):
         polygo=gpd.read_file(roi_clip_path)
     else:
