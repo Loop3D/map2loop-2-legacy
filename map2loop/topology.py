@@ -139,7 +139,7 @@ class Topology(object):
             labels = {}
             for node in GD.nodes():  # local store of node labels
                 labels[node] = G.nodes[node]['LabelGraphics']['text'].replace(
-                    " ", "_").replace("-", "_")
+                    " ", "_").replace("-", "_").replace("?", "_")
 
             cycles = nx.simple_cycles(GD)
             for cy in cycles:
@@ -211,14 +211,14 @@ class Topology(object):
                 nlist = list(nx.all_topological_sorts(GD))
 
             f = open(
-                os.path.join(path_out, glabels[p].replace(" ", "_").replace("-", "_")+'.csv'), 'w')
+                os.path.join(path_out, glabels[p].replace(" ", "_").replace("-", "_").replace("?", "_")+'.csv'), 'w')
 
             if(one):
                 f.write('Choice '+str(0))
                 for n in range(0, len(GD)):  # display nodes for one sorted graph
 
                     f.write(","+G.nodes[nlist[n]]['LabelGraphics']
-                            ['text'].replace(" ", "_").replace("-", "_"))
+                            ['text'].replace(" ", "_").replace("-", "_").replace("?", "_"))
 
                 f.write('\n')
             else:
@@ -227,7 +227,7 @@ class Topology(object):
                     for n in range(0, len(GD)):  # display nodes for one sorted graph
                         #print(nlist[m][n],G.nodes[nlist[m][n]]['LabelGraphics']['text'].replace(" ","_").replace("-","_"))
                         f.write(","+G.nodes[nlist[m][n]]['LabelGraphics']
-                                ['text'].replace(" ", "_").replace("-", "_"))
+                                ['text'].replace(" ", "_").replace("-", "_").replace("?", "_"))
                     # if(m<len(nlist)-1):
                         # print("....")
                     f.write('\n')
@@ -249,9 +249,9 @@ class Topology(object):
         ages = []
         for indx, a_poly in geol.iterrows():  # loop through all polygons
             if(str(a_poly[c_l['g']]) == 'None'):
-                grp = a_poly[c_l['c']].replace(" ", "_").replace("-", "_")
+                grp = a_poly[c_l['c']].replace(" ", "_").replace("-", "_").replace("?", "_")
             else:
-                grp = a_poly[c_l['g']].replace(" ", "_").replace("-", "_")
+                grp = a_poly[c_l['g']].replace(" ", "_").replace("-", "_").replace("?", "_")
             # print(grp)
             if(not grp in groups):
                 groups += [(grp)]
@@ -332,15 +332,15 @@ class Topology(object):
                 # print(df[df.CODE == "A-FOh-xs-f"])
                 # exit()
                 if(str(geology_file.loc[glabel_0][c_l['g']]) == 'None'):
-                    grp0 = glabel_0.replace(" ", "_").replace("-", "_")
+                    grp0 = glabel_0.replace(" ", "_").replace("-", "_").replace("?", "_")
                 else:
                     grp0 = geology_file.loc[glabel_0][c_l['g']].replace(
                         " ", "_").replace("-", "_")
                 if(str(geology_file.loc[glabel_1][c_l['g']]) == 'None'):
-                    grp1 = glabel_1.replace(" ", "_").replace("-", "_")
+                    grp1 = glabel_1.replace(" ", "_").replace("-", "_").replace("?", "_")
                 else:
                     grp1 = geology_file.loc[glabel_1][c_l['g']].replace(
-                        " ", "_").replace("-", "_")
+                        " ", "_").replace("-", "_").replace("?", "_")
 
                 # print(glabel_0,glabel_1,gp_ages.loc[grp0],gp_ages.loc[grp1])
                 if(grp0 in glabels.values() and grp1 in glabels.values()):
@@ -1048,6 +1048,7 @@ class Topology(object):
                 Gp.nodes[n]['gid'] = recode[Gp.nodes[n]['gid']]
 
         # check for cycle and arbitrarily remove first of the edges
+        nx.write_gml(Gp,os.path.join(graph_path, 'ASUD_strat_test.gml'))
         try:
             cycles = list(nx.simple_cycles(G))
             for c in cycles:
@@ -1073,7 +1074,11 @@ class Topology(object):
 
     def make_Loop_graph(tmp_path,output_path,fault_orientation_clusters,fault_length_clusters,point_data,dtm_file,dst_crs,c_l,run_flags,config,bbox):
         Gloop=nx.DiGraph()
-        
+        geol=gpd.read_file(os.path.join(tmp_path, 'geol_clip.shp'))
+        strats=geol.drop_duplicates(subset=[c_l['c']])
+        strats[c_l['c']]=strats[c_l['c']].replace(' ','_').replace('-','_')
+        strats.set_index([c_l['c']],inplace=True)
+
         # Load faults and stratigraphy
         Gf = nx.read_gml(os.path.join(tmp_path, 'fault_network.gml'))
         Astrat = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), ",")
@@ -1087,7 +1092,10 @@ class Topology(object):
                                     uctype=s['uctype'],
                                     GroupNumber=s['group number'],
                                     IndexInGroup=s['index in group'],
-                                    NumberInGroup=s['number in group']
+                                    NumberInGroup=s['number in group'],
+                                    MinAge=strats.loc[s.name][c_l['min']],
+                                    MaxAge=strats.loc[s.name][c_l['max']]
+                                    
                         )
         
         # add formation-formation stratigraphy to graph as edges
