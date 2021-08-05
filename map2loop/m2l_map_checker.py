@@ -177,6 +177,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                     if(code == 'c' or code == 'g' or code == 'g2'):
                         geology[c_l[code]]=geology[c_l[code]].str.replace(" ", "_")
                         geology[c_l[code]]=geology[c_l[code]].str.replace("-", "_")
+                        geology[c_l[code]]=geology[c_l[code]].str.replace("?", "_")
 
                     nans = geology[c_l[code]].isnull().sum()
                     if(nans > 0):
