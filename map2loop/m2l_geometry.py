@@ -16,6 +16,7 @@ import os
 import random
 import networkx as nx
 import statistics
+from shapely.ops import snap
 
 ####################################################
 # Export orientation data in csv format with heights and strat code added
@@ -369,7 +370,8 @@ def save_basal_contacts(path_in, dtm, dtb, dtb_null, cover_map, geol_clip, conta
                                         a_polygon = a_polygon.buffer(0)
                                     if(not b_polygon.is_valid):
                                         b_polygon = b_polygon.buffer(0)
-                                    LineStringC = a_polygon.intersection(
+                                    a_snapped = snap(a_polygon, b_polygon, 10)
+                                    LineStringC = a_snapped.intersection(
                                         b_polygon)
 
                                     # ignore weird intersections for now, worry about them later!
@@ -3171,11 +3173,13 @@ def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_
                                     height2 = m2l_utils.value_from_dtm_dtb(
                                         dtm, dtb, dtb_null, cover_map, locations2) 
                                     l1,m1,n1,l2,m2,n2=lmn_from_line_dip(lastx,lasty,height1,line.coords[0][0], line.coords[0][1],height2,dip)
-                                    if(not l1==-999):
+                                    
+                                    if((not l1==-999) and m*l1-l*m1 <1 and m*l1-l*m1 >-1 and m*l2-l*m2 <1 and m*l2-l*m2 >-1):
                                         if(polarity==0):
                                             dotproduct1=acos(m*l1-l*m1)
                                             dotproduct2=acos(m*l2-l*m2)
                                         else:
+                                            #print(m,l1,l,m1)
                                             dotproduct1=acos(-(m*l1-l*m1))
                                             dotproduct2=acos(-(m*l2-l*m2))
                                         if(dotproduct1<dotproduct2):
@@ -3555,7 +3559,15 @@ def lmn_from_line_dip(x1,y1,z1,x2,y2,z2,dip):
     b = cross_product[1]
     c = cross_product[2]
     d = d
-    l2,m2,n2=a/sqrt(a**2+b**2+c**2),b/sqrt(a**2+b**2+c**2),c/sqrt(a**2+b**2+c**2)
+    l2=a/sqrt(a**2+b**2+c**2)
+    m2=b/sqrt(a**2+b**2+c**2)
+    n2=c/sqrt(a**2+b**2+c**2)
+    if(l2>1):
+        l2=1
+    if(m2>1):
+        m2=1
+    if(n2>1):
+        n2=1
 
     return(l1,m1,n1,l2,m2,n2)
 
