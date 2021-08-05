@@ -372,7 +372,7 @@ class Project(object):
                 'use_fat': True,
                 'use_roi_clip': False,
                 'roi_clip_path':'',
-                'drift_prefix':'None'
+                'drift_prefix':['None']
             }
 
         # And copy in any new settings from the user
