@@ -1048,7 +1048,7 @@ class Topology(object):
                 Gp.nodes[n]['gid'] = recode[Gp.nodes[n]['gid']]
 
         # check for cycle and arbitrarily remove first of the edges
-        nx.write_gml(Gp,os.path.join(graph_path, 'ASUD_strat_test.gml'))
+        #nx.write_gml(Gp,os.path.join(graph_path, 'ASUD_strat_test.gml'))
         try:
             cycles = list(nx.simple_cycles(G))
             for c in cycles:

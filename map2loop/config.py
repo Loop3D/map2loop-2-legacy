@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 from .topology import Topology
+#from .map2graph import Map2Graph
 from . import (m2l_utils,
                m2l_geometry,
                m2l_interpolation,
@@ -142,7 +143,7 @@ class Config(object):
             structure_file, geology_file, fault_file, mindep_file, fold_file,
             self.tmp_path, self.bbox, c_l, proj_crs, self.local, drift_prefix, 
             self.run_flags['use_roi_clip'], self.run_flags['roi_clip_path'],self.bbox_3d)
-
+        #Map2Graph.map2graph('./test_m2g',geology_file,fault_file,mindep_file,c_l,self.run_flags['deposits'])
         # Process and store workflow params
         self.geology_file = geology_file
         self.structure_file = structure_file

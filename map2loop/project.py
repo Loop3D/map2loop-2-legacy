@@ -15,6 +15,7 @@ import networkx as nx
 from shapely.geometry import Polygon
 from matplotlib import pyplot as plt
 from .topology import Topology
+from .map2graph import Map2Graph
 from . import (
     geology_loopdata,
     structure_loopdata,
@@ -478,6 +479,7 @@ class Project(object):
             self.config.export_csv()
             self.config.run_map2model(
                 self.run_flags['deposits'], self.run_flags['aus'])
+            #Map2Graph.map2graph('./test_m2g',self.config.geology_file,self.config.fault_file,self.config.mindep_file,self.c_l,self.run_flags['deposits'])
             pbar.update(10)
 
             self.config.load_dtm(self.dtm_file if self.local else self.state)
