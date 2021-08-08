@@ -11,7 +11,8 @@ geology_loopdata = {
     'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_geol_dissolved_join_fix_mii_clip_wgs84&bbox=&srsName=EPSG:28355',
     'SA':
     'http://geo.loop-gis.org/geoserver/GSSA/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=GSSA:2m_surface_geology_28354_relage&bbox=&srs=EPSG:28354',
-    'VIC': '',
+    'VIC': 
+    'http://geo.loop-gis.org/geoserver/GSV/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=GSV:geolunit_250k_py_28355&bbox=&srs=EPSG:28355',
     'NSW': '',
     'ACT': '',
     'TAS': ''
@@ -23,7 +24,8 @@ structure_loopdata = {
     'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=outcrops_28355&bbox=&srsName=EPSG:28355',
     'SA':
     'http://geo.loop-gis.org/geoserver/GSSA/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=GSSA:sth_flinders_28354&bbox=&srs=EPSG:28354',
-    'VIC': '',
+    'VIC': 
+    'http://geo.loop-gis.org/geoserver/GSV/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=GSV:struc_28355&bbox=&srs=EPSG:28355',
     'NSW': '',
     'ACT': '',
     'TAS': ''
@@ -35,7 +37,8 @@ fault_loopdata = {
     'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_faults_folds_28355&bbox=&srsName=EPSG:28355',
     'SA':
     'http://geo.loop-gis.org/geoserver/GSSA/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=GSSA:2m_linear_structures_28354&bbox=&srs=EPSG:28354',
-    'VIC': '',
+    'VIC': 
+    'http://geo.loop-gis.org/geoserver/GSV/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=GSV:geolstructure_250k_ln_28355&bbox=&srs=EPSG:28355',
     'NSW': '',
     'ACT': '',
     'TAS': ''
@@ -47,7 +50,8 @@ fold_loopdata = {
     'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_faults_folds_28355&bbox=&srsName=EPSG:28355',
     'SA':
     'http://geo.loop-gis.org/geoserver/GSSA/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=GSSA:2m_linear_structures_28354&bbox=&srs=EPSG:28354',
-    'VIC': '',
+    'VIC':     
+    'http://geo.loop-gis.org/geoserver/GSV/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=GSV:geolstructure_250k_ln_28355&bbox=&srs=EPSG:28355',
     'NSW': '',
     'ACT': '',
     'TAS': ''
@@ -58,7 +62,8 @@ mindep_loopdata = {
     'QLD':
     'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_mindeps_28355&bbox=&srsName=EPSG:28355',
     'SA': '',
-    'VIC': '',
+    'VIC':
+    'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:mindeps_2018_28350&bbox=&srs=EPSG:28350',
     'NSW': '',
     'ACT': '',
     'TAS': ''
@@ -70,7 +75,7 @@ metafiles = {
     'https://gist.githubusercontent.com/yohanderose/7ad2ae1b36e4e0b3f27dff17eeae0cc2/raw/ec8d33e52d913e2df4658ca94e7eb467e35adccd/QLD_meta.hjson',
     'SA':
     'https://gist.githubusercontent.com/yohanderose/9401ce1ac72969e2e7fe78e64ca57212/raw/bb7afca4436b6a844053b0ae06978bf59495ed87/SA_meta.hjson',
-    'VIC': '',
+    'VIC': './source_data/VIC.hjson',
     'NSW': '',
     'ACT': '',
     'TAS': ''

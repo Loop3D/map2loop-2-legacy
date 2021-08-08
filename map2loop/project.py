@@ -15,6 +15,7 @@ import networkx as nx
 from shapely.geometry import Polygon
 from matplotlib import pyplot as plt
 from .topology import Topology
+from .map2graph import Map2Graph
 from . import (
     geology_loopdata,
     structure_loopdata,
@@ -27,7 +28,7 @@ from . import (
 
 from .config import Config
 from .m2l_utils import display, enable_quiet_mode, disable_quiet_mode, print
-from .m2l_geometry import combine_point_data
+from .m2l_geometry import combine_point_data, update_fault_layer
 
 class Project(object):
     """A high level object implementation of the map2loop workflow."""
@@ -196,7 +197,9 @@ class Project(object):
                 'polarity': False,
                 'strat_offset': True,
                 'contact_dips': True,
-                'drillholes': False
+                'drillholes': False,
+                'cover_contacts':True,
+                'cover_orientations':True
             })
         elif (workflow['model_engine'] == 'gempy'):
             workflow.update({
@@ -369,7 +372,8 @@ class Project(object):
                 'use_interpolations': True,
                 'use_fat': True,
                 'use_roi_clip': False,
-                'roi_clip_path':''
+                'roi_clip_path':'',
+                'drift_prefix':['None']
             }
 
         # And copy in any new settings from the user
@@ -475,6 +479,7 @@ class Project(object):
             self.config.export_csv()
             self.config.run_map2model(
                 self.run_flags['deposits'], self.run_flags['aus'])
+            #Map2Graph.map2graph('./test_m2g',self.config.geology_file,self.config.fault_file,self.config.mindep_file,self.c_l,self.run_flags['deposits'])
             pbar.update(10)
 
             self.config.load_dtm(self.dtm_file if self.local else self.state)
@@ -487,21 +492,21 @@ class Project(object):
             pbar.update(10)
 
             self.config.export_orientations(
-                self.run_flags['orientation_decimate'])
+                self.run_flags['orientation_decimate'],self.workflow['cover_map'])
             pbar.update(10)
             self.config.export_contacts(
-                self.run_flags['contact_decimate'], self.run_flags['intrusion_mode'])
+                self.run_flags['contact_decimate'], self.run_flags['intrusion_mode'],self.workflow['cover_map'])
             pbar.update(10)
             self.config.test_interpolation(self.run_flags['interpolation_spacing'],
                                            self.run_flags['misorientation'],
-                                           self.run_flags['interpolation_scheme'])
+                                           self.run_flags['interpolation_scheme'],self.workflow['cover_map'])
             pbar.update(10)
 
             # TODO: make all these internal, the config class already has the run_flags dictionary
             self.config.export_faults(self.run_flags['fault_decimate'], self.run_flags['min_fault_length'],
-                                      self.run_flags['fault_dip'])
+                                      self.run_flags['fault_dip'],self.workflow['cover_map'])
             self.config.process_plutons(self.run_flags['pluton_dip'], self.run_flags['pluton_form'], self.run_flags['dist_buffer'],
-                                        self.run_flags['contact_decimate'])
+                                        self.run_flags['contact_decimate'],self.workflow['cover_map'])
             pbar.update(20)
 
             # Seismic section 
@@ -510,16 +515,16 @@ class Project(object):
 
             if self.workflow["contact_dips"]:
                 self.config.propagate_contact_dips(
-                    self.run_flags['contact_dip'], self.run_flags['contact_orientation_decimate'])
+                    self.run_flags['contact_dip'], self.run_flags['contact_orientation_decimate'],self.workflow['cover_map'])
 
             if (self.workflow['formation_thickness']):
                 self.config.calc_thickness(self.run_flags['contact_decimate'], self.run_flags['null_scheme'],
                                            self.run_flags['thickness_buffer'],
-                                           self.run_flags['max_thickness_allowed'], self.c_l)
+                                           self.run_flags['max_thickness_allowed'], self.c_l,self.workflow['cover_map'])
 
             if self.workflow["fold_axial_traces"]:
                 self.config.create_fold_axial_trace_points(
-                    self.run_flags['fold_decimate'], self.run_flags['fat_step'], self.run_flags['close_dip'])
+                    self.run_flags['fold_decimate'], self.run_flags['fat_step'], self.run_flags['close_dip'],self.workflow['cover_map'])
 
             if (self.workflow['drillholes']):
                 self.config.extract_drillholes(self,self.drillhole_file)
@@ -532,7 +537,7 @@ class Project(object):
                           'contact_orientations')
             elif (self.workflow['model_engine'] == 'loopstructural'):
                 inputs = ('invented_orientations', 'fat_orientations','intrusive_orientations',
-                          'contact_orientations')
+                          'contact_orientations','cover_orientations','cover_contacts')
             elif (self.workflow['model_engine'] == 'gempy'):
                 inputs = ('invented_orientations', 'interpolated_orientations',
                           'fat_orientations', 'contact_orientations')
@@ -543,14 +548,36 @@ class Project(object):
                                     self.run_flags['use_fat'])
             pbar.update(10)
 
-            self.config.save_cmap()
+            self.config.save_cmap(self.workflow['cover_map'])
 
             # Combine multiple outputs into single graph
-
-            point_data=combine_point_data(self.config.output_path)
-            Gloop=Topology.make_Loop_graph(self.config.tmp_path,self.config.output_path,self.run_flags['fault_orientation_clusters'],self.run_flags['fault_length_clusters'],point_data)
+            config_out={
+                'project_path':os.path.normcase(self.config.project_path),
+                'geology_file':os.path.normcase(self.config.geology_file),
+                'fault_file':os.path.normcase(self.config.fault_file),
+                'fold_file':os.path.normcase(self.config.fold_file),
+                'structure_file':os.path.normcase(self.config.structure_file),
+                'mindep_file':os.path.normcase(self.config.mindep_file),
+                'section_files':self.config.section_files,
+                'drillhole_file':self.config.drillhole_file,
+                'dtb_grid_file':self.config.dtb_grid_file,
+                'cover_map_file':self.config.cover_map_file,
+                'bbox_3d':self.config.bbox_3d,
+                'step_out':self.config.step_out,
+                'dtm_crs':self.config.dtm_crs,
+                'proj_crs':self.config.proj_crs,
+                'local':self.config.local
+            }
+            point_data=combine_point_data(self.config.output_path,self.config.tmp_path)
+            Gloop=Topology.make_Loop_graph(self.config.tmp_path,self.config.output_path,self.run_flags['fault_orientation_clusters'],
+                                           self.run_flags['fault_length_clusters'],point_data,os.path.normcase(self.config.dtm_reproj_file),self.config.proj_crs,
+                                           self.config.c_l,self.config.run_flags,config_out,self.config.bbox_3d)
             nx.write_gml(Gloop, os.path.join(self.config.output_path,'loop.gml'))
-            Topology.colour_Loop_graph(self.config.output_path)
+            Topology.colour_Loop_graph(self.config.output_path,'loop')
+            #Gloop2=Topology.make_complete_Loop_graph(Gloop,self.config.tmp_path,self.config.output_path)
+            #nx.write_gml(Gloop2, os.path.join(self.config.output_path,'loop_complete.gml'))
+            update_fault_layer(self.config.tmp_path,self.config.output_path,self.c_l)
+            #Topology.colour_Loop_graph(self.config.output_path,'loop_complete')
             #self.config.update_projectfile()
             self.config.export_png()
 

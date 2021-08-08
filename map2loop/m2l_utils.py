@@ -186,8 +186,11 @@ def value_from_dtm_dtb(dtm, dtb, dtb_null, cover_map, locations):
                             "[", "").replace("]", ""))
                 else:
                     return(-999)
-            value_dtb = bilinear_interpolation(
-                delx, dely, zvals[2], zvals[3], zvals[0], zvals[1])
+            if(zvals[0]<-10000 or zvals[1]<-10000 or zvals[2]<-10000 or zvals[3]<-10000  ):
+                value_dtb=0
+            else:
+                value_dtb = bilinear_interpolation(
+                    delx, dely, zvals[2], zvals[3], zvals[0], zvals[1])
 
             return(str(value_dtm-value_dtb))
         else:
@@ -859,7 +862,10 @@ def plot_bedding_stereonets(orientations_clean, geology, c_l, quiet):
 
     orientations = gpd.sjoin(
         orientations_clean, geology, how="left", op="within")
+    is_bed = orientations[c_l['sf']].str.contains(
+        c_l['bedding'], regex=False)
 
+    orientations = orientations[is_bed] 
     groups = geology[c_l['g']].unique()
     codes = geology[c_l['c']].unique()
     print("All observations n=", len(orientations_clean))
@@ -1092,3 +1098,34 @@ def enable_quiet_mode():
 def disable_quiet_mode():
     global quiet
     quiet = False
+
+def save_dtm_mesh(dtm_path,output_path):
+    import rasterio
+    path_in=dtm_path+'/dtm_rp.tif'
+    dtm=rasterio.open(path_in)
+    band1 = dtm.read(1)
+    pixel=(dtm.bounds.right-dtm.bounds.left)/band1.shape[1]
+    band1=band1.T
+    band1.shape
+    f=[] # faces
+    v=[] #vertices
+
+    for x in range (3,band1.shape[0]-3):
+        for y in range (3,band1.shape[1]-3):
+            v.append(['v',dtm.bounds.left+x*pixel,dtm.bounds.top-y*pixel,band1[x,y]])
+
+    for y in range (3,band1.shape[1]-4):
+        for x in range (3,band1.shape[0]-4):
+                i=y+1+((x-3)*(band1.shape[1]-6))-3
+                #if(band1[x,y]>-10000 and band1[x+1,y]>-10000 and band1[x,y+1]>-10000 ):
+                f.append(['f',i,i+1,i+band1.shape[1]-1-5])
+                #if(band1[x+1,y]>-10000 and band1[x+1,y+1]>-10000 and band1[x,y+1]>-10000 ):
+                f.append(['f',i+1,i+band1.shape[1]-5,i+band1.shape[1]-6])
+
+    file=open(output_path+'/dtm.obj','w')
+    for pts in v:
+        file.write(' '.join(map(str, pts))+'\n')
+    for ind in f:
+        file.write(' '.join(map(str, ind))+'\n')
+    file.close()
+

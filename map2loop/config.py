@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 from .topology import Topology
+#from .map2graph import Map2Graph
 from . import (m2l_utils,
                m2l_geometry,
                m2l_interpolation,
@@ -132,17 +133,17 @@ class Config(object):
         self.proj_crs = proj_crs
 
         self.loop_projectfile = loopFilename
+        drift_prefix = self.run_flags['drift_prefix']
 
         # Check input maps for missing values
-        drift_prefix = kwargs.get('drift_prefix', ['None'])
         self.local = local
         #       - Check if fold file is always the same as fault or needs to be seperated
         # TODO: Allow for input as a polygon, not just a bounding box.
         structure_file, geology_file, fault_file, mindep_file, fold_file, c_l = m2l_map_checker.check_map(
             structure_file, geology_file, fault_file, mindep_file, fold_file,
-            self.tmp_path, self.bbox, c_l, proj_crs, self.local, drift_prefix,
-            self.run_flags['use_roi_clip'], self.run_flags['roi_clip_path'])
-
+            self.tmp_path, self.bbox, c_l, proj_crs, self.local, drift_prefix, 
+            self.run_flags['use_roi_clip'], self.run_flags['roi_clip_path'],self.bbox_3d)
+        #Map2Graph.map2graph('./test_m2g',geology_file,fault_file,mindep_file,c_l,self.run_flags['deposits'])
         # Process and store workflow params
         self.geology_file = geology_file
         self.structure_file = structure_file
@@ -227,11 +228,19 @@ class Config(object):
             structures.to_file(self.structure_file)
 
         # Structures
-        list1 = [
+        try:
+            list1 = [
+            'geometry', self.c_l['d'], self.c_l['dd'], self.c_l['sf'],
+            self.c_l['bo'],self.c_l['sl']
+            ]
+        except:
+            list1 = [
             'geometry', self.c_l['d'], self.c_l['dd'], self.c_l['sf'],
             self.c_l['bo']
-        ]
+            ]
+
         list2 = list(set(list1))
+        print(list2)
         sub_pts = self.structures[list2]
         structure_code = gpd.sjoin(sub_pts,
                                    self.geol_clip,
@@ -250,7 +259,8 @@ class Config(object):
         is_bed = structure_code[self.c_l['sf']].str.contains(
             self.c_l['bedding'], regex=False)
 
-        structure_clip = structure_code[is_bed]
+        #structure_clip = structure_code[is_bed]
+        structure_clip=structure_code.copy()
         structure_clip.crs = self.proj_crs
 
         if (self.c_l['otype'] == 'strike'):
@@ -355,7 +365,7 @@ class Config(object):
             i = 0
             for key in self.colour_dict.keys():
                 self.colour_dict[key] = random_colours[i]
-
+        
         self.cmap = colors.ListedColormap(self.colour_dict.values(),
                                           name='geol_key')
 
@@ -554,18 +564,18 @@ class Config(object):
 
     def calc_depth_grid(self, cover_workflow):
         dtm = self.dtm
-
-        if (not self.dtb_grid_file):
+        print("dtb_grid_file",self.dtb_grid_file)
+        if ( not self.dtb_grid_file):
             self.dtb = 0
             self.dtb_null = 0
 
             print("dtb and dtb_null set to 0")
             return
-
-        dtb_null = self.run_flags['dtb_null']
-        cover_dip = self.run_flags['cover_dip']
-        cover_spacing = self.run_flags['cover_spacing']
-
+        
+        dtb_null=self.run_flags['dtb_null'] 
+        cover_dip=self.run_flags['cover_dip'] 
+        cover_spacing=self.run_flags['cover_spacing']
+        print(cover_workflow,dtb_null,cover_dip,cover_spacing,self.cover_map_file)
         # TODO: DTB need to be defined, every function call bellow here that has a False boolean is referencing to the workflow['cover_map'] flag
         # dtb_grid = os.path.join(data_path,'young_cover_grid.tif') #obviously hard-wired for the moment
         # dtb_null = '-2147483648' #obviously hard-wired for the moment
@@ -610,15 +620,17 @@ class Config(object):
                                    self.bbox,
                                    self.proj_crs,
                                    cover_spacing,
-                                   contact_decimate=3,
+                                   self.run_flags['contact_decimate'],
                                    use_vector=True,
                                    use_grid=True)
+        self.dtb=dtb
+        self.dtb_null=dtb_null
 
-    def export_orientations(self, orientation_decimate):
+    def export_orientations(self, orientation_decimate,cover_map):
         m2l_geometry.save_orientations(self.structure_clip, self.output_path,
                                        self.c_l, orientation_decimate,
                                        self.dtm, self.dtb, self.dtb_null,
-                                       False)
+                                       cover_map)
 
         if self.quiet == 'None':
             m2l_utils.plot_points(
@@ -628,13 +640,13 @@ class Config(object):
         # Create arbitrary points for series without orientation data
         m2l_geometry.create_orientations(self.tmp_path, self.output_path,
                                          self.dtm, self.dtb, self.dtb_null,
-                                         False, self.geol_clip,
+                                         cover_map, self.geol_clip,
                                          self.structure_clip, self.c_l)
 
-    def export_contacts(self, contact_decimate, intrusion_mode):
+    def export_contacts(self, contact_decimate, intrusion_mode,cover_map):
 
         ls_dict, ls_dict_decimate = m2l_geometry.save_basal_contacts(
-            self.tmp_path, self.dtm, self.dtb, self.dtb_null, False,
+            self.tmp_path, self.dtm, self.dtb, self.dtb_null, cover_map,
             self.geol_clip, contact_decimate, self.c_l, intrusion_mode)
 
         # Remove basal contacts defined by faults, no decimation
@@ -648,7 +660,7 @@ class Config(object):
             os.path.join(self.tmp_path, 'basal_contacts.shp'))
         m2l_geometry.save_basal_contacts_csv(contacts, self.output_path,
                                              self.dtm, self.dtb, self.dtb_null,
-                                             False, contact_decimate, self.c_l)
+                                             cover_map, contact_decimate, self.c_l)
         # False in this call was already false and isn't the cover flag
         if self.quiet == "None":
             m2l_utils.plot_points(
@@ -659,7 +671,7 @@ class Config(object):
     # arbitrarily-located points and saves out four csv files of l, m & n
     # direction cosines and dip dip direction data
     def test_interpolation(self, interpolation_spacing, misorientation,
-                           interpolation_scheme):
+                           interpolation_scheme,cover_map):
 
         geology_file = self.geol_clip_file
         structure_file = self.structure_clip_file
@@ -676,7 +688,7 @@ class Config(object):
         group_girdle = m2l_utils.plot_bedding_stereonets(
             orientations, self.geology, self.c_l, quiet_interp)
         super_groups, self.use_gcode3 = Topology.super_groups_and_groups(
-            group_girdle, self.tmp_path, misorientation, self.c_l)
+            group_girdle, self.tmp_path, misorientation,self.c_l,cover_map)
         # print(super_groups)
         # print(self.geology['GROUP_'].unique())
         bbox = self.bbox
@@ -719,13 +731,15 @@ class Config(object):
         dip_dir_grid = np.ones((y, x))
         dip_dir_grid = dip_dir_grid * -999
         contact_grid = np.ones((y, x))
-        contact_grid = dip_dir_grid * -999
+        contact_grid = dip_dir_grid * -999        
+        polarity_grid = np.ones((y, x))
+        polarity_grid = polarity_grid * -999
         for row in combo_interp:
             r = int((row[1] - bbox[1]) / self.spacing)
             c = int((row[0] - bbox[0]) / self.spacing)
             dip_grid[r, c] = float(row[5])
             dip_dir_grid[r, c] = float(row[6])
-
+            polarity_grid[r,c]=float(row[4])
         for row in contact_interp:
             r = int((row[1] - bbox[1]) / self.spacing)
             c = int((row[0] - bbox[0]) / self.spacing)
@@ -733,6 +747,7 @@ class Config(object):
 
         self.dip_grid = dip_grid
         self.dip_dir_grid = dip_dir_grid
+        self.polarity_grid = polarity_grid
 
         if self.quiet == 'None':
             print('interpolated dips')
@@ -759,16 +774,18 @@ class Config(object):
                        vmax=360)
             plt.show()
 
-    def save_cmap(self):
+    def save_cmap(self,cover_map):
         """Create a colourmap for the model using the colour code
         """
         all_sorts = pd.read_csv(
             os.path.join(self.tmp_path, 'all_sorts_clean.csv'))
 
+        if(cover_map):
+            self.colour_dict['cover']='#FFFFC0'
         colours = []
         for code in all_sorts['code']:
             colours.append([self.colour_dict[code]])
-
+            
         data = colours
         expected_extra_cols = pd.DataFrame(columns=['colour'], data=data)
         all_sorts = pd.concat([all_sorts, expected_extra_cols], axis=1)
@@ -776,7 +793,7 @@ class Config(object):
                          ",",
                          index=None)
 
-    def export_faults(self, fault_decimate, min_fault_length, fault_dip):
+    def export_faults(self, fault_decimate, min_fault_length, fault_dip,cover_map):
         # fault_decimate = 5
         # min_fault_length = 5000
         # fault_dip = 90
@@ -791,12 +808,12 @@ class Config(object):
         if (faults_len > 0):
             m2l_interpolation.process_fault_throw_and_near_faults_from_grid(
                 self.tmp_path, self.output_path, self.dtm_reproj_file,
-                self.dtb, self.dtb_null, False, self.c_l, self.proj_crs,
+                self.dtb, self.dtb_null, cover_map, self.c_l, self.proj_crs,
                 self.bbox, self.scheme, self.dip_grid, self.dip_dir_grid,
                 self.x, self.y, self.spacing)
 
     def process_plutons(self, pluton_dip, pluton_form, dist_buffer,
-                        contact_decimate):
+                        contact_decimate,cover_map):
         # pluton_dip = 45
         pluton_dip = str(pluton_dip)
         self.pluton_form = pluton_form  # 'domes'
@@ -806,7 +823,7 @@ class Config(object):
 
         m2l_geometry.process_plutons(self.tmp_path, self.output_path,
                                      self.geol_clip, self.local, self.dtm,
-                                     self.dtb, self.dtb_null, False,
+                                     self.dtb, self.dtb_null, cover_map,
                                      self.pluton_form, pluton_dip,
                                      contact_decimate, self.c_l)
 
@@ -861,7 +878,7 @@ class Config(object):
                               header=True)
 
     def propagate_contact_dips(self, contact_dip,
-                               contact_orientation_decimate):
+                               contact_orientation_decimate,cover_map):
         print("Propagating dips along contacts...")
         orientations = pd.read_csv(
             os.path.join(self.output_path, 'orientations.csv'), ", ")
@@ -872,19 +889,19 @@ class Config(object):
         # contact_orientation_decimate = 5
         m2l_geometry.save_basal_contacts_orientations_csv(
             contacts, orientations, self.geol_clip, self.tmp_path,
-            self.output_path, self.dtm, self.dtb, self.dtb_null, False,
+            self.output_path, self.dtm, self.dtb, self.dtb_null, cover_map,
             contact_orientation_decimate, self.c_l, contact_dip, self.dip_grid,
-            self.spacing, self.bbox)
+            self.spacing, self.bbox,self.polarity_grid)
 
     def calc_thickness(self, contact_decimate, null_scheme, thickness_buffer,
-                       max_thickness_allowed, cl):
+                       max_thickness_allowed, cl,cover_map):
         # Estimate formation thickness and normalised formation thickness
         geology_file = os.path.join(self.tmp_path, 'basal_contacts.shp')
         # contact_decimate = 5
         # null_scheme = 'null'
         m2l_interpolation.save_contact_vectors(geology_file, self.tmp_path,
                                                self.dtm, self.dtb,
-                                               self.dtb_null, False, self.bbox,
+                                               self.dtb_null, cover_map, self.bbox,
                                                self.c_l, null_scheme,
                                                contact_decimate)
 
@@ -913,20 +930,20 @@ class Config(object):
                 'norm_th', 'x', 'y', True, 'numeric')
 
     def create_fold_axial_trace_points(self, fold_decimate, fat_step,
-                                       close_dip):
+                                       close_dip,cover_map):
         # fold_decimate = 5
         folds_clip = gpd.read_file(self.fold_file)
         if (len(folds_clip) > 0):
 
             m2l_geometry.save_fold_axial_traces(self.fold_file,
                                                 self.output_path, self.dtm,
-                                                self.dtb, self.dtb_null, False,
+                                                self.dtb, self.dtb_null, cover_map,
                                                 self.c_l, fold_decimate)
 
             # TODO : better approximation / multithread / numba
             m2l_geometry.save_fold_axial_traces_orientations(
                 self.fold_file, self.output_path, self.tmp_path, self.dtm,
-                self.dtb, self.dtb_null, False, self.c_l, self.proj_crs,
+                self.dtb, self.dtb_null, cover_map, self.c_l, self.proj_crs,
                 fold_decimate, fat_step, close_dip, self.scheme, self.bbox,
                 self.spacing, self.dip_grid, self.dip_dir_grid)
 

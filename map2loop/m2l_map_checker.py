@@ -37,12 +37,24 @@ def explode_polylines(indf, c_l, dst_crs):
     return outdf
 
 
-def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, tmp_path, bbox, c_l, dst_crs, local_paths, drift_prefix,use_roi_clip,roi_clip_path):
+def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, tmp_path, bbox, c_l, dst_crs, local_paths, drift_prefix,use_roi_clip,roi_clip_path,bbox_3d):
 
     # print(gpd.read_file(geology_file).columns)
     # print(gpd.read_file(fault_file).columns)
     # print(gpd.read_file(fold_file).columns)
     # print(gpd.read_file(mindep_file).columns)
+    m2l_errors = []
+    m2l_warnings = []
+    if(bbox[3]<bbox[1] or bbox[2]<bbox[0] or bbox_3d['top']<bbox_3d['base']):
+        m2l_errors.append(
+                'bounding box has negative range for x or y or z')
+    
+    f=open(tmp_path+'/bbox.csv','w')
+    f.write('minx,miny,maxx,maxy,lower,upper\n')
+    ostr='{},{},{},{},{},{}\n'.format(bbox[0],bbox[1],bbox[2],bbox[3],bbox_3d['base'],bbox_3d['top'])
+    f.write(ostr)
+    f.close()
+
     if(use_roi_clip):
         polygo=gpd.read_file(roi_clip_path)
     else:
@@ -51,8 +63,6 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
         bbox_geom = Polygon(zip(x_point_list, y_point_list))
         polygo = gpd.GeoDataFrame(index=[0], crs=dst_crs, geometry=[bbox_geom])
 
-    m2l_errors = []
-    m2l_warnings = []
     for file_name in (structure_file, geology_file, fault_file, fold_file):
         if not file_name.startswith("http") and not os.path.isfile(file_name):
             m2l_errors.append('file '+file_name+' not found')
@@ -165,15 +175,18 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
                     geology[c_l[code]].str.replace(",", " ")
                     if(code == 'c' or code == 'g' or code == 'g2'):
-                        geology[c_l[code]].str.replace(" ", "_")
-                        geology[c_l[code]].str.replace("-", "_")
+                        geology[c_l[code]]=geology[c_l[code]].str.replace(" ", "_")
+                        geology[c_l[code]]=geology[c_l[code]].str.replace("-", "_")
+                        geology[c_l[code]]=geology[c_l[code]].str.replace("?", "_")
 
                     nans = geology[c_l[code]].isnull().sum()
                     if(nans > 0):
                         m2l_warnings.append(''+str(nans)+' NaN/blank found in column "'+str(
                             c_l[code])+'" of geology file, replacing with 0')
                         geology[c_l[code]].fillna("0", inplace=True)
+            print('drift_prefix',drift_prefix)
             for drift in drift_prefix:
+                print('drift',drift)
                 geology = geology[~geology[c_l['u']].str.startswith(drift)]
 
             show_metadata(geology, "geology layer")
@@ -447,7 +460,6 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             orientations.crs = dst_crs
             orientations[c_l['dd']] = pd.to_numeric(orientations[c_l['dd']])
             orientations[c_l['d']] = pd.to_numeric(orientations[c_l['d']])
-
             orientations.to_file(structure_file)
 
         try:
@@ -561,7 +573,7 @@ def round_vertices(layer_file, precision, output_file):
     # https://gis.stackexchange.com/questions/321518/rounding-coordinates-to-5-decimals-in-geopandas
 
 
-def densify(geom):
+def densify(geom,spacing):
     wkt = geom.wkt  # Get wkt
     geom = ogr.CreateGeometryFromWkt(wkt)
     # Modify the geometry such it has no segment longer than the given (maximum) length.
