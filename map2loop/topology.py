@@ -1086,7 +1086,8 @@ class Topology(object):
         # add formation stratigraphy to graph as nodes
         Astrat=Astrat.set_index('code')
         for ind,s in Astrat.iterrows():
-            Gloop.add_node(s.name,s_colour=s['colour'],ntype="formation",
+            if(s.name!='cover'):
+                Gloop.add_node(s.name,s_colour=s['colour'],ntype="formation",
                                     group=s['group'],
                                     StratType=s['strat_type'],
                                     uctype=s['uctype'],
@@ -1097,6 +1098,19 @@ class Topology(object):
                                     MaxAge=strats.loc[s.name][c_l['max']]
                                     
                         )
+            else:
+                Gloop.add_node(s.name,s_colour=s['colour'],ntype="formation",
+                                    group=s['group'],
+                                    StratType=s['strat_type'],
+                                    uctype=s['uctype'],
+                                    GroupNumber=s['group number'],
+                                    IndexInGroup=s['index in group'],
+                                    NumberInGroup=s['number in group'],
+                                    MinAge=0,
+                                    MaxAge=1
+                                    
+                        )
+
         
         # add formation-formation stratigraphy to graph as edges
         i=0
