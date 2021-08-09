@@ -3577,7 +3577,7 @@ def lmn_from_line_dip(x1, y1, z1, x2, y2, z2, dip):
 
 def update_fault_layer(tmp_path,output_path,c_l):
     faults=gpd.read_file(tmp_path+'/faults_clip.shp')
-    faults['name']='Fault_'+faults[c_l['o']]
+    faults['name']=faults[c_l['o']].apply(lambda id: 'Fault_' + str(id))
     #display(faults)
     Gloop=nx.read_gml(output_path+'/loop.gml')
     fnodes_all=[]
