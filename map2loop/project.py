@@ -293,9 +293,6 @@ class Project(object):
         self.update_workflow(model_engine)
 
         self.loopFilename = loopFilename
-        if self.loopFilename is not None:
-            if not os.path.exists(loopFilename):
-                sys.exit("That project file path does not exist.")
 
         if bbox_3d["minx"] == 0 and bbox_3d["maxx"] == 0:
             bbox_3d.update(
