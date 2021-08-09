@@ -1644,9 +1644,11 @@ def display_LS_map(model, dtm, geol_clip, faults_clip, dst_crs, use_cmap, cmap,
 
 def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs, overwrite=False):
     if loopFilename is None:
-        from pathlib import Path
-        output_path_clean = Path(output_path)
-        loopFilename = os.path.join(output_path,output_path_clean.name+ '.loop3d')
+        loopFilename = os.path.join(output_path,os.path.basename(output_path)+ '.loop3d')
+
+    if not os.path.isdir(os.path.dirname(loopFilename)):
+        print('(ERROR) Output path ' + os.path.dirname(loopFilename) + ' does not exist aborting project file export')
+        return
 
     # Check that file exist and check version matches
     overwriteVersionMismatchedFile = False
@@ -1686,7 +1688,9 @@ def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs, o
                                 spacing=[1000, 1000, 500],
                                 preference="utm")
             else:
-                LoopProjectFile.Set(loopFilename,'extents',**existingExtents)
+                resp = LoopProjectFile.Set(loopFilename,'extents',**existingExtents)
+                if resp['errorFlag']:
+                    print(resp['errorString'])
 
     form2supergroup = pd.read_csv(
         os.path.join(tmp_path, 'all_sorts_clean.csv'),
