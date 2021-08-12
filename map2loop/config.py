@@ -416,12 +416,12 @@ class Config(object):
         if self.mindeps is not None:
             run_log = map2model.run(self.graph_path, self.geology_file_csv,
                                     self.fault_file_csv, self.mindep_file_csv,
-                                    self.bbox_3d, self.c_l, quiet_m2m,
+                                    self.bbox_3d, self.c_l, #quiet_m2m,
                                     deposits)
         else:
             run_log = map2model.run(self.graph_path, self.geology_file_csv,
                                     self.fault_file_csv, "", self.bbox_3d,
-                                    self.c_l, quiet_m2m,
+                                    self.c_l, #quiet_m2m,
                                     deposits)
 
         print(run_log)
@@ -1011,6 +1011,8 @@ class Config(object):
                                            self.output_path, fault_parse_figs)
 
         # TODO: Figures sometimes look a bit squashed in notebooks
+        #save object-specifc interpolation parameters
+        m2l_geometry.save_interpolation_parameters(self.output_path,self.tmp_path)
 
     def update_projectfile(self):
         self.loop_projectfile = export_to_projectfile(self.loop_projectfile,
