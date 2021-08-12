@@ -373,7 +373,12 @@ class Project(object):
                 'use_fat': True,
                 'use_roi_clip': False,
                 'roi_clip_path':'',
-                'drift_prefix':['None']
+                'drift_prefix':['None'],
+                'fault_fault_weight':3,
+                'fault_weight':1,
+                'formation_weight':7,
+                'formation_formation_weight':9,
+                'fault_formation_weight':5
             }
 
         # And copy in any new settings from the user
@@ -574,10 +579,21 @@ class Project(object):
                                            self.config.c_l,self.config.run_flags,config_out,self.config.bbox_3d)
             nx.write_gml(Gloop, os.path.join(self.config.output_path,'loop.gml'))
             Topology.colour_Loop_graph(self.config.output_path,'loop')
-            #Gloop2=Topology.make_complete_Loop_graph(Gloop,self.config.tmp_path,self.config.output_path)
-            #nx.write_gml(Gloop2, os.path.join(self.config.output_path,'loop_complete.gml'))
+            Map2Graph.map2graph(self.config.output_path,self.config.geology_file,self.config.fault_file,
+                self.config.mindep_file,self.config.c_l,self.config.run_flags['deposits'],
+                self.config.run_flags['fault_orientation_clusters'],self.config.run_flags['fault_length_clusters'],
+                self.config.run_flags['fault_fault_weight'],
+                self.config.run_flags['fault_weight'],
+                self.config.run_flags['formation_weight'],
+                self.config.run_flags['formation_formation_weight'],
+                self.config.run_flags['fault_formation_weight'])
+            Map2Graph.granular_map2graph(self.config.output_path,self.config.geology_file,self.config.fault_file,self.config.mindep_file,self.config.c_l,self.config.run_flags['deposits'],
+                self.config.run_flags['fault_fault_weight'],
+                self.config.run_flags['fault_weight'],
+                self.config.run_flags['formation_weight'],
+                self.config.run_flags['formation_formation_weight'],
+                self.config.run_flags['fault_formation_weight'])
             update_fault_layer(self.config.tmp_path,self.config.output_path,self.c_l)
-            #Topology.colour_Loop_graph(self.config.output_path,'loop_complete')
             #self.config.update_projectfile()
             self.config.export_png()
 

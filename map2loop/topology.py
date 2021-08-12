@@ -640,6 +640,9 @@ class Topology(object):
                     GD[f1][f2]['angle']=angle
                     GD[f1][f2]['topol']=topol
 
+        for f in unique_list:
+            if(not GD.has_node('Fault_'+f)):
+                GD.add_node('Fault_'+f)
 
         nx.write_gml(GD, os.path.join(tmp_path, "fault_network.gml"))
 
