@@ -725,6 +725,7 @@ class Map2Graph(object):
         geology_exploded=geology.explode()
         geology_exploded.reset_index(inplace=True)
         geology_exploded['idx']=geology_exploded.index
+        geology_exploded.crs=geology.crs
         return(geology_exploded)
     
     def granular_strat_graph(output_path,geology_exploded,c_l,formation_weight,formation_formation_weight):
@@ -782,31 +783,26 @@ class Map2Graph(object):
             commodities.append('NONE')
         fault_tmp=fault.copy()
         geology_exploded_tmp=geology_exploded.copy()
-        #i_contacts_gdf_tmp=i_contacts_gdf.copy()
+        geology_exploded_tmp.crs=geology_exploded.crs
         mindep_geology = gpd.sjoin(mindep, geology_exploded, how="left", op="within")
-
+        
         for com in commodities:
             if(not com == 'NONE'):
-                mindep_com=mindep[mindep[c_l['mcom']]==com]
-                if(len(mindep)>0):
+                mindep_com=mindep_geology[mindep_geology[c_l['mscm']]==com]
+
+                if(len(mindep_com)>0):
                 
                     for ind,m in mindep_com.iterrows():
                         fault_tmp['d_'+str(ind)]=fault_tmp.distance(Point(m.geometry))
 
-                    for ind,m in mindep_com.iterrows():
-                        geology_exploded_tmp['d_'+str(ind)]=geology_exploded.distance(Point(m.geometry))
-
-                    #for ind,m in mindep_com.iterrows():
-                        #i_contacts_gdf_tmp['d_'+str(ind)]=i_contacts_gdf_tmp.distance(Point(m.geometry))
-
-                    bc=[]
-                    for ind,b in geology_exploded_tmp.iterrows():
-                        basal_count=0
+                    gc=[]
+                    for ind,g in geology_exploded_tmp.iterrows():
+                        fm_count=0
                         for ind2,m in mindep_com.iterrows():
-                            if(b['d_'+str(ind2)]<close_b):
-                                basal_count=basal_count+1
-                        bc.append(basal_count)
-                    geology_exploded[com+'_min']=bc    
+                            if(m[c_l['c']]==g[c_l['c']]):
+                                fm_count=fm_count+1
+                        gc.append(fm_count)
+                    geology_exploded[com+'_min']=gc    
 
                     fc=[]
                     for ind,f in fault_tmp.iterrows():
@@ -824,24 +820,27 @@ class Map2Graph(object):
                         Gloop.nodes['Fault_'+f[c_l['o']]][com+'_min']=f[com+'_min']
 
                 else:
-                    for ind,b in geology_exploded_tmp.iterrows():
-                        Gloop.nodes[b.name][com+'_min']=-1
+                    for ind,b in geology_exploded.iterrows():
+                        Gloop.nodes[str(ind)][com+'_min']=-1
 
                     for ind,f in fault.iterrows():
                         Gloop.nodes['Fault_'+f[c_l['o']]][com+'_min']=-1
+                    
+                    geology_exploded[com+'_min']=-1    
 
                 
                 
         if(len(geology_exploded)>0):
             geology_exploded.to_file(os.path.join(output_path,'exploded_geology_min.shp'))
         if(len(mindep_geology)>0):
-            mindep_geology.to_file(os.path.join(output_path,'mindep_geology.shp'))
+            mindep_geology.to_file(os.path.join(output_path,'mindep_geology.shp'))    
         if(len(fault)>0):
             fault.to_file(os.path.join(output_path,'mindep_fault.shp')) 
             
         nx.write_gml(Gloop, os.path.join(output_path,'granular_pre_loop_mindep.gml'))
-        Topology.colour_Loop_graph(output_path, 'granular_pre_loop_mindep')
+        Topology.colour_Loop_graph( output_path,'granular_pre_loop_mindep')
         Map2Graph.fix_Loop_graph(output_path,'granular_pre_loop_mindep_colour')
+
 
     def granular_fault_formation_intersections(Gloop,fault_clean,geology_exploded,c_l,fault_formation_weight):
 
