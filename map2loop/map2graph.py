@@ -15,9 +15,9 @@ from . import project as Project
 from . import config as Config
 from .m2l_utils import display, print
 
-close_f=2000
-close_b=2000
-close_i=2000
+close_f=1000
+close_b=1000
+close_i=1000
 fault_clip_buffer=.01
 snap_buffer=.5
 
@@ -280,7 +280,7 @@ class Map2Graph(object):
 
                         ind2=ind2+1
 
-            nx.write_gml(Gfault, os.path.join(output_path,'fault_network.gml'))
+            nx.write_gml(Gfault, os.path.join(output_path,'pre_loop_fault_network.gml'))
 
             return(Gloop)
     
@@ -404,7 +404,10 @@ class Map2Graph(object):
 
                     for ind,i in i_contacts_gdf.iterrows():
                         Gloop.nodes[i[c_l['c']].replace(" ","_").replace("-","_")][com+'_min']=-1
-                
+
+                    i_contacts_gdf[com+'_min']=-1 
+                    b_contacts_gdf[com+'_min']=-1 
+                    fault[com+'_min']=-1
         
         if(len(i_contacts_gdf)>0):
             i_contacts_gdf.to_file(os.path.join(output_path,'igneous_contacts.shp'))
@@ -460,7 +463,7 @@ class Map2Graph(object):
                             fault_formation_weight=5):
         if (not os.path.isdir(output_path)):
             os.mkdir(output_path)
-
+        
         mindep,fault_clean,geology_clean,geology_clean_nona = Map2Graph.clean_inputs(geology_file,fault_file,mindep_file)
         groups,strats,all_contacts,Gloop = Map2Graph.strat_graph(geology_clean,output_path,c_l)
         Map2Graph.fix_Loop_graph(output_path,'pre_loop')
@@ -827,6 +830,7 @@ class Map2Graph(object):
                         Gloop.nodes['Fault_'+f[c_l['o']]][com+'_min']=-1
                     
                     geology_exploded[com+'_min']=-1    
+                    fault[com+'_min']=-1    
 
                 
                 
