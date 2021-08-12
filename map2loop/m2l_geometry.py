@@ -1610,6 +1610,14 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
 
     unique_contacts = set(all_contacts['formation'])
     # Remove groups that don't have any contact info
+    print("--------------------------")
+    print('all_groups')
+    print(all_groups)
+    print('unique_contacts')
+    print(unique_contacts)
+    print('unique_allsorts_contacts')
+    print(unique_allsorts_contacts)
+    print("--------------------------")
     no_contacts = []
     groups = []
     for agroup in all_groups:
@@ -1621,7 +1629,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
                     break
         if(not found):
             no_contacts.append(agroup)
-            # print('no contacts for the group:',agroup)
+            print('no contacts for the group:',agroup)
         else:
             groups.append(agroup)
 
@@ -1660,20 +1668,20 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     fgp.close()
 
     # print(all_groups,use_group)
-
-    # Remove orientations with no equivalent formations info
-    for agroup in all_groups:
-        found = False
-        for ano in all_orientations.iterrows():
-            # print(ano[1]['formation'])
-            # print(all_sorts.loc[ano[1]['formation']]['group'])
-            if(ano[1]['formation'] in unique_allsorts_contacts):
-                if(all_sorts.loc[ano[1]['formation']]['group'] in agroup and all_sorts.loc[ano[1]['formation']]['group'] in use_group):
-                    found = True
-                    break
-        if(not found):
-            no_contacts.append(agroup)
-            print('no orientations for the group:', agroup)
+    if(False):
+        # Remove orientations with no equivalent formations info
+        for agroup in all_groups:
+            found = False
+            for ano in all_orientations.iterrows():
+                # print(ano[1]['formation'])
+                # print(all_sorts.loc[ano[1]['formation']]['group'])
+                if(ano[1]['formation'] in unique_allsorts_contacts):
+                    if(all_sorts.loc[ano[1]['formation']]['group'] in agroup and all_sorts.loc[ano[1]['formation']]['group'] in use_group):
+                        found = True
+                        break
+            if(not found):
+                no_contacts.append(agroup)
+                print('no orientations for the group:', agroup)
 
     # print(no_contacts)
 
@@ -3594,3 +3602,52 @@ def update_fault_layer(tmp_path,output_path,c_l):
     new_faults=faults.merge(fault_data,on='name')
     new_faults.crs=faults.crs
     new_faults.to_file(tmp_path+'/faults_clip_data.shp')
+
+def save_interpolation_parameters(output_path,tmp_path):
+    Afaults = pd.read_csv(os.path.join(output_path, 'fault_dimensions.csv'), ",")
+    Astrat = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), ",")
+    Astrat.drop_duplicates(subset='group',inplace=True)
+    Astrat.set_index('group',inplace=True)
+    object_ip={}
+    index=0
+    for f in Afaults['Fault']:
+        object_ip[index]={'objectname':f,
+                          'objecttype':'fault',
+                          'interpolatortype':'PLI',
+                          'nelements':1e5,
+                          'regularisation':'0.1,0.1,0.1',
+                          'step':10,
+                          'fault_buffer':0.3,
+                          'solver':'cg',
+                          'cpw':10,
+                          'npw':10
+                          }
+        index=index+1
+    
+    sgi=0
+    supergroups = {}
+    with open(os.path.join(tmp_path, 'super_groups.csv')) as sgf:
+        lines = sgf.readlines()
+        for l in lines:
+            for g in l.split(','):
+                g = g.replace('-', '_').replace(' ', '_').rstrip()
+                if (g):
+                    supergroups[sgi] = g
+
+            sgi += 1
+
+    for s in supergroups:
+        object_ip[index]={'objectname':'supergroup_'+str(s),
+                          'objecttype':Astrat.loc[supergroups[s]]['strat_type'],
+                          'interpolatortype':'PLI',
+                          'nelements':1e5,
+                          'regularisation':'0.1',
+                          'buffer':1.8,
+                          'solver':'cg',
+                          'cpw':10,
+                          'npw':10
+                        }
+        index=index+1
+
+    object_ip_df=pd.DataFrame.from_dict(object_ip, orient='index')
+    object_ip_df.to_csv(os.path.join(output_path,'object_ip.csv'),index=None)
