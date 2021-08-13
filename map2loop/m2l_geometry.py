@@ -1689,12 +1689,19 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
 
     fas = open(os.path.join(tmp_path, 'all_sorts_clean.csv'), "w")
     fas.write(
-        'index,group number,index in group,number in group,code,group,uctype\n')
+        'index,group number,index in group,number in group,code,group,supergroup,uctype\n')
+    
+    sgf = open(os.path.join(tmp_path, 'super_groups.csv')) 
+    lines = sgf.readlines()
+    sgf.close()
 
     for a_sort in all_sorts.iterrows():
         if(a_sort[1]['group'] not in no_contacts):
-            ostr = "{},{},{},{},{},{},{}\n"\
-                .format(a_sort[1]['index'], a_sort[1]['group number'], a_sort[1]['index in group'], a_sort[1]['number in group'], a_sort[0], a_sort[1]['group'], 'erode')
+            for sg in range(len(lines)):
+                if(a_sort[1]['group'] in lines[sg]):
+                    supergroup='supergroup_'+str(sg)
+            ostr = "{},{},{},{},{},{},{},{}\n"\
+                .format(a_sort[1]['index'], a_sort[1]['group number'], a_sort[1]['index in group'], a_sort[1]['number in group'], a_sort[0], a_sort[1]['group'],supergroup, 'erode')
             # ostr = str(a_sort[1]['index'])+","+str(a_sort[1]['group number'])+","+str(a_sort[1]['index in group'])+","+str(a_sort[1]['number in group'])+","+a_sort[0]+","+a_sort[1]['group']+",erode\n"
             fas.write(ostr)
     fas.close()
