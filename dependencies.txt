@@ -1,7 +1,7 @@
 numpy
 pandas
 geopandas
-pyproj=2.6.0
+pyproj
 shapely
 rasterio
 descartes
@@ -10,8 +10,8 @@ networkx
 scipy
 owslib
 tqdm
-hjson
-mplstereonet
-loopprojectfile
 map2model
-cftime=1.4.0
+mplstereonet
+hjson
+loopprojectfile
+cftime>=1.4.0

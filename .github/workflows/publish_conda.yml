@@ -12,7 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest",  "windows-latest"] #"macos-latest",
-        python-version: ["3.7","3.9"]
+        python-version: ["3.7"]
     steps:
       - uses: conda-incubator/setup-miniconda@v2
         with:
@@ -32,8 +32,8 @@ jobs:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN  }}
         shell: bash -l {0}
         run: |
-           conda install -c conda-forge -c loop3d conda-build scikit-build cython anaconda-client -y --file dependencies${{ matrix.python-version }}.txt
-           conda build -c anaconda -c conda-forge -c loop3d --output-folder conda conda
+           conda install -c conda-forge -c loop3d conda-build scikit-build cython anaconda-client conda-verify -y
+           conda build -c conda-forge -c loop3d --output-folder conda conda
            conda install anaconda-client -y
       - name: upload windows
         env:

@@ -17,7 +17,7 @@ requirements:
   host:
     - pip
     - python
-    - pybind11
+    # - pybind11
     - setuptools
   run:
     - python
@@ -37,7 +37,7 @@ requirements:
     - mplstereonet
     - hjson
     - loopprojectfile
-    - cftime=1.4.0
+    - cftime>=1.4.0
 
 # test:
 #   imports:
