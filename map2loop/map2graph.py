@@ -59,7 +59,8 @@ class Map2Graph(object):
                         all_contacts.append([ind,ind2,g1_snapped.buffer(0).intersection(g2.geometry.buffer(0))])
 
         groups=geology_clean.drop_duplicates(subset=[c_l['g']])
-        groups.reset_index(inplace=True)
+        #groups.reset_index(inplace=True)
+        groups.index= pd.RangeIndex(start=0, stop=len(groups), step=1)
         groups['order'] = groups.index
         groups.set_index([c_l['g']],inplace=True)
             
@@ -190,10 +191,16 @@ class Map2Graph(object):
                         i=i+1
             
         df = DataFrame.from_dict(igneous_contacts, "index")
-        i_contacts_gdf = GeoDataFrame(df, crs=geology_clean.crs, geometry='geometry')
+        if(len(df)>0):
+            i_contacts_gdf = GeoDataFrame(df, crs=geology_clean.crs, geometry='geometry')
+        else:
+            i_contacts_gdf=DataFrame.from_dict({}, "index")
 
         df = DataFrame.from_dict(not_igneous_contacts, "index")
-        b_contacts_gdf = GeoDataFrame(df, crs=geology_clean.crs, geometry='geometry')
+        if(len(df)>0):
+            b_contacts_gdf = GeoDataFrame(df, crs=geology_clean.crs, geometry='geometry')
+        else:
+            b_contacts_gdf=DataFrame.from_dict({}, "index")
 
         return(Gloop,i_contacts_gdf,b_contacts_gdf)
 
@@ -349,10 +356,12 @@ class Map2Graph(object):
             fault_tmp['d_'+str(ind)]=fault_tmp.distance(Point(m.geometry))
 
         for ind,m in mindep_sub.iterrows():
-            b_contacts_gdf_tmp['d_'+str(ind)]=b_contacts_gdf_tmp.distance(Point(m.geometry))
+            if(len(b_contacts_gdf_tmp)>0):
+                b_contacts_gdf_tmp['d_'+str(ind)]=b_contacts_gdf_tmp.distance(Point(m.geometry))
 
         for ind,m in mindep_sub.iterrows():
-            i_contacts_gdf_tmp['d_'+str(ind)]=i_contacts_gdf_tmp.distance(Point(m.geometry))
+            if(len(i_contacts_gdf_tmp)>0):
+                i_contacts_gdf_tmp['d_'+str(ind)]=i_contacts_gdf_tmp.distance(Point(m.geometry))
 
         for com in commodities:
             if(not com == 'NONE'):
@@ -367,7 +376,8 @@ class Map2Graph(object):
                             if(b['d_'+str(ind2)]<close_b ):
                                 basal_count=basal_count+1
                         bc.append(basal_count)
-                    b_contacts_gdf[com+'_min']=bc    
+                    if(len(b_contacts_gdf_tmp)>0):
+                        b_contacts_gdf[com+'_min']=bc    
 
                     fc=[]
                     for ind,f in fault_tmp.iterrows():
@@ -385,7 +395,8 @@ class Map2Graph(object):
                             if(i['d_'+str(ind2)]<close_i):
                                 igneous_count=igneous_count+1
                         ic.append(igneous_count)
-                    i_contacts_gdf[com+'_min']=ic 
+                    if(len(i_contacts_gdf_tmp)>0):
+                        i_contacts_gdf[com+'_min']=ic 
 
                     for ind,b in b_contacts_gdf.iterrows():
                         Gloop.nodes[b[c_l['c']].replace(" ","_").replace("-","_")][com+'_min']=b[com+'_min']
@@ -405,8 +416,10 @@ class Map2Graph(object):
                     for ind,i in i_contacts_gdf.iterrows():
                         Gloop.nodes[i[c_l['c']].replace(" ","_").replace("-","_")][com+'_min']=-1
 
-                    i_contacts_gdf[com+'_min']=-1 
-                    b_contacts_gdf[com+'_min']=-1 
+                    if(len(i_contacts_gdf_tmp)>0):
+                        i_contacts_gdf[com+'_min']=-1 
+                    if(len(b_contacts_gdf_tmp)>0):
+                        b_contacts_gdf[com+'_min']=-1 
                     fault[com+'_min']=-1
         
         if(len(i_contacts_gdf)>0):
@@ -726,7 +739,7 @@ class Map2Graph(object):
     def granular_explode_geology(geology):
 
         geology_exploded=geology.explode()
-        geology_exploded.reset_index(inplace=True)
+        geology_exploded.index= pd.RangeIndex(start=0, stop=len(geology_exploded), step=1)
         geology_exploded['idx']=geology_exploded.index
         geology_exploded.crs=geology.crs
         return(geology_exploded)
