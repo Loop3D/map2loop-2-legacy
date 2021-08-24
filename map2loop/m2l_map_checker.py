@@ -126,7 +126,16 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                 geology[c_l['o']] = geology.index
 
             #make each pluton its own formatiion and group
+            if( not c_l['r1'] in geology.columns):
+                m2l_warnings.append('No extra litho for geology polygons')
+                c_l['r1'] = 'r1'
+                geology[c_l['r1']] = 'Nope'
+            if( not c_l['ds'] in geology.columns):
+                m2l_warnings.append('No extra litho for geology polygons')
+                c_l['ds'] = 'ds'
+                geology[c_l['ds']] = 'Nope'
             geology[c_l['r1']].fillna('not known', inplace=True)
+            geology[c_l['ds']].fillna('not known', inplace=True)
             geol_clip_tmp=geology.copy(deep=False)
             print('raw',len(geol_clip_tmp))
             geol_clip_tmp.crs=geology.crs
@@ -170,10 +179,6 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             geology[c_l['g']].fillna(geology[c_l['g2']], inplace=True)
             geology[c_l['g']].fillna(geology[c_l['c']], inplace=True)
 
-            if(c_l['r1'] == 'No_col' or not c_l['r1'] in geology.columns):
-                m2l_warnings.append('No extra litho for geology polygons')
-                c_l['r1'] = 'r1'
-                geology[c_l['r1']] = 'Nope'
 
             if(c_l['r2'] == 'No_col' or not c_l['r2'] in geology.columns):
                 m2l_warnings.append('No more extra litho for geology polygons')
