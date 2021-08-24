@@ -125,7 +125,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                 geology = geology.reset_index()
                 geology[c_l['o']] = geology.index
 
-            #make each pluton its own formatiion and group
+            #make each pluton its own formation and group
             if( not c_l['r1'] in geology.columns):
                 m2l_warnings.append('No extra litho for geology polygons')
                 c_l['r1'] = 'r1'
