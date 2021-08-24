@@ -125,6 +125,30 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                 geology = geology.reset_index()
                 geology[c_l['o']] = geology.index
 
+            #make each pluton its own formatiion and group
+            geology[c_l['r1']].fillna('not known', inplace=True)
+            geol_clip_tmp=geology.copy(deep=False)
+            print('raw',len(geol_clip_tmp))
+            geol_clip_tmp.crs=geology.crs
+            geol_clip_tmp=geol_clip_tmp.dissolve(by=c_l['c'],aggfunc = 'first')
+            geol_clip_tmp=geol_clip_tmp[geol_clip_tmp[c_l['r1']].str.contains(c_l['intrusive']) & ~geol_clip_tmp[c_l['ds']].str.contains(c_l['sill'])]
+            print('tmp',len(geol_clip_tmp))
+            geol_clip_tmp.reset_index(inplace=True)
+            geol_clip_tmp=geol_clip_tmp.explode()
+            geol_clip_tmp.reset_index(inplace=True)
+            geol_clip_not=geology[(~geology[c_l['r1']].str.contains(c_l['intrusive'])) | geology[c_l['ds']].str.contains(c_l['sill']) ]
+            print('not',len(geol_clip_not))
+            geol_clip_not.index = pd.RangeIndex(start=10000, stop=10000+len(geol_clip_not), step=1)
+            geol_clip_not.reset_index(inplace=True)
+            geol_clip_tmp[c_l['c']]=geol_clip_tmp[c_l['c']].astype(str)+'_'+geol_clip_tmp.index.astype(str)
+            geol_clip_tmp[c_l['o']]=geol_clip_tmp.index
+            geol_clip_tmp[c_l['g']]=geol_clip_tmp[c_l['c']]
+
+            geology = pd.concat([geol_clip_tmp, geol_clip_not], sort=False)
+            print('geol',len(geology))
+            geology.drop(labels='level_0', axis=1,inplace=True)
+            geology.drop(labels='level_1', axis=1,inplace=True)
+            
             unique_g = set(geology[c_l['o']])
 
             if(not len(unique_g) == len(geology)):
