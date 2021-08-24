@@ -749,7 +749,8 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                                 (-lsx*dip_dirs[flt[c_l['fdipdir']]][0])+(lsy*dip_dirs[flt[c_l['fdipdir']]][1])))
                             if(dotprod > 45):
                                 fault_dip = -fault_dip
-
+                        else:
+                            azimuth=azimuth_fault
                         
                         l,m,n=m2l_utils.ddd2dircos((90-fault_dip),azimuth)
                         #print('fault_name,l,m,n,azimuth_fault,dip',fault_name,l,m,n,azimuth,fault_dip) 
