@@ -731,9 +731,9 @@ def have_access(url):
 
 
 def ddd2dircos(dip, dipdir):
-    l = sin(radians(dipdir))*cos(radians(90-dip))
-    m = cos(radians(dipdir))*cos(radians(90-dip))
-    n = sin(radians(90-dip))
+    l = sin(radians(float(dipdir)))*cos(radians(90-float(dip)))
+    m = cos(radians(float(dipdir)))*cos(radians(90-float(dip)))
+    n = sin(radians(90-float(dip)))
     return(l, m, n)
 
 ####################################################
