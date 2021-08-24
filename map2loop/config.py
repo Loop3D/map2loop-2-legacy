@@ -801,7 +801,7 @@ class Config(object):
         m2l_geometry.save_faults(
             os.path.join(self.tmp_path, 'faults_clip.shp'), self.output_path,
             self.dtm, self.dtb, self.dtb_null, False, self.c_l, fault_decimate,
-            min_fault_length, fault_dip)
+            min_fault_length, fault_dip,self.bbox_3d['base'])
 
         faults = pd.read_csv(self.fault_output_file_csv, sep=",")
         faults_len = len(faults)
