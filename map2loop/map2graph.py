@@ -569,17 +569,6 @@ class Map2Graph(object):
         nodes=Gloop.subgraph(nodes_all)
         data=pd.DataFrame.from_dict(dict(nodes.nodes(data=True)), orient='index')
         data['name']=data.index
-        """if(ntype=='fault'):
-            columns={'ntype': 'ntype', 'Xmean': 'Xmean', 'Ymean': 'Ymean', 'Zmean': 'Zmean', 'HorizontalRadius': 'HzRad', 'VerticalRadius': 'Vrad', 'InfluenceDistance': 'NDist', 
-                'IncLength': 'IncLength', 'f_colour': 'colour', 'Dip': 'Dip_1', 'DipDirection': 'DipDir', 'DipPolarity': 'Polarity', 
-                'OrientationCluster': 'OCluster', 'LengthCluster': 'LCluster', 'ClosenessCentrality': 'CCentral', 'BetweennessCentrality':'BCentral'}
-        elif(ntype=='formation'):
-            columns={'ntype': 'ntype', 'label': 'label', 's_colour': 's_colour', 'group': 'group', 'StratType': 'StratType', 'uctype': 'uctype', 'GroupNum': 'GroupNumber', 
-                'IndexInGp': 'IndexInGroup', 'NumberInGp': 'NumberInGroup', 'ThMedian': 'ThicknessMedian', 'ThStd': 'ThicknessStd', 'ThMethod': 'ThicknessMethod'}
-        elif(ntype=='group' or ntype=='supergroup'):
-            columns={'ntype': 'ntype', 'label': 'label', 's_colour': 's_colour', 'group': 'group', 'StratType': 'StratType', 'uctype': 'uctype', 'GroupNum': 'GroupNumber', 
-                'IndexInGp': 'IndexInGroup', 'NumberInGp': 'NumberInGroup', 'ThMedian': 'ThicknessMedian', 'ThStd': 'ThicknessStd', 'ThMethod': 'ThicknessMethod'}
-        data=data.rename(columns =columns, inplace = False)"""
 
         return(data)
 
@@ -754,15 +743,6 @@ class Map2Graph(object):
                         g1_snapped = snap(g.geometry, g2.geometry,snap_buffer)
                         all_contacts.append([ind,ind2,g1_snapped.buffer(0).intersection(g2.geometry.buffer(0))])
 
-        """groups=geology_exploded.drop_duplicates(subset=[c_l['g']])
-        groups.reset_index(inplace=True)
-        groups['order'] = groups.index
-        groups.set_index([c_l['g']],inplace=True)
-            
-        strats=geology_exploded.drop_duplicates(subset=[c_l['c']])
-        strats[c_l['c']]=strats[c_l['c']].str.replace(' ','_').replace('-','_')
-        strats.set_index([c_l['c']],inplace=True)"""
-
         Gloop=nx.DiGraph()
 
         index=0
@@ -792,6 +772,55 @@ class Map2Graph(object):
                 Gloop[geology_exploded.iloc[c[0]].name][geology_exploded.iloc[c[1]].name]['weight']=formation_formation_weight
                 
         nx.write_gml(Gloop, os.path.join(output_path,'granular_pre_loop.gml'))
+        
+        """
+        geology_clean=geology_exploded.copy()
+        igneous_contacts={}
+        not_igneous_contacts={}
+        i=0
+        for c in all_contacts:
+            if(c[2].geom_type=='MultiLineString' or c[2].geom_type=='LineString' ): 
+                if( c_l['intrusive'] in geology_clean.iloc[c[0]][c_l['r1']] ):
+                    igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[0]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[1]][c_l['c']], "geometry": c[2]}
+                elif(c_l['intrusive'] in geology_clean.iloc[c[1]][c_l['r1']] ):
+                    igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[1]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[0]][c_l['c']], "geometry": c[2]}
+                else:
+                    if(mini_strat_df.loc[geology_clean.iloc[c[0]][c_l['c']].replace(" ","_").replace("-","_")]['order']>
+                    mini_strat_df.loc[geology_clean.iloc[c[1]][c_l['c']].replace(" ","_").replace("-","_")]['order']):
+                        not_igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[1]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[0]][c_l['c']], "geometry": c[2]}
+                    else:
+                        not_igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[0]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[1]][c_l['c']], "geometry": c[2]}
+                        
+                i=i+1
+            elif(c[2].geom_type=='GeometryCollection' ):
+                for geom in c[2]:
+                    if(geom.geom_type=='MultiLineString' or geom.geom_type=='LineString' ):
+                        if( c_l['intrusive'] in geology_clean.iloc[c[0]][c_l['r1']] ):
+                            igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[0]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[1]][c_l['c']], "geometry": geom}
+                        elif(c_l['intrusive'] in geology_clean.iloc[c[1]][c_l['r1']] ):
+                            igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[1]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[0]][c_l['c']], "geometry": geom}
+                        else:
+                            if(mini_strat_df.loc[geology_clean.iloc[c[0]][c_l['c']].replace(" ","_").replace("-","_")]['order']>
+                            mini_strat_df.loc[geology_clean.iloc[c[1]][c_l['c']].replace(" ","_").replace("-","_")]['order']):
+                                not_igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[1]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[0]][c_l['c']], "geometry": geom}
+                            else:
+                                not_igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[0]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[1]][c_l['c']], "geometry": geom}
+                        i=i+1
+            
+        df = DataFrame.from_dict(igneous_contacts, "index")
+        if(len(df)>0):
+            i_contacts_gdf = GeoDataFrame(df, crs=geology_clean.crs, geometry='geometry')
+        else:
+            i_contacts_gdf=DataFrame.from_dict({}, "index")
+
+        df = DataFrame.from_dict(not_igneous_contacts, "index")
+        if(len(df)>0):
+            b_contacts_gdf = GeoDataFrame(df, crs=geology_clean.crs, geometry='geometry')
+        else:
+            b_contacts_gdf=DataFrame.from_dict({}, "index")
+
+        return(Gloop,i_contacts_gdf,b_contacts_gdf)
+        """
 
     def granular_mineralisation_proximity(Gloop,output_path,fault,geology_exploded,mindep,commodity,c_l):
         commodities=commodity.split(',')
