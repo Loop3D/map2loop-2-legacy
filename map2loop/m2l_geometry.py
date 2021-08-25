@@ -2918,6 +2918,7 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
 
     if(use_grid and use_vector):  # assumes a grid of depth to cover, with a defined null value for no cover, and a vector description of cover limits
         print("use_vector, use_grid",use_vector, use_grid)
+
         nx = int((bbox[2]-bbox[0])/spacing)
         ny = int((bbox[3]-bbox[1])/spacing)
         x = np.linspace(bbox[0], bbox[2], nx)
@@ -2931,25 +2932,24 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
         cover_pts = gpd.GeoDataFrame(df, geometry='coords')
         cover_pts.crs = dst_crs
 
-        actual_cover = gpd.sjoin(cover_pts, cover, how="left", op="within")
+        cover_buffered=gpd.GeoDataFrame(geometry=cover.buffer(-1500))
 
+        actual_cover = gpd.sjoin(cover_pts, cover_buffered, how="inner", op="within")
         actual_cover["index_right"] = actual_cover["index_right"].fillna(0)
         print("df,actual_cover",len(df),len(actual_cover))
         allpts = open(os.path.join(output_path, 'cover_grid.csv'), "w")
         allpts.write('X,Y,Z,formation\n')
-        #actual_cover.to_csv('cover.csv')
         for indx, pt in actual_cover.iterrows():
-            if(pt['Id'] == 0):
-                locations = [(pt['X'], pt['Y'])]
-                height = m2l_utils.value_from_dtm_dtb(
-                    dtm, dtb, dtb_null, cover_map, locations)
-                ostr = "{},{},{},{}\n"\
-                    .format(pt['X'], pt['Y'], height, 'cover')
-                # ostr = str(pt['X'])+','+str(pt['Y'])+','+str(height)+',cover\n'
-                allpts.write(ostr)
+
+            locations = [(pt['X'], pt['Y'])]
+            height = m2l_utils.value_from_dtm_dtb(
+                dtm, dtb, dtb_null, cover_map, locations)
+            ostr = "{},{},{},{}\n"\
+                .format(pt['X'], pt['Y'], height, 'cover')
+            allpts.write(ostr)
 
         for indx, cpoly in cover.iterrows():
-            # need toignore points outside bbox and make poly os bbox
+            # need to ignore points outside bbox and make poly os bbox
             coords = extract_poly_coords(cpoly.geometry, 0)
             k = 0
             for pt in coords['exterior_coords']:
@@ -3009,14 +3009,13 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
         allpts.write('X,Y,Z,formation\n')
 
         for indx, pt in cover_pts.iterrows():
-            if(pt['Id'] == 0):
-                locations = [(pt['X'], pt['Y'])]
-                height = m2l_utils.value_from_dtm_dtb(
-                    dtm, dtb, dtb_null, cover_map, locations)
-                ostr = "{},{},{},{}\n"\
-                    .format(pt['X'], pt['Y'], height, 'cover')
-                # ostr = str(pt['X'])+','+str(pt['Y'])+','+str(height)+',cover\n'
-                allpts.write(ostr)
+            locations = [(pt['X'], pt['Y'])]
+            height = m2l_utils.value_from_dtm_dtb(
+                dtm, dtb, dtb_null, cover_map, locations)
+            ostr = "{},{},{},{}\n"\
+                .format(pt['X'], pt['Y'], height, 'cover')
+            # ostr = str(pt['X'])+','+str(pt['Y'])+','+str(height)+',cover\n'
+            allpts.write(ostr)
 
         allpts.close()
         print("cover grid saved out as", os.path.join(
