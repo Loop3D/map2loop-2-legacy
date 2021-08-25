@@ -502,6 +502,8 @@ class Topology(object):
 
         groups = summary.group.unique()
         ngroups = len(summary.group.unique())
+        supergroups=summary.supergroup.unique()
+        nsupergroups=len(summary.supergroup.unique())
         # print(ngroups,'groups',groups,groups[0])
         uf_array = uf_rel.to_numpy()
         gf_array = np.zeros((ngroups, uf_array.shape[1]), dtype='U100')
@@ -536,6 +538,7 @@ class Topology(object):
             ug.write("\n")
 
         ug.close()
+        
 
         uf = open(os.path.join(graph_path, 'fault-fault-intersection.txt'), 'r')
         contents = uf.readlines()
@@ -1256,7 +1259,11 @@ class Topology(object):
                         Gloop.nodes[n]['ThicknessStd']=-1
                     else:
                         Gloop.nodes[n]['ThicknessStd']=As_t.loc[n]['thickness std']
-                    Gloop.nodes[n]['ThicknessMedian']=As_t.loc[n]['thickness median']
+                    if(np.isnan(As_t.loc[n]['thickness median'])):
+                        Gloop.nodes[n]['ThicknessMedian']=-1
+                    else:
+                        Gloop.nodes[n]['ThicknessMedian']=As_t.loc[n]['thickness median']
+
                     Gloop.nodes[n]['ThicknessMethod']=As_t.loc[n]['method']
 
         # add group-formation stratigraphy to graph as edges
