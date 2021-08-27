@@ -1129,3 +1129,16 @@ def save_dtm_mesh(dtm_path,output_path):
         file.write(' '.join(map(str, ind))+'\n')
     file.close()
 
+def save_dtm_ascii(dtm_path):
+    dtm_file=os.path.join(dtm_path,'dtm_rp.tif')
+    with rasterio.open(dtm_file) as dtm:
+        band1 = dtm.read(1)
+        pixelx=(dtm.bounds.right-dtm.bounds.left)/band1.shape[1]
+        pixely=(dtm.bounds.top-dtm.bounds.bottom)/band1.shape[0]
+        with open(os.path.join(dtm_path,'dtm_rp.hdr'),'w') as header:
+            header.write('{},{},{},{}\n'.format(pixelx,pixely,band1.shape[0],band1.shape[1]))
+            header.write('{},{},{},{}\n'.format(dtm.bounds.left,dtm.bounds.bottom,dtm.bounds.right,dtm.bounds.top))
+        band1=band1.T
+    
+        band1.tofile(os.path.join(dtm_path,'dtm_rp.csv'), sep = ',')
+            
