@@ -538,7 +538,61 @@ class Topology(object):
             ug.write("\n")
 
         ug.close()
-        
+
+        summary = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'))
+        summary.sort_values(by='supergroup', inplace=True)
+        summary.drop_duplicates(subset='group',inplace=True)
+
+        groups = summary.group.unique()
+        ngroups = len(summary.group.unique())
+        supergroups=summary.supergroup.unique()
+        supergroups=pd.DataFrame(supergroups)
+        supergroups.sort_values(by=0, inplace=True)
+
+        index=np.arange(0,len(supergroups))
+        supergroups['index']=index
+        summary.set_index("group", inplace=True)
+
+        uf_rel = pd.read_csv(os.path.join(
+            output_path, 'unit-fault-relationships.csv'))
+
+
+        uf_array = uf_rel.to_numpy()
+        gf_array = np.zeros((ngroups, uf_array.shape[1]), dtype='U100')
+
+        group_faults = pd.read_csv(os.path.join(output_path, 'group-fault-relationships.csv'))
+        group_faults.sort_values(by='group', inplace=True)
+
+        group_faults.set_index('group',inplace=True)
+        uf_array=group_faults.to_numpy()
+        sg_array=np.zeros((len(supergroups),len(uf_rel.iloc[0])-1))
+        supergroups.set_index(0, inplace=True)
+
+        i=0
+        for  ind,gp in group_faults.iterrows():
+            for ind2,sgroup in summary.iterrows():
+                if(sgroup['supergroup'] == summary.loc[ind]['supergroup']):
+                    for k in range(0, len(uf_rel.iloc[0])-1):
+                        if(uf_array[i, k] == 1):
+                            sg_array[supergroups.loc[summary.loc[ind]['supergroup']]['index'],k]=1
+
+                            
+            i=i+1
+
+        sg = open(os.path.join(output_path, 'supergroup-fault-relationships.csv'), 'w')
+        sg.write('supergroup')
+        for k in range(1, len(uf_rel.iloc[0])):
+            sg.write(','+uf_rel.columns[k])
+        sg.write("\n")
+        for k,sgroups in supergroups.iterrows():
+            sg.write(k)
+
+            for i in range(0, sg_array.shape[1]):
+
+                sg.write(','+str(sg_array[sgroups['index'],i]))
+            sg.write("\n")
+            
+        sg.close()        
 
         uf = open(os.path.join(graph_path, 'fault-fault-intersection.txt'), 'r')
         contents = uf.readlines()
@@ -1351,7 +1405,7 @@ class Topology(object):
                     new_graph.write('    graphics [ type "octagon" fill "#00FF00" ]\n')
                     new_graph.write(l)
                 elif('etype "formation_formation"' in l):
-                    new_graph.write('    graphics [ style "line" arrow "last" fill "#0066FF" ]\n')
+                    new_graph.write('    graphics [ style "line" arrow "last" fill "#6666FF" ]\n')
                     new_graph.write(l)
                 elif('etype "fault_group"' in l):
                     new_graph.write('    graphics [ style "line" arrow "last" fill "#666600" ]\n')
