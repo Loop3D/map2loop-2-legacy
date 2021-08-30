@@ -480,6 +480,7 @@ def save_basal_no_faults(path_out, path_fault, ls_dict, dist_buffer, c_l, dst_cr
         faults_clip = faults_clip.dropna(subset=['geometry'])
 
         df = DataFrame.from_dict(ls_dict, "index")
+        print(df)
         contacts = GeoDataFrame(df, crs=dst_crs, geometry='geometry')
 
         # defines buffer around faults where strat nodes will be removed
@@ -3366,81 +3367,85 @@ def process_sills(output_path, geol_clip, dtm, dtb, dtb_null, cover_map, contact
     sills_df.to_csv(os.path.join(output_path, 'sills.csv'))
 
 def combine_point_data(output_path,tmp_path):
-    Afaults = pd.read_csv(os.path.join(output_path, 'faults.csv'), ",")
-    Afault_displacements = pd.read_csv(os.path.join(output_path, 'fault_displacements3.csv'), ",")
-    Afaults_strat_displacements = pd.read_csv(os.path.join(output_path, 'fault_strat_offset3.csv'), ",")
-    Acontacts = pd.read_csv(os.path.join(output_path, 'contacts_clean.csv'), ",")
+    
     Aorientations = pd.read_csv(os.path.join(output_path, 'orientations_clean.csv'), ",")
-    if(os.path.exists(os.path.join(output_path, 'secondary_orientations.csv'))):
-        Asecondaryorientations = pd.read_csv(os.path.join(output_path, 'secondary_orientations.csv'), ",")
-    else:
-        Asecondaryorientations=None
-    Araw_contacts = pd.read_csv(os.path.join(tmp_path, 'raw_contacts.csv'), ",")
-
-    d={'formation':'name'}
-    Afaults.rename(columns = d, inplace = True)
-    Afaults['type']='fault_geom'
-    Afaults['Param1']=None
-    Afaults['Param2']=None
-    Afaults['Param3']=None
-    Afaults['Param4']=None
-    Afaults['source']='calc'
-    Afaults = Afaults[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
-
-
-    d={'fname':'name','apparent_displacement':'Param1', 'vertical_displacement':'Param2',
-        'downthrow_dir':'Param3'}
-    Afault_displacements.rename(columns = d, inplace = True)
-    Afault_displacements['type']='fault_displacement'
-    Afault_displacements['Param4']=None
-    Afault_displacements['Z']=None
-    Afault_displacements['source']='calc'
-    Afault_displacements = Afault_displacements[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
-
-    d={'id':'name','left_fm':'Param1', 'right_fm':'Param2',
-        'min_offset':'Param3','strat_offset':'Param4'}
-    Afaults_strat_displacements.rename(columns = d, inplace = True)
-    Afaults_strat_displacements['type']='fault_strat_displacement'
-    Afaults_strat_displacements['Z']=None
-    Afaults_strat_displacements['source']='calc'
-    Afaults_strat_displacements = Afaults_strat_displacements[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
-
-    d={'formation':'name'}
-    Acontacts.drop(labels='index', axis=1,inplace = True)
-    Acontacts.rename(columns = d, inplace = True)
-    Acontacts['type']='contact'
-    Acontacts['Param1']=None
-    Acontacts['Param2']=None
-    Acontacts['Param3']=None
-    Acontacts['Param4']=None
-    Acontacts = Acontacts[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
-
-    d={'formation':'name','group':'Param1','angle':'Param2', 'lsx':'Param3',
-        'lsy':'Param4'}
-    Araw_contacts.rename(columns = d, inplace = True)
-    Araw_contacts['type']='raw_contact'
-    Araw_contacts['source']='raw_contact'
-    Araw_contacts = Araw_contacts[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
-
     d={'formation':'name','azimuth':'Param1', 'dip':'Param2',
         'polarity':'Param3'}
     Aorientations.rename(columns = d, inplace = True)
     Aorientations['type']='orientation'
     Aorientations['Param4']=None
     Aorientations = Aorientations[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+    all_points=Aorientations.copy()
 
+    if(os.path.isfile(os.path.join(output_path, 'faults.csv'))):
+        Afaults = pd.read_csv(os.path.join(output_path, 'faults.csv'), ",")
+        d={'formation':'name'}
+        Afaults.rename(columns = d, inplace = True)
+        Afaults['type']='fault_geom'
+        Afaults['Param1']=None
+        Afaults['Param2']=None
+        Afaults['Param3']=None
+        Afaults['Param4']=None
+        Afaults['source']='calc'
+        Afaults = Afaults[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+        all_points=pd.concat([all_points,Afaults])
 
-    if(Asecondaryorientations):
+    if(os.path.isfile(os.path.join(output_path, 'fault_displacements3.csv'))):
+        Afault_displacements = pd.read_csv(os.path.join(output_path, 'fault_displacements3.csv'), ",")
+        d={'fname':'name','apparent_displacement':'Param1', 'vertical_displacement':'Param2',
+            'downthrow_dir':'Param3'}
+        Afault_displacements.rename(columns = d, inplace = True)
+        Afault_displacements['type']='fault_displacement'
+        Afault_displacements['Param4']=None
+        Afault_displacements['Z']=None
+        Afault_displacements['source']='calc'
+        Afault_displacements = Afault_displacements[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+        all_points=pd.concat([all_points,Afault_displacements])
+    
+    if(os.path.isfile(os.path.join(output_path, 'fault_strat_offset3.csv'))):
+        Afaults_strat_displacements = pd.read_csv(os.path.join(output_path, 'fault_strat_offset3.csv'), ",")
+        d={'id':'name','left_fm':'Param1', 'right_fm':'Param2',
+            'min_offset':'Param3','strat_offset':'Param4'}
+        Afaults_strat_displacements.rename(columns = d, inplace = True)
+        Afaults_strat_displacements['type']='fault_strat_displacement'
+        Afaults_strat_displacements['Z']=None
+        Afaults_strat_displacements['source']='calc'
+        Afaults_strat_displacements = Afaults_strat_displacements[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+        all_points=pd.concat([all_points,Afaults_strat_displacements])
+
+    if(os.path.isfile(os.path.join(output_path, 'contacts_clean.csv'))):
+        Acontacts = pd.read_csv(os.path.join(output_path, 'contacts_clean.csv'), ",")
+        d={'formation':'name'}
+        Acontacts.drop(labels='index', axis=1,inplace = True)
+        Acontacts.rename(columns = d, inplace = True)
+        Acontacts['type']='contact'
+        Acontacts['Param1']=None
+        Acontacts['Param2']=None
+        Acontacts['Param3']=None
+        Acontacts['Param4']=None
+        Acontacts = Acontacts[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+        all_points=pd.concat([all_points,Acontacts])
+
+    if(os.path.exists(os.path.join(output_path, 'secondary_orientations.csv'))):
+        Asecondaryorientations = pd.read_csv(os.path.join(output_path, 'secondary_orientations.csv'), ",")
         d={'formation':'name','azimuth':'Param1', 'dip':'Param2',
         'polarity':'Param3'}
         Asecondaryorientations.rename(columns = d, inplace = True)
         Asecondaryorientations['type']='orientation'
         Asecondaryorientations['Param4']=None
+        Asecondaryorientations['source']='secondary_orientation'
         Asecondaryorientations = Asecondaryorientations[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
-
-        all_points=pd.concat([Afaults,Afault_displacements,Afaults_strat_displacements,Acontacts,Aorientations,Asecondaryorientations,Araw_contacts])
-    else:
-        all_points=pd.concat([Afaults,Afault_displacements,Afaults_strat_displacements,Acontacts,Aorientations,Araw_contacts])
+        all_points=pd.concat([all_points,Asecondaryorientations])
+    
+    if(os.path.isfile(os.path.join(output_path, 'raw_contacts.csv'))):
+        Araw_contacts = pd.read_csv(os.path.join(tmp_path, 'raw_contacts.csv'), ",")
+        d={'formation':'name','group':'Param1','angle':'Param2', 'lsx':'Param3',
+            'lsy':'Param4'}
+        Araw_contacts.rename(columns = d, inplace = True)
+        Araw_contacts['type']='raw_contact'
+        Araw_contacts['source']='raw_contact'
+        Araw_contacts = Araw_contacts[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
+        all_points=pd.concat([all_points,Araw_contacts])
 
     point_data=all_points.fillna( -99)
     point_data=point_data.to_dict('records')
@@ -3624,7 +3629,8 @@ def update_fault_layer(tmp_path,output_path,c_l):
     fault_data=fault_data.rename(columns =columns, inplace = False)
     new_faults=faults.merge(fault_data,on='name')
     new_faults.crs=faults.crs
-    new_faults.to_file(tmp_path+'/faults_clip_data.shp')
+    if(len(new_faults)>0):
+        new_faults.to_file(tmp_path+'/faults_clip_data.shp')
 
 def save_interpolation_parameters(output_path,tmp_path):
     Afaults = pd.read_csv(os.path.join(output_path, 'fault_dimensions.csv'), ",")
@@ -3660,16 +3666,17 @@ def save_interpolation_parameters(output_path,tmp_path):
             sgi += 1
 
     for s in supergroups:
-        object_ip[index]={'objectname':'supergroup_'+str(s),
-                          'objecttype':Astrat.loc[supergroups[s]]['strat_type'],
-                          'interpolatortype':'PLI',
-                          'nelements':1e5,
-                          'regularisation':'0.1',
-                          'buffer':1.8,
-                          'solver':'cg',
-                          'cpw':10,
-                          'npw':10
-                        }
+        if(supergroups[s] in Astrat.index):
+            object_ip[index]={'objectname':'supergroup_'+str(s),
+                            'objecttype':Astrat.loc[supergroups[s]]['strat_type'],
+                            'interpolatortype':'PLI',
+                            'nelements':1e5,
+                            'regularisation':'0.1',
+                            'buffer':1.8,
+                            'solver':'cg',
+                            'cpw':10,
+                            'npw':10
+                            }
         index=index+1
 
     object_ip_df=pd.DataFrame.from_dict(object_ip, orient='index')

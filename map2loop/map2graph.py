@@ -106,6 +106,8 @@ class Map2Graph(object):
         with open(os.path.join(output_path,prefix+'.gml')) as graph:
             lines = graph.readlines()
             graph.close()
+            while(not graph.closed):
+                pass
             new_graph=open(os.path.join(output_path,prefix+'.gml'),"w")
             for l in lines:
                 l=l.replace('&#34;','"').replace('"[','[').replace(']"',']')
@@ -456,14 +458,14 @@ class Map2Graph(object):
             dip,dip_dir=m2l_utils.dircos2ddd(l,m,0)
             
             Gloop.nodes['Fault_'+f[c_l['o']]]['fault_trend']=int(dip_dir%180)
-
-        for ind,s in strats.iterrows():
-            icontacts_strat=i_contacts_gdf[i_contacts_gdf[c_l['c']].str.replace(" ","_").replace("-","_")==s.name]
-            length=0
-            for ind2,b in icontacts_strat.iterrows():
-                length=length+b.geometry.length
-            if(length>0):
-                Gloop.nodes[s.name]['contact_length']=int(length)
+        if(len(i_contacts_gdf)>0):
+            for ind,s in strats.iterrows():
+                icontacts_strat=i_contacts_gdf[i_contacts_gdf[c_l['c']].str.replace(" ","_").replace("-","_")==s.name]
+                length=0
+                for ind2,b in icontacts_strat.iterrows():
+                    length=length+b.geometry.length
+                if(length>0):
+                    Gloop.nodes[s.name]['contact_length']=int(length)
             
         return(Gloop)
 
@@ -772,7 +774,7 @@ class Map2Graph(object):
                 Gloop[geology_exploded.iloc[c[0]].name][geology_exploded.iloc[c[1]].name]['weight']=formation_formation_weight
                 
         nx.write_gml(Gloop, os.path.join(output_path,'granular_pre_loop.gml'))
-        
+
         """
         geology_clean=geology_exploded.copy()
         igneous_contacts={}

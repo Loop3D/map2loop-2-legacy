@@ -240,7 +240,7 @@ class Config(object):
             ]
 
         list2 = list(set(list1))
-        print(list2)
+        print('list2',list2)
         sub_pts = self.structures[list2]
         structure_code = gpd.sjoin(sub_pts,
                                    self.geol_clip,

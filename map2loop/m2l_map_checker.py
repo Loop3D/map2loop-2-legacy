@@ -144,10 +144,15 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             #print('tmp',len(geol_clip_tmp))
             geol_clip_tmp.reset_index(inplace=True)
             geol_clip_tmp=geol_clip_tmp.explode()
+            if('level_0' in geol_clip_tmp.columns):
+                geol_clip_tmp.drop(labels='level_0', axis=1,inplace=True)
+
             geol_clip_tmp.reset_index(inplace=True)
             geol_clip_not=geology[(~geology[c_l['r1']].str.contains(c_l['intrusive'])) | geology[c_l['ds']].str.contains(c_l['sill']) ]
             #print('not',len(geol_clip_not))
             geol_clip_not.index = pd.RangeIndex(start=10000, stop=10000+len(geol_clip_not), step=1)
+            if('level_0' in geol_clip_not.columns):
+                geol_clip_not.drop(labels='level_0', axis=1,inplace=True)
             geol_clip_not.reset_index(inplace=True)
             geol_clip_tmp[c_l['c']]=geol_clip_tmp[c_l['c']].astype(str)+'_'+geol_clip_tmp.index.astype(str)
             geol_clip_tmp[c_l['o']]=geol_clip_tmp.index
@@ -155,8 +160,10 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
             geology = pd.concat([geol_clip_tmp, geol_clip_not], sort=False)
             #print('geol',len(geology))
-            geology.drop(labels='level_0', axis=1,inplace=True)
-            geology.drop(labels='level_1', axis=1,inplace=True)
+            if('level_0' in geology.columns):
+                geology.drop(labels='level_0', axis=1,inplace=True)
+            if('level_1' in geology.columns):
+                geology.drop(labels='level_1', axis=1,inplace=True)
             
             unique_g = set(geology[c_l['o']])
 

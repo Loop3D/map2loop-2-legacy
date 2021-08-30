@@ -177,7 +177,9 @@ Geometry:
 +-----------------------------------------------+---------------------------------------------------------------------------------+
 | Clipped geology map shapefile                 | \*/tmp/geol_clip.shp                                                            |
 +-----------------------------------------------+---------------------------------------------------------------------------------+
-| Clipped fault & fold axial traces shapefile   | \*/tmp/faults_clip.shp                                                          |
+| Clipped fault shapefile                       | \*/tmp/faults_clip.shp   &    \*/tmp/faults_clip_data.shp                       |
++-----------------------------------------------+---------------------------------------------------------------------------------+
+| Clipped  fold axial traces shapefile          | \*/tmp/folds_clip.shp                                                           |
 +-----------------------------------------------+---------------------------------------------------------------------------------+
 | Pluton contacts with z and formation          | \*/output/ign_contacts.csv                                                      |
 +-----------------------------------------------+---------------------------------------------------------------------------------+
@@ -639,7 +641,7 @@ These control the specific functionality of *map2loop*: what to calculate, what 
 
 proj.run()
 
-This method performs the data processing steps of the *map2loop* workflow, and can be modified by including the following parameters [defaults](data type):
+This method performs the data processing steps of the *map2loop* workflow, and can be modified by including the following parameters as run_flags [defaults](data type):
 
   - **aus**: Indicates if area is in Australia for using ASUD, the Australian Stratigraphic Units Database to redfine stratigraphic relationships. Should only be True in Australia, and when the finest stratigraphic level is the ASUD standard Formation name.  [True]  (bool)
   - **close_dip**: Dip to assign to all new fold axial trace orientations. If -999 then the nearest interpolated dip for that supergroup will be used instead.  [-999] In degrees (int)
@@ -666,6 +668,10 @@ This method performs the data processing steps of the *map2loop* workflow, and c
   - **thickness_buffer**: How far away to look for next highest unit when calculating formation thickness [5000] In metres. (int)
   - **use_fat**:  Use fold axial trace info to add near-axis bedding info  [True]  (bool)
   - **use_interpolations**: Use all interpolated dips for modelling [True]  (bool)
+  - **fault_orientation_clusters**:[2] number of clusters for kmeans clustering of faults by orientation (int)
+  - **fault_length_clusters**: number of clusters for kmeans clustering of faults by length [2] (int)
+  - **use_roi_clip**: use non-rectangular ROI polygon [False] (bool)
+  - **roi_clip_path**: path to non-rectangular ROI polygon shapefile [''] (bool)
 
 **6.6 Calculation workflow parameters** 
 
