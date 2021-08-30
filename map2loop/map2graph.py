@@ -439,12 +439,13 @@ class Map2Graph(object):
     def feature_geometries(Gloop,fault,b_contacts_gdf,i_contacts_gdf,strats,c_l):
 
         for ind,s in strats.iterrows():
-            bcontacts_strat=b_contacts_gdf[b_contacts_gdf[c_l['c']].str.replace(" ","_").replace("-","_")==s.name]
-            length=0
-            for ind2,b in bcontacts_strat.iterrows():
-                length=length+b.geometry.length
-            if(length>0):
-                Gloop.nodes[s.name]['contact_length']=int(length)
+            if(c_l['c'] in b_contacts_gdf.index):
+                bcontacts_strat=b_contacts_gdf[b_contacts_gdf[c_l['c']].str.replace(" ","_").replace("-","_")==s.name]
+                length=0
+                for ind2,b in bcontacts_strat.iterrows():
+                    length=length+b.geometry.length
+                if(length>0):
+                    Gloop.nodes[s.name]['contact_length']=int(length)
 
         for ind,f in fault.iterrows():
             length=length+f.geometry.length
