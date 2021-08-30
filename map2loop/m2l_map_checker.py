@@ -160,12 +160,12 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                 geol_clip_tmp[c_l['o']]=geol_clip_tmp.index
                 geol_clip_tmp[c_l['g']]=geol_clip_tmp[c_l['c']]
 
-            geology = pd.concat([geol_clip_tmp, geol_clip_not], sort=False)
+                geology = pd.concat([geol_clip_tmp, geol_clip_not], sort=False)
             #print('geol',len(geology))
-            if('level_0' in geology.columns):
-                geology.drop(labels='level_0', axis=1,inplace=True)
-            if('level_1' in geology.columns):
-                geology.drop(labels='level_1', axis=1,inplace=True)
+                if('level_0' in geology.columns):
+                    geology.drop(labels='level_0', axis=1,inplace=True)
+                if('level_1' in geology.columns):
+                    geology.drop(labels='level_1', axis=1,inplace=True)
             
             unique_g = set(geology[c_l['o']])
 
