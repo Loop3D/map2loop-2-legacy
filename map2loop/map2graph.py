@@ -437,6 +437,8 @@ class Map2Graph(object):
                
     
     def feature_geometries(Gloop,fault,b_contacts_gdf,i_contacts_gdf,strats,c_l):
+        
+        length=0
 
         for ind,s in strats.iterrows():
             if(c_l['c'] in b_contacts_gdf.index):
