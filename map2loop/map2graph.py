@@ -169,13 +169,12 @@ class Map2Graph(object):
                     igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[0]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[1]][c_l['c']], "geometry": c[2]}
                 elif(c_l['intrusive'] in geology_clean.iloc[c[1]][c_l['r1']] ):
                     igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[1]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[0]][c_l['c']], "geometry": c[2]}
-                else:
-                    if(c[0]][c_l['c'].replace(" ","_").replace("-","_") in mini_strat_df.index):
-                        if(mini_strat_df.loc[geology_clean.iloc[c[0]][c_l['c']].replace(" ","_").replace("-","_")]['order']>
-                        mini_strat_df.loc[geology_clean.iloc[c[1]][c_l['c']].replace(" ","_").replace("-","_")]['order']):
-                            not_igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[1]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[0]][c_l['c']], "geometry": c[2]}
-                        else:
-                            not_igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[0]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[1]][c_l['c']], "geometry": c[2]}
+                elif(c[0] in mini_strat_df.index):
+                    if(mini_strat_df.loc[geology_clean.iloc[c[0]][c_l['c']].replace(" ","_").replace("-","_")]['order']>
+                    mini_strat_df.loc[geology_clean.iloc[c[1]][c_l['c']].replace(" ","_").replace("-","_")]['order']):
+                        not_igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[1]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[0]][c_l['c']], "geometry": c[2]}
+                    else:
+                        not_igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[0]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[1]][c_l['c']], "geometry": c[2]}
                         
                 i=i+1
             elif(c[2].geom_type=='GeometryCollection' ):
@@ -185,7 +184,7 @@ class Map2Graph(object):
                             igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[0]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[1]][c_l['c']], "geometry": geom}
                         elif(c_l['intrusive'] in geology_clean.iloc[c[1]][c_l['r1']] ):
                             igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[1]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[0]][c_l['c']], "geometry": geom}
-                        else:
+                        elif(c[0] in mini_strat_df.index):
                             if(mini_strat_df.loc[geology_clean.iloc[c[0]][c_l['c']].replace(" ","_").replace("-","_")]['order']>
                             mini_strat_df.loc[geology_clean.iloc[c[1]][c_l['c']].replace(" ","_").replace("-","_")]['order']):
                                 not_igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[1]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[0]][c_l['c']], "geometry": geom}
