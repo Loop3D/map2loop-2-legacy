@@ -108,18 +108,18 @@ class Map2Graph(object):
             graph.close()
             while(not graph.closed):
                 pass
-            new_graph=open(os.path.join(output_path,prefix+'.gml'),"w")
-            for l in lines:
-                l=l.replace('&#34;','"').replace('"[','[').replace(']"',']')
-                if('gid "' in l):
-                    tmp=l.split('"')
-                    new_graph.write('    gid '+str(int(tmp[1])-1)+'\n')                
-                else:
-                    new_graph.write(l)
-                if('ntype "formation"' in l):
-                    new_graph.write('    graphics [ type "rectangle" fill "#FFFFFF" ]\n')                
+        new_graph=open(os.path.join(output_path,prefix+'.gml'),"w")
+        for l in lines:
+            l=l.replace('&#34;','"').replace('"[','[').replace(']"',']')
+            if('gid "' in l):
+                tmp=l.split('"')
+                new_graph.write('    gid '+str(int(tmp[1])-1)+'\n')                
+            else:
+                new_graph.write(l)
+            if('ntype "formation"' in l):
+                new_graph.write('    graphics [ type "rectangle" fill "#FFFFFF" ]\n')                
 
-            new_graph.close()
+        new_graph.close()
 
         
     
