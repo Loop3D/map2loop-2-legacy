@@ -19,11 +19,14 @@ class MapUtil:
         x=np.linspace(self.dtm.bounds[0],self.dtm.bounds[2],dtm_val.shape[1])
         y=np.linspace(self.dtm.bounds[1],self.dtm.bounds[3],dtm_val.shape[0])
 
-        dtm_interpolator = RegularGridInterpolator((x,y),dtm_val.T)
+        dtm_interpolator = RegularGridInterpolator((x,y),np.rot90(dtm_val,3))
 #         inside = self._is_inside(xy)
         interpolated_dtm =np.zeros(xy.shape[0])
         interpolated_dtm[:] = nodataval
-        interpolated_dtm[:] = dtm_interpolator(xy[:,:])
+        inside = np.logical_and(xy[:,0] > self.dtm.bounds[0], xy[:,0] < self.dtm.bounds[2])
+        inside = np.logical_and(inside, xy[:,1] > self.dtm.bounds[1])
+        inside = np.logical_and(inside, xy[:,1] < self.dtm.bounds[3])
+        interpolated_dtm[inside] = dtm_interpolator(xy[inside,:])
         return interpolated_dtm
     def evaluate_geology_at_points(self,xy,column='colour_index'):
         """Extract a numerical column from a shape file, default
