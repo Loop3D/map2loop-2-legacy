@@ -19,7 +19,7 @@ class MapUtil:
         x=np.linspace(self.dtm.bounds[0],self.dtm.bounds[2],dtm_val.shape[1])
         y=np.linspace(self.dtm.bounds[1],self.dtm.bounds[3],dtm_val.shape[0])
 
-        dtm_interpolator = RegularGridInterpolator((x,y),dtm_val.T)
+        dtm_interpolator = RegularGridInterpolator((x,y),np.rot90(dtm_val.T,2))
 #         inside = self._is_inside(xy)
         interpolated_dtm =np.zeros(xy.shape[0])
         interpolated_dtm[:] = nodataval
