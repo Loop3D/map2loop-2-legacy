@@ -167,6 +167,8 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                 if('level_1' in geology.columns):
                     geology.drop(labels='level_1', axis=1,inplace=True)
             
+            geology[c_l['max']]=geology[c_l['max']].astype(np.float64)            
+            geology[c_l['min']]=geology[c_l['min']].astype(np.float64)            
             unique_g = set(geology[c_l['o']])
 
             if(not len(unique_g) == len(geology)):
@@ -468,6 +470,11 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             fault_file = os.path.join(tmp_path, 'faults_clip.shp')
             print("\nFault layer metadata\n--------------------")
             print("No faults found, projection may be inconsistent")
+        
+        if('level_0' in geology.columns):
+            geology.drop(columns=['level_0'], inplace=True)
+        if('level_1' in geology.columns):
+            geology.drop(columns=['level_1'], inplace=True)
 
         geol_clip = gpd.overlay(geology, polygo, how='intersection')
 
