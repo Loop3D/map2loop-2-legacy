@@ -416,12 +416,12 @@ class Config(object):
         if self.mindeps is not None:
             run_log = map2model.run(self.graph_path, self.geology_file_csv,
                                     self.fault_file_csv, self.mindep_file_csv,
-                                    self.bbox_3d, self.c_l, #quiet_m2m,
+                                    self.bbox_3d, self.c_l, quiet_m2m,
                                     deposits)
         else:
             run_log = map2model.run(self.graph_path, self.geology_file_csv,
                                     self.fault_file_csv, "", self.bbox_3d,
-                                    self.c_l, #quiet_m2m,
+                                    self.c_l, quiet_m2m,
                                     deposits)
 
         print(run_log)
