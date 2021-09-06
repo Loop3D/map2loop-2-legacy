@@ -702,7 +702,6 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                 # display(flt.geometry.type)
                 if(flt.geometry.type == 'LineString'):
                     flt_ls = LineString(flt.geometry)
-                    first = True
                     dlsx = flt_ls.coords[0][0] - \
                         flt_ls.coords[len(flt_ls.coords)-1][0]
                     dlsy = flt_ls.coords[0][1] - \
@@ -755,6 +754,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                         
                         l,m,n=m2l_utils.ddd2dircos((90-fault_dip),azimuth)
                         #print('fault_name,l,m,n,azimuth_fault,dip',fault_name,l,m,n,azimuth,fault_dip) 
+                        first = True
                         for afs in flt_ls.coords:
                             if(dlsx == 0.0 or dlsy == 0.0):
                                 continue
