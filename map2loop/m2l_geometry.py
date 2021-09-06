@@ -826,6 +826,16 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                                 f.write(ostr)
                             i = i+1
                         
+                        strike = strike*1.25
+                        r = random.randint(1, 256)-1
+                        g = random.randint(1, 256)-1
+                        b = random.randint(1, 256)-1
+                        hex_rgb = m2l_utils.intstohex((r, g, b))
+                        ostr = "{},{},{},{},{},{}\n"\
+                            .format(fault_name, strike/2, strike/2, strike/4.0, incLength, hex_rgb)
+                        # ostr = fault_name+","+str(strike/2)+","+str(strike)+","+str(strike/4.0)+"\n"
+                        fd.write(ostr)
+
                         locations = [
                             (flt_ls.coords[int((len(afs)-1)/2)][0], flt_ls.coords[int((len(afs)-1)/2)][1])]
                         height = m2l_utils.value_from_dtm_dtb(
@@ -856,16 +866,8 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                         # ostr = str(flt_ls.coords[int((len(flt_ls.coords)-1)/2)][0])+","+str(flt_ls.coords[int((len(flt_ls.coords)-1)/2)][1])+","+height+","+str(azimuth)+","+str(fault_dip)+",1,"+fault_name+"\n"
                         fo.write(ostr)
 
-                        strike = strike*1.25
-                        r = random.randint(1, 256)-1
-                        g = random.randint(1, 256)-1
-                        b = random.randint(1, 256)-1
-                        hex_rgb = m2l_utils.intstohex((r, g, b))
 
-                        ostr = "{},{},{},{},{},{}\n"\
-                            .format(fault_name, strike/2, strike/2, strike/4.0, incLength, hex_rgb)
-                        # ostr = fault_name+","+str(strike/2)+","+str(strike)+","+str(strike/4.0)+"\n"
-                        fd.write(ostr)
+
                 # shouldn't happen any more
                 elif(flt.geometry.type == 'MultiLineString' or flt.geometry.type == 'GeometryCollection'):
                     sum_strike = 0
