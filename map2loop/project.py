@@ -587,12 +587,14 @@ class Project(object):
                 self.config.run_flags['formation_weight'],
                 self.config.run_flags['formation_formation_weight'],
                 self.config.run_flags['fault_formation_weight'])
+            """
             Map2Graph.granular_map2graph(self.config.output_path,self.config.geology_file,self.config.fault_file,self.config.mindep_file,self.config.c_l,self.config.run_flags['deposits'],
                 self.config.run_flags['fault_fault_weight'],
                 self.config.run_flags['fault_weight'],
                 self.config.run_flags['formation_weight'],
                 self.config.run_flags['formation_formation_weight'],
                 self.config.run_flags['fault_formation_weight'])
+            """            
             update_fault_layer(self.config.tmp_path,self.config.output_path,self.c_l)
             #self.config.update_projectfile()
             self.config.export_png()
