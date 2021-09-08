@@ -136,7 +136,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                 geology[c_l['ds']] = 'Nope'
             geology[c_l['r1']].fillna('not known', inplace=True)
             geology[c_l['ds']].fillna('not known', inplace=True)
-            explode_intrusives=False
+            explode_intrusives=True
             if(explode_intrusives):
                 geol_clip_tmp=geology.copy(deep=False)
                 #print('raw',len(geol_clip_tmp))
