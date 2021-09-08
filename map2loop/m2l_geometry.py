@@ -755,8 +755,9 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                         l,m,n=m2l_utils.ddd2dircos((90-fault_dip),azimuth)
                         #print('fault_name,l,m,n,azimuth_fault,dip',fault_name,l,m,n,azimuth,fault_dip) 
                         first = True
+                        incLength = 0
                         for afs in flt_ls.coords:
-                            if(dlsx == 0.0 or dlsy == 0.0):
+                            if(dlsx == 0.0 and dlsy == 0.0):
                                 continue
                             lsx = dlsx/sqrt((dlsx*dlsx)+(dlsy*dlsy))
                             lsy = dlsy/sqrt((dlsx*dlsx)+(dlsy*dlsy))
@@ -1195,7 +1196,7 @@ def create_basal_contact_orientations(contacts, structures, output_path, dtm, dt
 #########################################
 
 
-def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb_null, cover_map, pluton_form, pluton_dip, contact_decimate, c_l):
+def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb_null, cover_map, pluton_form, pluton_dip, contact_decimate, c_l,bbox_base,bbox_top):
 
     groups = np.genfromtxt(os.path.join(
         tmp_path, 'groups.csv'), delimiter=',', dtype='U100')
@@ -1317,6 +1318,20 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
                                                 .format(lineC.coords[0][0], lineC.coords[0][1], height, newgp.replace(" ", "_").replace("-", "_"))
                                             # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
                                             ac.write(ostr)
+
+                                            if(pluton_form == 'saucers'):
+                                                ostr = "{},{},{},{}\n"\
+                                                    .format(lineC.coords[0][0], lineC.coords[0][1], bbox_top+1000, newgp.replace(" ", "_").replace("-", "_"))
+                                                # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
+                                                ac.write(ostr)
+                                                
+                                                # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",1,"+newgp.replace(" ","_").replace("-","_")+"\n"
+                                            elif(pluton_form == 'domes'):
+                                                ostr = "{},{},{},{}\n"\
+                                                    .format(lineC.coords[0][0], lineC.coords[0][1], bbox_base-1000, newgp.replace(" ", "_").replace("-", "_"))
+                                                # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
+                                                ac.write(ostr)
+                                                
                                             allc.write(
                                                 agp+","+str(ageol[c_l['o']])+","+ostr)
                                             ls_dict_decimate[allpts] = {"id": allpts, c_l['c']: newgp, c_l['g']: newgp, "geometry": Point(
@@ -1718,8 +1733,9 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     for a_sort in all_sorts.iterrows():
         if(a_sort[1]['group'] not in no_contacts):
             for sg in range(len(lines)):
-                if(a_sort[1]['group'] in lines[sg]):
-                    supergroup='supergroup_'+str(sg)
+                for l in lines[sg].split(','):
+                    if(a_sort[1]['group'] == l):
+                        supergroup='supergroup_'+str(sg)
             ostr = "{},{},{},{},{},{},{},{}\n"\
                 .format(a_sort[1]['index'], a_sort[1]['group number'], a_sort[1]['index in group'], a_sort[1]['number in group'], a_sort[0], a_sort[1]['group'],supergroup, 'erode')
             # ostr = str(a_sort[1]['index'])+","+str(a_sort[1]['group number'])+","+str(a_sort[1]['index in group'])+","+str(a_sort[1]['number in group'])+","+a_sort[0]+","+a_sort[1]['group']+",erode\n"
@@ -2917,7 +2933,7 @@ def fault_strat_offset(path_out, c_l, dst_crs, fm_thick_file, all_sorts_file, fa
 ##########################################################
 
 
-def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, bbox, dst_crs, spacing, contact_decimate, use_vector, use_grid):
+def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, bbox, dst_crs, spacing, contact_decimate,bbox_top, use_vector, use_grid):
 
     if(use_grid and use_vector):  # assumes a grid of depth to cover, with a defined null value for no cover, and a vector description of cover limits
         print("use_vector, use_grid",use_vector, use_grid)
@@ -2969,6 +2985,10 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                             .format(pt[0], pt[1], height, 'cover')
                         # ostr = str(pt[0])+","+str(pt[1])+","+height+",cover\n"
                         allpts.write(ostr)
+                        ostr = "{},{},{},{}\n"\
+                            .format(pt[0], pt[1], bbox_top-1, 'cover')
+                        # ostr = str(pt[0])+","+str(pt[1])+","+height+",cover\n"
+                        allpts.write(ostr)
                 k = k+1
             if(len(coords['interior_coords']) > 0):
                 for i in range(0, len(coords['interior_coords']), 2):
@@ -2986,6 +3006,10 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                                     ostr = "{},{},{},{}\n"\
                                         .format(pt[0], pt[1], height, 'cover')
 
+                                    # ostr = str(pt[0])+","+str(pt[1])+","+height+",cover\n"
+                                    allpts.write(ostr)
+                                    ostr = "{},{},{},{}\n"\
+                                        .format(pt[0], pt[1], bbox_top+1000, 'cover')
                                     # ostr = str(pt[0])+","+str(pt[1])+","+height+",cover\n"
                                     allpts.write(ostr)
                 k = k+1
