@@ -1646,8 +1646,8 @@ def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs, o
     if loopFilename is None:
         from pathlib import Path
         output_path_clean = Path(output_path)
-        loopFilename = os.path.join(output_path_clean.name,output_path_clean.name+ '.loop3d')
-
+        loopFilename = os.path.join(output_path,output_path_clean.name+ '.loop3d')
+    #print(loopFilename, output_path)
     # Check that file exist and check version matches
     overwriteVersionMismatchedFile = False
     existingExtents = None
