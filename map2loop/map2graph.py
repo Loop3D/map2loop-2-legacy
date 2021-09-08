@@ -52,7 +52,10 @@ class Map2Graph(object):
 
         all_contacts=[]
         for ind,g in geology_clean.iterrows():
-            for ind2,g2 in geology_clean.iterrows():
+            bbxmin,bbymin,bbxmax,bbymax=g.geometry.bounds
+            subset = geology_clean.cx[bbxmin:bbxmax, bbymin:bbymax]
+
+            for ind2,g2 in subset.iterrows():
                 if(not ind >= ind2):
                     if(g.geometry.intersects(g2.geometry)):
                         g1_snapped = snap(g.geometry, g2.geometry,snap_buffer)
@@ -108,16 +111,16 @@ class Map2Graph(object):
             graph.close()
             while(not graph.closed):
                 pass
-        new_graph=open(os.path.join(output_path,prefix+'.gml'),"w")
-        for l in lines:
-            l=l.replace('&#34;','"').replace('"[','[').replace(']"',']')
-            if('gid "' in l):
-                tmp=l.split('"')
-                new_graph.write('    gid '+str(int(tmp[1])-1)+'\n')                
-            else:
-                new_graph.write(l)
-            if('ntype "formation"' in l):
-                new_graph.write('    graphics [ type "rectangle" fill "#FFFFFF" ]\n')                
+            new_graph=open(os.path.join(output_path,prefix+'.gml'),"w")
+            for l in lines:
+                l=l.replace('&#34;','"').replace('"[','[').replace(']"',']')
+                if('gid "' in l):
+                    tmp=l.split('"')
+                    new_graph.write('    gid '+str(int(tmp[1])-1)+'\n')                
+                else:
+                    new_graph.write(l)
+                if('ntype "formation"' in l):
+                    new_graph.write('    graphics [ type "rectangle" fill "#FFFFFF" ]\n')                
 
         new_graph.close()
 
@@ -301,7 +304,10 @@ class Map2Graph(object):
 
         i1=0
         for ind,f in fault_clean.iterrows():
-            for ind2,g in geology_clean_nona.iterrows():
+            bbxmin,bbymin,bbxmax,bbymax=f.geometry.bounds
+            subset = geology_clean_nona.cx[bbxmin:bbxmax, bbymin:bbymax]
+
+            for ind2,g in subset.iterrows():
                 if(f.geometry.intersects(g.geometry)):
                     g1_snapped = snap(g.geometry, f.geometry,snap_buffer)
                     x=g1_snapped.intersection(f.geometry)
@@ -742,7 +748,10 @@ class Map2Graph(object):
 
         all_contacts=[]
         for ind,g in geology_exploded.iterrows():
-            for ind2,g2 in geology_exploded.iterrows():
+            bbxmin,bbymin,bbxmax,bbymax=g.geometry.bounds
+            subset = geology_exploded.cx[bbxmin:bbxmax, bbymin:bbymax]
+            
+            for ind2,g2 in subset.iterrows():
                 if(not ind >= ind2):
                     if(g.geometry.intersects(g2.geometry)):
                         g1_snapped = snap(g.geometry, g2.geometry,snap_buffer)
@@ -896,7 +905,10 @@ class Map2Graph(object):
     def granular_fault_formation_intersections(Gloop,fault_clean,geology_exploded,c_l,fault_formation_weight):
 
         for ind,f in fault_clean.iterrows():
-            for ind2,g in geology_exploded.iterrows():
+            bbxmin,bbymin,bbxmax,bbymax=f.geometry.bounds
+            subset = geology_exploded.cx[bbxmin:bbxmax, bbymin:bbymax]
+
+            for ind2,g in subset.iterrows():
                 if(f.geometry.intersects(g.geometry.buffer(snap_buffer).buffer(0))):
                     g1_snapped = snap(g.geometry.buffer(snap_buffer).buffer(0), f.geometry.buffer(0),snap_buffer)
                     x=g1_snapped.intersection(f.geometry)
