@@ -208,7 +208,9 @@ class Config(object):
         self.faults_clip = faults.copy()
         self.faults_clip.crs = self.proj_crs
         self.faults_clip_file = os.path.join(self.tmp_path, "faults_clip.shp")
+        #if(len(self.faults_clip_file)>0): need to be able to deal with no faults...
         self.faults_clip.to_file(self.faults_clip_file)
+
 
         # Geology
         self.geol_clip = m2l_utils.explode(self.geology)
@@ -416,12 +418,12 @@ class Config(object):
         if self.mindeps is not None:
             run_log = map2model.run(self.graph_path, self.geology_file_csv,
                                     self.fault_file_csv, self.mindep_file_csv,
-                                    self.bbox_3d, self.c_l, quiet_m2m,
+                                    self.bbox_3d, self.c_l, #quiet_m2m,
                                     deposits)
         else:
             run_log = map2model.run(self.graph_path, self.geology_file_csv,
                                     self.fault_file_csv, "", self.bbox_3d,
-                                    self.c_l, quiet_m2m,
+                                    self.c_l, #quiet_m2m,
                                     deposits)
 
         print(run_log)
@@ -621,8 +623,10 @@ class Config(object):
                                    self.proj_crs,
                                    cover_spacing,
                                    self.run_flags['contact_decimate'],
+                                   self.bbox_3d['top'],
                                    use_vector=True,
-                                   use_grid=True)
+                                   use_grid=True
+                                   )
         self.dtb=dtb
         self.dtb_null=dtb_null
 
@@ -825,7 +829,7 @@ class Config(object):
                                      self.geol_clip, self.local, self.dtm,
                                      self.dtb, self.dtb_null, cover_map,
                                      self.pluton_form, pluton_dip,
-                                     contact_decimate, self.c_l)
+                                     contact_decimate, self.c_l,self.bbox_3d['base'],self.bbox_3d['top'])
 
     def extract_section_features(self, section_files):
         # Extract faults and basal contacts of groups from seismic sections
