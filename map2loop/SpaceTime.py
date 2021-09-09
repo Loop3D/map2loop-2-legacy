@@ -166,81 +166,16 @@ def plot_orogenic(orogenic_filename,bbox):
         plt.title('Orogenic Events')
     
         plt.show()
-        
-def plot_faults(linear_filename,bbox):
-    import fracpaq as fpq 
-    import matplotlib.pylab as plt 
-    import sys 
-    import numpy as np 
-    linear=gpd.read_file(linear_filename,bbox=bbox)
-    faults=linear[linear['FEATURE'].str.contains("Fault")]
 
-    xnodelist=[]
-    ynodelist=[]
-    for inf,fault in faults.iterrows():
-        xtmplist=[]
-        ytmplist=[]
-        for coords in fault['geometry'].coords:
-            xtmplist.append(coords[0])
-            ytmplist.append(coords[1])
-        xnodelist.append(xtmplist)
-        ynodelist.append(ytmplist)
 
-    nodelist=[xnodelist,ynodelist]
-
-    #   defaults 
-    CM2INCHES = 0.3937 
-    bGrid = False 
-    bEqualArea = False 
-    nBinWidth = 5  
-    sColour = 'C0' 
-    xSize = 15.0 * CM2INCHES 
-    ySize = 15.0 * CM2INCHES   
-
-    #   get nodes and calculate angles from nodes 
-
-    xnodelist = nodelist[0] 
-    ynodelist = nodelist[1]
-    segangle = fpq.getSegAngles(xnodelist, ynodelist)
-    nSegs = len(segangle)
-
-    if(nSegs>0):
-
-        #   bin the data and find maximum per bin 
-        nBins = int(round(360/nBinWidth))
-        segangleDoubled = np.zeros(len(segangle))
-        segangleDoubled = np.copy(segangle)
-        segangleDoubled = np.concatenate([segangleDoubled, segangleDoubled+180.0])
-        n, b = plt.histogram(segangleDoubled, nBins)
-        nMax = max(n) 
-
-        #   plot the segment angle distribution 
-        plt.figure(figsize=(xSize, ySize))
-        plt.subplot(111, projection='polar')
-        plt.bar(np.deg2rad(np.arange(0, 360, nBinWidth)), n, 
-                width=np.deg2rad(nBinWidth), bottom=0.0, color='.8', edgecolor='k')
-        plt.xticks(np.radians(range(0, 360, 45)), 
-                   ['0', '45', '90', '135', '180', '215', '270', '315'])
-        if(nMax>6):        
-            plt.rgrids(range(0, int(round(nMax*1.1)), int(round((nMax*1.1)/5))), angle=330)
-        plt.ylim(0, int(round(nMax*1.1)))
-        plt.title('Segment strikes, n={}'.format(nSegs) )
-        plt.savefig("faults_rose.pdf")
-        #faults.plot(figsize=(7,7),edgecolor='#ff0000',linewidth=0.3)
-        #print('Plotted %5d segments & angles' % nSegs)
-        #plt.savefig('faults.pdf')  
-        #plt.title('Fault traces')
-
-        plt.show()
-
-def plot_folds(linear_filename,bbox):
+def plot_linear_segments(linear_filename,bbox,feature):
     import fracpaq as fpq 
     import matplotlib.pylab as plt 
     import sys 
     import numpy as np 
 
     linear=gpd.read_file(linear_filename,bbox=bbox)
-    folds=linear[linear['FEATURE'].str.contains("Fold")]
+    folds=linear[linear['FEATURE'].str.contains(feature)]
     xnodelist=[]
     ynodelist=[]
     for inf,fold in folds.iterrows():
@@ -289,11 +224,11 @@ def plot_folds(linear_filename,bbox):
             plt.rgrids(range(0, int(round(nMax*1.1)), int(round((nMax*1.1)/5))), angle=330)
         plt.ylim(0, int(round(nMax*1.1)))
         plt.title('Segment strikes, n=%i' % nSegs)
-        plt.savefig("folds_rose.pdf")
+        plt.savefig(feature+"_rose.pdf")
         #folds.plot(figsize=(7,7),edgecolor='#ff0000',linewidth=0.3)
         #print('Plotted %5d segments & angles' % nSegs)
         #plt.savefig('folds.pdf')  
-        plt.title('Fold axial traces')
+        plt.title(feature+' axial traces')
         plt.show()
 
 
@@ -477,3 +412,67 @@ def plot_plutons(geology_filename,bbox):
     plt.savefig('Igneous.pdf')  
 
     plt.show() 
+
+def plot_whole_linear(linear_filename,bbox,feature):
+    import fracpaq as fpq 
+    import matplotlib.pylab as plt 
+    import sys 
+    import numpy as np 
+    linear=gpd.read_file(linear_filename,bbox=bbox)
+    faults=linear[linear['FEATURE'].str.contains(feature)]
+    xnodelist=[]
+    ynodelist=[]
+    for inf,fault in faults.iterrows():
+        xtempnodelist=[fault['geometry'].coords[0][0]]
+        ytempnodelist=[fault['geometry'].coords[0][1]]
+        xtempnodelist.append(fault['geometry'].coords[-1][0])
+        ytempnodelist.append(fault['geometry'].coords[-1][1])
+        xnodelist.append(xtempnodelist)
+        ynodelist.append(ytempnodelist)
+    nodelist=[xnodelist,ynodelist]
+
+    #   defaults 
+    CM2INCHES = 0.3937 
+    bGrid = False 
+    bEqualArea = False 
+    nBinWidth = 5  
+    sColour = 'C0' 
+    xSize = 15.0 * CM2INCHES 
+    ySize = 15.0 * CM2INCHES   
+
+    #   get nodes and calculate angles from nodes 
+
+    xnodelist = nodelist[0] 
+    ynodelist = nodelist[1]
+    segangle = fpq.getSegAngles(xnodelist, ynodelist)
+    nSegs = len(segangle)
+
+    if(nSegs>0):
+
+        #   bin the data and find maximum per bin 
+        nBins = int(round(360/nBinWidth))
+        segangleDoubled = np.zeros(len(segangle))
+        segangleDoubled = np.copy(segangle)
+        segangleDoubled = np.concatenate([segangleDoubled, segangleDoubled+180.0])
+        n, b = plt.histogram(segangleDoubled, nBins)
+        nMax = max(n) 
+
+        #   plot the segment angle distribution 
+        plt.figure(figsize=(xSize, ySize))
+        plt.subplot(111, projection='polar')
+        plt.bar(np.deg2rad(np.arange(0, 360, nBinWidth)), n, 
+                width=np.deg2rad(nBinWidth), bottom=0.0, color='.8', edgecolor='k')
+        plt.xticks(np.radians(range(0, 360, 45)), 
+                   ['0', '45', '90', '135', '180', '215', '270', '315'])
+        if(nMax>6):        
+            plt.rgrids(range(0, int(round(nMax*1.1)), int(round((nMax*1.1)/5))), angle=330)
+        plt.ylim(0, int(round(nMax*1.1)))
+        plt.title('Whole '+feature+' traces, n={}'.format(nSegs) )
+        plt.savefig(feature+"_whole_rose.pdf")
+        #faults.plot(figsize=(7,7),edgecolor='#ff0000',linewidth=0.3)
+        #print('Plotted %5d segments & angles' % nSegs)
+        #plt.savefig('faults.pdf')  
+        #plt.title('Fault traces')
+
+        plt.show()
+
