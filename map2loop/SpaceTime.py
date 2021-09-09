@@ -71,8 +71,8 @@ def plot_geology_codes(geology_filename,bbox):
             i=i+1
     ax = plt.axis()
     plt.axis((ax[0],ax[1],ax[3],ax[2]))
-    plt.title('Strat Codes')
-    plt.savefig('codes.pdf')  
+    plt.title('Strat Ages')
+    plt.savefig('Strat_ages.pdf')  
 
     plt.show()   
      
@@ -174,16 +174,19 @@ def plot_faults(linear_filename,bbox):
     linear=gpd.read_file(linear_filename,bbox=bbox)
     faults=linear[linear['FEATURE'].str.contains("Fault")]
 
-    f=open('fault.txt','w')
+    xnodelist=[]
+    ynodelist=[]
     for inf,fault in faults.iterrows():
+        xtmplist=[]
+        ytmplist=[]
         for coords in fault['geometry'].coords:
-            ostr="{}\t{}\t".format(coords[0],coords[1])
-            f.write(ostr)
-        f.write('\n')
-    f.close()
+            xtmplist.append(coords[0])
+            ytmplist.append(coords[1])
+        xnodelist.append(xtmplist)
+        ynodelist.append(ytmplist)
 
+    nodelist=[xnodelist,ynodelist]
 
-    fn='fault.txt'
     #   defaults 
     CM2INCHES = 0.3937 
     bGrid = False 
@@ -194,7 +197,7 @@ def plot_faults(linear_filename,bbox):
     ySize = 15.0 * CM2INCHES   
 
     #   get nodes and calculate angles from nodes 
-    nodelist = fpq.getNodes(fn)
+
     xnodelist = nodelist[0] 
     ynodelist = nodelist[1]
     segangle = fpq.getSegAngles(xnodelist, ynodelist)
@@ -213,20 +216,19 @@ def plot_faults(linear_filename,bbox):
         #   plot the segment angle distribution 
         plt.figure(figsize=(xSize, ySize))
         plt.subplot(111, projection='polar')
-        coll = fpq.rose(segangle, bins=nBins, 
-                        bidirectional=True, eqarea=True, 
-                        color=sColour)
+        plt.bar(np.deg2rad(np.arange(0, 360, nBinWidth)), n, 
+                width=np.deg2rad(nBinWidth), bottom=0.0, color='.8', edgecolor='k')
         plt.xticks(np.radians(range(0, 360, 45)), 
                    ['0', '45', '90', '135', '180', '215', '270', '315'])
         if(nMax>6):        
             plt.rgrids(range(0, int(round(nMax*1.1)), int(round((nMax*1.1)/5))), angle=330)
         plt.ylim(0, int(round(nMax*1.1)))
-        plt.title('Segment strikes, n=%i' % nSegs)
+        plt.title('Segment strikes, n={}'.format(nSegs) )
         plt.savefig("faults_rose.pdf")
         #faults.plot(figsize=(7,7),edgecolor='#ff0000',linewidth=0.3)
         #print('Plotted %5d segments & angles' % nSegs)
         #plt.savefig('faults.pdf')  
-        plt.title('Fault traces')
+        #plt.title('Fault traces')
 
         plt.show()
 
@@ -238,16 +240,18 @@ def plot_folds(linear_filename,bbox):
 
     linear=gpd.read_file(linear_filename,bbox=bbox)
     folds=linear[linear['FEATURE'].str.contains("Fold")]
-
-    f=open('fold.txt','w')
+    xnodelist=[]
+    ynodelist=[]
     for inf,fold in folds.iterrows():
+        xtmplist=[]
+        ytmplist=[]
         for coords in fold['geometry'].coords:
-            ostr="{}\t{}\t".format(coords[0],coords[1])
-            f.write(ostr)
-        f.write('\n')
-    f.close()
+            xtmplist.append(coords[0])
+            ytmplist.append(coords[1])
+        xnodelist.append(xtmplist)
+        ynodelist.append(ytmplist)
+    nodelist=[xnodelist,ynodelist]
 
-    fn='fold.txt'
     #   defaults 
     CM2INCHES = 0.3937 
     bGrid = False 
@@ -258,7 +262,7 @@ def plot_folds(linear_filename,bbox):
     ySize = 15.0 * CM2INCHES   
 
     #   get nodes and calculate angles from nodes 
-    nodelist = fpq.getNodes(fn)
+
     xnodelist = nodelist[0] 
     ynodelist = nodelist[1]
     segangle = fpq.getSegAngles(xnodelist, ynodelist)
@@ -275,9 +279,9 @@ def plot_folds(linear_filename,bbox):
         #   plot the segment angle distribution 
         plt.figure(figsize=(xSize, ySize))
         plt.subplot(111, projection='polar')
-        coll = fpq.rose(segangle, bins=nBins, 
-                        bidirectional=True, eqarea=True, 
-                        color=sColour)
+        plt.bar(np.deg2rad(np.arange(0, 360, nBinWidth)), n, 
+                width=np.deg2rad(nBinWidth), bottom=0.0, color='.8', edgecolor='k')
+
         plt.xticks(np.radians(range(0, 360, 45)), 
                    ['0', '45', '90', '135', '180', '215', '270', '315'])
         if(nMax>6):        
@@ -309,7 +313,7 @@ def plot_mag(mag_netcdf_path,bbox):
     lons = netcdf_dataset.variables['lon'][:]
     latselect = np.logical_and(lats>bbox[1],lats<bbox[3])
     lonselect = np.logical_and(lons>bbox[0],lons<bbox[2])
-    data = netcdf_dataset.variables['mag_tmi_rtp_anomaly'][latselect,lonselect]
+    data = netcdf_dataset.variables['Band1'][latselect,lonselect]
     #plt.contourf(data[::-1],cmap ='gist_ncar') # flip latitudes so they go south -> north
     plt.imshow(data,cmap ='gist_rainbow',vmin=-1000,vmax=1000)
     plt.title('Magnetics')
@@ -332,7 +336,7 @@ def plot_grav(grav_netcdf_path,bbox):
     lons = netcdf_dataset.variables['lon'][:]
     latselect = np.logical_and(lats>bbox[1],lats<bbox[3])
     lonselect = np.logical_and(lons>bbox[0],lons<bbox[2])
-    data = netcdf_dataset.variables['grav_ir_anomaly'][latselect,lonselect]
+    data = netcdf_dataset.variables['Band1'][latselect,lonselect]
     plt.imshow(data,cmap ='gist_rainbow')
     plt.title('Gravity')
     plt.show()
@@ -385,7 +389,7 @@ def plot_mag_mag_sus(mag_netcdf_path,mag_sus_filename,bbox):
     lons = netcdf_dataset.variables['lon'][:]
     latselect = np.logical_and(lats>bbox[1],lats<bbox[3])
     lonselect = np.logical_and(lons>bbox[0],lons<bbox[2])
-    data = netcdf_dataset.variables['mag_tmi_rtp_anomaly'][latselect,lonselect]
+    data = netcdf_dataset.variables['Band1'][latselect,lonselect]
     #plt.contourf(data[::-1],cmap ='gist_ncar') # flip latitudes so they go south -> north
     ax[0].imshow(data,cmap ='gist_rainbow',vmin=-1000,vmax=1000)
     
@@ -419,7 +423,7 @@ def plot_grav_density(grav_netcdf_path,density_filename,bbox):
     lons = netcdf_dataset.variables['lon'][:]
     latselect = np.logical_and(lats>bbox[1],lats<bbox[3])
     lonselect = np.logical_and(lons>bbox[0],lons<bbox[2])
-    data = netcdf_dataset.variables['grav_ir_anomaly'][latselect,lonselect]
+    data = netcdf_dataset.variables['Band1'][latselect,lonselect]
     ax[0].imshow(data,cmap ='gist_rainbow')
     
     density=gpd.read_file(density_filename,bbox=bbox)
