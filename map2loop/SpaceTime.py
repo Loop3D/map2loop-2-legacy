@@ -55,7 +55,8 @@ def plot_geochron(geochron_filename,bbox):
     
 def plot_geology_codes(geology_filename,bbox):
     geol=gpd.read_file(geology_filename,bbox=bbox)
-    geol_sort=geol.sort_values(by='MAX_AGE_MA')
+    geol['AVE_AGE_MA']=geol['MIN_AGE_MA'].astype('float')+((geol['MAX_AGE_MA'].astype('float')-geol['MIN_AGE_MA'].astype('float'))/2.0)
+    geol_sort=geol.sort_values(by='AVE_AGE_MA')
     geol_sort_unique=geol_sort.drop_duplicates(subset=['CODE'])
 
     plt.axes()
@@ -64,8 +65,8 @@ def plot_geology_codes(geology_filename,bbox):
     print(len(geol_sort_unique))
     for ind,poly in geol_sort_unique.iterrows():
         if(not str(poly['MIN_AGE_MA'])=='None' and not str(poly['MAX_AGE_MA'])=='None'  ):
-            ave_age=float(poly['MIN_AGE_MA'])+(float(poly['MAX_AGE_MA'])-float(poly['MIN_AGE_MA']))/2.0
-            plt.plot([i*xscale], ave_age, 'ro')        
+            #ave_age=float(poly['MIN_AGE_MA'])+(float(poly['MAX_AGE_MA'])-float(poly['MIN_AGE_MA']))/2.0
+            plt.plot([i*xscale], poly['AVE_AGE_MA'], 'ro')        
             line = plt.Line2D((i*xscale, i*xscale),(float(poly['MAX_AGE_MA']), float(poly['MIN_AGE_MA'])), lw=1.5)
             plt.gca().add_line(line)
             i=i+1
