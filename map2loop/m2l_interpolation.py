@@ -1608,7 +1608,7 @@ def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spac
     structures_code = structures_code[structures_code[c_l['d']] != 0]
     first_supergroup = True
     # avoids massive memory rbf calcs by splitting calc into (non-threaded) chunks, maybe try dask + masks??
-    split = 100000
+    split = 25000
     print('split',split,'bsh[0]',bsh[0],'bsh[1]',bsh[1],'spacing',spacing,'xdim',bbox[2]-bbox[0],'ydim',bbox[3]-bbox[1])
     for i in np.arange(0, bsh[0]*bsh[1], split):
         min = i
