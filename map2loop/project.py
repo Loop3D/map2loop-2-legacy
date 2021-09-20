@@ -573,30 +573,55 @@ class Project(object):
                 'proj_crs':self.config.proj_crs,
                 'local':self.config.local
             }
-            point_data=combine_point_data(self.config.output_path,self.config.tmp_path)
-            Gloop=Topology.make_Loop_graph(self.config.tmp_path,self.config.output_path,self.run_flags['fault_orientation_clusters'],
-                                           self.run_flags['fault_length_clusters'],point_data,os.path.normcase(self.config.dtm_reproj_file),self.config.proj_crs,
-                                           self.config.c_l,self.config.run_flags,config_out,self.config.bbox_3d)
-            nx.write_gml(Gloop, os.path.join(self.config.output_path,'loop.gml'))
-            Topology.colour_Loop_graph(self.config.output_path,'loop')
-            Map2Graph.map2graph(self.config.output_path,self.config.geology_file,self.config.fault_file,
-                self.config.mindep_file,self.config.c_l,self.config.run_flags['deposits'],
-                self.config.run_flags['fault_orientation_clusters'],self.config.run_flags['fault_length_clusters'],
-                self.config.run_flags['fault_fault_weight'],
-                self.config.run_flags['fault_weight'],
-                self.config.run_flags['formation_weight'],
-                self.config.run_flags['formation_formation_weight'],
-                self.config.run_flags['fault_formation_weight'])
-            """
-            Map2Graph.granular_map2graph(self.config.output_path,self.config.geology_file,self.config.fault_file,self.config.mindep_file,self.config.c_l,self.config.run_flags['deposits'],
-                self.config.run_flags['fault_fault_weight'],
-                self.config.run_flags['fault_weight'],
-                self.config.run_flags['formation_weight'],
-                self.config.run_flags['formation_formation_weight'],
-                self.config.run_flags['fault_formation_weight'])
-            """            
-            update_fault_layer(self.config.tmp_path,self.config.output_path,self.c_l)
-            #self.config.update_projectfile()
-            self.config.export_png()
+            try:
+                point_data=combine_point_data(self.config.output_path,self.config.tmp_path)
+            except:
+                print("combine_point_data failed")          
+            
+            try:
+                Gloop=Topology.make_Loop_graph(self.config.tmp_path,self.config.output_path,self.run_flags['fault_orientation_clusters'],
+                                            self.run_flags['fault_length_clusters'],point_data,os.path.normcase(self.config.dtm_reproj_file),self.config.proj_crs,
+                                            self.config.c_l,self.config.run_flags,config_out,self.config.bbox_3d)
+                nx.write_gml(Gloop, os.path.join(self.config.output_path,'loop.gml'))
+                Topology.colour_Loop_graph(self.config.output_path,'loop')
+            except:
+                print("Topology.make_Loop_graph failed")          
+            
+            try:
+                Map2Graph.map2graph(self.config.output_path,self.config.geology_file,self.config.fault_file,
+                    self.config.mindep_file,self.config.c_l,self.config.run_flags['deposits'],
+                    self.config.run_flags['fault_orientation_clusters'],self.config.run_flags['fault_length_clusters'],
+                    self.config.run_flags['fault_fault_weight'],
+                    self.config.run_flags['fault_weight'],
+                    self.config.run_flags['formation_weight'],
+                    self.config.run_flags['formation_formation_weight'],
+                    self.config.run_flags['fault_formation_weight'])
+            except:
+                print("Topology.map2graph failed")          
+
+            try:
+                Map2Graph.granular_map2graph(self.config.output_path,self.config.geology_file,self.config.fault_file,self.config.mindep_file,self.config.c_l,self.config.run_flags['deposits'],
+                    self.config.run_flags['fault_fault_weight'],
+                    self.config.run_flags['fault_weight'],
+                    self.config.run_flags['formation_weight'],
+                    self.config.run_flags['formation_formation_weight'],
+                    self.config.run_flags['fault_formation_weight'])
+            except:
+                print("Topology.granular_map2graph failed")          
+
+            try:
+                update_fault_layer(self.config.tmp_path,self.config.output_path,self.c_l)
+            except:
+                print("update_fault_layer failed")          
+
+            try:              
+                self.config.update_projectfile()
+            except:
+                print("self.config.update_projectfile failed")          
+
+            try:              
+                self.config.export_png()
+            except:
+                print("self.config.export_png failed")          
 
         disable_quiet_mode()
