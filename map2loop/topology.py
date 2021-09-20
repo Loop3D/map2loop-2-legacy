@@ -750,12 +750,12 @@ class Topology(object):
             if(str(sub_geol.loc[i][c_l['min']]) == 'None'):
                 min = 0.0
             else:
-                min = float(sub_geol.loc[i][c_l['min']])+float(hint)
+                min = sub_geol.loc[i][c_l['min']].astype('float64')+float(hint)
             # print(str(sub_geol.loc[i][c_l['max']]))
             if(str(sub_geol.loc[i][c_l['max']]) == 'None'):
                 max = 4500000000
             else:
-                max = float(sub_geol.loc[i][c_l['max']])+float(hint)
+                max = sub_geol.loc[i][c_l['max']].astype('float64')+float(hint)
             # f.write("\""+str(sub_geol.loc[i][c_l['min']])+"\"\t")
             # f.write("\""+str(sub_geol.loc[i][c_l['max']])+"\"\t")
             f.write("\""+str(min)+"\"\t")
