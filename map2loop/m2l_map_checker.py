@@ -291,7 +291,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
         faults = faults_folds[faults_folds[c_l['f']
                                            ].str.contains(c_l['fault'], case=False)]
         faults = faults.replace(r'^\s+$', np.nan, regex=True)
-
+        #print(faults)
         if not c_l['o'] in faults.columns:
             m2l_warnings.append(
                 'field named "'+str(c_l['o'])+'" added with default value')
