@@ -551,7 +551,7 @@ class Config(object):
         self.dtm = rasterio.open(self.dtm_reproj_file)
 
         if self.quiet == 'None':
-            plt.imshow(self.dtm.read(1), cmap='terrain', vmin=0, vmax=1000)
+            plt.imshow(self.dtm.read(1), cmap='terrain', vmin=np.percentile(self.dtm.read(1), 5), vmax=np.percentile(self.dtm.read(1), 95))
 
             plt.title('DTM')
             plt.show()
@@ -623,7 +623,7 @@ class Config(object):
                                    self.proj_crs,
                                    cover_spacing,
                                    self.run_flags['contact_decimate'],
-                                   self.bbox_3d['top'],
+                                   self.bbox_3d,
                                    use_vector=True,
                                    use_grid=True
                                    )
@@ -786,6 +786,7 @@ class Config(object):
 
         if(cover_map):
             self.colour_dict['cover']='#FFFFC0'
+            self.colour_dict['cover_up']='#FFFFC0'
         colours = []
         for code in all_sorts['code']:
             colours.append([self.colour_dict[code]])
@@ -829,7 +830,7 @@ class Config(object):
                                      self.geol_clip, self.local, self.dtm,
                                      self.dtb, self.dtb_null, cover_map,
                                      self.pluton_form, pluton_dip,
-                                     contact_decimate, self.c_l,self.bbox_3d['base'],self.bbox_3d['top'])
+                                     contact_decimate, self.c_l,self.bbox_3d)
 
     def extract_section_features(self, section_files):
         # Extract faults and basal contacts of groups from seismic sections
