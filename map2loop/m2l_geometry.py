@@ -371,9 +371,12 @@ def save_basal_contacts(path_in, dtm, dtb, dtb_null, cover_map, geol_clip, conta
                                     if(not b_polygon.is_valid):
                                         b_polygon = b_polygon.buffer(0)
                                     a_snapped = snap(a_polygon, b_polygon, 10)
-                                    LineStringC = a_snapped.intersection(
+                                    try:
+                                        LineStringC = a_snapped.intersection(
                                         b_polygon)
-
+                                    except:
+                                        print("unable to intersect polygons",a_poly,b_poly)
+                                        continue
                                     # ignore weird intersections for now, worry about them later!
                                     if(LineStringC.wkt.split(" ")[0] == 'GEOMETRYCOLLECTION'):
                                         # print("debug:GC")
@@ -714,9 +717,11 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                         saved = 0
                         fault_dip = 90.0
                         # null specifc dip defined
+                        #print(c_l['fdipdir_flag'] ,str(flt[c_l['fdipdir']]), int(flt[c_l['fdip']]) , int(c_l['fdipnull']),str(flt[c_l['fdipest']]),fault_dip_var)
                         if(int(flt[c_l['fdip']]) == int(c_l['fdipnull'])):
                             # dip estimate defined
                             if(not str(flt[c_l['fdipest']]) == '-999'):
+                                #print("1")
                                 i = 0
                                 for choice in split:
                                     if(flt[c_l['o']] == '-1'):
@@ -728,14 +733,17 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                                     i = i+1
                             else:
                                 if(flt[c_l['fdip']] == -999 or fault_dip_var == -999):  # random flag
+                                    #print("2")
                                     fault_dip = random.randint(60, 90)
                                 else:
+                                    #print("3")
                                     fault_dip = fault_dip_var
                         else:
-                        # specific dip defined
+                            #print("4")
+                            # specific dip defined
                             fault_dip = int(flt[c_l['fdip']])
 
-                        # print(c_l['fdipdir_flag'] ,str(flt[c_l['fdipdir']]), flt[c_l['fdip']] , c_l['fdipnull'])
+                        
                         # numeric dip direction defined
                         if(c_l['fdipdir_flag'] == 'num' and not str(flt[c_l['fdipdir']]) == 'None' and not str(int(flt[c_l['fdipdir']])) == c_l['fdipnull']):
                             azimuth = flt[c_l['fdipdir']]
@@ -1196,7 +1204,7 @@ def create_basal_contact_orientations(contacts, structures, output_path, dtm, dt
 #########################################
 
 
-def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb_null, cover_map, pluton_form, pluton_dip, contact_decimate, c_l,bbox_base,bbox_top):
+def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb_null, cover_map, pluton_form, pluton_dip, contact_decimate, c_l,bbox3D):
 
     groups = np.genfromtxt(os.path.join(
         tmp_path, 'groups.csv'), delimiter=',', dtype='U100')
@@ -1319,18 +1327,23 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
                                             # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
                                             ac.write(ostr)
 
-                                            if(pluton_form == 'saucers'):
-                                                ostr = "{},{},{},{}\n"\
-                                                    .format(lineC.coords[0][0], lineC.coords[0][1], bbox_top+1000, newgp.replace(" ", "_").replace("-", "_"))
-                                                # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
-                                                ac.write(ostr)
-                                                
-                                                # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",1,"+newgp.replace(" ","_").replace("-","_")+"\n"
-                                            elif(pluton_form == 'domes'):
-                                                ostr = "{},{},{},{}\n"\
-                                                    .format(lineC.coords[0][0], lineC.coords[0][1], bbox_base-1000, newgp.replace(" ", "_").replace("-", "_"))
-                                                # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
-                                                ac.write(ostr)
+                                            if(np.fabs(lineC.coords[0][0]-bbox3D['minx'])>100 and
+                                                   np.fabs(lineC.coords[0][0]-bbox3D['maxx'])>100 and                                               
+                                                   np.fabs(lineC.coords[0][1]-bbox3D['miny'])>100 and                                               
+                                                   np.fabs(lineC.coords[0][1]-bbox3D['maxy'])>100 ):                                               
+                                                   
+                                                if(pluton_form == 'saucers'):
+                                                    ostr = "{},{},{},{}\n"\
+                                                        .format(lineC.coords[0][0], lineC.coords[0][1], bbox3D['top']+1000, newgp.replace(" ", "_").replace("-", "_"))
+                                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
+                                                    ac.write(ostr)
+                                                    
+                                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",1,"+newgp.replace(" ","_").replace("-","_")+"\n"
+                                                elif(pluton_form == 'domes'):
+                                                    ostr = "{},{},{},{}\n"\
+                                                        .format(lineC.coords[0][0], lineC.coords[0][1], bbox3D['base']-1000, newgp.replace(" ", "_").replace("-", "_"))
+                                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
+                                                    ac.write(ostr)
                                                 
                                             allc.write(
                                                 agp+","+str(ageol[c_l['o']])+","+ostr)
@@ -1510,7 +1523,8 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
         'index,group number,index in group,number in group,code,group\n')
     j = 1
     if(cover_map):
-        all_sorts_file.write('-1,0,1,1,cover,cover\n')
+        all_sorts_file.write('-2,0,1,2,cover_up,cover\n')
+        all_sorts_file.write('-1,0,2,2,cover,cover\n')
 
     for i in range(1, len(all_sorts)+1):
         # don't write out if already there in new groups list#
@@ -1754,7 +1768,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     geol=geol.set_index(c_l['c'])
     slist=[]
     for ind,unit in all_sorts.iterrows():
-        if(unit['code']=='cover'):
+        if(unit['code']=='cover' or unit['code']=='cover_up' ):
             slist.append('cover')
         #elif(c_l['intrusive'] in geol.loc[unit['code'].replace("_"," ")][c_l['r1']] 
         #    and c_l['sill'] not in geol.loc[unit['code'].replace("_"," ")][c_l['ds']]):
@@ -1821,7 +1835,12 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     fs = open(os.path.join(output_path, 'formation_summary_thicknesses.csv'), 'a+')
 
     for ind, a_s in all_sorts.iterrows():
-        if(not a_s['code'] in found_codes):
+        
+        if(a_s['code']=='cover' or a_s['code']=='cover_up'):
+            ostr = "{},{},{},{}\n"\
+                .format(a_s['code'], 5000, 'nan', "fudge")
+            fs.write(ostr)            
+        elif(not a_s['code'] in found_codes):
             print("Guessing formation thickness of",
                   a_s['code'], "as", median_th)
             ostr = "{},{},{},{}\n"\
@@ -2933,7 +2952,7 @@ def fault_strat_offset(path_out, c_l, dst_crs, fm_thick_file, all_sorts_file, fa
 ##########################################################
 
 
-def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, bbox, dst_crs, spacing, contact_decimate,bbox_top, use_vector, use_grid):
+def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, bbox, dst_crs, spacing, contact_decimate,bbox3D, use_vector, use_grid):
 
     if(use_grid and use_vector):  # assumes a grid of depth to cover, with a defined null value for no cover, and a vector description of cover limits
         print("use_vector, use_grid",use_vector, use_grid)
@@ -2966,6 +2985,13 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
             ostr = "{},{},{},{}\n"\
                 .format(pt['X'], pt['Y'], height, 'cover')
             allpts.write(ostr)
+            if(np.fabs(pt['X']-bbox3D['minx'])>1000 and
+                    np.fabs(pt['X']-bbox3D['maxx'])>1000 and                                               
+                    np.fabs(pt['Y']-bbox3D['miny'])>1000 and                                               
+                    np.fabs(pt['Y']-bbox3D['maxy'])>1000 ):                                               
+                ostr = "{},{},{},{}\n"\
+                    .format(pt['X'], pt['Y'], float(height)+5000, 'cover_up')
+                allpts.write(ostr)
 
         for indx, cpoly in cover.iterrows():
             # need to ignore points outside bbox and make poly os bbox
@@ -2985,10 +3011,14 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                             .format(pt[0], pt[1], height, 'cover')
                         # ostr = str(pt[0])+","+str(pt[1])+","+height+",cover\n"
                         allpts.write(ostr)
-                        ostr = "{},{},{},{}\n"\
-                            .format(pt[0], pt[1], bbox_top-1, 'cover')
-                        # ostr = str(pt[0])+","+str(pt[1])+","+height+",cover\n"
-                        allpts.write(ostr)
+                        if(np.fabs(pt[0]-bbox3D['minx'])>1000 and
+                                np.fabs(pt[0]-bbox3D['maxx'])>1000 and                                               
+                                np.fabs(pt[1]-bbox3D['miny'])>1000 and                                               
+                                np.fabs(pt[1]-bbox3D['maxy'])>1000 ):                                               
+                            ostr = "{},{},{},{}\n"\
+                                .format(pt[0], pt[1], bbox3D['top']+5000, 'cover')
+                            # ostr = str(pt[0])+","+str(pt[1])+","+height+",cover\n"
+                            allpts.write(ostr)
                 k = k+1
             if(len(coords['interior_coords']) > 0):
                 for i in range(0, len(coords['interior_coords']), 2):
@@ -3009,7 +3039,7 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                                     # ostr = str(pt[0])+","+str(pt[1])+","+height+",cover\n"
                                     allpts.write(ostr)
                                     ostr = "{},{},{},{}\n"\
-                                        .format(pt[0], pt[1], bbox_top+1000, 'cover')
+                                        .format(pt[0], pt[1], bbox3D['top']+5000, 'cover')
                                     # ostr = str(pt[0])+","+str(pt[1])+","+height+",cover\n"
                                     allpts.write(ostr)
                 k = k+1
@@ -3043,6 +3073,10 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                 .format(pt['X'], pt['Y'], height, 'cover')
             # ostr = str(pt['X'])+','+str(pt['Y'])+','+str(height)+',cover\n'
             allpts.write(ostr)
+            ostr = "{},{},{},{}\n"\
+                .format(pt['X'], pt['Y'], float(height)+5000, 'cover')
+            # ostr = str(pt['X'])+','+str(pt['Y'])+','+str(height)+',cover\n'
+            #allpts.write(ostr)
 
         allpts.close()
         print("cover grid saved out as", os.path.join(
@@ -3098,6 +3132,10 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                                 .format(pt[0], pt[1], height, azimuth, cover_dip, '1', 'cover')
                             # ostr = str(pt[0])+","+str(pt[1])+","+str(height)+","+str(azimuth)+","+str(cover_dip)+",1,cover\n"
                             allo.write(ostr)
+                            ostr = "{},{},{},{},{},{},{}\n"\
+                                .format(pt[0], pt[1], float(height)+5000, azimuth, cover_dip, '1', 'cover_up')
+                            # ostr = str(pt[0])+","+str(pt[1])+","+str(height)+","+str(azimuth)+","+str(cover_dip)+",1,cover\n"
+                            #allo.write(ostr)
 
                 k = k+1
             first = True
@@ -3148,6 +3186,11 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
 
                                         # ostr = str(pt[0])+","+str(pt[1])+","+str(height)+","+str(azimuth)+","+str(cover_dip)+",1,cover\n"
                                         allo.write(ostr)
+                                        ostr = "{},{},{},{},{},{},{}\n"\
+                                            .format(pt[0], pt[1], float(height)+5000, azimuth, cover_dip, '1', 'cover_up')
+
+                                        # ostr = str(pt[0])+","+str(pt[1])+","+str(height)+","+str(azimuth)+","+str(cover_dip)+",1,cover\n"
+                                        #allo.write(ostr)
 
                             k = k+1
     elif(use_grid and not use_vector):  # assumes grid but no vector of limits of cover
