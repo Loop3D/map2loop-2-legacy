@@ -703,6 +703,14 @@ class Topology(object):
 
         nx.write_gml(GD, os.path.join(tmp_path, "fault_network.gml"))
 
+        f=open(os.path.join(tmp_path, "fault_network_edges.csv"),'w')
+        f.write('fault_1,fault_2,angle,topol\n')
+        for e in GD.edges():
+            f.write('{},{},{},{}\n'.format(e[0],e[1],GD[e[0]][e[1]]['angle'],GD[e[0]][e[1]]['topol']))
+        f.close() 
+
+        print('edges saved as :',os.path.join(tmp_path, "fault_network_edges.csv"))
+        
         try:
             print('cycles', list(nx.simple_cycles(GD)))
         except:
