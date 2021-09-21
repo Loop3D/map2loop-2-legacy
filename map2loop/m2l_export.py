@@ -1845,7 +1845,7 @@ def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs, o
             print(resp["errorString"])
 
     # each contact contains a location and which formation it is on
-    contacts = pd.read_csv(os.path.join(output_path, "contacts4.csv"))
+    contacts = pd.read_csv(os.path.join(output_path, "contacts_clean.csv"))
     layerIds = []
     for form in contacts['formation']:
         a = bytes(form, 'ascii')
@@ -1870,7 +1870,7 @@ def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs, o
     if resp["errorFlag"]:
         print(resp["errorString"])
 
-    observations = pd.read_csv(os.path.join(output_path, "orientations.csv"))
+    observations = pd.read_csv(os.path.join(output_path, "orientations_clean.csv"))
     layerIds = []
     for form in observations['formation']:
         a = bytes(form, 'ascii')
@@ -1949,3 +1949,33 @@ def loop2gempy(*args, **kwargs):
     from gempy.addons.map2gempy import loop2gempy
     geo_model = loop2gempy(*args, **kwargs)
     return geo_model
+
+def ElementToPandas(loopFilename,element,loopCompoundType):
+    """
+    **ElementToPandas** - Exports one element of the loop project file
+    to a pandas dataframe
+
+    Parameters
+    ----------
+    loopFilename: string
+        The filename of the loop project file
+    element: string
+        The name of the element to extract
+    loopCompoundType: numpy.compoundType
+        The numpy data structure that the element is stored in
+
+    Returns
+        pandas dataframe
+    -------
+
+    """
+    resp = LoopProjectFile.Get(loopFilename,element)
+    if resp['errorFlag']:
+        print(resp['errorString'])
+        df = pd.DataFrame()
+    else:
+        columns = list(loopCompoundType.names)
+        df = pd.DataFrame.from_records(resp['value'],columns=columns)
+        df = df.applymap(lambda x:x.decode() if isinstance(x,bytes) else x)
+        df.set_index(columns[0],inplace=True)
+    return(df)
