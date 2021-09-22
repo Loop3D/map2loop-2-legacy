@@ -378,7 +378,10 @@ class Project(object):
                 'fault_weight':1,
                 'formation_weight':7,
                 'formation_formation_weight':9,
-                'fault_formation_weight':5
+                'fault_formation_weight':5,
+                'map2graph':False,
+                'granular_map2graph':False
+
             }
 
         # And copy in any new settings from the user
@@ -587,27 +590,29 @@ class Project(object):
             except:
                 print("Topology.make_Loop_graph failed")          
             
-            try:
-                Map2Graph.map2graph(self.config.output_path,self.config.geology_file,self.config.fault_file,
-                    self.config.mindep_file,self.config.c_l,self.config.run_flags['deposits'],
-                    self.config.run_flags['fault_orientation_clusters'],self.config.run_flags['fault_length_clusters'],
-                    self.config.run_flags['fault_fault_weight'],
-                    self.config.run_flags['fault_weight'],
-                    self.config.run_flags['formation_weight'],
-                    self.config.run_flags['formation_formation_weight'],
-                    self.config.run_flags['fault_formation_weight'])
-            except:
-                print("Topology.map2graph failed")          
+            if(self.config.run_flags['map2graph']):
+                try:
+                    Map2Graph.map2graph(self.config.output_path,self.config.geology_file,self.config.fault_file,
+                        self.config.mindep_file,self.config.c_l,self.config.run_flags['deposits'],
+                        self.config.run_flags['fault_orientation_clusters'],self.config.run_flags['fault_length_clusters'],
+                        self.config.run_flags['fault_fault_weight'],
+                        self.config.run_flags['fault_weight'],
+                        self.config.run_flags['formation_weight'],
+                        self.config.run_flags['formation_formation_weight'],
+                        self.config.run_flags['fault_formation_weight'])
+                except:
+                    print("Topology.map2graph failed")          
 
-            try:
-                Map2Graph.granular_map2graph(self.config.output_path,self.config.geology_file,self.config.fault_file,self.config.mindep_file,self.config.c_l,self.config.run_flags['deposits'],
-                    self.config.run_flags['fault_fault_weight'],
-                    self.config.run_flags['fault_weight'],
-                    self.config.run_flags['formation_weight'],
-                    self.config.run_flags['formation_formation_weight'],
-                    self.config.run_flags['fault_formation_weight'])
-            except:
-                print("Topology.granular_map2graph failed")          
+            if(self.config.run_flags['granular_map2graph']):
+                try:
+                    Map2Graph.granular_map2graph(self.config.output_path,self.config.geology_file,self.config.fault_file,self.config.mindep_file,self.config.c_l,self.config.run_flags['deposits'],
+                        self.config.run_flags['fault_fault_weight'],
+                        self.config.run_flags['fault_weight'],
+                        self.config.run_flags['formation_weight'],
+                        self.config.run_flags['formation_formation_weight'],
+                        self.config.run_flags['fault_formation_weight'])
+                except:
+                    print("Topology.granular_map2graph failed")          
 
             try:
                 update_fault_layer(self.config.tmp_path,self.config.output_path,self.c_l)
