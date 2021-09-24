@@ -2076,6 +2076,18 @@ def calc_thickness_with_grid(tmp_path, output_path, buffer, max_thickness_allowe
     contact_lines = gpd.read_file(
         os.path.join(tmp_path, 'basal_contacts.shp'))
     all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts.csv'))
+    all_sorts['index2']=all_sorts.index
+    all_sorts.set_index('code',inplace=True)
+    geol=gpd.read_file(os.path.join(tmp_path, 'geol_clip.shp'))
+    geol.drop_duplicates(subset=c_l['c'],inplace=True)
+    geol.set_index(c_l['c'],inplace=True)
+    drops=geol[geol[c_l['ds']].str.contains(c_l['sill']) & geol[c_l['r1']].str.contains(c_l['intrusive'])]
+    for ind,drop in drops.iterrows():
+        all_sorts.drop(labels=drop.name,inplace=True)
+    all_sorts['code']=all_sorts.index
+    all_sorts['index']=all_sorts['index2']
+    all_sorts.set_index('index2',inplace=True)
+
     contacts = pd.read_csv(contact_points_file)
 
     clength = len(contacts)
