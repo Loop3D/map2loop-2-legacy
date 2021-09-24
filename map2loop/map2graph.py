@@ -249,18 +249,20 @@ class Map2Graph(object):
                             else:
                                 ang_code='X'
 
-                            Gloop.add_edge('Fault_'+f.name,'Fault_'+other)
-                            Gloop['Fault_'+f.name]['Fault_'+other]['etype']='fault_fault'
-                            Gloop['Fault_'+f.name]['Fault_'+other]['fault1']='Fault_'+f.name
-                            Gloop['Fault_'+f.name]['Fault_'+other]['fault2']='Fault_'+other
-                            Gloop['Fault_'+f.name]['Fault_'+other]['angle']=int(ang)
-                            Gloop['Fault_'+f.name]['Fault_'+other]['topol']=ang_code
-                            Gloop['Fault_'+f.name]['Fault_'+other]['weight']=fault_fault_weight
+                            Gloop.add_edge('Fault_'+other,'Fault_'+f.name)
+                            Gloop['Fault_'+other]['Fault_'+f.name]['etype']='fault_fault'
+                            Gloop['Fault_'+other]['Fault_'+f.name]['fault1']='Fault_'+other
+                            Gloop['Fault_'+other]['Fault_'+f.name]['fault2']='Fault_'+f.name
+                            Gloop['Fault_'+other]['Fault_'+f.name]['angle']=int(ang)
+                            Gloop['Fault_'+other]['Fault_'+f.name]['topol']=ang_code
+                            Gloop['Fault_'+other]['Fault_'+f.name]['weight']=fault_fault_weight
                             
-                            """Gfault.add_edge('Fault_'+f.name,'Fault_'+other)
-                            Gfault['Fault_'+f.name]['Fault_'+other]['etype']='fault_fault'
-                            Gfault['Fault_'+f.name]['Fault_'+other]['angle']=int(ang)
-                            Gfault['Fault_'+f.name]['Fault_'+other]['topol']=ang_code"""
+                            Gfault.add_edge('Fault_'+other,'Fault_'+f.name)
+                            Gfault['Fault_'+other]['Fault_'+f.name]['etype']='fault_fault'
+                            Gfault['Fault_'+other]['Fault_'+f.name]['fault1']='Fault_'+other
+                            Gfault['Fault_'+other]['Fault_'+f.name]['fault2']='Fault_'+f.name
+                            Gfault['Fault_'+other]['Fault_'+f.name]['angle']=int(ang)
+                            Gfault['Fault_'+other]['Fault_'+f.name]['topol']=ang_code
                         ind2=ind2+1
                 
                 elif(e[2].distance(Point(f.geometry.coords[-1]))<eps):
@@ -277,18 +279,20 @@ class Map2Graph(object):
                                 ang_code='T'
                             else:
                                 ang_code='X'
-                            Gloop.add_edge('Fault_'+f.name,'Fault_'+other)
-                            Gloop['Fault_'+f.name]['Fault_'+other]['etype']='fault_fault'
-                            Gloop['Fault_'+f.name]['Fault_'+other]['fault1']='Fault_'+f.name
-                            Gloop['Fault_'+f.name]['Fault_'+other]['fault2']='Fault_'+other
-                            Gloop['Fault_'+f.name]['Fault_'+other]['angle']=int(ang)
-                            Gloop['Fault_'+f.name]['Fault_'+other]['topol']=ang_code
-                            Gloop['Fault_'+f.name]['Fault_'+other]['weight']=fault_fault_weight
+                            Gloop.add_edge('Fault_'+other,'Fault_'+f.name)
+                            Gloop['Fault_'+other]['Fault_'+f.name]['etype']='fault_fault'
+                            Gloop['Fault_'+other]['Fault_'+f.name]['fault1']='Fault_'+other
+                            Gloop['Fault_'+other]['Fault_'+f.name]['fault2']='Fault_'+f.name
+                            Gloop['Fault_'+other]['Fault_'+f.name]['angle']=int(ang)
+                            Gloop['Fault_'+other]['Fault_'+f.name]['topol']=ang_code
+                            Gloop['Fault_'+other]['Fault_'+f.name]['weight']=fault_fault_weight
                             
-                            """Gfault.add_edge('Fault_'+f.name,'Fault_'+other)
-                            Gfault['Fault_'+f.name]['Fault_'+other]['etype']='fault_fault'
-                            Gfault['Fault_'+f.name]['Fault_'+other]['angle']=int(ang)
-                            Gfault['Fault_'+f.name]['Fault_'+other]['topol']=ang_code"""
+                            Gfault.add_edge('Fault_'+other,'Fault_'+f.name)
+                            Gfault['Fault_'+other]['Fault_'+f.name]['etype']='fault_fault'
+                            Gfault['Fault_'+other]['Fault_'+f.name]['fault1']='Fault_'+other
+                            Gfault['Fault_'+other]['Fault_'+f.name]['fault2']='Fault_'+f.name
+                            Gfault['Fault_'+other]['Fault_'+f.name]['angle']=int(ang)
+                            Gfault['Fault_'+other]['Fault_'+f.name]['topol']=ang_code
 
                         ind2=ind2+1
 
