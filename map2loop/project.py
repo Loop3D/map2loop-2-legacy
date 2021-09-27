@@ -360,6 +360,7 @@ class Project(object):
                 'fault_length_clusters':2,
                 'pluton_dip': 45,
                 'pluton_form': 'domes',
+                'min_pluton_area':10000000,
                 'dist_buffer': 10,
                 'contact_dip': -999,
                 'contact_orientation_decimate': 5,
@@ -488,34 +489,34 @@ class Project(object):
             self.config.run_map2model(
                 self.run_flags['deposits'], self.run_flags['aus'])
             #Map2Graph.map2graph('./test_m2g',self.config.geology_file,self.config.fault_file,self.config.mindep_file,self.c_l,self.run_flags['deposits'])
-            pbar.update(10)
+            pbar.update(10) #10%
 
             self.config.load_dtm(self.dtm_file if self.local else self.state)
-            pbar.update(10)
+            pbar.update(10) #20%
 
             self.config.join_features()
-            pbar.update(10)
+            pbar.update(5) #25%
 
             self.config.calc_depth_grid(self.workflow['cover_map'])
-            pbar.update(10)
+            pbar.update(5) #30%
 
             self.config.export_orientations(
                 self.run_flags['orientation_decimate'],self.workflow['cover_map'])
-            pbar.update(10)
+            pbar.update(10) #40%
             self.config.export_contacts(
                 self.run_flags['contact_decimate'], self.run_flags['intrusion_mode'],self.workflow['cover_map'])
-            pbar.update(10)
+            pbar.update(10) #50%
             self.config.test_interpolation(self.run_flags['interpolation_spacing'],
                                            self.run_flags['misorientation'],
                                            self.run_flags['interpolation_scheme'],self.workflow['cover_map'])
-            pbar.update(10)
+            pbar.update(10) #60%
 
             # TODO: make all these internal, the config class already has the run_flags dictionary
             self.config.export_faults(self.run_flags['fault_decimate'], self.run_flags['min_fault_length'],
                                       self.run_flags['fault_dip'],self.workflow['cover_map'])
             self.config.process_plutons(self.run_flags['pluton_dip'], self.run_flags['pluton_form'], self.run_flags['dist_buffer'],
                                         self.run_flags['contact_decimate'],self.workflow['cover_map'])
-            pbar.update(20)
+            pbar.update(20) #80%
 
             # Seismic section 
             if (self.workflow['seismic_section']):
@@ -554,7 +555,6 @@ class Project(object):
 
             self.config.postprocess(inputs, self.workflow, self.run_flags['use_interpolations'],
                                     self.run_flags['use_fat'])
-            pbar.update(10)
 
             self.config.save_cmap(self.workflow['cover_map'])
 
@@ -627,6 +627,8 @@ class Project(object):
             try:              
                 self.config.export_png()
             except:
-                print("self.config.export_png failed")          
+                print("self.config.export_png failed")   
+
+            pbar.update(20) #100%
 
         disable_quiet_mode()
