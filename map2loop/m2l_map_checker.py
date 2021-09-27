@@ -119,6 +119,8 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
     if (os.path.isfile(geology_file) or geology_file.startswith("http") or not local_paths):
         geology = gpd.read_file(geology_file, bbox=bbox)
+        geology = gpd.overlay(geology, polygo, how='intersection')
+
         if(not geology.empty):
             if not c_l['o'] in geology.columns:
                 # print(geology.columns)
@@ -476,9 +478,9 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
         if('level_1' in geology.columns):
             geology.drop(columns=['level_1'], inplace=True)
 
-        geol_clip = gpd.overlay(geology, polygo, how='intersection')
+        #geol_clip = gpd.overlay(geology, polygo, how='intersection')
 
-        if(len(geol_clip) > 0 ):
+        if(len(geology) > 0 ):
             """
             geol_gaps=check_gaps(geol_clip)
             if(len(geol_gaps)>0):
@@ -496,9 +498,9 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             else:
                 print("No overlaps between geology polygons")
             """
-            geol_clip.crs = dst_crs
+            geology.crs = dst_crs
             geol_file = os.path.join(tmp_path, 'geol_clip.shp')
-            geol_clip.to_file(geol_file)
+            geology.to_file(geol_file)
 
         if(len(orientations) > 0):
             structure_file = os.path.join(tmp_path, 'structure_clip.shp')
