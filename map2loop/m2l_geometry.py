@@ -10,6 +10,7 @@ import pandas as pd
 from math import acos, sqrt, cos, sin, degrees, radians, fabs, atan2, fmod, isnan, atan, asin
 from . import m2l_utils
 from .m2l_utils import print
+from .m2l_map_checker import densify
 from . import m2l_interpolation
 import numpy as np
 import os
@@ -483,7 +484,7 @@ def save_basal_no_faults(path_out, path_fault, ls_dict, dist_buffer, c_l, dst_cr
         faults_clip = faults_clip.dropna(subset=['geometry'])
 
         df = DataFrame.from_dict(ls_dict, "index")
-        print(df)
+        #print(df)
         contacts = GeoDataFrame(df, crs=dst_crs, geometry='geometry')
 
         # defines buffer around faults where strat nodes will be removed
@@ -1204,8 +1205,8 @@ def create_basal_contact_orientations(contacts, structures, output_path, dtm, dt
 #########################################
 
 
-def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb_null, cover_map, pluton_form, pluton_dip, contact_decimate, c_l,bbox3D):
-
+def process_plutons_old(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb_null, cover_map, pluton_form, pluton_dip, contact_decimate, c_l,bbox3D):
+    print("processing plutons...")
     groups = np.genfromtxt(os.path.join(
         tmp_path, 'groups.csv'), delimiter=',', dtype='U100')
 
@@ -1299,6 +1300,8 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
                             central_poly = central_poly.buffer(0)
                         if(not older_polygon.is_valid):
                             older_polygon = older_polygon.buffer(0)
+                        centroid=central_poly.centroid
+                        
                         LineStringC = central_poly.intersection(older_polygon)
                         if(LineStringC.wkt.split(" ")[0] == 'MULTIPOLYGON' or
                            LineStringC.wkt.split(" ")[0] == 'POLYGON'):  # ignore polygon intersections for now, worry about them later!
@@ -1311,6 +1314,8 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
                             ls_dict[id] = {"id": id, c_l['c']: newgp,
                                            c_l['g']: newgp, "geometry": LineStringC}
                             id = id+1
+                            #print('centroid',centroid)
+                            first=True # use first found dist so all arcs converge to same point
                             for lineC in LineStringC:  # process all linestrings
                                 if(lineC.wkt.split(" ")[0] == 'LINESTRING'):
                                     # decimate to reduce number of points, but also take second and third point of a series to keep gempy happy
@@ -1337,13 +1342,30 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
                                                         .format(lineC.coords[0][0], lineC.coords[0][1], bbox3D['top']+1000, newgp.replace(" ", "_").replace("-", "_"))
                                                     # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
                                                     ac.write(ostr)
-                                                    
-                                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",1,"+newgp.replace(" ","_").replace("-","_")+"\n"
+                                                    if(first):
+                                                        dist=centroid.distance(Point(lineC.coords[0][0],lineC.coords[0][1]))
+                                                        first=False
+                                                    #print('dist',dist)
+                                                    for rad in np.arange(0.8,-0.21,-.2):
+                                                        z=dist*sqrt((1-rad**2))*0.5
+                                                        x=lineC.coords[0][0]+((centroid.x-lineC.coords[0][0])*(1-rad))
+                                                        y=lineC.coords[0][1]+((centroid.y-lineC.coords[0][1])*(1-rad))
+                                                        ostr = "{},{},{},{}\n"\
+                                                            .format(x,y,float(height)-z, newgp.replace(" ", "_").replace("-", "_"))
+                                                        ac.write(ostr)                                                        
                                                 elif(pluton_form == 'domes'):
                                                     ostr = "{},{},{},{}\n"\
                                                         .format(lineC.coords[0][0], lineC.coords[0][1], bbox3D['base']-1000, newgp.replace(" ", "_").replace("-", "_"))
                                                     # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
                                                     ac.write(ostr)
+                                                    dist=centroid.distance(Point(lineC.coords[0][0],lineC.coords[0][1]))
+                                                    for rad in np.arange(0.8,-0.21,-.2):
+                                                        z=dist*sqrt((1-rad**2))
+                                                        x=lineC.coords[0][0]+((centroid.x-lineC.coords[0][0])*(1-rad))
+                                                        y=lineC.coords[0][1]+((centroid.y-lineC.coords[0][1])*(1-rad))
+                                                        ostr = "{},{},{},{}\n"\
+                                                            .format(x,y,float(height)+z, newgp.replace(" ", "_").replace("-", "_"))
+                                                        ac.write(ostr)                                                        
                                                 
                                             allc.write(
                                                 agp+","+str(ageol[c_l['o']])+","+ostr)
@@ -1365,6 +1387,324 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
                                                 agp+","+str(ageol[c_l['o']])+","+ostr)
                                             allpts += 1
 
+                                    # decimate to reduce number of points, but also take second and third point of a series to keep gempy happy
+                                    if(m2l_utils.mod_safe(k, contact_decimate) == 0 or k == int((len(LineStringC)-1)/2) or k == len(LineStringC)-1):
+                                        dlsx = lineC.coords[0][0] - \
+                                            lineC.coords[1][0]
+                                        dlsy = lineC.coords[0][1] - \
+                                            lineC.coords[1][1]
+                                        lsx = dlsx / \
+                                            sqrt((dlsx*dlsx)+(dlsy*dlsy))
+                                        lsy = dlsy / \
+                                            sqrt((dlsx*dlsx)+(dlsy*dlsy))
+
+                                        locations = [
+                                            (lineC.coords[0][0], lineC.coords[0][1])]
+                                        height = m2l_utils.value_from_dtm_dtb(
+                                            dtm, dtb, dtb_null, cover_map, locations)
+                                        # normal to line segment
+                                        azimuth = (
+                                            180+degrees(atan2(lsy, -lsx))) % 360
+                                        # pt just a bit in/out from line
+                                        testpx = lineC.coords[0][0]-lsy
+                                        testpy = lineC.coords[0][0]+lsx
+
+                                        if(ageol.geometry.type == 'Polygon'):
+                                            if Polygon(ageol.geometry).contains(Point(testpx, testpy)):
+                                                azimuth = (azimuth-180) % 360
+                                        else:
+                                            if MultiPolygon(ageol.geometry).contains(Point(testpx, testpy)):
+                                                azimuth = (azimuth-180) % 360
+
+                                        if(pluton_form == 'saucers'):
+                                            polarity = 1
+                                            # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",1,"+newgp.replace(" ","_").replace("-","_")+"\n"
+                                        elif(pluton_form == 'domes'):
+                                            polarity = 0
+                                            azimuth = (azimuth-180) % 360
+                                            # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",0,"+newgp.replace(" ","_").replace("-","_")+"\n"
+                                        elif(pluton_form == 'pendant'):
+                                            polarity = 0
+                                            # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",0,"+newgp.replace(" ","_").replace("-","_")+"\n"
+                                        else:  # pluton_form  ==  batholith
+                                            polarity = 1
+                                            azimuth = (azimuth-180) % 360
+                                            # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",1,"+newgp.replace(" ","_").replace("-","_")+"\n"
+                                        ostr = "{},{},{},{},{},{},{}\n"\
+                                            .format(lineC.coords[0][0], lineC.coords[0][1], height, azimuth, pluton_dip, polarity, newgp.replace(" ", "_").replace("-", "_"))
+                                        ao.write(ostr)
+
+                                    k += 1
+                        # apparently this is not needed
+                        elif(LineStringC.wkt.split(" ")[0] == 'LINESTRING'):
+                            k = 0
+                            lineC = LineString(LineStringC)
+                            # decimate to reduce number of points, but also take second and third point of a series to keep gempy happy
+                            if(m2l_utils.mod_safe(k, contact_decimate) == 0 or k == int((len(LineStringC)-1)/2) or k == len(LineStringC)-1):
+                                # doesn't like point right on edge?
+                                locations = [
+                                    (lineC.coords[0][0], lineC.coords[0][1])]
+                                if(lineC.coords[0][0] > dtm.bounds[0] and lineC.coords[0][0] < dtm.bounds[2] and
+                                   lineC.coords[0][1] > dtm.bounds[1] and lineC.coords[0][1] < dtm.bounds[3]):
+                                    height = m2l_utils.value_from_dtm_dtb(
+                                        dtm, dtb, dtb_null, cover_map, locations)
+                                    ostr = "{},{},{},{}\n"\
+                                        .format(lineC.coords[0][0], lineC.coords[0][1], height, newgp.replace(" ", "_").replace("-", "_"))
+                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
+                                    ac.write(ostr)
+                                    allc.write(
+                                        agp+","+str(ageol[c_l['o']])+","+ostr)
+                                    ls_dict_decimate[allpts] = {"id": allpts, c_l['c']: newgp, c_l['g']: newgp, "geometry": Point(
+                                        lineC.coords[0][0], lineC.coords[0][1])}
+                                    allpts += 1
+                                else:
+                                    continue
+                            else:
+                                if(lineC.coords[0][0] > dtm.bounds[0] and lineC.coords[0][0] < dtm.bounds[2] and
+                                        lineC.coords[0][1] > dtm.bounds[1] and lineC.coords[0][1] < dtm.bounds[3]):
+                                    height = m2l_utils.value_from_dtm_dtb(
+                                        dtm, dtb, dtb_null, cover_map, locations)
+                                    ostr = "{},{},{},{}\n"\
+                                        .format(lineC.coords[0][0], lineC.coords[0][1], height, newgp.replace(" ", "_").replace("-", "_"))
+                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
+                                    # ls_dict_decimate[allpts]  =  {"id": id,"CODE":ageol['CODE'],"GROUP_":ageol['GROUP_'], "geometry": Point(lineC.coords[0][0],lineC.coords[0][1])}
+                                    allc.write(
+                                        agp+","+str(ageol[c_l['o']])+","+ostr)
+                                    allpts += 1
+
+                            # decimate to reduce number of points, but also take second and third point of a series to keep gempy happy
+                            if(m2l_utils.mod_safe(k, contact_decimate) == 0 or k == int((len(LineStringC)-1)/2) or k == len(LineStringC)-1):
+                                dlsx = lineC.coords[0][0]-lineC.coords[1][0]
+                                dlsy = lineC.coords[0][1]-lineC.coords[1][1]
+                                lsx = dlsx/sqrt((dlsx*dlsx)+(dlsy*dlsy))
+                                lsy = dlsy/sqrt((dlsx*dlsx)+(dlsy*dlsy))
+
+                                locations = [
+                                    (lineC.coords[0][0], lineC.coords[0][1])]
+                                height = m2l_utils.value_from_dtm_dtb(
+                                    dtm, dtb, dtb_null, cover_map, locations)
+                                # normal to line segment
+                                azimuth = (180+degrees(atan2(lsy, -lsx))) % 360
+                                # pt just a bit in/out from line
+                                testpx = lineC.coords[0][0]-lsy
+                                testpy = lineC.coords[0][0]+lsx
+
+                                if(ageol.geometry.type == 'Polygon'):
+                                    if Polygon(ageol.geometry).contains(Point(testpx, testpy)):
+                                        azimuth = (azimuth-180) % 360
+                                else:
+                                    if MultiPolygon(ageol.geometry).contains(Point(testpx, testpy)):
+                                        azimuth = (azimuth-180) % 360
+
+                                if(pluton_form == 'saucers'):
+                                    polarity = 1
+                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",1,"+newgp.replace(" ","_").replace("-","_")+"\n"
+                                elif(pluton_form == 'domes'):
+                                    polarity = 0
+                                    azimuth = (azimuth-180) % 360
+                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",0,"+newgp.replace(" ","_").replace("-","_")+"\n"
+                                elif(pluton_form == 'pendant'):
+                                    polarity = 0
+                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",0,"+newgp.replace(" ","_").replace("-","_")+"\n"
+                                else:  # pluton_form  ==  batholith
+                                    polarity = 1
+                                    azimuth = (azimuth-180) % 360
+                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+str(height)+","+str(azimuth)+","+str(pluton_dip)+",1,"+newgp.replace(" ","_").replace("-","_")+"\n"
+                                ostr = "{},{},{},{},{},{},{}\n"\
+                                    .format(lineC.coords[0][0], lineC.coords[0][1], height, azimuth, pluton_dip, polarity, newgp.replace(" ", "_").replace("-", "_").replace(",", "_"))
+                                ao.write(ostr)
+                            k += 1
+                        # apparently this is not needed
+                        elif(LineStringC.wkt.split(" ")[0] == 'POINT'):
+                            k = 0
+                            # print("debug:POINT")
+                            k += 1
+                        else:
+                            k = 0
+                            # print(LineStringC.wkt.split(" ")[0]) # apparently this is not needed
+                            k += 1
+    ac.close()
+    ao.close()
+    allc.close()
+
+    an = open(os.path.join(tmp_path, 'groups2.csv'), "w")
+
+    for i in range(0, orig_ngroups):
+        print(i, gp_names[i].replace(" ", "_").replace("-", "_"))
+        an.write(gp_names[i].replace(" ", "_").replace("-", "_")+'\n')
+    an.close()
+
+    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts.csv'), ",")
+
+    as_2 = open(os.path.join(tmp_path, 'all_sorts.csv'), "r")
+    contents = as_2.readlines()
+    as_2.close
+
+    all_sorts_file = open(os.path.join(tmp_path, 'all_sorts2.csv'), "w")
+    all_sorts_file.write(
+        'index,group number,index in group,number in group,code,group\n')
+    j = 1
+    if(cover_map):
+        all_sorts_file.write('-2,0,1,2,cover_up,cover\n')
+        all_sorts_file.write('-1,0,2,2,cover,cover\n')
+
+    for i in range(1, len(all_sorts)+1):
+        # don't write out if already there in new groups list#
+        all_sorts_file.write(contents[i])
+
+    all_sorts_file.close()
+    print('pluton contacts and orientations saved as:')
+    print(os.path.join(output_path, 'ign_contacts.csv'))
+    print(os.path.join(output_path, 'ign_orientations_'+pluton_form+'.csv'))
+
+def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb_null, cover_map, pluton_form, pluton_dip, contact_decimate, c_l,bbox3D,min_pluton_area):
+    print("processing plutons...")
+    groups = np.genfromtxt(os.path.join(
+        tmp_path, 'groups.csv'), delimiter=',', dtype='U100')
+
+    if(len(groups.shape) == 1):
+        ngroups = len(groups)-1
+        orig_ngroups = ngroups
+
+        gp_ages = np.zeros((1000, 3))
+        gp_names = np.zeros((1000), dtype='U100')
+
+        for i in range(0, ngroups):
+            gp_ages[i, 0] = -1e6  # group max_age
+            gp_ages[i, 1] = 1e6  # group min_age
+            gp_ages[i, 2] = i  # group index
+            gp_names[i] = groups[i+1].replace("\n", "")
+    else:
+        ngroups = len(groups[0])-1
+        orig_ngroups = ngroups
+
+        gp_ages = np.zeros((1000, 3))
+        gp_names = np.zeros((1000), dtype='U100')
+
+        for i in range(0, ngroups):
+            gp_ages[i, 0] = -1e6  # group max_age
+            gp_ages[i, 1] = 1e6  # group min_age
+            gp_ages[i, 2] = i  # group index
+            gp_names[i] = groups[0][i+1].replace("\n", "")
+        # print(i,gp_names[i])
+
+    # print(local_paths)
+
+    allc = open(os.path.join(output_path, 'all_ign_contacts.csv'), "w")
+    allc.write('GROUP_,id,x,y,z,code\n')
+    ac = open(os.path.join(output_path, 'ign_contacts.csv'), "w")
+    ac.write("X,Y,Z,formation\n")
+    ao = open(os.path.join(
+        output_path, 'ign_orientations_'+pluton_form+'.csv'), "w")
+    ao.write("X,Y,Z,azimuth,dip,polarity,formation\n")
+
+
+
+    # print(output_path+'ign_orientations_'+pluton_form+'.csv')
+    j = 0
+    allpts = 0
+    ls_dict = {}
+    ls_dict_decimate = {}
+    id = 0
+    geol_clip=geol_clip[geol_clip.area>min_pluton_area]
+    for indx, ageol in geol_clip.iterrows():
+        ades = str(ageol[c_l['ds']])
+        arck = str(ageol[c_l['r1']])
+        if(str(ageol[c_l['g']]) == 'None'):
+            agroup = str(ageol[c_l['c']])
+        else:
+            agroup = str(ageol[c_l['g']])
+
+        for i in range(0, ngroups):
+            if (gp_names[i] == agroup):
+                if(int(ageol[c_l['max']]) > gp_ages[i][0]):
+                    gp_ages[i][0] = ageol[c_l['max']]
+                if(int(ageol[c_l['min']]) < gp_ages[i][1]):
+                    gp_ages[i][1] = ageol[c_l['min']]
+        if(c_l['intrusive'] in arck and c_l['sill'] not in ades):
+            newgp = str(ageol[c_l['c']])
+            # print(newgp)
+            if(str(ageol[c_l['g']]) == 'None'):
+                agp = str(ageol[c_l['c']])
+            else:
+                agp = str(ageol[c_l['g']])
+
+            if(not newgp in gp_names):
+                gp_names[ngroups] = newgp
+                gp_ages[ngroups][0] = ageol[c_l['max']]
+                gp_ages[ngroups][1] = ageol[c_l['min']]
+                gp_ages[ngroups][2] = ngroups
+                ngroups = ngroups+1
+            
+            for inset in np.arange(-5000,10001,1000):
+                #print("geom_type=",ageol.geometry.geom_type)
+
+                pluton_buffer=ageol.geometry.buffer(inset)
+                #print("buffer geom_type=",pluton_buffer.geom_type)
+
+                if(pluton_buffer.area>0):
+                    locations=[(pluton_buffer.centroid.x,pluton_buffer.centroid.y)]
+                    height = m2l_utils.value_from_dtm_dtb(
+                                        dtm, dtb, dtb_null, cover_map, locations)
+                    plu_dense=densify(pluton_buffer,1000)
+                    if(plu_dense.geom_type=='MultiPolygon'):
+                        for apoly in plu_dense:
+                            for x,y in apoly.exterior.coords:
+                                if(pluton_form == 'saucers'):
+                                    depth=float(height)-2000+(.00002*(inset+10000)**2)
+                                else:
+                                    depth=float(height)+2000-(.00002*(inset+10000)**2)
+                                ostr = "{},{},{},{}\n"\
+                                    .format(x,y, depth, newgp.replace(" ", "_").replace("-", "_"))
+                                ac.write(ostr)
+                    else:
+                        for x,y in plu_dense.exterior.coords:
+                            if(pluton_form == 'saucers'):
+                                depth=float(height)+-2000+(.00002*(inset+10000)**2)
+                            else:
+                                depth=float(height)+2000-(.00002*(inset+10000)**2)
+                            ostr = "{},{},{},{}\n"\
+                                .format(x,y, depth, newgp.replace(" ", "_").replace("-", "_"))
+                            ac.write(ostr)
+
+            neighbours = []
+            j += 1
+            central_age = ageol[c_l['min']]  # absolute age of central polygon
+            central_poly = ageol.geometry
+            for ind, bgeol in geol_clip.iterrows():  # potential neighbouring polygons
+                if(ageol.geometry != bgeol.geometry):  # do not compare with self
+                    if (ageol.geometry.intersects(bgeol.geometry)):  # is a neighbour
+                        neighbours.append(
+                            [(bgeol[c_l['c']], bgeol[c_l['min']], bgeol[c_l['r1']], bgeol[c_l['ds']], bgeol.geometry)])
+            # display(neighbours)
+            if(len(neighbours) > 0):
+                for i in range(0, len(neighbours)):
+                    if((c_l['intrusive'] in neighbours[i][0][2] and c_l['sill'] not in ades)
+                       # or ('intrusive' not in neighbours[i][0][2]) and neighbours[i][0][1] > central_age ): # neighbour is older than central
+                       or (c_l['intrusive'] not in neighbours[i][0][2]) and neighbours[i][0][1]):  # neighbour is older than central
+                        older_polygon = neighbours[i][0][4]
+                        if(not central_poly.is_valid):
+                            central_poly = central_poly.buffer(0)
+                        if(not older_polygon.is_valid):
+                            older_polygon = older_polygon.buffer(0)
+                        centroid=central_poly.centroid
+                        
+                        LineStringC = central_poly.intersection(older_polygon)
+                        if(LineStringC.wkt.split(" ")[0] == 'MULTIPOLYGON' or
+                           LineStringC.wkt.split(" ")[0] == 'POLYGON'):  # ignore polygon intersections for now, worry about them later!
+                            print(ageol[c_l['o']], "debug:",
+                                  LineStringC.wkt.split(" ")[0])
+                            continue
+
+                        elif(LineStringC.wkt.split(" ")[0] == 'MULTILINESTRING' or LineStringC.wkt.split(" ")[0] == 'GEOMETRYCOLLECTION'):
+                            k = 0
+                            ls_dict[id] = {"id": id, c_l['c']: newgp,
+                                           c_l['g']: newgp, "geometry": LineStringC}
+                            id = id+1
+                            #print('centroid',centroid)
+                            first=True # use first found dist so all arcs converge to same point
+                            for lineC in LineStringC:  # process all linestrings
+                                if(lineC.wkt.split(" ")[0] == 'LINESTRING'):
                                     # decimate to reduce number of points, but also take second and third point of a series to keep gempy happy
                                     if(m2l_utils.mod_safe(k, contact_decimate) == 0 or k == int((len(LineStringC)-1)/2) or k == len(LineStringC)-1):
                                         dlsx = lineC.coords[0][0] - \
@@ -3278,7 +3618,10 @@ def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_
                                 dip = dip_grid[r, c]
                                 if(not dip==-999):  
                                     if(dip>90):
-                                        dip=180-dip                        
+                                        dip=180-dip
+                                        flip=True
+                                    else:
+                                        flip=False                        
                                     locations1=[(lastx,lasty)]
                                     height1 = m2l_utils.value_from_dtm_dtb(
                                         dtm, dtb, dtb_null, cover_map, locations1)                  
@@ -3292,19 +3635,22 @@ def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_
                                             dotproduct1=acos(m*l1-l*m1)
                                             dotproduct2=acos(m*l2-l*m2)
                                         else:
-                                            #print(m,l1,l,m1)
                                             dotproduct1=acos(-(m*l1-l*m1))
                                             dotproduct2=acos(-(m*l2-l*m2))
+
                                         if(dotproduct1<dotproduct2):
                                             dip=90-degrees(asin(n1))
                                             lc=l1/sqrt(l1**2+m1**2)
                                             mc=m1/sqrt(l1**2+m1**2)
-
                                         else:
                                             dip=90-degrees(asin(n2))
                                             lc=l2/sqrt(l2**2+m2**2)
                                             mc=m2/sqrt(l2**2+m2**2)
+
                                         d,dipdir=m2l_utils.dircos2ddd(lc, mc, 0)
+                                        if(flip):
+                                            dipdir=(dipdir+180)%360
+                                            
                                         if(dip>90):
                                             dip=180-dip
                                         #print("orig_fdip=",dip_grid[r, c], "new_dips=",dip,90-degrees(asin(n1)),90-degrees(asin(n2)))
