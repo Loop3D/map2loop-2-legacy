@@ -830,7 +830,7 @@ class Config(object):
                                      self.geol_clip, self.local, self.dtm,
                                      self.dtb, self.dtb_null, cover_map,
                                      self.pluton_form, pluton_dip,
-                                     contact_decimate, self.c_l,self.bbox_3d)
+                                     contact_decimate, self.c_l,self.bbox_3d,self.run_flags['min_pluton_area'])
 
     def extract_section_features(self, section_files):
         # Extract faults and basal contacts of groups from seismic sections
