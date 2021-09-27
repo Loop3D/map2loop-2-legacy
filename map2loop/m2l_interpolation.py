@@ -2156,11 +2156,11 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                 vert_displacement = abs(
                     int(all_coordsdist[i]*tan(radians(dotproduct*dip_grid[r, c]))))
                 # cap displacements more than 20% of fault length
-                if(vert_displacement > fault_dim.loc[fdc[i][2]]['HorizontalRadius']/10.0):
+                if(vert_displacement > fault_dim.loc[fdc[i][2]]['HorizontalRadius']/100.0):
                     print('Fault', fdc[i][2], 'with displacement of', vert_displacement,
-                          'capped to', fault_dim.loc[fdc[i][2]]['HorizontalRadius']/10.0)
+                          'capped to', fault_dim.loc[fdc[i][2]]['HorizontalRadius']/100.0)
                     vert_displacement = fault_dim.loc[fdc[i]
-                                                      [2]]['HorizontalRadius']/10.0
+                                                      [2]]['HorizontalRadius']/100.0
 
                 ostr = str(xi[i])+','+str(yi[i])+','+str(fdc[i][2])+','+str(
                     int(all_coordsdist[i]))+','+str(vert_displacement)+','+str(down_dipdir)+'\n'
