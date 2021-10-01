@@ -2083,7 +2083,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     sgf = open(os.path.join(tmp_path, 'super_groups.csv')) 
     lines = sgf.readlines()
     sgf.close()
-
+    index=0
     for a_sort in all_sorts.iterrows():
         if(a_sort[1]['group'] not in no_contacts):
             for sg in range(len(lines)):
@@ -2091,9 +2091,10 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
                     if(a_sort[1]['group'] == l):
                         supergroup='supergroup_'+str(sg)
             ostr = "{},{},{},{},{},{},{},{}\n"\
-                .format(a_sort[1]['index'], a_sort[1]['group number'], a_sort[1]['index in group'], a_sort[1]['number in group'], a_sort[0], a_sort[1]['group'],supergroup, 'erode')
+                .format(index, a_sort[1]['group number'], a_sort[1]['index in group'], a_sort[1]['number in group'], a_sort[0], a_sort[1]['group'],supergroup, 'erode')
             # ostr = str(a_sort[1]['index'])+","+str(a_sort[1]['group number'])+","+str(a_sort[1]['index in group'])+","+str(a_sort[1]['number in group'])+","+a_sort[0]+","+a_sort[1]['group']+",erode\n"
             fas.write(ostr)
+            index=index+1
     fas.close()
 
     # add extra column for stratigraphy to specify intrsuve or strata (sed or volc)
