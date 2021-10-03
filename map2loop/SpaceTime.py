@@ -299,7 +299,7 @@ def plot_density(density_filename,bbox):
 def plot_mag_sus(mag_sus_filename,bbox):
     mag_sus=gpd.read_file(mag_sus_filename,bbox=bbox)
     if(len(mag_sus)>0):
-        mag_sus.plot(figsize=(7,7),column='lithologyg')
+        mag_sus.plot(figsize=(7,7),column='value')
     else:
         plt.text(.2,.2,"No mag sus values\n in area")
     plt.tight_layout()
@@ -331,7 +331,7 @@ def plot_mag_mag_sus(mag_netcdf_path,mag_sus_filename,bbox):
     
     mag_sus=gpd.read_file(mag_sus_filename,bbox=bbox)
     if(len(mag_sus)>0):
-        mag_sus.plot(ax=ax[1],figsize=(7,7),column='lithologyg')
+        mag_sus.plot(ax=ax[1],figsize=(7,7),column='value')
     else:
         plt.subplot(122)
         plt.text(.2,.2,"No mag sus values\n in area")
