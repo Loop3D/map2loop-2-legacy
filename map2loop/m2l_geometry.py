@@ -39,7 +39,18 @@ from shapely.ops import snap
 
 
 def save_orientations(structures, path_out, c_l, orientation_decimate, dtm, dtb, dtb_null, cover_map):
+    """[Export orientation data in csv format with heights and strat code added]
 
+    Args:
+        structures ([geopandas DataFrame]): [point structural oberservations]
+        path_out ([str]): [path to output directory]
+        c_l ([type]): [description]
+        orientation_decimate ([int]): [decimation factor]
+        dtm ([rasterio grid]): [digital terrain model]
+        dtb ([rasterio grid]): [depth to basement model]
+        dtb_null ([float]): [null dtb value]
+        cover_map ([boolean]): [availability of cover map]
+    """
     is_bed = structures[c_l['sf']].str.contains(
         c_l['bedding'], regex=False)
 
@@ -139,7 +150,20 @@ def save_orientations(structures, path_out, c_l, orientation_decimate, dtm, dtb,
 
 
 def create_orientations(path_in, path_out, dtm, dtb, dtb_null, cover_map, geology, structures, c_l):
-    """Create orientations if there is a series that does not have one."""
+    """[Find those series that don't have any orientation or contact point data and add some random data]
+
+    Args:
+        path_in ([str]): [path to input directory]
+        path_out ([str]): [path to output directory]
+        dtm ([rasterio grid]): [digital terrain model]
+        dtb ([rasterio grid]): [depth to basement model]
+        dtb_null ([float]): [null dtb value]
+        cover_map ([boolean]): [availability of cover map]
+        geology ([geopandas DataFrame]): [geology polygons]
+        structures ([geopandas DataFrame]): [point structural oberservations]
+        c_l ([dict]): [field names]
+    """
+    #Create orientations if there is a series that does not have one."
     # f = open(os.path.join(path_in,'groups.csv'),"r")
     # contents  = f.readlines()
     # f.close
@@ -236,7 +260,18 @@ def create_orientations(path_in, path_out, dtm, dtb, dtb_null, cover_map, geolog
 
 
 def extract_poly_coords(geom, i):
+    """[Convert polygons with holes into distinct poygons]
 
+    Args:
+        geom ([shapely geometry]): [geology polygon or multipolygon]
+        i ([int]): [master index of polygon coordinates]
+
+    Raises:
+        ValueError: [geometry type if not a polygon or multipolygon]
+
+    Returns:
+        [dict]: [exterior and interior coordinates]
+    """
     if geom.type == 'Polygon':
         exterior_coords = geom.exterior.coords[:]
         interior_coords = []
@@ -1892,6 +1927,8 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
 
 def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, use_fat, pluton_form, inputs, workflow, c_l):
 
+    use_projected_contacts=True
+
     contacts = pd.read_csv(os.path.join(output_path, 'contacts4.csv'), ",")
     contacts['source']='strat'
     all_orientations = pd.read_csv(os.path.join(
@@ -1901,6 +1938,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
         os.path.join(output_path, 'ign_contacts.csv'), ",")
     intrusive_contacts['source']='intrusive'
     all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts2.csv'), ",")
+
 
     if('invented_orientations' in inputs and os.path.exists(os.path.join(output_path, 'empty_series_orientations.csv'))):
         invented_orientations = pd.read_csv(
@@ -1974,7 +2012,10 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     all_sorts.set_index('code',  inplace=True)
 
     all_contacts = pd.concat([intrusive_contacts, contacts], sort=False)
-
+    if(use_projected_contacts and os.path.exists(os.path.join(output_path, 'contact_projections.csv'))):
+        projected_contacts=pd.read_csv(os.path.join(output_path, 'contact_projections.csv'), ",")
+        all_contacts = pd.concat([all_contacts, projected_contacts], sort=False)
+       
     if('cover_contacts' in inputs and os.path.exists(os.path.join(output_path, 'cover_grid.csv'))):
         cover_contacts = pd.read_csv(os.path.join(
             output_path, 'cover_grid.csv'), ",")
@@ -3567,17 +3608,23 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
 def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_path, output_path, dtm, dtb,
                                          dtb_null, cover_map, contact_decimate, c_l, contact_dip, dip_grid, spacing, bbox,polarity_grid):
     print('contact_decimate:',contact_decimate)
+    height_above_offset=1000.0
+    depth_below_offset=1000.0
+
     interpolated_combo_file = os.path.join(tmp_path, 'combo_full.csv')
     # orientations = pd.read_csv(interpolated_combo_file)
+    fp= open(os.path.join(output_path, 'contact_projections.csv'), 'w')
+    fp.write('X,Y,Z,formation\n')
 
     f = open(os.path.join(output_path, 'contact_orientations.csv'), 'w')
     f.write("X,Y,Z,azimuth,dip,polarity,formation\n")
+    first_geom=contacts.iloc[0].geometry
     for index, contact in contacts[:-1].iterrows():
         i = 0
         # print(contact[c_l['c']])
         first = True
         if(not str(contact.geometry) == 'None'):
-            if contact.geometry.type == 'MultiLineString':
+            if (contact.geometry.type == 'MultiLineString' and not contact.geometry==first_geom): #why not LineString?
                 for line in contact.geometry:
                     first_in_line = True
                     if(m2l_utils.mod_safe(i, contact_decimate) == 0):
@@ -3590,17 +3637,7 @@ def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_
                                 lastx, lasty, line.coords[0][0], line.coords[0][1])
                             midx = lastx+((line.coords[0][0]-lastx)/2)
                             midy = lasty+((line.coords[0][1]-lasty)/2)
-                            #valid_polygons=geol_clip[geol_clip[c_l['c']].str.replace(' ','_').replace("-", "_")==contact['unitname']]
-                            #if(first_in_line):
-                            #found_code = None
-                            #print(contact['unitname'],len(geol_clip),len(valid_polygons))
-                            #for indx, apoly in valid_polygons.iterrows():
-                            #    testpt = Point((midx-m, midy+l))
-                            #    if(apoly.geometry.contains(testpt)):
-                            #        found_code = apoly[c_l['c']]
-                            #        break
-                            #print("found_code=",found_code)
-                            #first_in_line = False
+
                             dip, dipdir = m2l_utils.dircos2ddd(-m, l, 0)
 
                             r = int((midy-bbox[1])/spacing)
@@ -3615,6 +3652,7 @@ def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_
 
                             height = m2l_utils.value_from_dtm_dtb(
                                 dtm, dtb, dtb_null, cover_map, locations)
+                            
                             if(contact_dip == -999):
                                 dip = dip_grid[r, c]
                                 if(not dip==-999):  
@@ -3629,6 +3667,7 @@ def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_
                                     locations2=[(line.coords[0][0], line.coords[0][1])]                  
                                     height2 = m2l_utils.value_from_dtm_dtb(
                                         dtm, dtb, dtb_null, cover_map, locations2) 
+                                    
                                     l1,m1,n1,l2,m2,n2=lmn_from_line_dip(lastx,lasty,height1,line.coords[0][0], line.coords[0][1],height2,dip)
                                     
                                     if((not l1==-999) and m*l1-l*m1 <1 and m*l1-l*m1 >-1 and m*l2-l*m2 <1 and m*l2-l*m2 >-1):
@@ -3670,15 +3709,28 @@ def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_
                                     .format(midx, midy, height, dipdir, str(dip), polarity, str(contact[c_l['c']]).replace(" ", "_").replace("-", "_"))
                                 # ostr = str(midx)+','+str(midy)+','+str(height)+','+str(dipdir)+','+str(contact_dip)+',1,'+str(contact[c_l['c']]).replace(" ","_").replace("-","_")+'\n'
                                 f.write(ostr)
+
+                                l,m,n=m2l_utils.ddd2dircos(90.0-dip,dipdir)
+                                ostr = "{},{},{},{}\n"\
+                                    .format(midx-(l*height_above_offset), midy-(m*height_above_offset), float(height)+(n*height_above_offset), contact[c_l['c']])
+                                fp.write(ostr)
+
+                                ostr = "{},{},{},{}\n"\
+                                    .format(midx+(l*depth_below_offset), midy+(m*depth_below_offset), float(height)-(n*depth_below_offset), contact[c_l['c']])
+                                fp.write(ostr)
                             lastx = line.coords[0][0]
                             lasty = line.coords[0][1]
+
 
                     else:
                         lastx = line.coords[0][0]
                         lasty = line.coords[0][1]
 
                     i = i+1
+            else:
+                print('other basal contact geom ignored',contact.geometry.type)
     f.close()
+    fp.close()
 
 
 def process_sills(output_path, geol_clip, dtm, dtb, dtb_null, cover_map, contact_decimate, c_l, dip_grid, x, y, spacing, bbox, buffer):
