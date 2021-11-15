@@ -1141,4 +1141,31 @@ def save_dtm_ascii(dtm_path):
         band1=band1.T
     
         band1.tofile(os.path.join(dtm_path,'dtm_rp.csv'), sep = ',')
-            
+
+def save_parameters(model_name,vtk_model_path,proj,foliation_params,fault_params,st_bbox,m2lv,LSv):
+
+    f=open(os.path.join(vtk_model_path, 'params.txt'),'w')
+
+    f.write('map2loop version: '+m2lv+'\n')
+    f.write('LoopStructural version: '+LSv+'\n')
+    f.write('model_name: '+model_name+'\n')
+    f.write('project_path: '+str(proj.config.project_path)+'\n')
+    f.write('c_l: '+str(proj.config.c_l).replace('),','),\n')+'\n')
+    f.write('run_flags: '+str(proj.config.run_flags).replace(", '",",\n'")+'\n')
+    f.write('workflow: '+str(proj.workflow).replace(", '",",\n'")+'\n')
+    f.write('bbox_LL: '+str(st_bbox)+'\n')
+    f.write('bbox_3d: '+str(proj.config.bbox_3d)+'\n')
+    f.write('proj_crs: '+str(proj.config.proj_crs)+'\n')  
+    f.write('geology_layer: '+str(proj.geology_file)+'\n')
+    f.write('dtm_layer: '+str(proj.dtm_file)+'\n')
+    f.write('fault_layer: '+str(proj.fault_file)+'\n')
+    f.write('fold_layer: '+str(proj.fold_file)+'\n')
+    f.write('structure_layer: '+str(proj.structure_file)+'\n')
+    f.write('mindep_layer: '+str(proj.mindep_file)+'\n')
+    f.write('section_layer: '+str(proj.section_files)+'\n')
+    f.write('drillhole_layer: '+str(proj.drillhole_file)+'\n')
+    f.write('dtb_grid_layer: '+str(proj.dtb_grid_file)+'\n')
+    f.write('cover_map_layer: '+str(proj.cover_map_file)+'\n')
+    f.write('fault_params: '+str(fault_params)+'\n')
+    f.write('foliation_params: '+str(foliation_params)+'\n')
+    f.close()
