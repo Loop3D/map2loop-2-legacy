@@ -295,16 +295,18 @@ def plot_density(density_filename,bbox):
     plt.tight_layout()
     plt.title('Density')
     plt.show()
+    return(density)
 
 def plot_mag_sus(mag_sus_filename,bbox):
     mag_sus=gpd.read_file(mag_sus_filename,bbox=bbox)
     if(len(mag_sus)>0):
-        mag_sus.plot(figsize=(7,7),column='value')
+        mag_sus.plot(figsize=(7,7),color='blue')
     else:
         plt.text(.2,.2,"No mag sus values\n in area")
     plt.tight_layout()
     plt.title('Magnetic Susceptibility')
     plt.show()
+    return(mag_sus)
 
 def plot_mag_mag_sus(mag_netcdf_path,mag_sus_filename,bbox):
     import os
@@ -331,7 +333,7 @@ def plot_mag_mag_sus(mag_netcdf_path,mag_sus_filename,bbox):
     
     mag_sus=gpd.read_file(mag_sus_filename,bbox=bbox)
     if(len(mag_sus)>0):
-        mag_sus.plot(ax=ax[1],figsize=(7,7),column='value')
+        mag_sus.plot(ax=ax[1],figsize=(7,7),color='blue')
     else:
         plt.subplot(122)
         plt.text(.2,.2,"No mag sus values\n in area")
@@ -339,6 +341,7 @@ def plot_mag_mag_sus(mag_netcdf_path,mag_sus_filename,bbox):
     plt.title('Magnetics and Magnetic Susceptibility')
 
     plt.show()
+    return(data,mag_sus)
     
 def plot_grav_density(grav_netcdf_path,density_filename,bbox):
     import os
@@ -371,6 +374,7 @@ def plot_grav_density(grav_netcdf_path,density_filename,bbox):
     plt.tight_layout()
     plt.title('Gravity and Density')
     plt.show()
+    return(data,density)
     
 def plot_plutons(geology_filename,bbox):
     import pandas as pd
@@ -476,3 +480,16 @@ def plot_whole_linear(linear_filename,bbox,feature):
 
         plt.show()
 
+def get_data(netcdf_path,bbox):
+    import os
+    import netCDF4
+    import numpy as np
+    
+    netcdf_dataset = netCDF4.Dataset(netcdf_path, 'r')
+
+    lats = netcdf_dataset.variables['lat'][:]
+    lons = netcdf_dataset.variables['lon'][:]
+    latselect = np.logical_and(lats>bbox[1],lats<bbox[3])
+    lonselect = np.logical_and(lons>bbox[0],lons<bbox[2])
+    data = netcdf_dataset.variables['Band1'][latselect,lonselect]
+    return(data,netcdf_dataset.geospatial_lon_resolution)
