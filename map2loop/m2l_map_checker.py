@@ -1,7 +1,7 @@
 import os
 import sys
 import geopandas as gpd
-from shapely.geometry import LineString, Polygon, MultiLineString
+from shapely.geometry import LineString, Polygon, MultiLineString, MultiPolygon
 from . import m2l_utils
 import warnings
 import numpy as np
@@ -172,6 +172,10 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             geology[c_l['max']]=geology[c_l['max']].astype(np.float64)            
             geology[c_l['min']]=geology[c_l['min']].astype(np.float64)            
             unique_g = set(geology[c_l['o']])
+            
+            unique_c = list(set(geology[c_l['c']]))
+            if(len(unique_c)<2):
+                m2l_errors.append('The selected area only has one formation in it, so no model can be calculated')
 
             if(not len(unique_g) == len(geology)):
                 m2l_warnings.append('duplicate geology polygon unique IDs')
@@ -314,7 +318,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                 m2l_warnings.append(
                     'No fault dip direction for fault polylines')
                 c_l['fdipdir'] = 'fdipdir'
-                faults[c_l['fdipdir']] = 0
+                faults[c_l['fdipdir']] = -999
 
             if(c_l['fdipest'] == 'No_col' or not c_l['fdipest'] in faults.columns):
                 m2l_warnings.append(
@@ -631,3 +635,16 @@ def densify(geom,spacing):
 
 # spacing=500
 #shapefile['geometry'] = shapefile['geometry'].map(densify)
+
+def densify_polygon_gdf(geology,spacing):
+    geoms=[]    
+    g2=geology.copy()
+    for ind,g in geology.iterrows():
+        g3=densify(g.geometry,spacing)
+        if(g3.geom_type=='Polygon'):
+            geoms.append(Polygon(g3))
+        elif(g3.geom_type=='MultiPolygon'):
+            geoms.append(MultiPolygon(g3))
+
+    g2.geometry=geoms
+    return(g2)
