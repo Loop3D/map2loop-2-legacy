@@ -357,6 +357,7 @@ class Project(object):
                 'fault_length_clusters':2,
                 'pluton_dip': 45,
                 'pluton_form': 'domes',
+                'min_pluton_area':10000000,
                 'dist_buffer': 10,
                 'contact_dip': -999,
                 'contact_orientation_decimate': 5,
@@ -370,7 +371,15 @@ class Project(object):
                 'use_fat': True,
                 'use_roi_clip': False,
                 'roi_clip_path':'',
-                'drift_prefix':['None']
+                'drift_prefix':['None'],
+                'fault_fault_weight':3,
+                'fault_weight':1,
+                'formation_weight':7,
+                'formation_formation_weight':9,
+                'fault_formation_weight':5,
+                'map2graph':False,
+                'granular_map2graph':False
+
             }
 
         # And copy in any new settings from the user
@@ -477,34 +486,34 @@ class Project(object):
             self.config.run_map2model(
                 self.run_flags['deposits'], self.run_flags['aus'])
             #Map2Graph.map2graph('./test_m2g',self.config.geology_file,self.config.fault_file,self.config.mindep_file,self.c_l,self.run_flags['deposits'])
-            pbar.update(10)
+            pbar.update(10) #10%
 
             self.config.load_dtm(self.dtm_file if self.local else self.state)
-            pbar.update(10)
+            pbar.update(10) #20%
 
             self.config.join_features()
-            pbar.update(10)
+            pbar.update(5) #25%
 
             self.config.calc_depth_grid(self.workflow['cover_map'])
-            pbar.update(10)
+            pbar.update(5) #30%
 
             self.config.export_orientations(
                 self.run_flags['orientation_decimate'],self.workflow['cover_map'])
-            pbar.update(10)
+            pbar.update(10) #40%
             self.config.export_contacts(
                 self.run_flags['contact_decimate'], self.run_flags['intrusion_mode'],self.workflow['cover_map'])
-            pbar.update(10)
+            pbar.update(10) #50%
             self.config.test_interpolation(self.run_flags['interpolation_spacing'],
                                            self.run_flags['misorientation'],
                                            self.run_flags['interpolation_scheme'],self.workflow['cover_map'])
-            pbar.update(10)
+            pbar.update(10) #60%
 
             # TODO: make all these internal, the config class already has the run_flags dictionary
             self.config.export_faults(self.run_flags['fault_decimate'], self.run_flags['min_fault_length'],
                                       self.run_flags['fault_dip'],self.workflow['cover_map'])
             self.config.process_plutons(self.run_flags['pluton_dip'], self.run_flags['pluton_form'], self.run_flags['dist_buffer'],
                                         self.run_flags['contact_decimate'],self.workflow['cover_map'])
-            pbar.update(20)
+            pbar.update(20) #80%
 
             # Seismic section 
             if (self.workflow['seismic_section']):
@@ -543,7 +552,6 @@ class Project(object):
 
             self.config.postprocess(inputs, self.workflow, self.run_flags['use_interpolations'],
                                     self.run_flags['use_fat'])
-            pbar.update(10)
 
             self.config.save_cmap(self.workflow['cover_map'])
 
@@ -565,17 +573,59 @@ class Project(object):
                 'proj_crs':self.config.proj_crs,
                 'local':self.config.local
             }
-            point_data=combine_point_data(self.config.output_path,self.config.tmp_path)
-            Gloop=Topology.make_Loop_graph(self.config.tmp_path,self.config.output_path,self.run_flags['fault_orientation_clusters'],
-                                           self.run_flags['fault_length_clusters'],point_data,os.path.normcase(self.config.dtm_reproj_file),self.config.proj_crs,
-                                           self.config.c_l,self.config.run_flags,config_out,self.config.bbox_3d)
-            nx.write_gml(Gloop, os.path.join(self.config.output_path,'loop.gml'))
-            Topology.colour_Loop_graph(self.config.output_path,'loop')
-            #Gloop2=Topology.make_complete_Loop_graph(Gloop,self.config.tmp_path,self.config.output_path)
-            #nx.write_gml(Gloop2, os.path.join(self.config.output_path,'loop_complete.gml'))
-            update_fault_layer(self.config.tmp_path,self.config.output_path,self.c_l)
-            #Topology.colour_Loop_graph(self.config.output_path,'loop_complete')
-            #self.config.update_projectfile()
-            self.config.export_png()
+            try:
+                point_data=combine_point_data(self.config.output_path,self.config.tmp_path)
+            except:
+                print("combine_point_data failed")          
+            
+            try:
+                Gloop=Topology.make_Loop_graph(self.config.tmp_path,self.config.output_path,self.run_flags['fault_orientation_clusters'],
+                                            self.run_flags['fault_length_clusters'],point_data,os.path.normcase(self.config.dtm_reproj_file),self.config.proj_crs,
+                                            self.config.c_l,self.config.run_flags,config_out,self.config.bbox_3d)
+                nx.write_gml(Gloop, os.path.join(self.config.output_path,'loop.gml'))
+                Topology.colour_Loop_graph(self.config.output_path,'loop')
+            except:
+                print("Topology.make_Loop_graph failed")          
+            
+            if(self.config.run_flags['map2graph']):
+                try:
+                    Map2Graph.map2graph(self.config.output_path,self.config.geology_file,self.config.fault_file,
+                        self.config.mindep_file,self.config.c_l,self.config.run_flags['deposits'],
+                        self.config.run_flags['fault_orientation_clusters'],self.config.run_flags['fault_length_clusters'],
+                        self.config.run_flags['fault_fault_weight'],
+                        self.config.run_flags['fault_weight'],
+                        self.config.run_flags['formation_weight'],
+                        self.config.run_flags['formation_formation_weight'],
+                        self.config.run_flags['fault_formation_weight'])
+                except:
+                    print("Topology.map2graph failed")          
+
+            if(self.config.run_flags['granular_map2graph']):
+                try:
+                    Map2Graph.granular_map2graph(self.config.output_path,self.config.geology_file,self.config.fault_file,self.config.mindep_file,self.config.c_l,self.config.run_flags['deposits'],
+                        self.config.run_flags['fault_fault_weight'],
+                        self.config.run_flags['fault_weight'],
+                        self.config.run_flags['formation_weight'],
+                        self.config.run_flags['formation_formation_weight'],
+                        self.config.run_flags['fault_formation_weight'])
+                except:
+                    print("Topology.granular_map2graph failed")          
+
+            try:
+                update_fault_layer(self.config.tmp_path,self.config.output_path,self.c_l)
+            except:
+                print("update_fault_layer failed")          
+
+            try:              
+                self.config.update_projectfile()
+            except:
+                print("self.config.update_projectfile failed")          
+
+            try:              
+                self.config.export_png()
+            except:
+                print("self.config.export_png failed")   
+
+            pbar.update(20) #100%
 
         disable_quiet_mode()

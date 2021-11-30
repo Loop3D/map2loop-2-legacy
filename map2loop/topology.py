@@ -502,6 +502,8 @@ class Topology(object):
 
         groups = summary.group.unique()
         ngroups = len(summary.group.unique())
+        supergroups=summary.supergroup.unique()
+        nsupergroups=len(summary.supergroup.unique())
         # print(ngroups,'groups',groups,groups[0])
         uf_array = uf_rel.to_numpy()
         gf_array = np.zeros((ngroups, uf_array.shape[1]), dtype='U100')
@@ -536,6 +538,61 @@ class Topology(object):
             ug.write("\n")
 
         ug.close()
+
+        summary = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'))
+        summary.sort_values(by='supergroup', inplace=True)
+        summary.drop_duplicates(subset='group',inplace=True)
+
+        groups = summary.group.unique()
+        ngroups = len(summary.group.unique())
+        supergroups=summary.supergroup.unique()
+        supergroups=pd.DataFrame(supergroups)
+        supergroups.sort_values(by=0, inplace=True)
+
+        index=np.arange(0,len(supergroups))
+        supergroups['index']=index
+        summary.set_index("group", inplace=True)
+
+        uf_rel = pd.read_csv(os.path.join(
+            output_path, 'unit-fault-relationships.csv'))
+
+
+        uf_array = uf_rel.to_numpy()
+        gf_array = np.zeros((ngroups, uf_array.shape[1]), dtype='U100')
+
+        group_faults = pd.read_csv(os.path.join(output_path, 'group-fault-relationships.csv'))
+        group_faults.sort_values(by='group', inplace=True)
+
+        group_faults.set_index('group',inplace=True)
+        uf_array=group_faults.to_numpy()
+        sg_array=np.zeros((len(supergroups),len(uf_rel.iloc[0])-1))
+        supergroups.set_index(0, inplace=True)
+
+        i=0
+        for  ind,gp in group_faults.iterrows():
+            for ind2,sgroup in summary.iterrows():
+                if(sgroup['supergroup'] == summary.loc[ind]['supergroup']):
+                    for k in range(0, len(uf_rel.iloc[0])-1):
+                        if(uf_array[i, k] == 1):
+                            sg_array[supergroups.loc[summary.loc[ind]['supergroup']]['index'],k]=1
+
+                            
+            i=i+1
+
+        sg = open(os.path.join(output_path, 'supergroup-fault-relationships.csv'), 'w')
+        sg.write('supergroup')
+        for k in range(1, len(uf_rel.iloc[0])):
+            sg.write(','+uf_rel.columns[k])
+        sg.write("\n")
+        for k,sgroups in supergroups.iterrows():
+            sg.write(k)
+
+            for i in range(0, sg_array.shape[1]):
+
+                sg.write(','+str(sg_array[sgroups['index'],i]))
+            sg.write("\n")
+            
+        sg.close()        
 
         uf = open(os.path.join(graph_path, 'fault-fault-intersection.txt'), 'r')
         contents = uf.readlines()
@@ -640,9 +697,20 @@ class Topology(object):
                     GD[f1][f2]['angle']=angle
                     GD[f1][f2]['topol']=topol
 
+        for f in unique_list:
+            if(not GD.has_node('Fault_'+f)):
+                GD.add_node('Fault_'+f)
 
         nx.write_gml(GD, os.path.join(tmp_path, "fault_network.gml"))
 
+        f=open(os.path.join(tmp_path, "fault_network_edges.csv"),'w')
+        f.write('fault_1,fault_2,angle,topol\n')
+        for e in GD.edges():
+            f.write('{},{},{},{}\n'.format(e[0],e[1],GD[e[0]][e[1]]['angle'],GD[e[0]][e[1]]['topol']))
+        f.close() 
+
+        print('edges saved as :',os.path.join(tmp_path, "fault_network_edges.csv"))
+        
         try:
             print('cycles', list(nx.simple_cycles(GD)))
         except:
@@ -690,12 +758,12 @@ class Topology(object):
             if(str(sub_geol.loc[i][c_l['min']]) == 'None'):
                 min = 0.0
             else:
-                min = float(sub_geol.loc[i][c_l['min']])+float(hint)
+                min = sub_geol.loc[i][c_l['min']].astype('float64')+float(hint)
             # print(str(sub_geol.loc[i][c_l['max']]))
             if(str(sub_geol.loc[i][c_l['max']]) == 'None'):
                 max = 4500000000
             else:
-                max = float(sub_geol.loc[i][c_l['max']])+float(hint)
+                max = sub_geol.loc[i][c_l['max']].astype('float64')+float(hint)
             # f.write("\""+str(sub_geol.loc[i][c_l['min']])+"\"\t")
             # f.write("\""+str(sub_geol.loc[i][c_l['max']])+"\"\t")
             f.write("\""+str(min)+"\"\t")
@@ -930,38 +998,9 @@ class Topology(object):
         for i in range(1, len(group_girdle)):
             #if(c_l['intrusive'] in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][c_l['r1']] 
             #and c_l['sill'] not in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][c_l['ds']]):
-            if(c_l['intrusive'] in geol.loc[group_girdle.iloc[i].name][c_l['r1']] 
-            and c_l['sill'] not in geol.loc[group_girdle.iloc[i].name][c_l['ds']]):
-                sg_index = sg_index+1
-                #print('not found',sg_index)
-                sgname = 'Super_Group_'+str(sg_index)
-                super_group_new = pd.DataFrame(
-                    [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
-                super_group_new.set_index('Group', inplace=True)
-                super_group = super_group.append(super_group_new)
-
-            elif(group_girdle.iloc[i]['num orientations'] > 5):
-                l, m, n = m2l_utils.ddd2dircos(
-                    group_girdle.iloc[i]['plunge'], group_girdle.iloc[i]['bearing'])
-
-                found = False
-                sg_i = 0
-                for ind, sg in super_group.iterrows():
-
-                    c = sg['l']*l + sg['m']*m + sg['n']*n
-                    if c > 1:
-                        c = 1
-                    c = degrees(acos(c))
-                    if(c < misorientation and not found):
-                        found = True
-                        sgname = 'Super_Group_'+str(sg_i)
-                        super_group_old = pd.DataFrame(
-                            [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
-                        super_group_old.set_index('Group', inplace=True)
-                        super_group = super_group.append(super_group_old)
-                    sg_i = sg_i+1
-                if(not found):
-
+            if group_girdle.iloc[i].name in geol:
+                if(c_l['intrusive'] in geol.loc[group_girdle.iloc[i].name][c_l['r1']]
+                and c_l['sill'] not in geol.loc[group_girdle.iloc[i].name][c_l['ds']]):
                     sg_index = sg_index+1
                     #print('not found',sg_index)
                     sgname = 'Super_Group_'+str(sg_index)
@@ -969,12 +1008,42 @@ class Topology(object):
                         [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
                     super_group_new.set_index('Group', inplace=True)
                     super_group = super_group.append(super_group_new)
-            else:  # not enough orientations to test, so lumped with group with most orientations
-                sgname = 'Super_Group_'+str(0)
-                super_group_old = pd.DataFrame(
-                    [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
-                super_group_old.set_index('Group', inplace=True)
-                super_group = super_group.append(super_group_old)
+
+                elif(group_girdle.iloc[i]['num orientations'] > 5):
+                    l, m, n = m2l_utils.ddd2dircos(
+                        group_girdle.iloc[i]['plunge'], group_girdle.iloc[i]['bearing'])
+
+                    found = False
+                    sg_i = 0
+                    for ind, sg in super_group.iterrows():
+
+                        c = sg['l']*l + sg['m']*m + sg['n']*n
+                        if c > 1:
+                            c = 1
+                        c = degrees(acos(c))
+                        if(c < misorientation and not found):
+                            found = True
+                            sgname = 'Super_Group_'+str(sg_i)
+                            super_group_old = pd.DataFrame(
+                                [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
+                            super_group_old.set_index('Group', inplace=True)
+                            super_group = super_group.append(super_group_old)
+                        sg_i = sg_i+1
+                    if(not found):
+
+                        sg_index = sg_index+1
+                        #print('not found',sg_index)
+                        sgname = 'Super_Group_'+str(sg_index)
+                        super_group_new = pd.DataFrame(
+                            [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
+                        super_group_new.set_index('Group', inplace=True)
+                        super_group = super_group.append(super_group_new)
+                else:  # not enough orientations to test, so lumped with group with most orientations
+                    sgname = 'Super_Group_'+str(0)
+                    super_group_old = pd.DataFrame(
+                        [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
+                    super_group_old.set_index('Group', inplace=True)
+                    super_group = super_group.append(super_group_old)
 
         use_gcode3 = []
         for ind, sg in super_group.iterrows():
@@ -1086,7 +1155,8 @@ class Topology(object):
         # add formation stratigraphy to graph as nodes
         Astrat=Astrat.set_index('code')
         for ind,s in Astrat.iterrows():
-            Gloop.add_node(s.name,s_colour=s['colour'],ntype="formation",
+            if(s.name!='cover'):
+                Gloop.add_node(s.name,s_colour=s['colour'],ntype="formation",
                                     group=s['group'],
                                     StratType=s['strat_type'],
                                     uctype=s['uctype'],
@@ -1097,6 +1167,19 @@ class Topology(object):
                                     MaxAge=strats.loc[s.name][c_l['max']]
                                     
                         )
+            else:
+                Gloop.add_node(s.name,s_colour=s['colour'],ntype="formation",
+                                    group=s['group'],
+                                    StratType=s['strat_type'],
+                                    uctype=s['uctype'],
+                                    GroupNumber=s['group number'],
+                                    IndexInGroup=s['index in group'],
+                                    NumberInGroup=s['number in group'],
+                                    MinAge=0,
+                                    MaxAge=1
+                                    
+                        )
+
         
         # add formation-formation stratigraphy to graph as edges
         i=0
@@ -1239,7 +1322,11 @@ class Topology(object):
                         Gloop.nodes[n]['ThicknessStd']=-1
                     else:
                         Gloop.nodes[n]['ThicknessStd']=As_t.loc[n]['thickness std']
-                    Gloop.nodes[n]['ThicknessMedian']=As_t.loc[n]['thickness median']
+                    if(np.isnan(As_t.loc[n]['thickness median'])):
+                        Gloop.nodes[n]['ThicknessMedian']=-1
+                    else:
+                        Gloop.nodes[n]['ThicknessMedian']=As_t.loc[n]['thickness median']
+
                     Gloop.nodes[n]['ThicknessMethod']=As_t.loc[n]['method']
 
         # add group-formation stratigraphy to graph as edges
@@ -1327,7 +1414,7 @@ class Topology(object):
                     new_graph.write('    graphics [ type "octagon" fill "#00FF00" ]\n')
                     new_graph.write(l)
                 elif('etype "formation_formation"' in l):
-                    new_graph.write('    graphics [ style "line" arrow "last" fill "#0066FF" ]\n')
+                    new_graph.write('    graphics [ style "line" arrow "last" fill "#6666FF" ]\n')
                     new_graph.write(l)
                 elif('etype "fault_group"' in l):
                     new_graph.write('    graphics [ style "line" arrow "last" fill "#666600" ]\n')

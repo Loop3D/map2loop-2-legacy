@@ -1,7 +1,7 @@
 import os
 import sys
 import geopandas as gpd
-from shapely.geometry import LineString, Polygon, MultiLineString
+from shapely.geometry import LineString, Polygon, MultiLineString, MultiPolygon
 from . import m2l_utils
 import warnings
 import numpy as np
@@ -119,13 +119,63 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
 
     if (os.path.isfile(geology_file) or geology_file.startswith("http") or not local_paths):
         geology = gpd.read_file(geology_file, bbox=bbox)
+        geology = gpd.overlay(geology, polygo, how='intersection')
+
         if(not geology.empty):
             if not c_l['o'] in geology.columns:
                 # print(geology.columns)
                 geology = geology.reset_index()
                 geology[c_l['o']] = geology.index
 
+            #make each pluton its own formation and group
+            if( not c_l['r1'] in geology.columns):
+                m2l_warnings.append('No extra litho for geology polygons')
+                c_l['r1'] = 'r1'
+                geology[c_l['r1']] = 'Nope'
+            if( not c_l['ds'] in geology.columns):
+                m2l_warnings.append('No extra litho for geology polygons')
+                c_l['ds'] = 'ds'
+                geology[c_l['ds']] = 'Nope'
+            geology[c_l['r1']].fillna('not known', inplace=True)
+            geology[c_l['ds']].fillna('not known', inplace=True)
+            explode_intrusives=True
+            if(explode_intrusives):
+                geol_clip_tmp=geology.copy(deep=False)
+                #print('raw',len(geol_clip_tmp))
+                geol_clip_tmp.crs=geology.crs
+                geol_clip_tmp=geol_clip_tmp.dissolve(by=c_l['c'],aggfunc = 'first')
+                geol_clip_tmp=geol_clip_tmp[geol_clip_tmp[c_l['r1']].str.contains(c_l['intrusive']) & ~geol_clip_tmp[c_l['ds']].str.contains(c_l['sill'])]
+                #print('tmp',len(geol_clip_tmp))
+                geol_clip_tmp.reset_index(inplace=True)
+                geol_clip_tmp=geol_clip_tmp.explode()
+                if('level_0' in geol_clip_tmp.columns):
+                    geol_clip_tmp.drop(labels='level_0', axis=1,inplace=True)
+
+                geol_clip_tmp.reset_index(inplace=True)
+                geol_clip_not=geology[(~geology[c_l['r1']].str.contains(c_l['intrusive'])) | geology[c_l['ds']].str.contains(c_l['sill']) ]
+                #print('not',len(geol_clip_not))
+                geol_clip_not.index = pd.RangeIndex(start=10000, stop=10000+len(geol_clip_not), step=1)
+                if('level_0' in geol_clip_not.columns):
+                    geol_clip_not.drop(labels='level_0', axis=1,inplace=True)
+                geol_clip_not.reset_index(inplace=True)
+                geol_clip_tmp[c_l['c']]=geol_clip_tmp[c_l['c']].astype(str)+'_'+geol_clip_tmp.index.astype(str)
+                geol_clip_tmp[c_l['o']]=geol_clip_tmp.index
+                geol_clip_tmp[c_l['g']]=geol_clip_tmp[c_l['c']]
+
+                geology = pd.concat([geol_clip_tmp, geol_clip_not], sort=False)
+            #print('geol',len(geology))
+                if('level_0' in geology.columns):
+                    geology.drop(labels='level_0', axis=1,inplace=True)
+                if('level_1' in geology.columns):
+                    geology.drop(labels='level_1', axis=1,inplace=True)
+            
+            geology[c_l['max']]=geology[c_l['max']].astype(np.float64)            
+            geology[c_l['min']]=geology[c_l['min']].astype(np.float64)            
             unique_g = set(geology[c_l['o']])
+            
+            unique_c = list(set(geology[c_l['c']]))
+            if(len(unique_c)<2):
+                m2l_errors.append('The selected area only has one formation in it, so no model can be calculated')
 
             if(not len(unique_g) == len(geology)):
                 m2l_warnings.append('duplicate geology polygon unique IDs')
@@ -140,16 +190,12 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                     'No secondary strat coding for geology polygons')
                 c_l['g'] = 'group'
                 geology[c_l['g']] = "Top"
-
+            #print(geology.columns)
             geology = geology.replace(r'^\s+$', np.nan, regex=True)
             geology = geology.replace(',', ' ', regex=True)
             geology[c_l['g']].fillna(geology[c_l['g2']], inplace=True)
             geology[c_l['g']].fillna(geology[c_l['c']], inplace=True)
 
-            if(c_l['r1'] == 'No_col' or not c_l['r1'] in geology.columns):
-                m2l_warnings.append('No extra litho for geology polygons')
-                c_l['r1'] = 'r1'
-                geology[c_l['r1']] = 'Nope'
 
             if(c_l['r2'] == 'No_col' or not c_l['r2'] in geology.columns):
                 m2l_warnings.append('No more extra litho for geology polygons')
@@ -251,7 +297,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
         faults = faults_folds[faults_folds[c_l['f']
                                            ].str.contains(c_l['fault'], case=False)]
         faults = faults.replace(r'^\s+$', np.nan, regex=True)
-
+        #print(faults)
         if not c_l['o'] in faults.columns:
             m2l_warnings.append(
                 'field named "'+str(c_l['o'])+'" added with default value')
@@ -272,7 +318,7 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
                 m2l_warnings.append(
                     'No fault dip direction for fault polylines')
                 c_l['fdipdir'] = 'fdipdir'
-                faults[c_l['fdipdir']] = 0
+                faults[c_l['fdipdir']] = -999
 
             if(c_l['fdipest'] == 'No_col' or not c_l['fdipest'] in faults.columns):
                 m2l_warnings.append(
@@ -430,10 +476,15 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             fault_file = os.path.join(tmp_path, 'faults_clip.shp')
             print("\nFault layer metadata\n--------------------")
             print("No faults found, projection may be inconsistent")
+        
+        if('level_0' in geology.columns):
+            geology.drop(columns=['level_0'], inplace=True)
+        if('level_1' in geology.columns):
+            geology.drop(columns=['level_1'], inplace=True)
 
-        geol_clip = gpd.overlay(geology, polygo, how='intersection')
+        #geol_clip = gpd.overlay(geology, polygo, how='intersection')
 
-        if(len(geol_clip) > 0 ):
+        if(len(geology) > 0 ):
             """
             geol_gaps=check_gaps(geol_clip)
             if(len(geol_gaps)>0):
@@ -451,9 +502,9 @@ def check_map(structure_file, geology_file, fault_file, mindep_file, fold_file, 
             else:
                 print("No overlaps between geology polygons")
             """
-            geol_clip.crs = dst_crs
+            geology.crs = dst_crs
             geol_file = os.path.join(tmp_path, 'geol_clip.shp')
-            geol_clip.to_file(geol_file)
+            geology.to_file(geol_file)
 
         if(len(orientations) > 0):
             structure_file = os.path.join(tmp_path, 'structure_clip.shp')
@@ -584,3 +635,16 @@ def densify(geom,spacing):
 
 # spacing=500
 #shapefile['geometry'] = shapefile['geometry'].map(densify)
+
+def densify_polygon_gdf(geology,spacing):
+    geoms=[]    
+    g2=geology.copy()
+    for ind,g in geology.iterrows():
+        g3=densify(g.geometry,spacing)
+        if(g3.geom_type=='Polygon'):
+            geoms.append(Polygon(g3))
+        elif(g3.geom_type=='MultiPolygon'):
+            geoms.append(MultiPolygon(g3))
+
+    g2.geometry=geoms
+    return(g2)

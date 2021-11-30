@@ -208,7 +208,9 @@ class Config(object):
         self.faults_clip = faults.copy()
         self.faults_clip.crs = self.proj_crs
         self.faults_clip_file = os.path.join(self.tmp_path, "faults_clip.shp")
+        #if(len(self.faults_clip_file)>0): need to be able to deal with no faults...
         self.faults_clip.to_file(self.faults_clip_file)
+
 
         # Geology
         self.geol_clip = m2l_utils.explode(self.geology)
@@ -240,7 +242,7 @@ class Config(object):
             ]
 
         list2 = list(set(list1))
-        print(list2)
+        print('list2',list2)
         sub_pts = self.structures[list2]
         structure_code = gpd.sjoin(sub_pts,
                                    self.geol_clip,
@@ -549,7 +551,7 @@ class Config(object):
         self.dtm = rasterio.open(self.dtm_reproj_file)
 
         if self.quiet == 'None':
-            plt.imshow(self.dtm.read(1), cmap='terrain', vmin=0, vmax=1000)
+            plt.imshow(self.dtm.read(1), cmap='terrain', vmin=np.percentile(self.dtm.read(1), 5), vmax=np.percentile(self.dtm.read(1), 95))
 
             plt.title('DTM')
             plt.show()
@@ -621,8 +623,10 @@ class Config(object):
                                    self.proj_crs,
                                    cover_spacing,
                                    self.run_flags['contact_decimate'],
+                                   self.bbox_3d,
                                    use_vector=True,
-                                   use_grid=True)
+                                   use_grid=True
+                                   )
         self.dtb=dtb
         self.dtb_null=dtb_null
 
@@ -782,6 +786,7 @@ class Config(object):
 
         if(cover_map):
             self.colour_dict['cover']='#FFFFC0'
+            self.colour_dict['cover_up']='#FFFFC0'
         colours = []
         for code in all_sorts['code']:
             colours.append([self.colour_dict[code]])
@@ -801,7 +806,7 @@ class Config(object):
         m2l_geometry.save_faults(
             os.path.join(self.tmp_path, 'faults_clip.shp'), self.output_path,
             self.dtm, self.dtb, self.dtb_null, False, self.c_l, fault_decimate,
-            min_fault_length, fault_dip)
+            min_fault_length, fault_dip,self.bbox_3d['base'])
 
         faults = pd.read_csv(self.fault_output_file_csv, sep=",")
         faults_len = len(faults)
@@ -825,7 +830,7 @@ class Config(object):
                                      self.geol_clip, self.local, self.dtm,
                                      self.dtb, self.dtb_null, cover_map,
                                      self.pluton_form, pluton_dip,
-                                     contact_decimate, self.c_l)
+                                     contact_decimate, self.c_l,self.bbox_3d,self.run_flags['min_pluton_area'])
 
     def extract_section_features(self, section_files):
         # Extract faults and basal contacts of groups from seismic sections
@@ -1011,6 +1016,8 @@ class Config(object):
                                            self.output_path, fault_parse_figs)
 
         # TODO: Figures sometimes look a bit squashed in notebooks
+        #save object-specifc interpolation parameters
+        m2l_geometry.save_interpolation_parameters(self.output_path,self.tmp_path)
 
     def update_projectfile(self):
         self.loop_projectfile = export_to_projectfile(self.loop_projectfile,
