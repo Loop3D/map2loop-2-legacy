@@ -514,8 +514,7 @@ def save_basal_no_faults(path_out, path_fault, ls_dict, dist_buffer, c_l, dst_cr
 
     if(os.path.exists(path_fault)):
         faults_clip_all = gpd.read_file(path_fault)
-        faults_clip = faults_clip_all[faults_clip_all[c_l['f']].str.contains(
-            c_l['fault'])]
+        faults_clip = faults_clip_all[faults_clip_all[c_l['f']].str.lower().str.contains(c_l['fault'].lower())]
         faults_clip = faults_clip.dropna(subset=['geometry'])
 
         df = DataFrame.from_dict(ls_dict, "index")
@@ -736,7 +735,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                     'Unknown': (0.0, 1.0), 'Vertical': (.707, .707)}
         random.seed(1)
         for indx, flt in faults_clip.iterrows():
-            if(c_l['fault'] in flt[c_l['f']]):
+            if(c_l['fault'].lower() in flt[c_l['f']].lower()):
                 fault_name = 'Fault_'+str(flt[c_l['o']])
                 # display(flt.geometry.type)
                 if(flt.geometry.type == 'LineString'):
@@ -1040,7 +1039,7 @@ def old_save_faults(path_faults, path_fault_orientations, dtm, dtb, dtb_null, co
     # fd.write("Fault_ID,strike,dip_direction,down_dip\n")
 
     for indx, flt in faults_clip.iterrows():
-        if(c_l['fault'] in flt[c_l['f']]):
+        if(c_l['fault'].lower() in flt[c_l['f']].lower()):
             fault_name = 'Fault_'+str(flt[c_l['o']])
             flt_ls = LineString(flt.geometry)
             dlsx = flt_ls.coords[0][0]-flt_ls.coords[len(flt_ls.coords)-1][0]
@@ -1119,7 +1118,7 @@ def save_fold_axial_traces(path_folds, path_fold_orientations, dtm, dtb, dtb_nul
 
                     i = 0
                     for afs in fold_ls.coords:
-                        if(c_l['fold'] in fold[c_l['ff']]):
+                        if(c_l['fold'].lower() in fold[c_l['ff']].lower()):
                             # decimate to reduce number of points, but also take mid and end points of a series to keep some shape
                             if(m2l_utils.mod_safe(i, fold_decimate) == 0 or i == int((len(fold_ls.coords)-1)/2) or i == len(fold_ls.coords)-1):
                                 locations = [(afs[0], afs[1])]
@@ -1135,7 +1134,7 @@ def save_fold_axial_traces(path_folds, path_fold_orientations, dtm, dtb, dtb_nul
 
                 i = 0
                 for afs in fold_ls.coords:
-                    if(c_l['fold'] in fold[c_l['ff']]):
+                    if(c_l['fold'].lower() in fold[c_l['ff']].lower()):
                         # decimate to reduce number of points, but also take mid and end points of a series to keep some shape
                         if(m2l_utils.mod_safe(i, fold_decimate) == 0 or i == int((len(fold_ls.coords)-1)/2) or i == len(fold_ls.coords)-1):
                             locations = [(afs[0], afs[1])]
@@ -2799,7 +2798,7 @@ def save_fold_axial_traces_orientations(path_folds, output_path, tmp_path, dtm, 
                     i = 0
                     first = True
                     for afs in fold_ls.coords:
-                        if(c_l['fold'] in fold[c_l['ff']]):
+                        if(c_l['fold'].lower() in fold[c_l['ff']].lower()):
                             # save out current geometry of FAT
                             # decimate to reduce number of points, but also take mid and end points of a series to keep some shape
                             if(m2l_utils.mod_safe(i, fold_decimate) == 0 or i == int((len(fold_ls.coords)-1)/2) or i == len(fold_ls.coords)-1):
@@ -2875,7 +2874,7 @@ def save_fold_axial_traces_orientations(path_folds, output_path, tmp_path, dtm, 
                 i = 0
                 first = True
                 for afs in fold_ls.coords:
-                    if(c_l['fold'] in fold[c_l['ff']]):
+                    if(c_l['fold'].lower() in fold[c_l['ff']].lower()):
                         # save out current geometry of FAT
                         # decimate to reduce number of points, but also take mid and end points of a series to keep some shape
                         if(m2l_utils.mod_safe(i, fold_decimate) == 0 or i == int((len(fold_ls.coords)-1)/2) or i == len(fold_ls.coords)-1):

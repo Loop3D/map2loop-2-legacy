@@ -998,38 +998,9 @@ class Topology(object):
         for i in range(1, len(group_girdle)):
             #if(c_l['intrusive'] in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][c_l['r1']] 
             #and c_l['sill'] not in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][c_l['ds']]):
-            if(c_l['intrusive'] in geol.loc[group_girdle.iloc[i].name][c_l['r1']] 
-            and c_l['sill'] not in geol.loc[group_girdle.iloc[i].name][c_l['ds']]):
-                sg_index = sg_index+1
-                #print('not found',sg_index)
-                sgname = 'Super_Group_'+str(sg_index)
-                super_group_new = pd.DataFrame(
-                    [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
-                super_group_new.set_index('Group', inplace=True)
-                super_group = super_group.append(super_group_new)
-
-            elif(group_girdle.iloc[i]['num orientations'] > 5):
-                l, m, n = m2l_utils.ddd2dircos(
-                    group_girdle.iloc[i]['plunge'], group_girdle.iloc[i]['bearing'])
-
-                found = False
-                sg_i = 0
-                for ind, sg in super_group.iterrows():
-
-                    c = sg['l']*l + sg['m']*m + sg['n']*n
-                    if c > 1:
-                        c = 1
-                    c = degrees(acos(c))
-                    if(c < misorientation and not found):
-                        found = True
-                        sgname = 'Super_Group_'+str(sg_i)
-                        super_group_old = pd.DataFrame(
-                            [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
-                        super_group_old.set_index('Group', inplace=True)
-                        super_group = super_group.append(super_group_old)
-                    sg_i = sg_i+1
-                if(not found):
-
+            if group_girdle.iloc[i].name in geol:
+                if(c_l['intrusive'] in geol.loc[group_girdle.iloc[i].name][c_l['r1']]
+                and c_l['sill'] not in geol.loc[group_girdle.iloc[i].name][c_l['ds']]):
                     sg_index = sg_index+1
                     #print('not found',sg_index)
                     sgname = 'Super_Group_'+str(sg_index)
@@ -1037,12 +1008,42 @@ class Topology(object):
                         [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
                     super_group_new.set_index('Group', inplace=True)
                     super_group = super_group.append(super_group_new)
-            else:  # not enough orientations to test, so lumped with group with most orientations
-                sgname = 'Super_Group_'+str(0)
-                super_group_old = pd.DataFrame(
-                    [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
-                super_group_old.set_index('Group', inplace=True)
-                super_group = super_group.append(super_group_old)
+
+                elif(group_girdle.iloc[i]['num orientations'] > 5):
+                    l, m, n = m2l_utils.ddd2dircos(
+                        group_girdle.iloc[i]['plunge'], group_girdle.iloc[i]['bearing'])
+
+                    found = False
+                    sg_i = 0
+                    for ind, sg in super_group.iterrows():
+
+                        c = sg['l']*l + sg['m']*m + sg['n']*n
+                        if c > 1:
+                            c = 1
+                        c = degrees(acos(c))
+                        if(c < misorientation and not found):
+                            found = True
+                            sgname = 'Super_Group_'+str(sg_i)
+                            super_group_old = pd.DataFrame(
+                                [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
+                            super_group_old.set_index('Group', inplace=True)
+                            super_group = super_group.append(super_group_old)
+                        sg_i = sg_i+1
+                    if(not found):
+
+                        sg_index = sg_index+1
+                        #print('not found',sg_index)
+                        sgname = 'Super_Group_'+str(sg_index)
+                        super_group_new = pd.DataFrame(
+                            [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
+                        super_group_new.set_index('Group', inplace=True)
+                        super_group = super_group.append(super_group_new)
+                else:  # not enough orientations to test, so lumped with group with most orientations
+                    sgname = 'Super_Group_'+str(0)
+                    super_group_old = pd.DataFrame(
+                        [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
+                    super_group_old.set_index('Group', inplace=True)
+                    super_group = super_group.append(super_group_old)
 
         use_gcode3 = []
         for ind, sg in super_group.iterrows():
