@@ -74,8 +74,8 @@ Or get the source + example notebooks with
 Navigate into map2loop-2, and issue the following to install map2loop and its dependencies. _Note_: The 'develop' flag makes your source changes take effect on saving, so you only need to run this once
 
 ::
-
-  python setup.py develop
+  conda install -c loop3d --file dependencies.txt
+  python setup.py install
 
 **2.3 Building with Docker**
 

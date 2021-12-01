@@ -1,11 +1,7 @@
 import os
 import sys
-import time
 import setuptools
-import importlib
-from setuptools.command.develop import develop
 import subprocess
-import platform
 from map2loop import __version__
 
 head, tail = os.path.split(sys.argv[0])
@@ -20,33 +16,6 @@ try:
         cmd.split())
 except Exception as e:
     print(e)
-
-
-class CondaDependencies(develop):
-    def run(self):
-        try:
-            deplist_path = os.path.join(head, "dependencies.txt")
-            deps = []
-            with open(deplist_path, 'r') as f:
-                for line in f:
-                    deps.append(line.strip())
-
-            _platform = platform.platform()
-
-            if _platform.startswith("Windows"):
-                _shell = True
-            else:  # Linux or Mac
-                _shell = False
-
-            command = 'conda install -c conda-forge -c loop3d -y python=3.7'.split() + \
-                deps
-            print(command)
-            subprocess.run(command, shell=_shell)
-        except Exception as e:
-            self.error('Could not install dependencies using conda!')
-
-        develop.run(self)
-
 
 def get_description():
     long_description = ""
@@ -71,8 +40,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    cmdclass={
-        'develop': CondaDependencies,
-    },
     python_requires='>=3.6',
 )
