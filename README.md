@@ -16,6 +16,9 @@ To just use map2loop, issue the following
 ```bash
 conda install -c conda-forge -c loop3d map2loop -y
 ```
+### Documentation
+
+If you can call it that, is available at [![Documentation Status](https://readthedocs.org/projects/map2loop-docs/badge/?version=latest)](https://map2loop-docs.readthedocs.io/en/latest/?badge=latest)
 
 ### Development
 
