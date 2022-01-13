@@ -6,7 +6,7 @@ __version__ = "1.1.76"
 
 geology_loopdata = {
     'WA':
-    'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:geol_500k&bbox=&srs=EPSG:28350',
+    'http://13.211.217.129:8080/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:500k_geol_28350&bbox=&srs=EPSG:28350',
     'QLD':
     'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_geol_dissolved_join_fix_mii_clip_wgs84&bbox=&srsName=EPSG:28355',
     'SA':
@@ -19,7 +19,7 @@ geology_loopdata = {
 }
 structure_loopdata = {
     'WA':
-    'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=waroxi_wa_28350_bed&bbox=&srs=EPSG:28350',
+    'http://13.211.217.129:8080/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=waroxi_wa_28350&bbox=&srs=EPSG:28350',
     'QLD':
     'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=outcrops_28355&bbox=&srsName=EPSG:28355',
     'SA':
@@ -32,7 +32,7 @@ structure_loopdata = {
 }
 fault_loopdata = {
     'WA':
-    'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=linear_500k&bbox=&srs=EPSG:28350',
+    'http://13.211.217.129:8080/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=500k_faults_28350&bbox=&srs=EPSG:28350',
     'QLD':
     'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_faults_folds_28355&bbox=&srsName=EPSG:28355',
     'SA':
@@ -45,7 +45,7 @@ fault_loopdata = {
 }
 fold_loopdata = {
     'WA':
-    'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=linear_500k&bbox=&srs=EPSG:28350',
+    'http://13.211.217.129:8080/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=500k_faults_28350&bbox=&srs=EPSG:28350',
     'QLD':
     'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_faults_folds_28355&bbox=&srsName=EPSG:28355',
     'SA':
@@ -58,7 +58,7 @@ fold_loopdata = {
 }
 mindep_loopdata = {
     'WA':
-    'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:mindeps_2018_28350&bbox=&srs=EPSG:28350',
+    'http://13.211.217.129:8080/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:mindeps_2018_28350&bbox=&srs=EPSG:28350',
     'QLD':
     'http://geo.loop-gis.org/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_mindeps_28355&bbox=&srsName=EPSG:28355',
     'SA': '',
