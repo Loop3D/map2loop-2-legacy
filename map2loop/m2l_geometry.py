@@ -54,7 +54,7 @@ def save_orientations(structures, path_out, c_l, orientation_decimate, dtm, dtb,
     is_bed = structures[c_l['sf']].str.contains(
         c_l['bedding'], regex=False)
 
-    structure_clip = structures[is_bed]    
+    structure_clip = structures[is_bed]
     i = 0
     f = open(os.path.join(path_out, 'orientations.csv'), "w")
     f.write("X,Y,Z,azimuth,dip,polarity,formation\n")
@@ -86,7 +86,7 @@ def save_orientations(structures, path_out, c_l, orientation_decimate, dtm, dtb,
                     i = i+1
 
     f.close()
-    
+
     try:
         if(not c_l['sl']=='None'):
             sl_code_list=['S1','S2','S3','S4','S5','S0/S1','S1/S2','S2/S3','S3/S4','S4/S5','F1','F2','F3','F4','F5']
@@ -778,7 +778,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                             # specific dip defined
                             fault_dip = int(flt[c_l['fdip']])
 
-                        
+
                         # numeric dip direction defined
                         if(c_l['fdipdir_flag'] == 'num' and not str(flt[c_l['fdipdir']]) == 'None' and not str(int(flt[c_l['fdipdir']])) == c_l['fdipnull']):
                             azimuth = flt[c_l['fdipdir']]
@@ -794,9 +794,9 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                                 fault_dip = -fault_dip
                         else:
                             azimuth=azimuth_fault
-                        
+
                         l,m,n=m2l_utils.ddd2dircos((90-fault_dip),azimuth)
-                        #print('fault_name,l,m,n,azimuth_fault,dip',fault_name,l,m,n,azimuth,fault_dip) 
+                        #print('fault_name,l,m,n,azimuth_fault,dip',fault_name,l,m,n,azimuth,fault_dip)
                         first = True
                         incLength = 0
                         for afs in flt_ls.coords:
@@ -810,7 +810,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
 
                             # if(flt[c_l['o']] == '-1'):
                             # print(flt[c_l['o']],  int(flt[c_l['fdip']]), c_l['fdipnull'],str(flt[c_l['fdipest']]))
-  
+
 
                             if(first):
                                 incLength = 0
@@ -869,7 +869,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                                 # ostr = str(afs[0])+","+str(afs[1])+","+str(height)+","+fault_name+"\n"
                                 f.write(ostr)
                             i = i+1
-                        
+
                         strike = strike*1.25
                         r = random.randint(1, 256)-1
                         g = random.randint(1, 256)-1
@@ -883,7 +883,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                         locations = [
                             (flt_ls.coords[int((len(afs)-1)/2)][0], flt_ls.coords[int((len(afs)-1)/2)][1])]
                         height = m2l_utils.value_from_dtm_dtb(
-                            dtm, dtb, dtb_null, cover_map, locations)                        
+                            dtm, dtb, dtb_null, cover_map, locations)
                         ostr = "{},{},{},{},{},{},{}\n"\
                             .format(flt_ls.coords[int((len(flt_ls.coords)-1)/2)][0], flt_ls.coords[int((len(flt_ls.coords)-1)/2)][1],
                                     height, azimuth, fault_dip, 1, fault_name)
@@ -1335,7 +1335,7 @@ def process_plutons_old(tmp_path, output_path, geol_clip, local_paths, dtm, dtb,
                         if(not older_polygon.is_valid):
                             older_polygon = older_polygon.buffer(0)
                         centroid=central_poly.centroid
-                        
+
                         LineStringC = central_poly.intersection(older_polygon)
                         if(LineStringC.wkt.split(" ")[0] == 'MULTIPOLYGON' or
                            LineStringC.wkt.split(" ")[0] == 'POLYGON'):  # ignore polygon intersections for now, worry about them later!
@@ -1367,10 +1367,10 @@ def process_plutons_old(tmp_path, output_path, geol_clip, local_paths, dtm, dtb,
                                             ac.write(ostr)
 
                                             if(np.fabs(lineC.coords[0][0]-bbox3D['minx'])>100 and
-                                                   np.fabs(lineC.coords[0][0]-bbox3D['maxx'])>100 and                                               
-                                                   np.fabs(lineC.coords[0][1]-bbox3D['miny'])>100 and                                               
-                                                   np.fabs(lineC.coords[0][1]-bbox3D['maxy'])>100 ):                                               
-                                                   
+                                                   np.fabs(lineC.coords[0][0]-bbox3D['maxx'])>100 and
+                                                   np.fabs(lineC.coords[0][1]-bbox3D['miny'])>100 and
+                                                   np.fabs(lineC.coords[0][1]-bbox3D['maxy'])>100 ):
+
                                                 if(pluton_form == 'saucers'):
                                                     ostr = "{},{},{},{}\n"\
                                                         .format(lineC.coords[0][0], lineC.coords[0][1], bbox3D['top']+1000, newgp.replace(" ", "_").replace("-", "_"))
@@ -1386,7 +1386,7 @@ def process_plutons_old(tmp_path, output_path, geol_clip, local_paths, dtm, dtb,
                                                         y=lineC.coords[0][1]+((centroid.y-lineC.coords[0][1])*(1-rad))
                                                         ostr = "{},{},{},{}\n"\
                                                             .format(x,y,float(height)-z, newgp.replace(" ", "_").replace("-", "_"))
-                                                        ac.write(ostr)                                                        
+                                                        ac.write(ostr)
                                                 elif(pluton_form == 'domes'):
                                                     ostr = "{},{},{},{}\n"\
                                                         .format(lineC.coords[0][0], lineC.coords[0][1], bbox3D['base']-1000, newgp.replace(" ", "_").replace("-", "_"))
@@ -1399,8 +1399,8 @@ def process_plutons_old(tmp_path, output_path, geol_clip, local_paths, dtm, dtb,
                                                         y=lineC.coords[0][1]+((centroid.y-lineC.coords[0][1])*(1-rad))
                                                         ostr = "{},{},{},{}\n"\
                                                             .format(x,y,float(height)+z, newgp.replace(" ", "_").replace("-", "_"))
-                                                        ac.write(ostr)                                                        
-                                                
+                                                        ac.write(ostr)
+
                                             allc.write(
                                                 agp+","+str(ageol[c_l['o']])+","+ostr)
                                             ls_dict_decimate[allpts] = {"id": allpts, c_l['c']: newgp, c_l['g']: newgp, "geometry": Point(
@@ -1669,7 +1669,7 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
                 gp_ages[ngroups][1] = ageol[c_l['min']]
                 gp_ages[ngroups][2] = ngroups
                 ngroups = ngroups+1
-            
+
             for inset in np.arange(-5000,10001,1000):
                 #print("geom_type=",ageol.geometry.geom_type)
 
@@ -1722,7 +1722,7 @@ def process_plutons(tmp_path, output_path, geol_clip, local_paths, dtm, dtb, dtb
                         if(not older_polygon.is_valid):
                             older_polygon = older_polygon.buffer(0)
                         centroid=central_poly.centroid
-                        
+
                         LineStringC = central_poly.intersection(older_polygon)
                         if(LineStringC.wkt.split(" ")[0] == 'MULTIPOLYGON' or
                            LineStringC.wkt.split(" ")[0] == 'POLYGON'):  # ignore polygon intersections for now, worry about them later!
@@ -2014,7 +2014,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     if(use_projected_contacts and os.path.exists(os.path.join(output_path, 'contact_projections.csv'))):
         projected_contacts=pd.read_csv(os.path.join(output_path, 'contact_projections.csv'), ",")
         all_contacts = pd.concat([all_contacts, projected_contacts], sort=False)
-       
+
     if('cover_contacts' in inputs and os.path.exists(os.path.join(output_path, 'cover_grid.csv'))):
         cover_contacts = pd.read_csv(os.path.join(
             output_path, 'cover_grid.csv'), ",")
@@ -2119,8 +2119,8 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     fas = open(os.path.join(tmp_path, 'all_sorts_clean.csv'), "w")
     fas.write(
         'index,group number,index in group,number in group,code,group,supergroup,uctype\n')
-    
-    sgf = open(os.path.join(tmp_path, 'super_groups.csv')) 
+
+    sgf = open(os.path.join(tmp_path, 'super_groups.csv'))
     lines = sgf.readlines()
     sgf.close()
     index=0
@@ -2151,9 +2151,9 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     for ind,unit in all_sorts.iterrows():
         if(unit['code']=='cover' or unit['code']=='cover_up' ):
             slist.append('cover')
-        #elif(c_l['intrusive'] in geol.loc[unit['code'].replace("_"," ")][c_l['r1']] 
+        #elif(c_l['intrusive'] in geol.loc[unit['code'].replace("_"," ")][c_l['r1']]
         #    and c_l['sill'] not in geol.loc[unit['code'].replace("_"," ")][c_l['ds']]):
-        elif(c_l['intrusive'] in geol.loc[unit['code']][c_l['r1']] 
+        elif(c_l['intrusive'] in geol.loc[unit['code']][c_l['r1']]
             and c_l['sill'] not in geol.loc[unit['code']][c_l['ds']]):
             slist.append('intrusion')
         else:
@@ -2216,11 +2216,11 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     fs = open(os.path.join(output_path, 'formation_summary_thicknesses.csv'), 'a+')
 
     for ind, a_s in all_sorts.iterrows():
-        
+
         if(a_s['code']=='cover' or a_s['code']=='cover_up'):
             ostr = "{},{},{},{}\n"\
                 .format(a_s['code'], 5000, 'nan', "fudge")
-            fs.write(ostr)            
+            fs.write(ostr)
         elif(not a_s['code'] in found_codes):
             print("Guessing formation thickness of",
                   a_s['code'], "as", median_th)
@@ -3250,94 +3250,86 @@ def fault_strat_offset(path_out, c_l, dst_crs, fm_thick_file, all_sorts_file, fa
 
     new_als.set_index('code',  inplace=True)
 
-    all_long_faults = np.genfromtxt(
-        fault_dim_file, delimiter=',', dtype='U100')
+    all_long_faults = np.genfromtxt(fault_dim_file, delimiter=',', dtype='U100')
 
-    f = open(os.path.join(path_out, 'fault_strat_offset3.csv'), 'w')
-    f.write('X,Y,id,left_fm,right_fm,min_offset,strat_offset\n')
+    data = []
+    columns=["X","Y","id","left_fm","right_fm","min_offset","strat_offset"]
     if(len(all_long_faults) > 0):
         fault_names = all_long_faults[1:, :1]
 
+        print("Calculating fault stratigraphic offsets for",len(faults),"faults")
+
+        # Create lists of fault segment mid points, and points 10m to the left and right of the
+        # mid points, also build a corresponding list of faultIds for those points
+        lgeomList = []
+        rgeomList = []
+        xmidsList = []
+        ymidsList = []
+        faultIds = []
         for index, fault in faults.iterrows():
             if('Fault_'+str(fault[c_l['o']]) in fault_names):
-                lcoords = []
-                rcoords = []
-                index = []
-                for i in range(0, len(fault.geometry.coords)-1):
-                    midx = fault.geometry.coords[i][0]+(
-                        (fault.geometry.coords[i+1][0]-fault.geometry.coords[i][0])/2.0)
-                    midy = fault.geometry.coords[i][1]+(
-                        (fault.geometry.coords[i+1][1]-fault.geometry.coords[i][1])/2.0)
-                    l, m = m2l_utils.pts2dircos(
-                        fault.geometry.coords[i][0], fault.geometry.coords[i][1], fault.geometry.coords[i+1][0], fault.geometry.coords[i+1][1])
-                    lcoords.append([(midx+(10*m), midy-(10*l))])
-                    rcoords.append([(midx-(10*m), midy+(10*l))])
-                    index.append([(i)])
-                lgeom = [Point(xy) for xy in lcoords]
-                rgeom = [Point(xy) for xy in rcoords]
-                lgdf = GeoDataFrame(index, crs=dst_crs, geometry=lgeom)
-                rgdf = GeoDataFrame(index, crs=dst_crs, geometry=rgeom)
-                lcode = gpd.sjoin(lgdf, geology, how="left", op="within")
-                rcode = gpd.sjoin(rgdf, geology, how="left", op="within")
+                L = fault.geometry.coords
+                avg = lambda x0, x1: (x0+x1)/2
+                xmids =  [ avg(pts[0][0],pts[1][0]) for pts in [L[I:I+2] for I in range(len(L)-1)] ]
+                ymids =  [ avg(pts[0][1],pts[1][1]) for pts in [L[I:I+2] for I in range(len(L)-1)] ]
+                xdiffs = [ pts[1][0] - pts[0][0]    for pts in [L[I:I+2] for I in range(len(L)-1)] ]
+                ydiffs = [ pts[1][1] - pts[0][1]    for pts in [L[I:I+2] for I in range(len(L)-1)] ]
 
-                for i in range(0, len(fault.geometry.coords)-1):
-                    if(not str(lcode.iloc[i][c_l['c']]) == 'nan' and not str(rcode.iloc[i][c_l['c']]) == 'nan'):
-                        lcode_fm = lcode.iloc[i][c_l['c']].replace(
-                            " ", "_").replace("-", "_").replace("\n", "")
-                        rcode_fm = rcode.iloc[i][c_l['c']].replace(
-                            " ", "_").replace("-", "_").replace("\n", "")
+                length = lambda p0, p1: Point(p0).distance(Point(p1))
+                seg_lens = [ length(pts[0],pts[1])  for pts in [L[I:I+2] for I in range(len(L)-1)] ]
 
-                        if(lcode_fm in codes and rcode_fm in codes and lcode_fm in formations and rcode_fm in formations):
-                            midx = lcode.iloc[i].geometry.x + \
-                                ((rcode.iloc[i].geometry.x -
-                                  lcode.iloc[i].geometry.x)/2)
-                            midy = lcode.iloc[i].geometry.y + \
-                                ((rcode.iloc[i].geometry.y -
-                                  lcode.iloc[i].geometry.y)/2)
+                m = [ ydiff / seglen for ydiff,seglen in zip(ydiffs, seg_lens) ]
+                l = [ xdiff / seglen for xdiff,seglen in zip(xdiffs, seg_lens) ]
 
-                            fm_l = int(new_als.loc[lcode_fm]["index"])
-                            fm_r = int(new_als.loc[rcode_fm]["index"])
+                lcomb = lambda midx, midy, l, m : Point(midx+(10*m), midy-(10*l))
+                rcomb = lambda midx, midy, l, m : Point(midx-(10*m), midy+(10*l))
+                lgeomList += [ lcomb(x,y,l1,m1) for x,y,l1,m1 in zip(xmids,ymids,l,m) ]
+                rgeomList += [ rcomb(x,y,l1,m1) for x,y,l1,m1 in zip(xmids,ymids,l,m) ]
+                xmidsList += xmids
+                ymidsList += ymids
+                faultIds += [fault[c_l['o']]] * len(xmids)
 
-                            if(fm_l > fm_r):
-                                t = fm_l
-                                fm_l = fm_r
-                                fm_r = t
-                            diff = fm_r-fm_l
-                            number_string = str(diff)
-                            diff = number_string.zfill(3)
-                            ostr = "{},{},Fault_{},{},{},{},{}\n"\
-                                .format(midx, midy, fault[c_l['o']], lcode_fm, rcode_fm, fm_thick_arr[fm_l, fm_r], diff)
-                            # ostr = str(midx)+','+str(midy)+','+str('Fault_'+str(fault[c_l['o']]))+','+str(lcode_fm)+','+str(rcode_fm)+','+str(fm_thick_arr[fm_l,fm_r])+","+str(diff)+'\n'
-                        elif(lcode_fm in codes and rcode_fm in codes):
-                            midx = lcode.iloc[i].geometry.x + \
-                                ((rcode.iloc[i].geometry.x -
-                                  lcode.iloc[i].geometry.x)/2)
-                            midy = lcode.iloc[i].geometry.y + \
-                                ((rcode.iloc[i].geometry.y -
-                                  lcode.iloc[i].geometry.y)/2)
+        # Create geometry from left and right points list and join with geology to
+        # find which formation the point lands in
+        lgdf = GeoDataFrame(crs=dst_crs, geometry=lgeomList)
+        rgdf = GeoDataFrame(crs=dst_crs, geometry=rgeomList)
+        # Note: the sjoin function is very time intensive if the geopandas data
+        # has not been optimised so call it infrequently
+        lcode = gpd.sjoin(lgdf, geology, how="left", predicate="within")
+        rcode = gpd.sjoin(rgdf, geology, how="left", predicate="within")
 
-                            fm_l = int(new_als.loc[lcode_fm]["index"])
-                            fm_r = int(new_als.loc[rcode_fm]["index"])
+        # For each set of joined points fill a 2D list (data) with point information and
+        # what formation is left and right of it, (also list strat column difference and
+        # thus minimum throw for the fault at that position)
+        for i in range(0, len(lcode)):
+            if(not str(lcode.iloc[i][c_l['c']]) == 'nan' and not str(rcode.iloc[i][c_l['c']]) == 'nan'):
+                lcode_fm = lcode.iloc[i][c_l['c']].replace("-", "_").replace("\n", "")
+                rcode_fm = rcode.iloc[i][c_l['c']].replace("-", "_").replace("\n", "")
 
-                            if(fm_l > fm_r):
-                                t = fm_l
-                                fm_l = fm_r
-                                fm_r = t
-                            diff = fm_r-fm_l
-                            number_string = str(diff)
-                            diff = number_string.zfill(3)
-                            ostr = "{},{},Fault_{},{},{},{},{}\n"\
-                                .format(midx, midy, fault[c_l['o']], lcode_fm, rcode_fm, '-1', diff)
-                            # ostr = str(midx)+','+str(midy)+','+str('Fault_'+str(fault[c_l['o']]))+','+str(lcode_fm)+','+str(rcode_fm)+','+str('-1')+","+str(diff)+'\n'
-                        else:
-                            ostr = "{},{},Fault_{},{},{},{},{}\n"\
-                                .format(midx, midy, fault[c_l['o']], '', '', '-1', '-1')
-                            # ostr = str(midx)+','+str(midy)+','+str('Fault_'+str(fault[c_l['o']]))+','+str('')+','+str('')+','+str('-1')+','+str('-1')+'\n'
+                if(lcode_fm in codes and rcode_fm in codes):
+                    fm_l = int(new_als.loc[lcode_fm]["index"])
+                    fm_r = int(new_als.loc[rcode_fm]["index"])
 
-                        f.write(ostr)
-    f.close()
-    print('minumim stratigraphic offsets saved as',
-          os.path.join(path_out, 'fault_strat_offset3.csv'))
+                    if(fm_l > fm_r):
+                        t = fm_l
+                        fm_l = fm_r
+                        fm_r = t
+                    diff = fm_r-fm_l
+                    number_string = str(diff)
+                    diff = number_string.zfill(3)
+                    if lcode_fm in formations and rcode_fm in formations:
+                        min_offset = fm_thick_arr[fm_l,fm_r]
+                    else:
+                        min_offset = -1
+                    data.append([xmidsList[i],ymidsList[i],"Fault_"+str(faultIds[i]),lcode_fm,rcode_fm,min_offset,diff])
+                else:
+                    data.append([xmidsList[i],ymidsList[i],"Fault_"+str(faultIds[i]),'','',-1,-1])
+
+    # Convert list to Dataframe and output to csv
+    df = DataFrame(data,columns=columns)
+    df.to_csv(os.path.join(path_out, 'fault_strat_offset3.csv'),index=False,columns=columns)
+
+    print('minumim stratigraphic offsets saved as', os.path.join(path_out, 'fault_strat_offset3.csv'))
 
 ##########################################################
 # Extract cover thickness dip and contact info from depth to basement grid
@@ -3379,9 +3371,9 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                 .format(pt['X'], pt['Y'], height, 'cover')
             allpts.write(ostr)
             if(np.fabs(pt['X']-bbox3D['minx'])>1000 and
-                    np.fabs(pt['X']-bbox3D['maxx'])>1000 and                                               
-                    np.fabs(pt['Y']-bbox3D['miny'])>1000 and                                               
-                    np.fabs(pt['Y']-bbox3D['maxy'])>1000 ):                                               
+                    np.fabs(pt['X']-bbox3D['maxx'])>1000 and
+                    np.fabs(pt['Y']-bbox3D['miny'])>1000 and
+                    np.fabs(pt['Y']-bbox3D['maxy'])>1000 ):
                 ostr = "{},{},{},{}\n"\
                     .format(pt['X'], pt['Y'], float(height)+5000, 'cover_up')
                 allpts.write(ostr)
@@ -3391,11 +3383,11 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
             coords = extract_poly_coords(cpoly.geometry, 0)
             k = 0
             for pt in coords['exterior_coords']:
-                # decimate to reduce number of points, but also take second and third point of a series               
+                # decimate to reduce number of points, but also take second and third point of a series
                 if(m2l_utils.mod_safe(k, contact_decimate) == 0 or k == int((len(coords['exterior_coords'])-1)/2) or k == len(coords['exterior_coords'])-1):
                     if(pt[0] > bbox[0] and pt[0] < bbox[2] and
                             pt[1] > bbox[1] and pt[1] < bbox[3]):
-                        
+
                         locations = [(pt[0],pt[1])]
 
                         height = m2l_utils.value_from_dtm_dtb(
@@ -3405,9 +3397,9 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                         # ostr = str(pt[0])+","+str(pt[1])+","+height+",cover\n"
                         allpts.write(ostr)
                         if(np.fabs(pt[0]-bbox3D['minx'])>1000 and
-                                np.fabs(pt[0]-bbox3D['maxx'])>1000 and                                               
-                                np.fabs(pt[1]-bbox3D['miny'])>1000 and                                               
-                                np.fabs(pt[1]-bbox3D['maxy'])>1000 ):                                               
+                                np.fabs(pt[0]-bbox3D['maxx'])>1000 and
+                                np.fabs(pt[1]-bbox3D['miny'])>1000 and
+                                np.fabs(pt[1]-bbox3D['maxy'])>1000 ):
                             ostr = "{},{},{},{}\n"\
                                 .format(pt[0], pt[1], bbox3D['top']+5000, 'cover')
                             # ostr = str(pt[0])+","+str(pt[1])+","+height+",cover\n"
@@ -3417,11 +3409,11 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                 for i in range(0, len(coords['interior_coords']), 2):
                     for pts in coords['interior_coords'][i+1:i+2]:
                         for pt in pts:
-                            # decimate to reduce number of points, but also take second and third point of a series               
+                            # decimate to reduce number of points, but also take second and third point of a series
                             if(m2l_utils.mod_safe(k, contact_decimate) == 0 or k == int((len(coords['interior_coords'])-1)/2) or k == len(coords['interior_coords'])-1):
                                 if(pt[0] > bbox[0] and pt[0] < bbox[2] and
                                         pt[1] > bbox[1] and pt[1] < bbox[3]):
-                                    
+
                                     locations = [(pt[0],pt[1])]
 
                                     height = m2l_utils.value_from_dtm_dtb(
@@ -3490,7 +3482,7 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                     lastx = pt[0]
                     lasty = pt[1]
                     first = False
-                # decimate to reduce number of points, but also take second and third point of a series               
+                # decimate to reduce number of points, but also take second and third point of a series
                 locations = [(pt[0],pt[1])]
                 if(m2l_utils.mod_safe(k, contact_decimate) == 0 or k == int((len(coords['exterior_coords'])-1)/2) or k == len(coords['exterior_coords'])-1):
                     if(pt[0] > bbox[0] and pt[0] < bbox[2] and
@@ -3511,7 +3503,7 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                             # pt just a bit in/out from line
                             testpx = pt[0]-lsy
                             testpy = pt[1]+lsx
-                            
+
                             df = pd.DataFrame({'point': ['apoint'],'X': [testpx],'Y': [testpy]})
                             gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.X, df.Y))
                             gdf.crs=dst_crs
@@ -3540,7 +3532,7 @@ def process_cover(output_path, dtm, dtb, dtb_null, cover, cover_map, cover_dip, 
                                 lastx = pt[0]
                                 lasty = pt[1]
                                 first = False
-                            # decimate to reduce number of points, but also take second and third point of a series               
+                            # decimate to reduce number of points, but also take second and third point of a series
                             locations = [(pt[0],pt[1])]
                             if(m2l_utils.mod_safe(k, contact_decimate) == 0 or k == int((len(coords['interior_coords'])-1)/2) or k == len(coords['interior_coords'])-1):
                                 if(pt[0] > bbox[0] and pt[0] < bbox[2] and
@@ -3651,24 +3643,24 @@ def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_
 
                             height = m2l_utils.value_from_dtm_dtb(
                                 dtm, dtb, dtb_null, cover_map, locations)
-                            
+
                             if(contact_dip == -999):
                                 dip = dip_grid[r, c]
-                                if(not dip==-999):  
+                                if(not dip==-999):
                                     if(dip>90):
                                         dip=180-dip
                                         flip=True
                                     else:
-                                        flip=False                        
+                                        flip=False
                                     locations1=[(lastx,lasty)]
                                     height1 = m2l_utils.value_from_dtm_dtb(
-                                        dtm, dtb, dtb_null, cover_map, locations1)                  
-                                    locations2=[(line.coords[0][0], line.coords[0][1])]                  
+                                        dtm, dtb, dtb_null, cover_map, locations1)
+                                    locations2=[(line.coords[0][0], line.coords[0][1])]
                                     height2 = m2l_utils.value_from_dtm_dtb(
-                                        dtm, dtb, dtb_null, cover_map, locations2) 
-                                    
+                                        dtm, dtb, dtb_null, cover_map, locations2)
+
                                     l1,m1,n1,l2,m2,n2=lmn_from_line_dip(lastx,lasty,height1,line.coords[0][0], line.coords[0][1],height2,dip)
-                                    
+
                                     if((not l1==-999) and m*l1-l*m1 <1 and m*l1-l*m1 >-1 and m*l2-l*m2 <1 and m*l2-l*m2 >-1):
                                         if(polarity==0):
                                             dotproduct1=acos(m*l1-l*m1)
@@ -3689,7 +3681,7 @@ def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_
                                         d,dipdir=m2l_utils.dircos2ddd(lc, mc, 0)
                                         if(flip):
                                             dipdir=(dipdir+180)%360
-                                            
+
                                         if(dip>90):
                                             dip=180-dip
                                         #print("orig_fdip=",dip_grid[r, c], "new_dips=",dip,90-degrees(asin(n1)),90-degrees(asin(n2)))
@@ -3698,11 +3690,11 @@ def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_
                                 else:
                                     dip=90
 
-                                
-                                
+
+
                             else:
                                 dip = contact_dip
-                            gap=m2l_utils.ptsdist(lastx, lasty, line.coords[0][0], line.coords[0][1])    
+                            gap=m2l_utils.ptsdist(lastx, lasty, line.coords[0][0], line.coords[0][1])
                             if(dip != -999 and gap<2000):
                                 ostr = "{},{},{},{},{},{},{}\n"\
                                     .format(midx, midy, height, dipdir, str(dip), polarity, str(contact[c_l['c']]).replace(" ", "_").replace("-", "_"))
@@ -3846,7 +3838,7 @@ def process_sills(output_path, geol_clip, dtm, dtb, dtb_null, cover_map, contact
     sills_df.to_csv(os.path.join(output_path, 'sills.csv'))
 
 def combine_point_data(output_path,tmp_path):
-    
+
     Aorientations = pd.read_csv(os.path.join(output_path, 'orientations_clean.csv'), ",")
     d={'formation':'name','azimuth':'Param1', 'dip':'Param2',
         'polarity':'Param3'}
@@ -3880,7 +3872,7 @@ def combine_point_data(output_path,tmp_path):
         Afault_displacements['source']='calc'
         Afault_displacements = Afault_displacements[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
         all_points=pd.concat([all_points,Afault_displacements])
-    
+
     if(os.path.isfile(os.path.join(output_path, 'fault_strat_offset3.csv'))):
         Afaults_strat_displacements = pd.read_csv(os.path.join(output_path, 'fault_strat_offset3.csv'), ",")
         d={'id':'name','left_fm':'Param1', 'right_fm':'Param2',
@@ -3915,7 +3907,7 @@ def combine_point_data(output_path,tmp_path):
         Asecondaryorientations['source']='secondary_orientation'
         Asecondaryorientations = Asecondaryorientations[['source','type', 'name', 'X', 'Y', 'Z',  'Param1', 'Param2', 'Param3', 'Param4']]
         all_points=pd.concat([all_points,Asecondaryorientations])
-    
+
     if(os.path.isfile(os.path.join(output_path, 'raw_contacts.csv'))):
         Araw_contacts = pd.read_csv(os.path.join(tmp_path, 'raw_contacts.csv'), ",")
         d={'formation':'name','group':'Param1','angle':'Param2', 'lsx':'Param3',
@@ -4025,10 +4017,10 @@ def lmn_from_line_dip(x1, y1, z1, x2, y2, z2, dip):
     Z1=-99
     while(Z1==-99 and dip <91):
         try:
-            Z1 = (C**2*(-(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1)) 
-                  - sqrt(C**4.0*(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1)**2 
-                  - 4*C**2*(x1**2 - 2*x1*x2 + x2**2 + y1**2 - 2*y1*y2 + y2**2)*(C**2*abs(x2*y1 - x1*y2)**2 + C**2*x1**2*z2**2 - 2*C**2*x1*x2*z1*z2 
-                  + C**2*x2**2*z1**2 + C**2*y1**2*z2**2 - 2*C**2*y1*y2*z1*z2 + C**2*y2**2*z1**2 - x1**2*y2**2 + 2*x1*x2*y1*y2 
+            Z1 = (C**2*(-(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1))
+                  - sqrt(C**4.0*(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1)**2
+                  - 4*C**2*(x1**2 - 2*x1*x2 + x2**2 + y1**2 - 2*y1*y2 + y2**2)*(C**2*abs(x2*y1 - x1*y2)**2 + C**2*x1**2*z2**2 - 2*C**2*x1*x2*z1*z2
+                  + C**2*x2**2*z1**2 + C**2*y1**2*z2**2 - 2*C**2*y1*y2*z1*z2 + C**2*y2**2*z1**2 - x1**2*y2**2 + 2*x1*x2*y1*y2
                   - x2**2*y1**2)))/(2*C**2*(x1**2 - 2*x1*x2 + x2**2 + y1**2 - 2*y1*y2 + y2**2))
         except:
             dip=dip+1
@@ -4036,15 +4028,15 @@ def lmn_from_line_dip(x1, y1, z1, x2, y2, z2, dip):
     if(Z1==-99):
         print("no solution",x1,y1,z1,x2,y2,z2,dip_orig)
         return(-999,-999,-999,-999,-999,-999)
-    
+
     C=cos(radians(dip))
     Z2=-99
     while(Z2==-99 and dip <91):
-        try:    
-            Z2 = (sqrt(C**4.0*(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1)**2 
-                 - 4*C**2*(x1**2 - 2*x1*x2 + x2**2 + y1**2 - 2*y1*y2 + y2**2)*(C**2*abs(x2*y1 - x1*y2)**2 + C**2*x1**2*z2**2 - 2*C**2*x1*x2*z1*z2 
-                 + C**2*x2**2*z1**2 + C**2*y1**2*z2**2 - 2*C**2*y1*y2*z1*z2 + C**2*y2**2*z1**2 - x1**2*y2**2 + 2*x1*x2*y1*y2 - x2**2*y1**2)) 
-                 - C**2*(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1))/(2*C**2*(x1**2 
+        try:
+            Z2 = (sqrt(C**4.0*(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1)**2
+                 - 4*C**2*(x1**2 - 2*x1*x2 + x2**2 + y1**2 - 2*y1*y2 + y2**2)*(C**2*abs(x2*y1 - x1*y2)**2 + C**2*x1**2*z2**2 - 2*C**2*x1*x2*z1*z2
+                 + C**2*x2**2*z1**2 + C**2*y1**2*z2**2 - 2*C**2*y1*y2*z1*z2 + C**2*y2**2*z1**2 - x1**2*y2**2 + 2*x1*x2*y1*y2 - x2**2*y1**2))
+                 - C**2*(-2*x1**2*z2 + 2*x1*x2*z1 + 2*x1*x2*z2 - 2*x2**2*z1 - 2*y1**2*z2 + 2*y1*y2*z1 + 2*y1*y2*z2 - 2*y2**2*z1))/(2*C**2*(x1**2
                  - 2*x1*x2 + x2**2 + y1**2 - 2*y1*y2 + y2**2))
         except:
             dip=dip+1
@@ -4102,8 +4094,8 @@ def update_fault_layer(tmp_path,output_path,c_l):
     fault_nodes=Gloop.subgraph(fnodes_all)
     fault_data=pd.DataFrame.from_dict(dict(fault_nodes.nodes(data=True)), orient='index')
     fault_data['name']=fault_data.index
-    columns={'ntype': 'ntype', 'Xmean': 'Xmean', 'Ymean': 'Ymean', 'Zmean': 'Zmean', 'HorizontalRadius': 'HzRad', 'VerticalRadius': 'Vrad', 'InfluenceDistance': 'NDist', 
-             'IncLength': 'IncLength', 'f_colour': 'colour', 'Dip': 'Dip_1', 'DipDirection': 'DipDir', 'DipPolarity': 'Polarity', 
+    columns={'ntype': 'ntype', 'Xmean': 'Xmean', 'Ymean': 'Ymean', 'Zmean': 'Zmean', 'HorizontalRadius': 'HzRad', 'VerticalRadius': 'Vrad', 'InfluenceDistance': 'NDist',
+             'IncLength': 'IncLength', 'f_colour': 'colour', 'Dip': 'Dip_1', 'DipDirection': 'DipDir', 'DipPolarity': 'Polarity',
              'OrientationCluster': 'OCluster', 'LengthCluster': 'LCluster', 'ClosenessCentrality': 'CCentral', 'BetweennessCentrality':'BCentral'}
     fault_data=fault_data.rename(columns =columns, inplace = False)
     new_faults=faults.merge(fault_data,on='name')
@@ -4131,7 +4123,7 @@ def save_interpolation_parameters(output_path,tmp_path):
                           'npw':10
                           }
         index=index+1
-    
+
     sgi=0
     supergroups = {}
     with open(os.path.join(tmp_path, 'super_groups.csv')) as sgf:
