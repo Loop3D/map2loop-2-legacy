@@ -998,7 +998,7 @@ class Topology(object):
         for i in range(1, len(group_girdle)):
             #if(c_l['intrusive'] in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][c_l['r1']] 
             #and c_l['sill'] not in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][c_l['ds']]):
-            if group_girdle.iloc[i].name in geol:
+            if group_girdle.iloc[i].name in geol.index:
                 if(c_l['intrusive'] in geol.loc[group_girdle.iloc[i].name][c_l['r1']]
                 and c_l['sill'] not in geol.loc[group_girdle.iloc[i].name][c_l['ds']]):
                     sg_index = sg_index+1
