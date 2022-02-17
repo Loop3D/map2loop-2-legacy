@@ -18,7 +18,7 @@ conda install -c conda-forge -c loop3d map2loop -y
 ```
 ### Documentation
 
-If you can call it that, is available  <a href="https://geo.loop-gis.org/m2ldocs">here</a>
+If you can call it that, is available  <a href="http://13.211.217.129/m2ldocs/">here</a>
 
 ### Development
 
