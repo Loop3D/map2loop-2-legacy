@@ -753,7 +753,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                         fault_dip = 90.0
                         # null specifc dip defined
                         #print(c_l['fdipdir_flag'] ,str(flt[c_l['fdipdir']]), int(flt[c_l['fdip']]) , int(c_l['fdipnull']),str(flt[c_l['fdipest']]),fault_dip_var)
-                        if(int(flt[c_l['fdip']]) == int(c_l['fdipnull'])):
+                        if(int(float(flt[c_l['fdip']])) == int(float(c_l['fdipnull']))):
                             # dip estimate defined
                             if(not str(flt[c_l['fdipest']]) == '-999'):
                                 #print("1")
@@ -776,27 +776,27 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                         else:
                             #print("4")
                             # specific dip defined
-                            fault_dip = int(flt[c_l['fdip']])
+                            fault_dip = int(float(flt[c_l['fdip']]))
 
-                        
+
                         # numeric dip direction defined
-                        if(c_l['fdipdir_flag'] == 'num' and not str(flt[c_l['fdipdir']]) == 'None' and not str(int(flt[c_l['fdipdir']])) == c_l['fdipnull']):
+                        if(c_l['fdipdir_flag'] == 'num' and not str(flt[c_l['fdipdir']]) == 'None' and not str(float(flt[c_l['fdipdir']])) == c_l['fdipnull']):
                             azimuth = flt[c_l['fdipdir']]
                         # alpha dip direction defined or no numeric dd defined
                         elif(flt[c_l['fdip']] == -999 or fault_dip_var == -999):
                             #print('az_before',fault_name,azimuth_fault)
                             azimuth = (azimuth_fault+(180*random.randint(0,1)))%360
                             #print('az_after',fault_name,azimuth)
-                        elif (not str(flt[c_l['fdipdir']]) == 'None' and not str(int(flt[c_l['fdip']])) == c_l['fdipnull']):
+                        elif (not str(flt[c_l['fdipdir']]) == 'None' and not str(float(flt[c_l['fdip']])) == c_l['fdipnull']):
                             dotprod = degrees(acos(
                                 (-lsx*dip_dirs[flt[c_l['fdipdir']]][0])+(lsy*dip_dirs[flt[c_l['fdipdir']]][1])))
                             if(dotprod > 45):
                                 fault_dip = -fault_dip
                         else:
                             azimuth=azimuth_fault
-                        
+
                         l,m,n=m2l_utils.ddd2dircos((90-fault_dip),azimuth)
-                        #print('fault_name,l,m,n,azimuth_fault,dip',fault_name,l,m,n,azimuth,fault_dip) 
+                        #print('fault_name,l,m,n,azimuth_fault,dip',fault_name,l,m,n,azimuth,fault_dip)
                         first = True
                         incLength = 0
                         for afs in flt_ls.coords:
@@ -810,7 +810,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
 
                             # if(flt[c_l['o']] == '-1'):
                             # print(flt[c_l['o']],  int(flt[c_l['fdip']]), c_l['fdipnull'],str(flt[c_l['fdipest']]))
-  
+
 
                             if(first):
                                 incLength = 0
@@ -869,7 +869,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                                 # ostr = str(afs[0])+","+str(afs[1])+","+str(height)+","+fault_name+"\n"
                                 f.write(ostr)
                             i = i+1
-                        
+
                         strike = strike*1.25
                         r = random.randint(1, 256)-1
                         g = random.randint(1, 256)-1
@@ -883,7 +883,7 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                         locations = [
                             (flt_ls.coords[int((len(afs)-1)/2)][0], flt_ls.coords[int((len(afs)-1)/2)][1])]
                         height = m2l_utils.value_from_dtm_dtb(
-                            dtm, dtb, dtb_null, cover_map, locations)                        
+                            dtm, dtb, dtb_null, cover_map, locations)
                         ostr = "{},{},{},{},{},{},{}\n"\
                             .format(flt_ls.coords[int((len(flt_ls.coords)-1)/2)][0], flt_ls.coords[int((len(flt_ls.coords)-1)/2)][1],
                                     height, azimuth, fault_dip, 1, fault_name)
