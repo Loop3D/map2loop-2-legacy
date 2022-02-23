@@ -470,7 +470,7 @@ class Project(object):
         self.metadata = metafiles[self.state]
         self.clut_path = clut_paths[self.state]
 
-        if self.metadata is not "":
+        if self.metadata != "":
             self.read_metadata(self.metadata)
 
     def run(self):
