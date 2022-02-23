@@ -527,15 +527,15 @@ class Topology(object):
         ug.write('group')
         for k in range(1, len(uf_rel.columns)):
             ug.write(','+uf_rel.columns[k])
+        ug.write("\n")
+        for i in range(0, ngroups):
+            ug.write(groups[i].replace("\n", ""))
+            for k in range(1, len(uf_rel.columns)):
+                if(gf_array[i-1, k] == '1'):
+                    ug.write(',1')
+                else:
+                    ug.write(',0')
             ug.write("\n")
-            for i in range(0, ngroups):
-                ug.write(groups[i].replace("\n", ""))
-                for k in range(1, len(uf_rel.columns)):
-                    if(gf_array[i-1, k] == '1'):
-                        ug.write(',1')
-                    else:
-                        ug.write(',0')
-                ug.write("\n")
 
         ug.close()
 
