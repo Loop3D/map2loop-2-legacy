@@ -521,7 +521,7 @@ class Project(object):
 
             if self.workflow["contact_dips"]:
                 self.config.propagate_contact_dips(
-                    self.run_flags['contact_dip'], self.run_flags['contact_orientation_decimate'],self.workflow['cover_map'])
+                    self.run_flags['contact_dip'], self.run_flags['contact_decimate'],self.workflow['cover_map'])
 
             if (self.workflow['formation_thickness']):
                 self.config.calc_thickness(self.run_flags['contact_decimate'], self.run_flags['null_scheme'],

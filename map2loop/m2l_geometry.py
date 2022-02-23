@@ -54,7 +54,8 @@ def save_orientations(structures, path_out, c_l, orientation_decimate, dtm, dtb,
     is_bed = structures[c_l['sf']].str.contains(
         c_l['bedding'], regex=False)
 
-    structure_clip = structures[is_bed]    
+    structure_clip = structures[is_bed] 
+    print(structure_clip.columns)   
     i = 0
     f = open(os.path.join(path_out, 'orientations.csv'), "w")
     f.write("X,Y,Z,azimuth,dip,polarity,formation\n")
@@ -3730,7 +3731,7 @@ def save_basal_contacts_orientations_csv(contacts, orientations, geol_clip, tmp_
                 print('other basal contact geom ignored',contact.geometry.type)
     f.close()
     fp.close()
-
+    
 
 def process_sills(output_path, geol_clip, dtm, dtb, dtb_null, cover_map, contact_decimate, c_l, dip_grid, x, y, spacing, bbox, buffer):
 
