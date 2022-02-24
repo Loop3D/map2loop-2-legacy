@@ -886,7 +886,7 @@ def plot_bedding_stereonets(orientations_clean, geology, c_l, quiet):
         text = ax.text(2.2, 1.37, "All data", color='b')
         plt.show()
     group_girdle = {}
- 
+    #print(orientations.columns)
     for gp in groups:
         all_orientations = orientations[orientations[c_l['g']] == gp]
         if(len(all_orientations) == 1):
@@ -1110,17 +1110,17 @@ def save_dtm_mesh(dtm_path,output_path):
     f=[] # faces
     v=[] #vertices
 
-    for x in range (3,band1.shape[0]-3):
-        for y in range (3,band1.shape[1]-3):
+    for x in range (10,band1.shape[0]-10):
+        for y in range (10,band1.shape[1]-10):
             v.append(['v',dtm.bounds.left+x*pixel,dtm.bounds.top-y*pixel,band1[x,y]])
 
-    for y in range (3,band1.shape[1]-4):
-        for x in range (3,band1.shape[0]-4):
-                i=y+1+((x-3)*(band1.shape[1]-6))-3
+    for y in range (10,band1.shape[1]-11):
+        for x in range (10,band1.shape[0]-11):
+                i=y+1+((x-10)*(band1.shape[1]-20))-10
                 #if(band1[x,y]>-10000 and band1[x+1,y]>-10000 and band1[x,y+1]>-10000 ):
-                f.append(['f',i,i+1,i+band1.shape[1]-1-5])
+                f.append(['f',i,i+1,i+band1.shape[1]-20])
                 #if(band1[x+1,y]>-10000 and band1[x+1,y+1]>-10000 and band1[x,y+1]>-10000 ):
-                f.append(['f',i+1,i+band1.shape[1]-5,i+band1.shape[1]-6])
+                f.append(['f',i+1,i+band1.shape[1]-19,i+band1.shape[1]-20])
 
     file=open(output_path+'/dtm.obj','w')
     for pts in v:
