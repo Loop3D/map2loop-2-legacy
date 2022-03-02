@@ -781,8 +781,11 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
 
 
                         # numeric dip direction defined
-                        if(c_l['fdipdir_flag'] == 'num' and not str(flt[c_l['fdipdir']]) == 'None' and not str(float(flt[c_l['fdipdir']])) == c_l['fdipnull']):
-                            azimuth = flt[c_l['fdipdir']]
+                        if(c_l['fdipdir_flag'] == 'num'  ):
+                            if( pd.notna( flt[c_l['fdipdir']])):
+                                azimuth = flt[c_l['fdipdir']]
+                            else:
+                                azimuth=azimuth_fault                            
                         # alpha dip direction defined or no numeric dd defined
                         elif(flt[c_l['fdip']] == -999 or fault_dip_var == -999):
                             #print('az_before',fault_name,azimuth_fault)
