@@ -28,13 +28,14 @@ class MapUtil:
         inside = np.logical_and(inside, xy[:,1] < self.dtm.bounds[3])
         interpolated_dtm[inside] = dtm_interpolator(xy[inside,:])
         return interpolated_dtm
+
     def evaluate_geology_at_points(self,xy,column='colour_index'):
         """Extract a numerical column from a shape file, default
         is colour index
         """
         nodes = geopandas.GeoDataFrame(
             xy[:,:1], geometry=[Point(xy) for xy in zip(xy[:,0], xy[:,1])])
-        points_geology = geopandas.sjoin(nodes, self.geology, how="left", op="within")
+        points_geology = geopandas.sjoin(nodes, self.geology, how="left", predicate="within")
         return points_geology[column].to_numpy()
     
     def _is_inside(self,xy):

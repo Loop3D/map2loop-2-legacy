@@ -11,9 +11,6 @@ from shapely.ops import snap
 from map2loop import m2l_utils
 from math import acos, degrees
 from . import m2l_utils
-from . import project as Project
-from . import config as Config
-from .m2l_utils import display, print
 
 close_f=1000
 close_b=1000
@@ -353,7 +350,7 @@ class Map2Graph(object):
         fault_tmp=fault.copy()
         b_contacts_gdf_tmp=b_contacts_gdf.copy()
         i_contacts_gdf_tmp=i_contacts_gdf.copy()
-        mindep_geology = gpd.sjoin(mindep, geology, how="left", op="within")
+        mindep_geology = gpd.sjoin(mindep, geology, how="left", predicate="within")
         
         first=True
         for com in commodities:
@@ -847,7 +844,7 @@ class Map2Graph(object):
         fault_tmp=fault.copy()
         geology_exploded_tmp=geology_exploded.copy()
         geology_exploded_tmp.crs=geology_exploded.crs
-        mindep_geology = gpd.sjoin(mindep, geology_exploded, how="left", op="within")
+        mindep_geology = gpd.sjoin(mindep, geology_exploded, how="left", predicate="within")
         
         for com in commodities:
             if(not com == 'NONE'):

@@ -2,6 +2,7 @@ import sys
 import builtins
 import geopandas as gpd
 import pandas as pd
+from map2loop.m2l_enums import VerboseLevel
 from shapely.geometry.polygon import Polygon
 from shapely.geometry.multipolygon import MultiPolygon
 from shapely.geometry import Point
@@ -18,17 +19,14 @@ from urllib.request import urlopen
 from math import sin, cos, atan, atan2, asin, radians, degrees, sqrt, pow, acos, fmod, fabs, isnan, floor
 from owslib.wcs import WebCoverageService
 from scipy.interpolate import griddata
+import netCDF4
+import time
+import functools
+import beartype
+from .m2l_enums import Datatype, VerboseLevel
 #from osgeo import gdal
 
 quiet = False
-
-############################################
-# output version number
-############################################
-
-
-def v():
-    print('0.0.61')
 
 ############################################
 # first test
@@ -357,19 +355,18 @@ def get_local_dtm(dtm_file, geotif_file, dst_crs, bbox):
 ############################################
 
 
-def get_dtm(path_out, minlong, maxlong, minlat, maxlat,
-            url="http://services.ga.gov.au/gis/services/DEM_SRTM_1Second_over_Bathymetry_Topography/MapServer/WCSServer?"
-            ):
+def get_dtm(path_out, minlong, maxlong, minlat, maxlat, url="AU"):
+    if url == "AU":
+        url = "http://services.ga.gov.au/gis/services/DEM_SRTM_1Second_over_Bathymetry_Topography/MapServer/WCSServer?"
 
     bbox = (minlong, minlat, maxlong, maxlat)
-
     wcs = WebCoverageService(url, version='1.0.0')
 
     cvg = wcs.getCoverage(identifier='1',  bbox=bbox,
                           format='GeoTIFF', crs=4326, width=200, height=200)
 
     f = open(path_out, 'wb')
-    bytes_written = f.write(cvg.read())
+    f.write(cvg.read())
     f.close()
     print("dtm geotif saved as", path_out)
 
@@ -411,6 +408,80 @@ def reproject_dtm(path_in, path_out, src_crs, dst_crs):
                     resampling=Resampling.nearest)
             dst.close()
     print("reprojected dtm geotif saved as", path_out)
+
+def load_and_reproject_dtm(polygon, dst_crs, dtm_crs="EPSG:4326", url="AU", verbose=False):
+    if url == "AU":
+        url = "http://services.ga.gov.au/gis/services/DEM_SRTM_1Second_over_Bathymetry_Topography/MapServer/WCSServer?"
+
+    tb_ll = tuple(polygon.to_crs(dtm_crs).geometry.total_bounds)
+
+    if url.startswith('http') and "wcs" in url.lower():
+        # Load wcs style file and open dataset
+        if verbose: print("Attempting to load wcs dtm data from", url)
+        tb_en  = polygon.geometry.total_bounds
+        spacing = 30
+        width  = min(int((tb_en[2]-tb_en[0])/spacing),2048)
+        height = min(int((tb_en[3]-tb_en[1])/spacing),2048)
+        wcs = WebCoverageService(url,version="1.0.0")
+        cvg=wcs.getCoverage(identifier='1', bbox=tb_ll, format="GeoTIFF",crs=4326, width=width,height=height)
+        memfile = rasterio.io.MemoryFile(cvg.read())
+        dataset = memfile.open()
+    elif url.startswith('http') and "hawaii" in url.lower():
+        # Load global hawaii dataset
+        bbox_str = "[("+ str(tb_ll[1]) +"):1:("+ str(tb_ll[3]) +")][("+ str(tb_ll[0]) +"):1:("+ str(tb_ll[2]) +")]"
+        url = "https://pae-paha.pacioos.hawaii.edu/erddap/griddap/srtm30plus_v11_land.nc?elev"+bbox_str
+        if verbose: print("Attempting to load netcdf dtm data from", url)
+        f = urlopen(url)
+        ds = netCDF4.Dataset("in-mem-file",mode="r",memory=f.read())
+        spatial = (ds.geospatial_lon_min, ds.geospatial_lat_max, ds.geospatial_lon_resolution, ds.geospatial_lat_resolution)
+        transform = rasterio.transform.from_origin(*spatial)
+        shape = ds.variables['elev'].shape
+        nc_data = np.flipud(ds.variables['elev'][:][:])
+        src_params ={'crs':ds.geospatial_bounds_crs,
+             'width':shape[1],
+             'height':shape[0],
+             'nodata':0,
+             'transform':transform,
+             'driver':'GTiff',
+             'count':1,
+             'dtype':np.float32}
+        memfile = rasterio.io.MemoryFile()
+        dataset = memfile.open(**src_params)
+        dataset.write(nc_data,1)
+    elif url.startswith('http'):
+        # Load open topography dataset as last resort
+        link = 'https://portal.opentopography.org/otr/getdem?demtype=SRTMGL3&west=' + \
+        str(tb_ll[0])+'&south='+str(tb_ll[1])+'&east='+str(tb_ll[2]) + \
+        '&north='+str(tb_ll[3])+'&outputFormat=GTiff'
+
+        if verbose: print("Attempting to load open topography dtm data from", link)
+        img = urlopen(link)
+        memfile = rasterio.io.MemoryFile(img.read())
+        dataset = memfile.open()
+    else:
+        # Load local file
+        if verbose: print("Attempting to load dtm data from", url)
+        dataset = rasterio.open(url)
+
+    # Given an open rasterio dataset reproject it into dst_crs
+    new_transform, new_width, new_height = calculate_default_transform(
+        dataset.crs, dst_crs, dataset.width, dataset.height, *dataset.bounds)
+    params = dataset.meta.copy()
+    params.update({'crs':dst_crs, 'width':new_width, 'height':new_height,
+                'nodata':0, 'transform':new_transform})
+    reprojected_dtm = rasterio.io.MemoryFile()
+    with reprojected_dtm.open(**params) as dst:
+        data = np.zeros((new_width,new_height),dtype=np.float64)
+        reproject(
+            dataset.read(), data,
+            src_transform=dataset.transform,src_crs=dataset.meta['crs'],
+            dst_crs=dst.crs
+        )
+        dst.write(data,indexes=1)
+        dst.close()
+    dataset.close()
+
+    return reprojected_dtm
 
 ############################################
 # get bounds of a dtm
@@ -581,6 +652,8 @@ def _clip_multi_poly_line(shp, clip_obj):
     line_diss = lines.dissolve(by=[lines.index]).drop(columns="level_1")
 
     polys = clipped[clipped.geometry.type == "Polygon"]
+    # print(polys)
+    polys.fillna('null',inplace=True)
     poly_diss = polys.dissolve(by=[polys.index]).drop(columns="level_1")
 
     return gpd.GeoDataFrame(
@@ -833,8 +906,9 @@ def tri_angle(p1x, p1y, p2x, p2y, p3x, p3y):
 ###########################################
 
 
-def plot_points(point_source, geol_clip, colour_code, x_code, y_code, legend, dtype):
+def plot_points(point_source, geol_clip, colour_code, x_code, y_code, legend, dtype, title):
     from shapely.geometry import Point
+    import matplotlib.pyplot as plt
     thick = pd.read_csv(point_source, encoding="ISO-8859-1", dtype='object')
     if(dtype == 'numeric'):
         thick['cc'] = pd.to_numeric(thick[colour_code])
@@ -850,79 +924,86 @@ def plot_points(point_source, geol_clip, colour_code, x_code, y_code, legend, dt
                        cmap='rainbow', legend=legend)
     plot2 = plot2.figure
     plot2.tight_layout()
+    plt.title(title)
+    plt.show()
 
 ###########################################
 # plot bedding stereonets
 ###########################################
 
 
-def plot_bedding_stereonets(orientations_clean, geology, c_l, quiet):
+def plot_bedding_stereonets(config, map_data):
     import mplstereonet
     import matplotlib.pyplot as plt
 
-    orientations = gpd.sjoin(
-        orientations_clean, geology, how="left", op="within")
-    is_bed = orientations[c_l['sf']].str.contains(
-        c_l['bedding'], regex=False)
+    # orientations = gpd.sjoin(orientations_clean, geology, how="left", predicate="within")
+    geology = map_data.get_map_data(Datatype.GEOLOGY)
+    # TODO: orientations should be 'clean'
+    orientations = map_data.get_map_data(Datatype.STRUCTURE).copy()
+    is_bed = orientations[config.c_l['sf']].str.contains(config.c_l['bedding'], regex=False)
 
     orientations = orientations[is_bed] 
-    groups = geology[c_l['g']].unique()
-    codes = geology[c_l['c']].unique()
-    print("All observations n=", len(orientations_clean))
-    print('groups', groups, '\ncodes', codes)
+    groups = geology[config.c_l['g']].unique()
+    codes = geology[config.c_l['c']].unique()
+    if config.verbose_level != VerboseLevel.NONE:
+        print("All observations n=", len(orientations))
+        print('groups', groups, '\ncodes', codes)
 
-    if not quiet:
-        fig, ax = mplstereonet.subplots(figsize=(7, 7))
-    if(c_l['otype'] == 'dip direction'):
-        strikes = orientations[c_l['dd']].values - 90
+    if(config.c_l['otype'] == 'dip direction'):
+        strikes = orientations[config.c_l['dd']].values - 90
     else:
-        strikes = orientations[c_l['dd']].values
+        strikes = orientations[config.c_l['dd']].values
 
-    if not quiet:
-        dips = orientations[c_l['d']].values
+    if config.verbose_level != VerboseLevel.NONE:
+        fig, ax = mplstereonet.subplots(figsize=(7, 7))
+        dips = orientations[config.c_l['d']].values
         cax = ax.density_contourf(strikes, dips, measurement='poles')
         ax.pole(strikes, dips, markersize=5, color='w')
         ax.grid(True)
-        text = ax.text(2.2, 1.37, "All data", color='b')
+        # text = ax.text(2.2, 1.37, "All data", color='b')
+        plt.title("All data")
         plt.show()
     group_girdle = {}
- 
     for gp in groups:
-        all_orientations = orientations[orientations[c_l['g']] == gp]
+        all_orientations = orientations[orientations[config.c_l['g']] == gp]
         if(len(all_orientations) == 1):
-            print("----------------------------------------------------------------------------------------------------------------------")
-            print(gp, "observations has 1 observation")
             group_girdle[gp] = (-999, -999, 1)
 
+            if config.verbose_level != VerboseLevel.NONE:
+                print("----------------------------------------------------------------------------------------------------------------------")
+                print(gp, "observations has 1 observation")
+
         elif(len(all_orientations) > 0):
-            print("----------------------------------------------------------------------------------------------------------------------")
-            print(gp, "observations n=", len(all_orientations))
 
             ax = None
-            if not quiet:
-                fig, ax = mplstereonet.subplots(figsize=(5, 5))
-            if(c_l['otype'] == 'dip direction'):
-                strikes = all_orientations[c_l['dd']].values - 90
+            if(config.c_l['otype'] == 'dip direction'):
+                strikes = all_orientations[config.c_l['dd']].values - 90
             else:
-                strikes = all_orientations[c_l['dd']].values
+                strikes = all_orientations[config.c_l['dd']].values
 
-            dips = all_orientations[c_l['d']].values
-            if not quiet:
+            dips = all_orientations[config.c_l['d']].values
+            fit_strike, fit_dip = mplstereonet.fit_girdle(strikes, dips)
+            (plunge,), (bearing,) = mplstereonet.pole2plunge_bearing(fit_strike, fit_dip)
+            group_girdle[gp] = (plunge, bearing, len(all_orientations))
+
+            if config.verbose_level != VerboseLevel.NONE:
+                print("----------------------------------------------------------------------------------------------------------------------")
+                print(gp, "observations n=", len(all_orientations))
+                print('strike/dip of girdle', fit_strike, '/', fit_dip)
+            if config.verbose_level == VerboseLevel.ALL:
+                fig, ax = mplstereonet.subplots(figsize=(5, 5))
                 cax = ax.density_contourf(strikes, dips, measurement='poles')
                 ax.pole(strikes, dips, markersize=5, color='w')
                 ax.grid(True)
-                text = ax.text(2.2, 1.37, gp, color='b')
-            fit_strike, fit_dip = mplstereonet.fit_girdle(strikes, dips)
-            (plunge,), (bearing,) = mplstereonet.pole2plunge_bearing(
-                fit_strike, fit_dip)
-            group_girdle[gp] = (plunge, bearing, len(all_orientations))
-            print('strike/dip of girdle', fit_strike, '/', fit_dip)
-            if not quiet:
+                # text = ax.text(2.2, 1.37, gp, color='b')
+                plt.title(gp)
                 plt.show()
         else:
-            print("----------------------------------------------------------------------------------------------------------------------")
-            print(gp, "observations has no observations")
             group_girdle[gp] = (-999, -999, 0)
+
+            if config.verbose_level != VerboseLevel.NONE:
+                print("----------------------------------------------------------------------------------------------------------------------")
+                print(gp, "observations has no observations")
 
     if(False):
         for gp in groups:
@@ -931,10 +1012,10 @@ def plot_bedding_stereonets(orientations_clean, geology, c_l, quiet):
             print(gp)
             # display(all_sorts2)
             ind = 0
-            orientations2 = orientations[orientations[c_l['g']] == gp]
+            orientations2 = orientations[orientations[config.c_l['g']] == gp]
 
             for code in codes:
-                orientations3 = orientations2[orientations2[c_l['c']] == code]
+                orientations3 = orientations2[orientations2[config.c_l['c']] == code]
                 ind2 = int(fmod(ind, 3))
                 if(len(orientations3) > 0):
                     print(code, "observations n=", len(orientations3))
@@ -942,12 +1023,12 @@ def plot_bedding_stereonets(orientations_clean, geology, c_l, quiet):
                 if(len(orientations3) > 0):
                     if(ind2 == 0):
                         fig, ax = mplstereonet.subplots(1, 3, figsize=(15, 15))
-                    if(c_l['otype'] == 'dip direction'):
-                        strikes = orientations3[c_l['dd']].values - 90
+                    if(config.c_l['otype'] == 'dip direction'):
+                        strikes = orientations3[config.c_l['dd']].values - 90
                     else:
-                        strikes = orientations3[c_l['dd']].values
+                        strikes = orientations3[config.c_l['dd']].values
 
-                    dips = orientations3[c_l['d']].values
+                    dips = orientations3[config.c_l['d']].values
 
                     cax = ax[ind2].density_contourf(
                         strikes, dips, measurement='poles')
@@ -970,22 +1051,25 @@ def plot_bedding_stereonets(orientations_clean, geology, c_l, quiet):
                 plt.show()
     return(group_girdle)
 
-
-def plot_bedding_stereonets_old(orientations, all_sorts):
+@beartype.beartype
+def plot_bedding_stereonets_old(orientations, all_sorts, verbose_level:VerboseLevel):
     import mplstereonet
     import matplotlib.pyplot as plt
 
     groups = all_sorts['group'].unique()
-    print("All observations n=", len(orientations))
+    if verbose_level != VerboseLevel.NONE:
+        print("All observations n=", len(orientations))
 
-    fig, ax = mplstereonet.subplots(figsize=(7, 7))
-    strikes = orientations["azimuth"].values - 90
-    dips = orientations["dip"].values
-    cax = ax.density_contourf(strikes, dips, measurement='poles')
-    ax.pole(strikes, dips, markersize=5, color='w')
-    ax.grid(True)
-    text = ax.text(2.2, 1.37, "All data", color='b')
-    plt.show()
+    if verbose_level == VerboseLevel.ALL:
+        fig, ax = mplstereonet.subplots(figsize=(7, 7))
+        strikes = orientations["azimuth"].values - 90
+        dips = orientations["dip"].values
+        cax = ax.density_contourf(strikes, dips, measurement='poles')
+        ax.pole(strikes, dips, markersize=5, color='w')
+        ax.grid(True)
+        # text = ax.text(2.2, 1.37, "All data", color='b')
+        plt.title("All Data")
+        plt.show()
 
     for gp in groups:
         all_sorts2 = all_sorts[all_sorts["group"] == gp]
@@ -1003,54 +1087,60 @@ def plot_bedding_stereonets_old(orientations, all_sorts):
                     [all_orientations, orientations2], sort=False)
 
         if(len(all_orientations) > 0):
-            print("----------------------------------------------------------------------------------------------------------------------")
-            print(gp, "observations n=", len(all_orientations))
-            fig, ax = mplstereonet.subplots(figsize=(5, 5))
-            strikes = all_orientations["azimuth"].values - 90
-            dips = all_orientations["dip"].values
-            cax = ax.density_contourf(strikes, dips, measurement='poles')
-            ax.pole(strikes, dips, markersize=5, color='w')
-            ax.grid(True)
-            text = ax.text(2.2, 1.37, gp, color='b')
-            plt.show()
+            if verbose_level != VerboseLevel.NONE:
+                print("----------------------------------------------------------------------------------------------------------------------")
+                print(gp, "observations n=", len(all_orientations))
+            if verbose_level == VerboseLevel.ALL:
+                fig, ax = mplstereonet.subplots(figsize=(5, 5))
+                strikes = all_orientations["azimuth"].values - 90
+                dips = all_orientations["dip"].values
+                cax = ax.density_contourf(strikes, dips, measurement='poles')
+                ax.pole(strikes, dips, markersize=5, color='w')
+                ax.grid(True)
+                text = ax.text(2.2, 1.37, gp, color='b')
+                plt.title(gp)
+                plt.show()
 
     for gp in groups:
         all_sorts2 = all_sorts[all_sorts["group"] == gp]
         all_sorts2.set_index("code",  inplace=True)
 
-        print("----------------------------------------------------------------------------------------------------------------------")
-        print(gp)
+        if verbose_level != VerboseLevel.NONE:
+            print("----------------------------------------------------------------------------------------------------------------------")
+            print(gp)
         # display(all_sorts2)
         ind = 0
 
         for indx, as2 in all_sorts2.iterrows():
             ind2 = int(fmod(ind, 3))
             orientations2 = orientations[orientations["formation"] == indx]
-            print(indx, "observations n=", len(orientations2))
+            if verbose_level != VerboseLevel.NONE:
+                print(indx, "observations n=", len(orientations2))
             # display(orientations2)
-            if(len(orientations2) > 0):
-                if(ind2 == 0):
-                    fig, ax = mplstereonet.subplots(1, 3, figsize=(15, 15))
-                strikes = orientations2["azimuth"].values - 90
-                dips = orientations2["dip"].values
+            if verbose_level == VerboseLevel.ALL:
+                if(len(orientations2) > 0):
+                    if(ind2 == 0):
+                        fig, ax = mplstereonet.subplots(1, 3, figsize=(15, 15))
+                    strikes = orientations2["azimuth"].values - 90
+                    dips = orientations2["dip"].values
 
-                cax = ax[ind2].density_contourf(
-                    strikes, dips, measurement='poles')
-                ax[ind2].pole(strikes, dips, markersize=5, color='w')
-                ax[ind2].grid(True)
-                # fig.colorbar(cax)
-                text = ax[ind2].text(2.2, 1.37, indx, color='b')
+                    cax = ax[ind2].density_contourf(
+                        strikes, dips, measurement='poles')
+                    ax[ind2].pole(strikes, dips, markersize=5, color='w')
+                    ax[ind2].grid(True)
+                    # fig.colorbar(cax)
+                    text = ax[ind2].text(2.2, 1.37, indx, color='b')
 
-                # Fit a plane to the girdle of the distribution and display it.
-                fit_strike, fit_dip = mplstereonet.fit_girdle(strikes, dips)
-                print('strike/dip of girdle', fit_strike, '/', fit_dip)
+                    # Fit a plane to the girdle of the distribution and display it.
+                    fit_strike, fit_dip = mplstereonet.fit_girdle(strikes, dips)
+                    print('strike/dip of girdle', fit_strike, '/', fit_dip)
 
-                if(ind2 == 2):
-                    plt.show()
+                    if(ind2 == 2):
+                        plt.show()
 
-                ind = ind+1
+                    ind = ind+1
 
-        if(ind > 0 and not ind2 == 2):
+        if(ind > 0 and not ind2 == 2 and verbose_level == VerboseLevel.ALL):
             plt.show()
 
 
@@ -1169,3 +1259,19 @@ def save_parameters(model_name,vtk_model_path,proj,foliation_params,fault_params
     f.write('fault_params: '+str(fault_params)+'\n')
     f.write('foliation_params: '+str(foliation_params)+'\n')
     f.close()
+
+timer_decorator_enabled = True
+def timer_decorator(func):
+    @functools.wraps(func)
+    def decorator(*args,**kwargs):
+        print(f"Entering function {func.__name__}")
+        starttime = time.time()
+        func(*args, **kwargs)
+        runtime = time.time() - starttime
+        print(f"Function {func.__name__} took {runtime:.4f} seconds")
+    def clean(*args,**kwargs):
+        return func(*args,**kwargs)
+    if (timer_decorator_enabled):
+        return decorator
+    else:
+        return clean

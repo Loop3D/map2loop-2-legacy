@@ -15,6 +15,8 @@ from rasterio.io import MemoryFile
 import matplotlib
 from . import m2l_utils
 import LoopProjectFile
+import beartype
+from .config import Config
 import re
 
 
@@ -81,11 +83,9 @@ def loop2geomodeller(model_name, test_data_path, tmp_path, output_path,
     f.write('    }\n')
     f.write('}\n')
 
-    orientations = pd.read_csv(
-        os.path.join(output_path, 'orientations_clean.csv'), ',')
-    contacts = pd.read_csv(os.path.join(output_path, 'contacts_clean.csv'),
-                           ',')
-    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), ',')
+    orientations = pd.read_csv(os.path.join(output_path, 'orientations_clean.csv'), sep=',')
+    contacts = pd.read_csv(os.path.join(output_path, 'contacts_clean.csv'), sep=',')
+    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), sep=',')
     print(os.getcwd())
 
     supergroups = {}
@@ -117,11 +117,9 @@ def loop2geomodeller(model_name, test_data_path, tmp_path, output_path,
             empty_fm.append(afm['code'])
 
     # print(empty_fm)
-    asc = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), ",")
+    asc = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), sep=",")
 
-    all_sorts = np.genfromtxt(os.path.join(tmp_path, 'all_sorts_clean.csv'),
-                              delimiter=',',
-                              dtype='U100')
+    all_sorts = np.genfromtxt(os.path.join(tmp_path, 'all_sorts_clean.csv'), delimiter=',', dtype='U100')
     nformations = len(all_sorts)
 
     f.write(
@@ -241,8 +239,7 @@ def loop2geomodeller(model_name, test_data_path, tmp_path, output_path,
     if (save_faults):
         output_path = os.path.join(test_data_path, 'output')
 
-        faults_len = pd.read_csv(
-            os.path.join(output_path, 'fault_dimensions.csv'))
+        faults_len = pd.read_csv(os.path.join(output_path, 'fault_dimensions.csv'))
 
         n_allfaults = len(faults_len)
 
@@ -287,9 +284,8 @@ def loop2geomodeller(model_name, test_data_path, tmp_path, output_path,
     f.write(
         '#---------------------------------------------------------------\n')
 
-    contacts = pd.read_csv(os.path.join(output_path, 'contacts_clean.csv'),
-                           ',')
-    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), ',')
+    contacts = pd.read_csv(os.path.join(output_path, 'contacts_clean.csv'), sep=',')
+    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), sep=',')
     #all_sorts.set_index('code',  inplace = True)
     # display(all_sorts)
 
@@ -316,9 +312,8 @@ def loop2geomodeller(model_name, test_data_path, tmp_path, output_path,
     f.write(
         '#---------------------------------------------------------------\n')
 
-    orientations = pd.read_csv(
-        os.path.join(output_path, 'orientations_clean.csv'), ',')
-    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), ',')
+    orientations = pd.read_csv(os.path.join(output_path, 'orientations_clean.csv'), sep=',')
+    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), sep=',')
     #all_sorts.set_index('code',  inplace = True)
     # display(all_sorts)
 
@@ -357,9 +352,8 @@ def loop2geomodeller(model_name, test_data_path, tmp_path, output_path,
     f.write(
         '#---------------------------------------------------------------\n')
 
-    contacts = pd.read_csv(os.path.join(output_path, 'faults.csv'), ',')
-    faults = pd.read_csv(os.path.join(output_path, 'fault_dimensions.csv'),
-                         ',')
+    contacts = pd.read_csv(os.path.join(output_path, 'faults.csv'), sep=',')
+    faults = pd.read_csv(os.path.join(output_path, 'fault_dimensions.csv'), sep=',')
 
     for indx, afault in faults.iterrows():
         f.write('GeomodellerTask {\n')
@@ -381,10 +375,8 @@ def loop2geomodeller(model_name, test_data_path, tmp_path, output_path,
     f.write(
         '#---------------------------------------------------------------\n')
 
-    orientations = pd.read_csv(
-        os.path.join(output_path, 'fault_orientations.csv'), ',')
-    faults = pd.read_csv(os.path.join(output_path, 'fault_dimensions.csv'),
-                         ',')
+    orientations = pd.read_csv(os.path.join(output_path, 'fault_orientations.csv'), sep=',')
+    faults = pd.read_csv(os.path.join(output_path, 'fault_dimensions.csv'), sep=',')
 
     for indx, afault in faults.iterrows():
         f.write('GeomodellerTask {\n')
@@ -452,10 +444,7 @@ def loop2geomodeller(model_name, test_data_path, tmp_path, output_path,
         f.write('}\n')
 
     if (save_faults):
-        all_fault_group = np.genfromtxt(os.path.join(
-            output_path, 'group-fault-relationships.csv'),
-            delimiter=',',
-            dtype='U100')
+        all_fault_group = np.genfromtxt(os.path.join(output_path, 'group-fault-relationships.csv'), delimiter=',', dtype='U100')
         ngroups = len(all_fault_group)
         all_fault_group = np.transpose(all_fault_group)
         nfaults = len(all_fault_group)
@@ -654,11 +643,9 @@ def loop2geomodeller2(model_name, test_data_path, tmp_path, output_path,
     ostr.append('    }\n')
     ostr.append('}\n')
 
-    orientations = pd.read_csv(
-        os.path.join(output_path, 'orientations_clean.csv'), ',')
-    contacts = pd.read_csv(os.path.join(output_path, 'contacts_clean.csv'),
-                           ',')
-    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), ',')
+    orientations = pd.read_csv(os.path.join(output_path, 'orientations_clean.csv'), sep=',')
+    contacts = pd.read_csv(os.path.join(output_path, 'contacts_clean.csv'), sep=',')
+    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), sep=',')
 
     empty_fm = []
 
@@ -678,9 +665,7 @@ def loop2geomodeller2(model_name, test_data_path, tmp_path, output_path,
 
     # print(empty_fm)
 
-    all_sorts = np.genfromtxt(os.path.join(tmp_path, 'all_sorts_clean.csv'),
-                              delimiter=',',
-                              dtype='U100')
+    all_sorts = np.genfromtxt(os.path.join(tmp_path, 'all_sorts_clean.csv'), delimiter=',', dtype='U100')
     nformations = len(all_sorts)
 
     ostr.append(
@@ -754,8 +739,7 @@ def loop2geomodeller2(model_name, test_data_path, tmp_path, output_path,
     if (save_faults):
         output_path = os.path.join(test_data_path, 'output')
 
-        faults_len = pd.read_csv(
-            os.path.join(output_path, 'fault_dimensions.csv'))
+        faults_len = pd.read_csv(os.path.join(output_path, 'fault_dimensions.csv'))
 
         n_allfaults = len(faults_len)
 
@@ -799,9 +783,8 @@ def loop2geomodeller2(model_name, test_data_path, tmp_path, output_path,
     ostr.append(
         '#---------------------------------------------------------------\n')
 
-    contacts = pd.read_csv(os.path.join(output_path, 'contacts_clean.csv'),
-                           ',')
-    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), ',')
+    contacts = pd.read_csv(os.path.join(output_path, 'contacts_clean.csv'), sep=',')
+    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), sep=',')
     #all_sorts.set_index('code',  inplace = True)
     # display(all_sorts)
 
@@ -828,9 +811,8 @@ def loop2geomodeller2(model_name, test_data_path, tmp_path, output_path,
     ostr.append(
         '#---------------------------------------------------------------\n')
 
-    orientations = pd.read_csv(
-        os.path.join(output_path, 'orientations_clean.csv'), ',')
-    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), ',')
+    orientations = pd.read_csv(os.path.join(output_path, 'orientations_clean.csv'), sep=',')
+    all_sorts = pd.read_csv(os.path.join(tmp_path, 'all_sorts_clean.csv'), sep=',')
     #all_sorts.set_index('code',  inplace = True)
     # display(all_sorts)
 
@@ -869,9 +851,8 @@ def loop2geomodeller2(model_name, test_data_path, tmp_path, output_path,
     ostr.append(
         '#---------------------------------------------------------------\n')
 
-    contacts = pd.read_csv(os.path.join(output_path, 'faults.csv'), ',')
-    faults = pd.read_csv(os.path.join(output_path, 'fault_dimensions.csv'),
-                         ',')
+    contacts = pd.read_csv(os.path.join(output_path, 'faults.csv'), sep=',')
+    faults = pd.read_csv(os.path.join(output_path, 'fault_dimensions.csv'), sep=',')
 
     for indx, afault in faults.iterrows():
         ostr.append('GeomodellerTask {\n')
@@ -893,10 +874,8 @@ def loop2geomodeller2(model_name, test_data_path, tmp_path, output_path,
     ostr.append(
         '#---------------------------------------------------------------\n')
 
-    orientations = pd.read_csv(
-        os.path.join(output_path, 'fault_orientations.csv'), ',')
-    faults = pd.read_csv(os.path.join(output_path, 'fault_dimensions.csv'),
-                         ',')
+    orientations = pd.read_csv(os.path.join(output_path, 'fault_orientations.csv'), sep=',')
+    faults = pd.read_csv(os.path.join(output_path, 'fault_dimensions.csv'), sep=',')
 
     for indx, afault in faults.iterrows():
         ostr.append('GeomodellerTask {\n')
@@ -964,10 +943,7 @@ def loop2geomodeller2(model_name, test_data_path, tmp_path, output_path,
         ostr.append('}\n')
 
     if (save_faults):
-        all_fault_group = np.genfromtxt(os.path.join(
-            output_path, 'group-fault-relationships.csv'),
-            delimiter=',',
-            dtype='U100')
+        all_fault_group = np.genfromtxt(os.path.join( output_path, 'group-fault-relationships.csv'), delimiter=',', dtype='U100')
         ngroups = len(all_fault_group)
         all_fault_group = np.transpose(all_fault_group)
         nfaults = len(all_fault_group)
@@ -1176,7 +1152,7 @@ def loop2LoopStructural(m2l_directory):
                 faultfunction='BaseFault',
                 interpolatortype='FDI',
                 nelements=1e4,
-                data_region=.1,
+                # data_region=.1, Not implemented currently
                 #                                                  regularisation=[1,1,1],
                 solver='pyamg',
                 #                                                  damp=True,
@@ -1306,9 +1282,7 @@ def loop2gempy__(test_data_name: str,
     for group in contents:
         # Reading surfaces groups
         surfaces_g = np.atleast_2d(
-            np.genfromtxt(os.path.join(tmp_path, group + '.csv'),
-                          delimiter=',',
-                          dtype='U100'))
+            np.genfromtxt(os.path.join(tmp_path, group + '.csv'), delimiter=',', dtype='U100'))
 
         # Check if there are several choices
         if surfaces_g.shape[1] > 1:
@@ -1427,9 +1401,7 @@ def loop2gempy_(test_data_name, tmp_path, vtk_path, orientations_file,
 
     print(ngroups, groups)
     for i in range(0, ngroups):
-        contents = np.genfromtxt(os.path.join(tmp_path, groups[i] + '.csv'),
-                                 delimiter=',',
-                                 dtype='U100')
+        contents = np.genfromtxt(os.path.join(tmp_path, groups[i] + '.csv'), delimiter=',', dtype='U100')
         nformations = len(contents.shape)
 
         if (nformations == 1):
@@ -1642,12 +1614,13 @@ def display_LS_map(model, dtm, geol_clip, faults_clip, dst_crs, use_cmap, cmap,
                          linewidth=0.7)
 
 
-def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs, overwrite=False):
-    if loopFilename is None:
-        loopFilename = os.path.join(output_path,os.path.basename(output_path)+ '.loop3d')
+@beartype.beartype
+def export_to_projectfile(loopFilename, config:Config, overwrite:bool=False):
+    if loopFilename is None or loopFilename == '':
+        loopFilename = os.path.join(config.output_path,os.path.basename(config.output_path)+ '.loop3d')
 
-    if not os.path.isdir(os.path.dirname(loopFilename)):
-        print('(ERROR) Output path ' + os.path.dirname(loopFilename) + ' does not exist aborting project file export')
+    if not os.path.isdir(os.path.dirname(config.output_path)):
+        print('(ERROR) Output path ' + os.path.dirname(config.output_path) + ' does not exist aborting project file export')
         return
 
     # Check that file exist and check version matches
@@ -1682,9 +1655,9 @@ def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs, o
                 # Without meaningful geodesic and utm zone values set extents to a non-conflicting
                 # location in the pacific
                 LoopProjectFile.Set(loopFilename, "extents", geodesic=[-180, -179, 0, 1],
-                                utm=[1, 1, bbox['maxx'], bbox['minx'],
-                                bbox['maxy'], bbox['miny']],
-                                depth=[bbox['top'], bbox['base']],
+                                utm=[1, 1, config.bbox_3d['maxx'], config.bbox_3d['minx'],
+                                config.bbox_3d['maxy'], config.bbox_3d['miny']],
+                                depth=[config.bbox_3d['top'], config.bbox_3d['base']],
                                 spacing=[1000, 1000, 500],
                                 preference="utm")
             else:
@@ -1693,46 +1666,35 @@ def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs, o
                     print(resp['errorString'])
 
     form2supergroup = pd.read_csv(
-        os.path.join(tmp_path, 'all_sorts_clean.csv'),
-        ',')[['code', 'group', 'colour']].rename(columns={
+        os.path.join(config.tmp_path, 'all_sorts_clean.csv'),sep=',')[['code', 'group', 'colour']].rename(columns={
             'code': 'formation',
             'group': 'supergroup'
         })
 
-    stratigraphicLayers = pd.read_csv(
-        os.path.join(output_path, "formation_thicknesses.csv"))
+    stratigraphicLayers = pd.read_csv(os.path.join(config.output_path, "formation_thicknesses.csv"))
 
-    stratAges = pd.read_csv(os.path.join(
-        tmp_path, 'age_sorted_groups.csv'))[['group_', 'min', 'max']]
+    stratAges = pd.read_csv(os.path.join(config.tmp_path, 'age_sorted_groups.csv'))[['group_', 'min', 'max']]
     stratAges.rename(columns={
         'group_': 'supergroup',
         'min': 'minAge',
         'max': 'maxAge'
-    },
+        },
         inplace=True)
     stratLayers = pd.merge(form2supergroup,
                            stratigraphicLayers,
                            on=['formation'])
     stratLayers = pd.merge(stratLayers, stratAges, on=['supergroup'])
-    stratLayers['colour1Red'] = [
-        int(a[1:3], 16) for a in stratLayers['colour']
-    ]
-    stratLayers['colour1Green'] = [
-        int(a[3:5], 16) for a in stratLayers['colour']
-    ]
-    stratLayers['colour1Blue'] = [
-        int(a[5:7], 16) for a in stratLayers['colour']
-    ]
+    stratLayers['colour1Red'] =   [ int(a[1:3], 16) for a in stratLayers['colour'] ]
+    stratLayers['colour1Green'] = [ int(a[3:5], 16) for a in stratLayers['colour'] ]
+    stratLayers['colour1Blue'] =  [ int(a[5:7], 16) for a in stratLayers['colour'] ]
     thickness = {}
     uniqueLayers = stratLayers[[
         'formation', 'supergroup', 'colour1Red', 'colour1Green', 'colour1Blue',
         'minAge', 'maxAge'
-    ]].drop_duplicates(subset="formation")
+        ]].drop_duplicates(subset="formation")
     for f in uniqueLayers['formation']:
-        thickness[f] = np.mean(stratigraphicLayers[
-            stratigraphicLayers['formation'] == f]['thickness'])
-    stratigraphicLogData = np.zeros(uniqueLayers.shape[0],
-                                    LoopProjectFile.stratigraphicLayerType)
+        thickness[f] = np.mean(stratigraphicLayers[stratigraphicLayers['formation'] == f]['thickness'])
+    stratigraphicLogData = np.zeros(uniqueLayers.shape[0], LoopProjectFile.stratigraphicLayerType)
     stratigraphicLogData['layerId'] = range(uniqueLayers.shape[0])
     stratigraphicLogData['layerId'] += 1
     stratigraphicLogData['minAge'] = uniqueLayers['minAge']
@@ -1748,43 +1710,28 @@ def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs, o
     stratigraphicLogData['colour1Red'] = uniqueLayers['colour1Red']
     stratigraphicLogData['colour1Green'] = uniqueLayers['colour1Green']
     stratigraphicLogData['colour1Blue'] = uniqueLayers['colour1Blue']
-    stratigraphicLogData['colour2Red'] = [
-        int(a * 0.95) for a in stratigraphicLogData['colour1Red']
-    ]
-    stratigraphicLogData['colour2Green'] = [
-        int(a * 0.95) for a in stratigraphicLogData['colour1Green']
-    ]
-    stratigraphicLogData['colour2Blue'] = [
-        int(a * 0.95) for a in stratigraphicLogData['colour1Blue']
-    ]
-    resp = LoopProjectFile.Set(loopFilename,
-                               "stratigraphicLog",
-                               data=stratigraphicLogData,
-                               verbose=True)
+    stratigraphicLogData['colour2Red'] =   [ int(a * 0.95) for a in stratigraphicLogData['colour1Red'] ]
+    stratigraphicLogData['colour2Green'] = [ int(a * 0.95) for a in stratigraphicLogData['colour1Green'] ]
+    stratigraphicLogData['colour2Blue'] =  [ int(a * 0.95) for a in stratigraphicLogData['colour1Blue'] ]
+    resp = LoopProjectFile.Set(loopFilename, "stratigraphicLog", data=stratigraphicLogData, verbose=True)
+
     if resp["errorFlag"]:
         print(resp["errorString"])
 
-    faults = pd.read_csv(os.path.join(output_path, "fault_orientations.csv"))
+    faults = pd.read_csv(os.path.join(config.output_path, "fault_orientations.csv"))
     faults['formation'] = [re.sub("\.0", "", s) for s in faults['formation']]
-    faultDims = pd.read_csv(os.path.join(output_path, "fault_dimensions.csv"))
+    faultDims = pd.read_csv(os.path.join(config.output_path, "fault_dimensions.csv"))
     faultDims.rename(columns={'Fault': 'formation'}, inplace=True)
-    faultDims['formation'] = [
-        re.sub("\.0", "", s) for s in faultDims['formation']
-    ]
-    faultDisplacements = pd.read_csv(
-        os.path.join(output_path, "fault_displacements3.csv"))
+    faultDims['formation'] = [ re.sub("\.0", "", s) for s in faultDims['formation'] ]
+    faultDisplacements = pd.read_csv(os.path.join(config.output_path, "fault_displacements3.csv"))
     faultDisplacements.rename(columns={'fname': 'formation'}, inplace=True)
-    faultDisplacements['formation'] = [
-        re.sub("\.0", "", s) for s in faultDisplacements['formation']
-    ]
+    faultDisplacements['formation'] = [ re.sub("\.0", "", s) for s in faultDisplacements['formation'] ]
     faults = faults.merge(faultDims, on='formation')
 
     minStratAge = np.nanmin(uniqueLayers['minAge'])
     maxStratAge = np.nanmax(uniqueLayers['maxAge'])
-    faultObs = pd.read_csv(os.path.join(output_path, "faults.csv"))
-    faultObs['formation'] = [
-        re.sub("\.0", "", s) for s in faultObs['formation']
-    ]
+    faultObs = pd.read_csv(os.path.join(config.output_path, "faults.csv"))
+    faultObs['formation'] = [ re.sub("\.0", "", s) for s in faultObs['formation'] ]
     faultObs['posOnly'] = 1
     faultsJoined = pd.concat([faults, faultObs])
     if (len(faultDims) > 0):
@@ -1817,22 +1764,14 @@ def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs, o
         faultEvents['horizontalRadius'] = faultDims['HorizontalRadius']
         faultEvents['colour'] = faultDims['colour']
 
-        faultEvents['eventId'] = [
-            re.sub('.*_', '', s) for s in faultDims['formation']
-        ]
+        faultEvents['eventId'] = [ re.sub('.*_', '', s) for s in faultDims['formation'] ]
 
-        resp = LoopProjectFile.Set(loopFilename,
-                                   "faultLog",
-                                   data=faultEvents,
-                                   verbose=False)
+        resp = LoopProjectFile.Set(loopFilename, "faultLog", data=faultEvents, verbose=False)
         if resp["errorFlag"]:
             print(resp["errorString"])
 
-        faultsData = np.zeros(faultsJoined.shape[0],
-                              LoopProjectFile.faultObservationType)
-        faultsData['eventId'] = [
-            re.sub('.*_', '', s) for s in faultsJoined['formation']
-        ]
+        faultsData = np.zeros(faultsJoined.shape[0], LoopProjectFile.faultObservationType)
+        faultsData['eventId'] = [ re.sub('.*_', '', s) for s in faultsJoined['formation'] ]
         faultsData['easting'] = faultsJoined['X']
         faultsData['northing'] = faultsJoined['Y']
         faultsData['altitude'] = faultsJoined['Z']
@@ -1849,7 +1788,7 @@ def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs, o
             print(resp["errorString"])
 
     # each contact contains a location and which formation it is on
-    contacts = pd.read_csv(os.path.join(output_path, "contacts_clean.csv"))
+    contacts = pd.read_csv(os.path.join(config.output_path, "contacts_clean.csv"))
     layerIds = []
     for form in contacts['formation']:
         a = bytes(form, 'ascii')
@@ -1859,22 +1798,18 @@ def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs, o
                     ['layerId']))
         else:
             layerIds.append(0)
-    contactsData = np.zeros(contacts.shape[0],
-                            LoopProjectFile.contactObservationType)
+    contactsData = np.zeros(contacts.shape[0], LoopProjectFile.contactObservationType)
     contactsData['layerId'] = layerIds
     contactsData['easting'] = contacts['X']
     contactsData['northing'] = contacts['Y']
     contactsData['altitude'] = contacts['Z']
     # contactsData['dipdir'] = contacts['']
     # contactsData['dip'] = contacts['']
-    resp = LoopProjectFile.Set(loopFilename,
-                               "contacts",
-                               data=contactsData,
-                               verbose=True)
+    resp = LoopProjectFile.Set(loopFilename, "contacts", data=contactsData, verbose=True)
     if resp["errorFlag"]:
         print(resp["errorString"])
 
-    observations = pd.read_csv(os.path.join(output_path, "orientations_clean.csv"))
+    observations = pd.read_csv(os.path.join(config.output_path, "orientations_clean.csv"))
     layerIds = []
     for form in observations['formation']:
         a = bytes(form, 'ascii')
@@ -1885,8 +1820,7 @@ def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs, o
         else:
             layerIds.append(0)
     observations['layer'] = "s0"
-    observationsData = np.zeros(observations.shape[0],
-                                LoopProjectFile.stratigraphicObservationType)
+    observationsData = np.zeros(observations.shape[0], LoopProjectFile.stratigraphicObservationType)
     observationsData['layerId'] = layerIds
     observationsData['easting'] = observations['X']
     observationsData['northing'] = observations['Y']
@@ -1895,10 +1829,7 @@ def export_to_projectfile(loopFilename, tmp_path, output_path, bbox, proj_crs, o
     observationsData['dip'] = observations['dip']
     observationsData['dipPolarity'] = observations['polarity']
     observationsData['layer'] = observations['layer']
-    resp = LoopProjectFile.Set(loopFilename,
-                               "stratigraphicObservations",
-                               data=observationsData,
-                               verbose=True)
+    resp = LoopProjectFile.Set(loopFilename, "stratigraphicObservations", data=observationsData, verbose=True)
     if resp["errorFlag"]:
         print(resp["errorString"])
 

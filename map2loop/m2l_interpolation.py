@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.interpolate import Rbf
 import matplotlib.pyplot as plt
-from matplotlib import cm
 from math import sin, cos, atan, atan2, asin, radians, degrees, sqrt, pow, acos, fabs, tan, isnan
 import numpy as np
 import geopandas as gpd
@@ -11,10 +10,10 @@ import os
 from shapely.geometry import Polygon, LineString, Point
 from . import m2l_utils
 import rasterio
-import sys
-import time
+from .m2l_enums import Datatype, VerboseLevel
 
-from .m2l_utils import print
+import beartype
+from .config import Config
 
 ######################################
 # inspired by https://stackoverflow.com/questions/3104781/inverse-distance-weighted-idw-interpolation-with-python
@@ -376,8 +375,7 @@ def interpolate_orientations(structure_file, output_path, bbox, c_l, this_gcode,
                 dip, dipdir = m2l_utils.dircos2ddd(L, M, N)
                 if(isnan(dip) or isnan(dipdir)):
                     dip = dipdir = L = M = N = 0
-                    print(
-                        "Warning, no interpolated value for grid point No. ", xx, ',', yy)
+                    print("Warning, no interpolated value for grid point No. ", xx, ',', yy)
                 ostr = "{},{},{},{}\n"\
                     .format(bbox[0]+(xx*((bbox[2]-bbox[0])/gridx)), bbox[1]+((gridy-1-yy)*((bbox[3]-bbox[1])/gridy)), int(dip), int(dipdir))
                 # ostr=str(bbox[0]+(xx*((bbox[2]-bbox[0])/gridx)))+","+str(bbox[1]+((gridy-1-yy)*((bbox[3]-bbox[1])/gridy)))+","+str(int(dip))+","+str(int(dipdir))+'\n'
@@ -636,22 +634,24 @@ def interpolate_contacts(geology_file, output_path, dtm, dtb, dtb_null, cover_ma
 # decimate simple decimation factor for saving vectors
 ######################################
 
-
-def save_contact_vectors(geology_file, tmp_path, dtm, dtb, dtb_null, cover_map, bbox, c_l, calc, decimate):
-    geol_file = gpd.read_file(geology_file, bbox=bbox)
-    print(len(geol_file))
+@beartype.beartype
+def save_contact_vectors(config:Config, map_data, workflow:dict):
+    geol_file = map_data.basal_contacts_no_faults
+    dtm = map_data.get_map_data(Datatype.DTM).open()
+    # geol_file = gpd.read_file(geology_file, bbox=config.bbox)
+    # print(len(geol_file))
     # geol_file.plot( color='black',edgecolor='black')
 
     npts = 0
     i = 0
     for indx, acontact in geol_file.iterrows():  # loop through distinct linestrings in MultiLineString
-        if(acontact.geometry.type == 'MultiLineString'):
-            for line in acontact.geometry:  # loop through line segments
-                if(m2l_utils.mod_safe(i, decimate) == 0):
+        if(acontact.geometry and acontact.geometry.type == 'MultiLineString'):
+            for line in acontact.geometry.geoms:  # loop through line segments
+                if(m2l_utils.mod_safe(i, config.run_flags['contact_decimate']) == 0):
                     npoint = 1
                 i = i+1
         else:
-            if(m2l_utils.mod_safe(i, decimate) == 0):
+            if(m2l_utils.mod_safe(i, config.run_flags['contact_decimate']) == 0):
                 npoint = 1
             i = i+1
 
@@ -660,16 +660,16 @@ def save_contact_vectors(geology_file, tmp_path, dtm, dtb, dtb_null, cover_map, 
     l = np.zeros(i+1)
     m = np.zeros(i+1)
 
-    f = open(os.path.join(tmp_path, 'raw_contacts.csv'), 'w')
+    f = open(os.path.join(config.tmp_path, 'raw_contacts.csv'), 'w')
     f.write("X,Y,Z,angle,lsx,lsy,formation,group\n")
     j = 0
     i = 0
     for indx, acontact in geol_file.iterrows():  # loop through distinct linestrings in MultiLineString
-        if(acontact.geometry.type == 'MultiLineString'):
+        if(acontact.geometry and acontact.geometry.type == 'MultiLineString'):
             # print(i)
-            for line in acontact.geometry:  # loop through line segments
+            for line in acontact.geometry.geoms:  # loop through line segments
                 # print(i,len(acontact.geometry))
-                if(m2l_utils.mod_safe(i, decimate) == 0):
+                if(m2l_utils.mod_safe(i, config.run_flags['contact_decimate']) == 0):
                     # if(acontact['id']==170):
                     # display(npts,line.coords[0][0],line.coords[1][0])
                     dlsx = line.coords[0][0]-line.coords[1][0]
@@ -685,23 +685,23 @@ def save_contact_vectors(geology_file, tmp_path, dtm, dtb, dtb_null, cover_map, 
                         # doesn't like point right on edge?
                         locations = [(x[i], y[i])]
                         height = m2l_utils.value_from_dtm_dtb(
-                            dtm, dtb, dtb_null, cover_map, locations)
+                            dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
 
-                        if(str(acontact[c_l['g']]) == 'None'):
+                        if(str(acontact[config.c_l['g']]) == 'None'):
                             ostr = "{},{},{},{},{},{},{},{}\n"\
-                                .format(x[i], y[i], height, angle % 180, lsx, lsy, acontact[c_l['c']].replace(" ", "_").replace("-", "_"), acontact[c_l['c']].replace(" ", "_").replace("-", "_"))
-                            # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact[c_l['c']].replace(" ","_").replace("-","_")+","+acontact[c_l['c']].replace(" ","_").replace("-","_")+"\n"
+                                .format(x[i], y[i], height, angle % 180, lsx, lsy, acontact[config.c_l['c']].replace(" ", "_").replace("-", "_"), acontact[config.c_l['c']].replace(" ", "_").replace("-", "_"))
+                            # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact[config.c_l['c']].replace(" ","_").replace("-","_")+","+acontact[config.c_l['c']].replace(" ","_").replace("-","_")+"\n"
                         else:
                             ostr = "{},{},{},{},{},{},{},{}\n"\
-                                .format(x[i], y[i], height, angle % 180, lsx, lsy, acontact[c_l['c']].replace(" ", "_").replace("-", "_"), acontact[c_l['g']].replace(" ", "_").replace("-", "_"))
-                            # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact[c_l['c']].replace(" ","_").replace("-","_")+","+acontact[c_l['g']].replace(" ","_").replace("-","_")+"\n"
+                                .format(x[i], y[i], height, angle % 180, lsx, lsy, acontact[config.c_l['c']].replace(" ", "_").replace("-", "_"), acontact[config.c_l['g']].replace(" ", "_").replace("-", "_"))
+                            # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact[config.c_l['c']].replace(" ","_").replace("-","_")+","+acontact[config.c_l['g']].replace(" ","_").replace("-","_")+"\n"
                         f.write(ostr)
                         npts = npts+1
                 i = i+1
         else:
             # display(acontact.geometry,acontact.geometry.coords)
             # for line in acontact: # loop through line segments in LineString
-            if(m2l_utils.mod_safe(i, decimate) == 0):
+            if(acontact.geometry and m2l_utils.mod_safe(i, config.run_flags['contact_decimate']) == 0):
                 dlsx = acontact.geometry.coords[0][0] - \
                     acontact.geometry.coords[1][0]
                 dlsy = acontact.geometry.coords[0][1] - \
@@ -718,15 +718,15 @@ def save_contact_vectors(geology_file, tmp_path, dtm, dtb, dtb_null, cover_map, 
                     # doesn't like point right on edge?
                     locations = [(x[i], y[i])]
                     height = m2l_utils.value_from_dtm_dtb(
-                        dtm, dtb, dtb_null, cover_map, locations)
-                    if(str(acontact[c_l['g']]) == 'None'):
+                        dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
+                    if(str(acontact[config.c_l['g']]) == 'None'):
                         ostr = "{},{},{},{},{},{},{},{}\n"\
-                            .format(x[i], y[i], height, angle % 180, lsx, lsy, acontact[c_l['c']].replace(" ", "_").replace("-", "_"), acontact[c_l['c']].replace(" ", "_").replace("-", "_"))
-                        # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact[c_l['c']].replace(" ","_").replace("-","_")+","+acontact[c_l['c']].replace(" ","_").replace("-","_")+"\n"
+                            .format(x[i], y[i], height, angle % 180, lsx, lsy, acontact[config.c_l['c']].replace(" ", "_").replace("-", "_"), acontact[config.c_l['c']].replace(" ", "_").replace("-", "_"))
+                        # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact[config.c_l['c']].replace(" ","_").replace("-","_")+","+acontact[config.c_l['c']].replace(" ","_").replace("-","_")+"\n"
                     else:
                         ostr = "{},{},{},{},{},{},{},{}\n"\
-                            .format(x[i], y[i], height, angle % 180, lsx, lsy, acontact[c_l['c']].replace(" ", "_").replace("-", "_"), acontact[c_l['g']].replace(" ", "_").replace("-", "_"))
-                        # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact[c_l['c']].replace(" ","_").replace("-","_")+","+acontact[c_l['g']].replace(" ","_").replace("-","_")+"\n"
+                            .format(x[i], y[i], height, angle % 180, lsx, lsy, acontact[config.c_l['c']].replace(" ", "_").replace("-", "_"), acontact[config.c_l['g']].replace(" ", "_").replace("-", "_"))
+                        # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact[config.c_l['c']].replace(" ","_").replace("-","_")+","+acontact[config.c_l['g']].replace(" ","_").replace("-","_")+"\n"
                     # print(ostr)
                     f.write(ostr)
                     # print(npts,dlsx,dlsy)
@@ -734,7 +734,8 @@ def save_contact_vectors(geology_file, tmp_path, dtm, dtb, dtb_null, cover_map, 
                 i = i+1
         j = j+1
     f.close()
-    print(npts, 'points saved to', os.path.join(tmp_path, 'raw_contacts.csv'))
+    if config.verbose_level != VerboseLevel.NONE:
+        print(npts, 'points saved to', os.path.join(config.tmp_path, 'raw_contacts.csv'))
 
 
 ####################################
@@ -792,7 +793,8 @@ def join_contacts_and_orientations(combo_file, geology_file, output_path, dtm_re
 
     geology = gpd.read_file(geology_file, bbox=bbox)
     geology.crs = dst_crs
-    geology = m2l_utils.explode(geology)
+    # geology = m2l_utils.explode(geology)
+    geology = geology.explode(ignore_index=True)
 
     data = pd.read_csv(combo_file)
 
@@ -801,8 +803,8 @@ def join_contacts_and_orientations(combo_file, geology_file, output_path, dtm_re
     gdf = GeoDataFrame(data, crs=dst_crs, geometry=geometry)
 
     gdf.crs = dst_crs
-    print(gdf.crs, geology.crs)
-    structure_code = gpd.sjoin(gdf, geology, how="left", op="within")
+    # print(gdf.crs, geology.crs)
+    structure_code = gpd.sjoin(gdf, geology, how="left", predicate="within")
     dtm = rasterio.open(dtm_reproj_file)
     if(fault_flag):
         f = open(os.path.join(output_path, 'f_combo_full.csv'), 'w')
@@ -855,8 +857,7 @@ def join_contacts_and_orientations(combo_file, geology_file, output_path, dtm_re
 
 def interpolate_orientations_with_fat(structure_file, output_path, bbox, c_l, this_gcode, calc, gridx, gridy):
     structure = gpd.read_file(structure_file, bbox=bbox)
-    fat_orientations = pd.read_csv(
-        os.path.join(output_path, 'fold_axial_trace_orientations2.csv'), ",")
+    fat_orientations = pd.read_csv(os.path.join(output_path, 'fold_axial_trace_orientations2.csv'), sep=",")
 
     if(len(this_gcode) == 1):
         # subset orientations to just those with this group
@@ -1019,8 +1020,7 @@ def process_fault_throw_and_near_orientations(tmp_path, output_path, dtm_reproj_
     geology = gpd.read_file(geology_file)
     dtm = rasterio.open(dtm_reproj_file)
 
-    all_long_faults = np.genfromtxt(
-        os.path.join(output_path, 'fault_dimensions.csv'), delimiter=',', dtype='U100')
+    all_long_faults = np.genfromtxt(os.path.join(output_path, 'fault_dimensions.csv'), delimiter=',', dtype='U100')
     fault_names = all_long_faults[1:, :1]
     m_step = 10.0  # outstep from fault
     # if we have two faults at low angle this can be a problem as the point crosses the next fault
@@ -1067,8 +1067,8 @@ def process_fault_throw_and_near_orientations(tmp_path, output_path, dtm_reproj_
 
                 lgdf = GeoDataFrame(index, crs=dst_crs, geometry=lgeom)
                 rgdf = GeoDataFrame(index, crs=dst_crs, geometry=rgeom)
-                lcode = gpd.sjoin(lgdf, geology, how="left", op="within")
-                rcode = gpd.sjoin(rgdf, geology, how="left", op="within")
+                lcode = gpd.sjoin(lgdf, geology, how="left", predicate="within")
+                rcode = gpd.sjoin(rgdf, geology, how="left", predicate="within")
                 # display(lcode)
 
                 # add points to list if they have different geology code than previous node on left side
@@ -1221,8 +1221,8 @@ def process_fault_throw_and_near_orientations(tmp_path, output_path, dtm_reproj_
                     rgeom = [Point(xy) for xy in rcoords]
                     lgdf = GeoDataFrame(index, crs=dst_crs, geometry=lgeom)
                     rgdf = GeoDataFrame(index, crs=dst_crs, geometry=rgeom)
-                    lcode = gpd.sjoin(lgdf, geology, how="left", op="within")
-                    rcode = gpd.sjoin(rgdf, geology, how="left", op="within")
+                    lcode = gpd.sjoin(lgdf, geology, how="left", predicate="within")
+                    rcode = gpd.sjoin(rgdf, geology, how="left", predicate="within")
 
                     # add points to list if they have different geology code than previous node on left side
 
@@ -1523,7 +1523,7 @@ def interpolate_contacts_grid(contacts, calc, xcoords_group, ycoords_group):
     listarray = []
     for indx, acontact in contacts.iterrows():  # loop through distinct linestrings in MultiLineString
         if(acontact.geometry.type == 'MultiLineString'):
-            for line in acontact.geometry:
+            for line in acontact.geometry.geoms:
                 if(m2l_utils.mod_safe(i, decimate) == 0):
                     listarray.append([line.coords[0][0], line.coords[0][1]])
                 i = i+1
@@ -1572,27 +1572,29 @@ def interpolate_contacts_grid(contacts, calc, xcoords_group, ycoords_group):
         return(0, 0, 0)
 
 
-def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spacing, dst_crs, scheme, super_groups, c_l):
-    geology = gpd.read_file(geology_file, bbox=bbox)
-    structures_code = gpd.read_file(structure_file, bbox=bbox)
+@beartype.beartype
+def interpolation_grids(config:Config, map_data, basal_contacts_filename:str, super_groups:list) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    geology = map_data.get_map_data(Datatype.GEOLOGY).copy()
+    orientations = map_data.get_map_data(Datatype.STRUCTURE).copy()
     
-    is_bed = structures_code[c_l['sf']].str.contains(
-        c_l['bedding'], regex=False)
+    is_bed = orientations[config.c_l['sf']].str.contains(config.c_l['bedding'], regex=False)
 
-    structures_code = structures_code[is_bed]    
-    contacts = gpd.read_file(basal_contacts, bbox=bbox)
+    orientations = orientations[is_bed]    
+    contacts = gpd.read_file(basal_contacts_filename, bbox=config.bbox)
 
-    geology[c_l['g']].fillna(geology[c_l['g2']], inplace=True)
-    geology[c_l['g']].fillna(geology[c_l['c']], inplace=True)
+    geology[config.c_l['g']].fillna(geology[config.c_l['g2']], inplace=True)
+    geology[config.c_l['g']].fillna(geology[config.c_l['c']], inplace=True)
 
+    spacing = config.run_flags['interpolation_spacing']
+    scheme = config.run_flags['interpolation_scheme']
     if(spacing < 0):
-        spacing = -(bbox[2]-bbox[0])/spacing
+        spacing = -(config.bbox[2]-config.bbox[0])/spacing
 
-    x = (bbox[2]-bbox[0])/spacing
-    y = (bbox[3]-bbox[1])/spacing
+    x = (config.bbox[2]-config.bbox[0])/spacing
+    y = (config.bbox[3]-config.bbox[1])/spacing
 
-    xcoords = np.arange(bbox[0], bbox[2], spacing)
-    ycoords = np.arange(bbox[1], bbox[3], spacing)
+    xcoords = np.arange(config.bbox[0], config.bbox[2], spacing)
+    ycoords = np.arange(config.bbox[1], config.bbox[3], spacing)
     xcoords, ycoords = np.meshgrid(xcoords, ycoords)
     bsh = xcoords.shape
     xcoords, ycoords = xcoords.flatten(), ycoords.flatten()
@@ -1602,43 +1604,44 @@ def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spac
 
     nodes = gpd.GeoDataFrame(
         xycoords, geometry=[Point(xy) for xy in zip(xcoords, ycoords)])
-    nodes.crs = dst_crs
-    nodes_code = gpd.sjoin(nodes, geology, how="left", op="within")
-    # structures_code = gpd.sjoin(structures, geology, how="left", op="within")
-    structures_code = structures_code[structures_code[c_l['d']] != 0]
+    nodes.crs = map_data.working_projection
+    nodes_code = gpd.sjoin(nodes, geology, how="left", predicate="within")
+    # orientations = gpd.sjoin(structures, geology, how="left", predicate="within")
+    orientations = orientations[orientations[config.c_l['d']] != 0]
     first_supergroup = True
     # avoids massive memory rbf calcs by splitting calc into (non-threaded) chunks, maybe try dask + masks??
     split = 25000
-    print('split',split,'bsh[0]',bsh[0],'bsh[1]',bsh[1],'spacing',spacing,'xdim',bbox[2]-bbox[0],'ydim',bbox[3]-bbox[1])
+    # print('split',split,'bsh[0]',bsh[0],'bsh[1]',bsh[1],'spacing',spacing,'xdim',config.bbox[2]-config.bbox[0],'ydim',config.bbox[3]-config.bbox[1])
     for i in np.arange(0, bsh[0]*bsh[1], split):
         min = i
         max = i+split
         if(max > bsh[0]*bsh[1]):
             max = bsh[0]*bsh[1]+1
-        print('rbf_split', min, max)
+        # print('rbf_split', min, max)
         nodes_code_row = nodes_code[min:max]
         for groups in super_groups:
-            print(groups)
+            if config.verbose_level != VerboseLevel.NONE:
+                print(groups)
             first = True
             for group in groups:
 
                 if(first):
-                    all_nodes = nodes_code_row[nodes_code_row[c_l['g']] == group]
-                    all_structures = structures_code[structures_code[c_l['g']] == group]
-                    all_contacts = contacts[contacts[c_l['g']] ==
+                    all_nodes = nodes_code_row[nodes_code_row[config.c_l['g']] == group]
+                    all_structures = orientations[orientations[config.c_l['g']] == group]
+                    all_contacts = contacts[contacts[config.c_l['g']] ==
                                             group.replace(' ', '_').replace('-', '_')]
                     first = False
                 else:
-                    another_node = nodes_code_row[nodes_code_row[c_l['g']] == group]
+                    another_node = nodes_code_row[nodes_code_row[config.c_l['g']] == group]
                     all_nodes = pd.concat(
                         [all_nodes, another_node], sort=False)
 
-                another_contact = contacts[contacts[c_l['g']] == group.replace(
+                another_contact = contacts[contacts[config.c_l['g']] == group.replace(
                     ' ', '_').replace('-', '_')]
                 all_contacts = pd.concat(
                     [all_contacts, another_contact], sort=False)
 
-                another_structure = structures_code[structures_code[c_l['g']] == group]
+                another_structure = orientations[orientations[config.c_l['g']] == group]
                 all_structures = pd.concat(
                     [all_structures, another_structure], sort=False)
 
@@ -1648,12 +1651,13 @@ def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spac
             if(len(xcoords_group) > 0):
                 if(len(all_structures) > 2):
                     l, m, n, d, dd = interpolate_orientation_grid(
-                        all_structures, scheme, xcoords_group, ycoords_group, c_l)
+                        all_structures, scheme, xcoords_group, ycoords_group, config.c_l)
                     xy_lmn = np.vstack(
                         (xcoords_group, ycoords_group, l, m, n, d, dd)).transpose()
                     xy_lmn = xy_lmn.reshape(len(l), 7)
                 else:
-                    print(groups, 'has no structures')
+                    if config.verbose_level != VerboseLevel.NONE:
+                        print(groups, 'has no structures')
 
                     xy_lmn = np.zeros((5, len(xcoords_group)))
                     xy_lmn = np.vstack(
@@ -1674,7 +1678,8 @@ def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spac
                         xy_lm_contacts = xy_lm_contacts.reshape(
                             len(xcoords_group), 5)
                 else:
-                    print(groups, 'has no contacts')
+                    if config.verbose_level != VerboseLevel.NONE:
+                        print(groups, 'has no contacts')
 
                     xy_lm_contacts = np.zeros((3, len(xcoords_group)))
                     xy_lm_contacts = np.vstack(
@@ -1692,17 +1697,17 @@ def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spac
                         (xy_lm_contacts_all, xy_lm_contacts))
 
     # sort to get back to x,y grid ordering
-    dt = [('x', xy_lmn_all.dtype), ('y', xy_lmn_all.dtype), ('l', xy_lmn_all.dtype), ('m',
-                                                                                      xy_lmn_all.dtype), ('n', xy_lmn_all.dtype), ('d', xy_lmn_all.dtype), ('dd', xy_lmn_all.dtype)]
+    dt = [('X', xy_lmn_all.dtype), ('Y', xy_lmn_all.dtype), ('l', xy_lmn_all.dtype), ('m', xy_lmn_all.dtype),
+          ('n', xy_lmn_all.dtype), ('dip', xy_lmn_all.dtype), ('dip_dir', xy_lmn_all.dtype)]
     # assert xy_lmn_all.flags['C_CONTIGUOUS']
     orientation_interp = xy_lmn_all.ravel().view(dt)
-    orientation_interp.sort(order=['x', 'y', 'l', 'm', 'n', 'd', 'dd'])
+    orientation_interp.sort(order=['X', 'Y', 'l', 'm', 'n', 'dip', 'dip_dir'])
 
-    dt = [('x', xy_lm_contacts_all.dtype), ('y', xy_lm_contacts_all.dtype), ('l',
-                                                                             xy_lm_contacts_all.dtype), ('m', xy_lm_contacts_all.dtype), ('S', xy_lm_contacts_all.dtype)]
+    dt = [('X', xy_lm_contacts_all.dtype), ('Y', xy_lm_contacts_all.dtype), ('l', xy_lm_contacts_all.dtype),
+          ('m', xy_lm_contacts_all.dtype), ('angle', xy_lm_contacts_all.dtype)]
     # assert xy_lm_contacts_all.flags['C_CONTIGUOUS']
     contact_interp = xy_lm_contacts_all.ravel().view(dt)
-    contact_interp.sort(order=['x', 'y', 'l', 'm', 'S'])
+    contact_interp.sort(order=['X', 'Y', 'l', 'm', 'angle'])
 
     scale = np.sqrt(1-(orientation_interp['n']**2))
     lscaled = -scale*contact_interp['m']
@@ -1725,23 +1730,23 @@ def interpolation_grids(geology_file, structure_file, basal_contacts, bbox, spac
     # dip_direction=np.where(mscaled<0, (540+np.degrees(np.arctan2(lscaled,mscaled)))%360, dip_direction)
     # dip_direction=np.where(mscaled==0, 90, dip_direction)
 
-    combo_interp = np.vstack((contact_interp['x'], contact_interp['y'], lscaled, mscaled, orientation_interp['n'],
+    combo_interp = np.vstack((contact_interp['X'], contact_interp['Y'], lscaled, mscaled, orientation_interp['n'],
                               dip, dip_direction)).transpose()
 
+    orientation_interp = pd.DataFrame(orientation_interp)
+    contact_interp = pd.DataFrame(contact_interp)
+    combo_interp = pd.DataFrame(combo_interp)
     return(orientation_interp, contact_interp, combo_interp)
 
+@beartype.beartype
+def process_fault_throw_and_near_faults_from_grid(config:Config, map_data, workflow, dip_grid, dip_dir_grid):
 
-def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_reproj_file, dtb, dtb_null, cover_map, c_l, dst_crs, bbox, scheme, dip_grid, dip_dir_grid, xgrid, ygrid, spacing):
-    fault_file = os.path.join(tmp_path, 'faults_clip.shp')
-    geology_file = os.path.join(tmp_path, 'geol_clip.shp')
+    local_faults = map_data.get_map_data(Datatype.FAULT)
+    local_faults = local_faults.dropna(subset=['geometry'])
+    geology = map_data.get_map_data(Datatype.GEOLOGY)
+    dtm = map_data.get_map_data(Datatype.DTM).open()
 
-    faults = gpd.read_file(fault_file)
-    faults = faults.dropna(subset=['geometry'])
-    geology = gpd.read_file(geology_file)
-    dtm = rasterio.open(dtm_reproj_file)
-
-    all_long_faults = np.genfromtxt(os.path.join(
-        output_path, 'fault_dimensions.csv'), delimiter=',', dtype='U100')
+    all_long_faults = np.genfromtxt(os.path.join(config.output_path, 'fault_dimensions.csv'), delimiter=',', dtype='U100')
     fault_names = all_long_faults[1:, :1]
     m_step = 5  # outstep from fault
     decimate_near = 50
@@ -1752,20 +1757,20 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
     all_coords_x = []
     all_coords_y = []
 
-    fftc = open(os.path.join(output_path, 'fault_tip_contacts.csv'), 'w')
+    fftc = open(os.path.join(config.output_path, 'fault_tip_contacts.csv'), 'w')
     fftc.write('X,Y,Z,formation\n')
 
     # loop through all faults
 
     # Looping through each fault
-    for index, fault in faults.iterrows():
-        # if(fault[c_l['o']]!=1071):
+    for index, fault in local_faults.iterrows():
+        # if(fault[config.c_l['o']]!=1071):
         # continue
         if(not str(fault.geometry.type) == 'None'):
             if(fault.geometry.type == 'LineString'):
                 # in is dangerous as Fault_1 is in Fault_10
-                if('Fault_'+str(fault[c_l['o']]) in fault_names):
-                    # print('LineString','Fault_'+str(fault[c_l['o']]),len(fault.geometry.coords))
+                if('Fault_'+str(fault[config.c_l['o']]) in fault_names):
+                    # print('LineString','Fault_'+str(fault[config.c_l['o']]),len(fault.geometry.coords))
                     lcoords = []
                     rcoords = []
                     index = []
@@ -1790,41 +1795,41 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                     lgeom = [Point(xy) for xy in lcoords]
                     rgeom = [Point(xy) for xy in rcoords]
 
-                    lgdf = GeoDataFrame(index, crs=dst_crs, geometry=lgeom)
-                    rgdf = GeoDataFrame(index, crs=dst_crs, geometry=rgeom)
-                    lcode = gpd.sjoin(lgdf, geology, how="left", op="within")
-                    rcode = gpd.sjoin(rgdf, geology, how="left", op="within")
+                    lgdf = GeoDataFrame(index, crs=map_data.working_projection, geometry=lgeom)
+                    rgdf = GeoDataFrame(index, crs=map_data.working_projection, geometry=rgeom)
+                    lcode = gpd.sjoin(lgdf, geology, how="left", predicate="within")
+                    rcode = gpd.sjoin(rgdf, geology, how="left", predicate="within")
                     # display(lcode)
 
                     # add lots of points left and right of fault to make sure ellipse range is happy in geomodeller
                     lgroups = []
                     for ind, indl in lcode.iterrows():
-                        if(not str(indl[c_l['c']]) == 'nan' and not str(indl[c_l['r1']]) == 'nan'):
+                        if(not str(indl[config.c_l['c']]) == 'nan' and not str(indl[config.c_l['r1']]) == 'nan'):
                             if(m2l_utils.mod_safe(ind, decimate_near) == 0 or ind == len(lcode)-1):
-                                if((not c_l['sill'] in indl[c_l['ds']]) or (not c_l['intrusive'] in indl[c_l['r1']])):
+                                if((not config.c_l['sill'] in indl[config.c_l['ds']]) or (not config.c_l['intrusive'] in indl[config.c_l['r1']])):
                                     locations = [
                                         (indl.geometry.x, indl.geometry.y)]
                                     last_height_l = m2l_utils.value_from_dtm_dtb(
-                                        dtm, dtb, dtb_null, cover_map, locations)
-                                    if(not indl[c_l['g']] in lgroups):
+                                        dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
+                                    if(not indl[config.c_l['g']] in lgroups):
                                         ostr = "{},{},{},{}\n"\
-                                            .format(indl.geometry.x, indl.geometry.y, last_height_l, indl[c_l['c']].replace(" ", "_").replace("-", "_"))
+                                            .format(indl.geometry.x, indl.geometry.y, last_height_l, indl[config.c_l['c']].replace(" ", "_").replace("-", "_"))
                                         fftc.write(ostr)
-                                        lgroups.append(indl[c_l['g']])
+                                        lgroups.append(indl[config.c_l['g']])
                     rgroups = []
                     for ind, indr in rcode.iterrows():
-                        if(not str(indr[c_l['c']]) == 'nan' and not str(indr[c_l['r1']]) == 'nan'):
-                            if((not c_l['sill'] in indr[c_l['ds']]) or (not c_l['intrusive'] in indr[c_l['r1']])):
+                        if(not str(indr[config.c_l['c']]) == 'nan' and not str(indr[config.c_l['r1']]) == 'nan'):
+                            if((not config.c_l['sill'] in indr[config.c_l['ds']]) or (not config.c_l['intrusive'] in indr[config.c_l['r1']])):
                                 if(m2l_utils.mod_safe(ind, decimate_near) == 0 or ind == len(rcode)-1):
                                     locations = [
                                         (indr.geometry.x, indr.geometry.y)]
                                     last_height_r = m2l_utils.value_from_dtm_dtb(
-                                        dtm, dtb, dtb_null, cover_map, locations)
-                                    if(not indr[c_l['g']] in rgroups):
+                                        dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
+                                    if(not indr[config.c_l['g']] in rgroups):
                                         ostr = "{},{},{},{}\n"\
-                                            .format(indr.geometry.x, indr.geometry.y, last_height_r, indr[c_l['c']].replace(" ", "_").replace("-", "_"))
+                                            .format(indr.geometry.x, indr.geometry.y, last_height_r, indr[config.c_l['c']].replace(" ", "_").replace("-", "_"))
                                         fftc.write(ostr)
-                                        rgroups.append(indr[c_l['g']])
+                                        rgroups.append(indr[config.c_l['g']])
 
                     # add points to list if they have different geology code than previous node on left side
 
@@ -1834,38 +1839,38 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
 
                     for ind, indl in lcode.iterrows():
                         if(ind < len(lcode) and not isnan(indl['index_right'])):
-                            ntest1 = str(indl[c_l['ds']])
-                            ntest2 = str(indl[c_l['r1']])
+                            ntest1 = str(indl[config.c_l['ds']])
+                            ntest2 = str(indl[config.c_l['r1']])
 
                             if(not ntest1 == 'None' and not ntest2 == 'None'):
-                                if(ind == 1 or (not lastlcode == indl[c_l['c']] and ((not c_l['sill'] in indl[c_l['ds']]) or (not c_l['intrusive'] in indl[c_l['r1']])))):
+                                if(ind == 1 or (not lastlcode == indl[config.c_l['c']] and ((not config.c_l['sill'] in indl[config.c_l['ds']]) or (not config.c_l['intrusive'] in indl[config.c_l['r1']])))):
                                     all_coords_x.append(indl.geometry.x)
                                     all_coords_y.append(indl.geometry.y)
                                     if(first):
                                         first = False
                                         firstlx = indl.geometry.x
                                         firstly = indl.geometry.y
-                                        firstlc = indl[c_l['c']].replace(
+                                        firstlc = indl[config.c_l['c']].replace(
                                             " ", "_").replace("-", "_")
                                     lastlx = indl.geometry.x
                                     lastly = indl.geometry.y
-                                    lastlc = indl[c_l['c']].replace(
+                                    lastlc = indl[config.c_l['c']].replace(
                                         " ", "_").replace("-", "_")
 
-                                if(lastlcode == '' and ((not c_l['sill'] in indl[c_l['ds']]) or (not c_l['intrusive'] in indl[c_l['r1']]))):
-                                    lastlcode = indl[c_l['c']]
+                                if(lastlcode == '' and ((not config.c_l['sill'] in indl[config.c_l['ds']]) or (not config.c_l['intrusive'] in indl[config.c_l['r1']]))):
+                                    lastlcode = indl[config.c_l['c']]
 
-                                # print('l',ind,indl[c_l['c']],indl[c_l['ds']],indl[c_l['r1']])
-                                if(not ntest1 == 'None' and not ntest2 == 'None' and not str(indl[c_l['c']]) == 'nan'):
-                                    if((not indl[c_l['c']] == lastlcode) and ((not c_l['sill'] in indl[c_l['ds']]) or (not c_l['intrusive'] in indl[c_l['r1']]))):
+                                # print('l',ind,indl[config.c_l['c']],indl[config.c_l['ds']],indl[config.c_l['r1']])
+                                if(not ntest1 == 'None' and not ntest2 == 'None' and not str(indl[config.c_l['c']]) == 'nan'):
+                                    if((not indl[config.c_l['c']] == lastlcode) and ((not config.c_l['sill'] in indl[config.c_l['ds']]) or (not config.c_l['intrusive'] in indl[config.c_l['r1']]))):
                                         lcontact.append(
-                                            [(ind, lastlcode, indl[c_l['c']], indl.geometry)])
-                                        lastlcode = indl[c_l['c']]
+                                            [(ind, lastlcode, indl[config.c_l['c']], indl.geometry)])
+                                        lastlcode = indl[config.c_l['c']]
                                         locations = [(lastlx, lastly)]
                                         last_height_l = m2l_utils.value_from_dtm_dtb(
-                                            dtm, dtb, dtb_null, cover_map, locations)
+                                            dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
                                         ostr = "{},{},{},{}\n"\
-                                            .format(lastlx, lastly, last_height_l, indl[c_l['c']].replace(" ", "_").replace("-", "_"))
+                                            .format(lastlx, lastly, last_height_l, indl[config.c_l['c']].replace(" ", "_").replace("-", "_"))
                                         fftc.write(ostr)
 
                     # add points to list if they have different geology code than previous node on right side
@@ -1875,40 +1880,40 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                     lastrcode = ''
                     for ind, indr in rcode.iterrows():
                         if(ind < len(rcode) and not isnan(indr['index_right'])):
-                            ntest1 = str(indr[c_l['ds']])
-                            ntest2 = str(indr[c_l['r1']])
+                            ntest1 = str(indr[config.c_l['ds']])
+                            ntest2 = str(indr[config.c_l['r1']])
 
                             if(not ntest1 == 'None' and not ntest2 == 'None'):
-                                if(ind == 1 or (not lastrcode == indr[c_l['c']] and ((not c_l['sill'] in indr[c_l['ds']]) or (not c_l['intrusive'] in indr[c_l['r1']])))):
+                                if(ind == 1 or (not lastrcode == indr[config.c_l['c']] and ((not config.c_l['sill'] in indr[config.c_l['ds']]) or (not config.c_l['intrusive'] in indr[config.c_l['r1']])))):
                                     all_coords_x.append(indr.geometry.x)
                                     all_coords_y.append(indr.geometry.y)
                                     if(first):
                                         first = False
                                         firstrx = indr.geometry.x
                                         firstry = indr.geometry.y
-                                        firstrc = indr[c_l['c']].replace(
+                                        firstrc = indr[config.c_l['c']].replace(
                                             " ", "_").replace("-", "_")
                                     lastrx = indr.geometry.x
                                     lastry = indr.geometry.y
-                                    lastrc = indr[c_l['c']].replace(
+                                    lastrc = indr[config.c_l['c']].replace(
                                         " ", "_").replace("-", "_")
 
-                                if(lastrcode == '' and ((not c_l['sill'] in indr[c_l['ds']]) or (not c_l['intrusive'] in indr[c_l['r1']]))):
-                                    lastrcode = indr[c_l['c']]
-                                # print('r',ind,indr[c_l['c']],indr[c_l['ds']],indr[c_l['r1']])
+                                if(lastrcode == '' and ((not config.c_l['sill'] in indr[config.c_l['ds']]) or (not config.c_l['intrusive'] in indr[config.c_l['r1']]))):
+                                    lastrcode = indr[config.c_l['c']]
+                                # print('r',ind,indr[config.c_l['c']],indr[config.c_l['ds']],indr[config.c_l['r1']])
 
-                                # print(lastrcode,ntest1,ntest2,str(indr[c_l['c']]),indr[c_l['c']],c_l['sill'],c_l['intrusive'])
+                                # print(lastrcode,ntest1,ntest2,str(indr[config.c_l['c']]),indr[config.c_l['c']],config.c_l['sill'],config.c_l['intrusive'])
 
-                                if(not ntest1 == 'None' and not ntest2 == 'None' and not str(indr[c_l['c']]) == 'nan'):
-                                    if((not indr[c_l['c']] == lastrcode) and ((not c_l['sill'] in indr[c_l['ds']]) or (not c_l['intrusive'] in indr[c_l['r1']]))):
+                                if(not ntest1 == 'None' and not ntest2 == 'None' and not str(indr[config.c_l['c']]) == 'nan'):
+                                    if((not indr[config.c_l['c']] == lastrcode) and ((not config.c_l['sill'] in indr[config.c_l['ds']]) or (not config.c_l['intrusive'] in indr[config.c_l['r1']]))):
                                         rcontact.append(
-                                            [(ind, lastrcode, indr[c_l['c']], indr.geometry)])
-                                        lastrcode = indr[c_l['c']]
+                                            [(ind, lastrcode, indr[config.c_l['c']], indr.geometry)])
+                                        lastrcode = indr[config.c_l['c']]
                                         locations = [(lastrx, lastry)]
                                         last_height_r = m2l_utils.value_from_dtm_dtb(
-                                            dtm, dtb, dtb_null, cover_map, locations)
+                                            dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
                                         ostr = "{},{},{},{}\n"\
-                                            .format(lastrx, lastry, last_height_r, indr[c_l['c']].replace(" ", "_").replace("-", "_"))
+                                            .format(lastrx, lastry, last_height_r, indr[config.c_l['c']].replace(" ", "_").replace("-", "_"))
                                         fftc.write(ostr)
 
                     # loop through left and right sides to find equivalent contact pairs along fault
@@ -1930,13 +1935,13 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                                         lc[0][3].x, lc[0][3].y, rc[0][3].x, rc[0][3].y)
                                     if(not (l == 0.0 and m == 0.0)):
                                         fdc.append(
-                                            (l, m, 'Fault_'+str(fault[c_l['o']])))
+                                            (l, m, 'Fault_'+str(fault[config.c_l['o']])))
                                         all_coordsdist.append((dist))
             ##############################################################################################
             # Between these dividers shouldn't be neccessary anymore.
             else:
                 # in is dangerous as Fault_1 is in Fault_10
-                if('Fault_'+str(fault[c_l['o']]) in fault_names):
+                if('Fault_'+str(fault[config.c_l['o']]) in fault_names):
                     for fls in fault.geometry:
                         fault_ls = LineString(fls)
                         lcoords = []
@@ -1962,12 +1967,12 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
 
                         lgeom = [Point(xy) for xy in lcoords]
                         rgeom = [Point(xy) for xy in rcoords]
-                        lgdf = GeoDataFrame(index, crs=dst_crs, geometry=lgeom)
-                        rgdf = GeoDataFrame(index, crs=dst_crs, geometry=rgeom)
+                        lgdf = GeoDataFrame(index, crs=map_data.working_projection, geometry=lgeom)
+                        rgdf = GeoDataFrame(index, crs=map_data.working_projection, geometry=rgeom)
                         lcode = gpd.sjoin(
-                            lgdf, geology, how="left", op="within")
+                            lgdf, geology, how="left", predicate="within")
                         rcode = gpd.sjoin(
-                            rgdf, geology, how="left", op="within")
+                            rgdf, geology, how="left", predicate="within")
 
                         # add points to list if they have different geology code than previous node on left side
 
@@ -1977,37 +1982,37 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                         for ind, indl in lcode.iterrows():
 
                             if(ind < len(lcode) and not isnan(indl['index_right'])):
-                                ntest1 = str(indl[c_l['ds']])
-                                ntest2 = str(indl[c_l['r1']])
+                                ntest1 = str(indl[config.c_l['ds']])
+                                ntest2 = str(indl[config.c_l['r1']])
 
                                 if(not ntest1 == 'None' and not ntest2 == 'None'):
-                                    if(ind == 1 or (not lastlcode == indl[c_l['c']] and ((not c_l['sill'] in indl[c_l['ds']]) or (not c_l['intrusive'] in indl[c_l['r1']])))):
+                                    if(ind == 1 or (not lastlcode == indl[config.c_l['c']] and ((not config.c_l['sill'] in indl[config.c_l['ds']]) or (not config.c_l['intrusive'] in indl[config.c_l['r1']])))):
                                         all_coords_x.append(indl.geometry.x)
                                         all_coords_y.append(indl.geometry.y)
                                         if(first):
                                             first = False
                                             firstlx = indl.geometry.x
                                             firstly = indl.geometry.y
-                                            firstlc = indl[c_l['c']].replace(
+                                            firstlc = indl[config.c_l['c']].replace(
                                                 " ", "_").replace("-", "_")
                                         lastlx = indl.geometry.x
                                         lastly = indl.geometry.y
-                                        lastlc = indl[c_l['c']].replace(
+                                        lastlc = indl[config.c_l['c']].replace(
                                             " ", "_").replace("-", "_")
 
-                                    if(lastlcode == '' and ((not c_l['sill'] in indl[c_l['ds']]) or (not c_l['intrusive'] in indl[c_l['r1']]))):
-                                        lastlcode = indl[c_l['c']]
+                                    if(lastlcode == '' and ((not config.c_l['sill'] in indl[config.c_l['ds']]) or (not config.c_l['intrusive'] in indl[config.c_l['r1']]))):
+                                        lastlcode = indl[config.c_l['c']]
 
-                                    if(not ntest1 == 'None' and not ntest2 == 'None' and not str(indl[c_l['c']]) == 'nan'):
-                                        if((not indl[c_l['c']] == lastlcode) and ((not c_l['sill'] in indl[c_l['ds']]) or (not c_l['intrusive'] in indl[c_l['r1']]))):
+                                    if(not ntest1 == 'None' and not ntest2 == 'None' and not str(indl[config.c_l['c']]) == 'nan'):
+                                        if((not indl[config.c_l['c']] == lastlcode) and ((not config.c_l['sill'] in indl[config.c_l['ds']]) or (not config.c_l['intrusive'] in indl[config.c_l['r1']]))):
                                             lcontact.append(
-                                                [(ind, lastlcode, indl[c_l['c']], indl.geometry)])
-                                            lastlcode = indl[c_l['c']]
+                                                [(ind, lastlcode, indl[config.c_l['c']], indl.geometry)])
+                                            lastlcode = indl[config.c_l['c']]
                                             locations = [(lastlx, lastly)]
                                             last_height_l = m2l_utils.value_from_dtm_dtb(
-                                                dtm, dtb, dtb_null, cover_map, locations)
+                                                dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
                                             ostr = "{},{},{},{}\n"\
-                                                .format(lastlx, lastly, last_height_l, indl[c_l['c']].replace(" ", "_").replace("-", "_"))
+                                                .format(lastlx, lastly, last_height_l, indl[config.c_l['c']].replace(" ", "_").replace("-", "_"))
                                             fftc.write(ostr)
 
                         # add points to list if they have different geology code than previous node on right side
@@ -2017,60 +2022,60 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                         lastrcode = ''
                         for ind, indr in rcode.iterrows():
                             if(ind < len(rcode) and not isnan(indr['index_right'])):
-                                ntest1 = str(indr[c_l['ds']])
-                                ntest2 = str(indr[c_l['r1']])
+                                ntest1 = str(indr[config.c_l['ds']])
+                                ntest2 = str(indr[config.c_l['r1']])
 
                                 if(not ntest1 == 'None' and not ntest2 == 'None'):
-                                    if(ind == 1 or (not lastrcode == indr[c_l['c']] and ((not c_l['sill'] in indr[c_l['ds']]) or (not c_l['intrusive'] in indr[c_l['r1']])))):
+                                    if(ind == 1 or (not lastrcode == indr[config.c_l['c']] and ((not config.c_l['sill'] in indr[config.c_l['ds']]) or (not config.c_l['intrusive'] in indr[config.c_l['r1']])))):
                                         all_coords_x.append(indr.geometry.x)
                                         all_coords_y.append(indr.geometry.y)
                                         if(first):
                                             first = False
                                             firstrx = indr.geometry.x
                                             firstry = indr.geometry.y
-                                            firstrc = indr[c_l['c']].replace(
+                                            firstrc = indr[config.c_l['c']].replace(
                                                 " ", "_").replace("-", "_")
                                         lastrx = indr.geometry.x
                                         lastry = indr.geometry.y
-                                        lastrc = indr[c_l['c']].replace(
+                                        lastrc = indr[config.c_l['c']].replace(
                                             " ", "_").replace("-", "_")
 
-                                    if(lastrcode == '' and ((not c_l['sill'] in indr[c_l['ds']]) or (not c_l['intrusive'] in indr[c_l['r1']]))):
-                                        lastrcode = indr[c_l['c']]
+                                    if(lastrcode == '' and ((not config.c_l['sill'] in indr[config.c_l['ds']]) or (not config.c_l['intrusive'] in indr[config.c_l['r1']]))):
+                                        lastrcode = indr[config.c_l['c']]
 
-                                    if(not ntest1 == 'None' and not ntest2 == 'None' and not str(indr[c_l['c']]) == 'nan'):
-                                        if((not indr[c_l['c']] == lastrcode) and ((not c_l['sill'] in indr[c_l['ds']]) or (not c_l['intrusive'] in indr[c_l['r1']]))):
+                                    if(not ntest1 == 'None' and not ntest2 == 'None' and not str(indr[config.c_l['c']]) == 'nan'):
+                                        if((not indr[config.c_l['c']] == lastrcode) and ((not config.c_l['sill'] in indr[config.c_l['ds']]) or (not config.c_l['intrusive'] in indr[config.c_l['r1']]))):
                                             rcontact.append(
-                                                [(ind, lastrcode, indr[c_l['c']], indr.geometry)])
-                                            lastrcode = indr[c_l['c']]
+                                                [(ind, lastrcode, indr[config.c_l['c']], indr.geometry)])
+                                            lastrcode = indr[config.c_l['c']]
                                             locations = [(lastrx, lastry)]
                                             last_height_r = m2l_utils.value_from_dtm_dtb(
-                                                dtm, dtb, dtb_null, cover_map, locations)
+                                                dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
                                             ostr = "{},{},{},{}\n"\
-                                                .format(lastrx, lastry, last_height_r, indr[c_l['c']].replace(" ", "_").replace("-", "_"))
+                                                .format(lastrx, lastry, last_height_r, indr[config.c_l['c']].replace(" ", "_").replace("-", "_"))
                                             fftc.write(ostr)
 
                         locations = [(firstlx, firstly)]
                         first_height_l = m2l_utils.value_from_dtm_dtb(
-                            dtm, dtb, dtb_null, cover_map, locations)
+                            dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
                         ostr = "{},{},{},{}\n"\
                             .format(firstlx, firstly, first_height_l, firstlc.replace(" ", "_").replace("-", "_"))
                         fftc.write(ostr)
                         locations = [(firstrx, firstry)]
                         first_height_r = m2l_utils.value_from_dtm_dtb(
-                            dtm, dtb, dtb_null, cover_map, locations)
+                            dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
                         ostr = "{},{},{},{}\n"\
                             .format(firstrx, firstry, first_height_r, firstrc.replace(" ", "_").replace("-", "_"))
                         fftc.write(ostr)
                         locations = [(lastlx, lastly)]
                         last_height_l = m2l_utils.value_from_dtm_dtb(
-                            dtm, dtb, dtb_null, cover_map, locations)
+                            dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
                         ostr = "{},{},{},{}\n"\
                             .format(lastlx, lastly, last_height_l, lastlc.replace(" ", "_").replace("-", "_"))
                         fftc.write(ostr)
                         locations = [(lastrx, lastry)]
                         last_height_r = m2l_utils.value_from_dtm_dtb(
-                            dtm, dtb, dtb_null, cover_map, locations)
+                            dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
                         ostr = "{},{},{},{}\n"\
                             .format(lastrx, lastry, last_height_r, lastrc.replace(" ", "_").replace("-", "_"))
                         fftc.write(ostr)
@@ -2078,19 +2083,19 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                             locations = [
                                 (lcode.iloc[len(lcode)-3].geometry.x, lcode.iloc[len(lcode)-3].geometry.y)]
                             last_height_l = m2l_utils.value_from_dtm_dtb(
-                                dtm, dtb, dtb_null, cover_map, locations)
+                                dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
                             ostr = "{},{},{},{}\n"\
-                                .format(lcode.iloc[len(lcode)-3].geometry.x, lcode.iloc[len(lcode)-3].geometry.y, last_height_l, str(lcode.iloc[len(lcode)-3][c_l['c']]).replace(" ", "_").replace("-", "_"))
-                            if(not str(lcode.iloc[len(lcode)-3][c_l['c']]) == 'nan'):
+                                .format(lcode.iloc[len(lcode)-3].geometry.x, lcode.iloc[len(lcode)-3].geometry.y, last_height_l, str(lcode.iloc[len(lcode)-3][config.c_l['c']]).replace(" ", "_").replace("-", "_"))
+                            if(not str(lcode.iloc[len(lcode)-3][config.c_l['c']]) == 'nan'):
                                 fftc.write(ostr)
                         if(len(rcode) > 5):
                             locations = [
                                 (rcode.iloc[len(rcode)-3].geometry.x, rcode.iloc[len(rcode)-3].geometry.y)]
                             last_height_r = m2l_utils.value_from_dtm_dtb(
-                                dtm, dtb, dtb_null, cover_map, locations)
+                                dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
                             ostr = "{},{},{},{}\n"\
-                                .format(lcode.iloc[len(rcode)-3].geometry.x, rcode.iloc[len(rcode)-3].geometry.y, last_height_r, str(rcode.iloc[len(rcode)-3][c_l['c']]).replace(" ", "_").replace("-", "_"))
-                            if(not str(rcode.iloc[len(rcode)-3][c_l['c']]) == 'nan'):
+                                .format(lcode.iloc[len(rcode)-3].geometry.x, rcode.iloc[len(rcode)-3].geometry.y, last_height_r, str(rcode.iloc[len(rcode)-3][config.c_l['c']]).replace(" ", "_").replace("-", "_"))
+                            if(not str(rcode.iloc[len(rcode)-3][config.c_l['c']]) == 'nan'):
                                 fftc.write(ostr)
 
                         # loop through left and right sides to find equivalent contact pairs along fault
@@ -2112,26 +2117,24 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                                             lc[0][3].x, lc[0][3].y, rc[0][3].x, rc[0][3].y)
                                         if(not (l == 0.0 and m == 0.0)):
                                             fdc.append(
-                                                (l, m, 'Fault_'+str(fault[c_l['o']])))
+                                                (l, m, 'Fault_'+str(fault[config.c_l['o']])))
                                             all_coordsdist.append((dist))
 
                 ##############################################################################################
 
     fftc.close()
-    fault_dim = pd.read_csv(os.path.join(
-        output_path, 'fault_dimensions.csv'), ",")
+    fault_dim = pd.read_csv(os.path.join(config.output_path, 'fault_dimensions.csv'), sep=",")
     fault_dim.set_index('Fault',  inplace=True)
 
-    fault_orien = pd.read_csv(os.path.join(
-        output_path, 'fault_orientations.csv'), ",")
+    fault_orien = pd.read_csv(os.path.join(config.output_path, 'fault_orientations.csv'), sep=",")
     fault_orien = fault_orien.drop_duplicates(subset=['formation'])
     fault_orien.set_index('formation',  inplace=True)
-    f = open(os.path.join(output_path, 'fault_displacements3.csv'), 'w')
+    f = open(os.path.join(config.output_path, 'fault_displacements3.csv'), 'w')
     f.write('X,Y,fname,apparent_displacement,vertical_displacement,downthrow_dir\n')
 
     for i in range(len(fdc)):
-        r = int((yi[i]-bbox[1])/spacing)
-        c = int((xi[i]-bbox[0])/spacing)
+        r = int((yi[i]-config.bbox[1])/config.run_flags['interpolation_spacing'])
+        c = int((xi[i]-config.bbox[0])/config.run_flags['interpolation_spacing'])
         if(not np.isnan(dip_dir_grid[r, c]) and not np.isnan(dip_grid[r, c])):
             l, m, n = m2l_utils.ddd2dircos(dip_grid[r, c], dip_dir_grid[r, c])
             lnorm = l/sqrt(pow(l, 2)+pow(m, 2))
@@ -2157,8 +2160,9 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
                     int(all_coordsdist[i]*tan(radians(dotproduct*dip_grid[r, c]))))
                 # cap displacements more than 20% of fault length
                 if(vert_displacement > fault_dim.loc[fdc[i][2]]['HorizontalRadius']/100.0):
-                    print('Fault', fdc[i][2], 'with displacement of', vert_displacement,
-                          'capped to', fault_dim.loc[fdc[i][2]]['HorizontalRadius']/100.0)
+                    if config.verbose_level != VerboseLevel.NONE:
+                        print('Fault', fdc[i][2], 'with displacement of', vert_displacement,
+                              'capped to', fault_dim.loc[fdc[i][2]]['HorizontalRadius']/100.0)
                     vert_displacement = fault_dim.loc[fdc[i]
                                                       [2]]['HorizontalRadius']/100.0
 
@@ -2167,24 +2171,23 @@ def process_fault_throw_and_near_faults_from_grid(tmp_path, output_path, dtm_rep
         f.write(ostr)
 
     f.close()
-    print('fault displacement estimates saved as',
-          os.path.join(output_path, 'fault_displacements3.csv'))
-    print('near-fault orientations saved as',
-          os.path.join(tmp_path, 'ex_f_combo_full.csv'))
-    print('near-fault orientations saved as',
-          os.path.join(tmp_path, 'ex_f_combo_full.csv'))
+    if config.verbose_level != VerboseLevel.NONE:
+        print('fault displacement estimates saved as',
+          os.path.join(config.output_path, 'fault_displacements3.csv'))
+        print('near-fault orientations saved as',
+          os.path.join(config.tmp_path, 'ex_f_combo_full.csv'))
+        print('near-fault orientations saved as',
+          os.path.join(config.tmp_path, 'ex_f_combo_full.csv'))
 
     # when no fault displacment data are available, set to 1m displacment so they still are calculated
 
-    if(os.path.exists(fault_file)):
-        fault_ori = pd.read_csv(os.path.join(
-            output_path, 'fault_orientations.csv'))
-        fault_disp = pd.read_csv(os.path.join(
-            output_path, 'fault_displacements3.csv'))
+    if local_faults is not None:
+        fault_ori = pd.read_csv(os.path.join(config.output_path, 'fault_orientations.csv'))
+        fault_disp = pd.read_csv(os.path.join(config.output_path, 'fault_displacements3.csv'))
 
         fault_disp_found = fault_disp['fname'].unique()
 
-        f = open(os.path.join(output_path, 'fault_displacements3.csv'), 'a+')
+        f = open(os.path.join(config.output_path, 'fault_displacements3.csv'), 'a+')
 
         for ind, fault in fault_ori.iterrows():
             if(not fault['formation'] in fault_disp_found):

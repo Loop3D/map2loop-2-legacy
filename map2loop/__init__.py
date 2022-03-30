@@ -6,78 +6,78 @@ __version__ = "1.1.77"
 
 geology_loopdata = {
     'WA':
-    'http://13.211.217.129:8080/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:500k_geol_28350&bbox=&srs=EPSG:28350',
+    'http://13.211.217.129:8080/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:500k_geol_28350&bbox={BBOX_STR}&srs=EPSG:28350&outputFormat=shape-zip',
     'QLD':
-    'http://13.211.217.129:8080/geoserver/QLD/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=QLD:qld_geol_dissolved_join_fix_mii_clip_wgs84&bbox=&srsName=EPSG:28355',
+    'http://13.211.217.129:8080/geoserver/QLD/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=QLD:qld_geol_asud&bbox={BBOX_STR}&srsName=EPSG:28355&outputFormat=shape-zip',
     'SA':
-    'http://13.211.217.129:8080/geoserver/SA/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=SA:2m_surface_geology_28354_relage&bbox=&srs=EPSG:28354',
+    'http://13.211.217.129:8080/geoserver/SA/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=SA:2m_surface_geology_28354_relage&bbox={BBOX_STR}&srs=EPSG:28354&outputFormat=shape-zip',
     'VIC': 
-    'http://13.211.217.129:8080/geoserver/VIC/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=VIC:geolunit_250k_py_28355&bbox=&srs=EPSG:28355',
+    'http://13.211.217.129:8080/geoserver/VIC/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=VIC:geolunit_250k_py_28355&bbox={BBOX_STR}&srs=EPSG:28355&outputFormat=shape-zip',
     'NSW': 
-    'http://13.211.217.129:8080/geoserver/NSW/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=NSW:ge_rockunit_lao2&bbox=&srs=EPSG:28355',
+    'http://13.211.217.129:8080/geoserver/NSW/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=NSW:ge_rockunit_lao2&bbox={BBOX_STR}&srs=EPSG:28355&outputFormat=shape-zip',
     'ACT': '',
     'TAS':
-    'http://13.211.217.129:8080/geoserver/TAS/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=TAS:geol_poly_250_28355&bbox=&srs=EPSG:28355',
+    'http://13.211.217.129:8080/geoserver/TAS/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=TAS:geol_poly_250_28355&bbox={BBOX_STR}&srs=EPSG:28355&outputFormat=shape-zip',
 
 }
 structure_loopdata = {
     'WA':
-    'http://13.211.217.129:8080/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=loop:waroxi_wa_28350&bbox=&srs=EPSG:28350',
+    'http://13.211.217.129:8080/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=loop:waroxi_wa_28350&bbox={BBOX_STR}&srs=EPSG:28350&outputFormat=shape-zip',
     'QLD':
-    'http://13.211.217.129:8080/geoserver/QLD/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=QLD:outcrops_28355&bbox=&srsName=EPSG:28355',
+    'http://13.211.217.129:8080/geoserver/QLD/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=QLD:outcrops_28355&bbox={BBOX_STR}&srsName=EPSG:28355&outputFormat=shape-zip',
     'SA':
-    'http://13.211.217.129:8080/geoserver/SA/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=SA:sth_flinders_28354&bbox=&srs=EPSG:28354',
+    'http://13.211.217.129:8080/geoserver/SA/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=SA:sth_flinders_28354&bbox={BBOX_STR}&srs=EPSG:28354&outputFormat=shape-zip',
     'VIC': 
-    'http://13.211.217.129:8080/geoserver/VIC/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=VIC:struc_28355&bbox=&srs=EPSG:28355',
+    'http://13.211.217.129:8080/geoserver/VIC/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=VIC:struc_28355&bbox={BBOX_STR}&srs=EPSG:28355&outputFormat=shape-zip',
     'NSW': 
-    'http://13.211.217.129:8080/geoserver/NSW/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=NSW:lao_struct_pt&bbox=&srs=EPSG:28355',
+    'http://13.211.217.129:8080/geoserver/NSW/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=NSW:lao_struct_pt&bbox={BBOX_STR}&srs=EPSG:28355&outputFormat=shape-zip',
     'ACT': '',
     'TAS': 
-    'http://13.211.217.129:8080/geoserver/TAS/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=TAS:geol_struc_250_28355&bbox=&srs=EPSG:28355',
+    'http://13.211.217.129:8080/geoserver/TAS/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=TAS:geol_struc_250_28355&bbox={BBOX_STR}&srs=EPSG:28355&outputFormat=shape-zip',
 }
 fault_loopdata = {
     'WA':
-    'http://13.211.217.129:8080/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=loop:500k_faults_28350&bbox=&srs=EPSG:28350',
+    'http://13.211.217.129:8080/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=loop:500k_faults_28350&bbox={BBOX_STR}&srs=EPSG:28350&outputFormat=shape-zip',
     'QLD':
-    'http://13.211.217.129:8080/geoserver/QLD/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=QLD:qld_faults_folds_28355&bbox=&srsName=EPSG:28355',
+    'http://13.211.217.129:8080/geoserver/QLD/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=QLD:qld_faults_folds_28355&bbox={BBOX_STR}&srsName=EPSG:28355&outputFormat=shape-zip',
     'SA':
-    'http://13.211.217.129:8080/geoserver/SA/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=SA:2m_linear_structures_28354&bbox=&srs=EPSG:28354',
+    'http://13.211.217.129:8080/geoserver/SA/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=SA:2m_linear_structures_28354&bbox={BBOX_STR}&srs=EPSG:28354&outputFormat=shape-zip',
     'VIC': 
-    'http://13.211.217.129:8080/geoserver/VIC/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=VIC:geolstructure_250k_ln_28355&bbox=&srs=EPSG:28355',
+    'http://13.211.217.129:8080/geoserver/VIC/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=VIC:geolstructure_250k_ln_28355&bbox={BBOX_STR}&srs=EPSG:28355&outputFormat=shape-zip',
     'NSW':  
-    'http://13.211.217.129:8080/geoserver/NSW/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=NSW:faults_joined_left_contains_drop_dups&bbox=&srs=EPSG:28355',
+    'http://13.211.217.129:8080/geoserver/NSW/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=NSW:faults_joined_left_contains_drop_dups&bbox={BBOX_STR}&srs=EPSG:28355&outputFormat=shape-zip',
     'ACT': '',
     'TAS': 
-    'http://13.211.217.129:8080/geoserver/TAS/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=TAS:geol_line_250_28355&bbox=&srs=EPSG:28355',
+    'http://13.211.217.129:8080/geoserver/TAS/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=TAS:geol_line_250_28355&bbox={BBOX_STR}&srs=EPSG:28355&outputFormat=shape-zip',
 }
 fold_loopdata = {
     'WA':
-    'http://13.211.217.129:8080/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=loop:500k_faults_28350&bbox=&srs=EPSG:28350',
+    'http://13.211.217.129:8080/geoserver/loop/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=loop:500k_faults_28350&bbox={BBOX_STR}&srs=EPSG:28350&outputFormat=shape-zip',
     'QLD':
-    'http://13.211.217.129:8080/geoserver/QLD/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=QLD:qld_faults_folds_28355&bbox=&srsName=EPSG:28355',
+    'http://13.211.217.129:8080/geoserver/QLD/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=QLD:qld_faults_folds_28355&bbox={BBOX_STR}&srsName=EPSG:28355&outputFormat=shape-zip',
     'SA':
-    'http://13.211.217.129:8080/geoserver/SA/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=SA:2m_linear_structures_28354&bbox=&srs=EPSG:28354',
+    'http://13.211.217.129:8080/geoserver/SA/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=SA:2m_linear_structures_28354&bbox={BBOX_STR}&srs=EPSG:28354&outputFormat=shape-zip',
     'VIC':     
-    'http://13.211.217.129:8080/geoserver/VIC/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=VIC:geolstructure_250k_ln_28355&bbox=&srs=EPSG:28355',
+    'http://13.211.217.129:8080/geoserver/VIC/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=VIC:geolstructure_250k_ln_28355&bbox={BBOX_STR}&srs=EPSG:28355&outputFormat=shape-zip',
     'NSW': 
-    'http://13.211.217.129:8080/geoserver/NSW/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=NSW:folds_lao&bbox=&srs=EPSG:28355',
+    'http://13.211.217.129:8080/geoserver/NSW/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=NSW:folds_lao&bbox={BBOX_STR}&srs=EPSG:28355&outputFormat=shape-zip',
     'ACT': '',
     'TAS': 
-    'http://13.211.217.129:8080/geoserver/TAS/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=TAS:geol_line_250_28355&bbox=&srs=EPSG:28355',
+    'http://13.211.217.129:8080/geoserver/TAS/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=TAS:geol_line_250_28355&bbox={BBOX_STR}&srs=EPSG:28355&outputFormat=shape-zip',
 }
 mindep_loopdata = {
     'WA':
-    'http://13.211.217.129:8080/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:mindeps_2018_28350&bbox=&srs=EPSG:28350',
+    'http://13.211.217.129:8080/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:mindeps_2018_28350&bbox={BBOX_STR}&srs=EPSG:28350&outputFormat=shape-zip',
     'QLD':
-    'http://13.211.217.129:8080/geoserver/QLD/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_mindeps_28355&bbox=&srsName=EPSG:28355',
+    'http://13.211.217.129:8080/geoserver/QLD/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=qld_mindeps_28355&bbox={BBOX_STR}&srsName=EPSG:28355&outputFormat=shape-zip',
     'SA': '',
     'VIC':
-    'http://13.211.217.129:8080/geoserver/VIC/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=VIC:mindeps_2018_28350&bbox=&srs=EPSG:28350',
+    'http://13.211.217.129:8080/geoserver/VIC/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=VIC:mindeps_2018_28350&bbox={BBOX_STR}&srs=EPSG:28350&outputFormat=shape-zip',
     'NSW': 
-    'http://13.211.217.129:8080/geoserver/NSW/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=NSW:nsw_mindeps&bbox=&srs=EPSG:28355',
+    'http://13.211.217.129:8080/geoserver/NSW/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=NSW:nsw_mindeps&bbox={BBOX_STR}&srs=EPSG:28355&outputFormat=shape-zip',
     'ACT': '',
     'TAS': 
-    'http://13.211.217.129:8080/geoserver/VIC/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=VIC:mindeps_2018_28350&bbox=&srs=EPSG:28350',
+    'http://13.211.217.129:8080/geoserver/VIC/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=VIC:mindeps_2018_28350&bbox={BBOX_STR}&srs=EPSG:28350&outputFormat=shape-zip',
 }
 metafiles = {
     'WA':
@@ -97,15 +97,11 @@ metafiles = {
 clut_paths = {
     'WA':
     'https://gist.githubusercontent.com/yohanderose/8f7e2d57db9086fbe1a7c651b9e25996/raw/9144994d162662ec015321699c3658a8dbf57def/WA_clut.csv',
-    'QLD': 
-    'https://gist.githubusercontent.com/markjessell/4fe2a14bcf408250607092aa682982e7/raw/75543541b20392b88deb8dd6292bb00bf6c570b8/ga_colours.csv',
+    'QLD': '',
     'SA':
     'https://gist.githubusercontent.com/yohanderose/c7927fa6f9a2b9e983eeec6941ad9f56/raw/253b33afee74fcb1d487ef1c12093134f31093f4/SA_clut.csv',
-    'VIC': 
-    'https://gist.githubusercontent.com/markjessell/4fe2a14bcf408250607092aa682982e7/raw/75543541b20392b88deb8dd6292bb00bf6c570b8/ga_colours.csv',
-    'NSW': 
-    'https://gist.githubusercontent.com/markjessell/4fe2a14bcf408250607092aa682982e7/raw/75543541b20392b88deb8dd6292bb00bf6c570b8/ga_colours.csv',
+    'VIC': '',
+    'NSW': '',
     'ACT': '',
-    'TAS': 
-    'https://gist.githubusercontent.com/markjessell/4fe2a14bcf408250607092aa682982e7/raw/75543541b20392b88deb8dd6292bb00bf6c570b8/ga_colours.csv'
+    'TAS': ''
 }

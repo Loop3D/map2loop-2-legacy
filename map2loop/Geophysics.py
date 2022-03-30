@@ -321,7 +321,7 @@ def petrophysics_profile(petrophysics,geology,geol_clip,gdf,grav_long,grav_lat):
 
     petrophysics['unitname']=petrophysics.index
     geol_clip=geol_clip.merge(petrophysics,on='unitname')
-    petro_profile_mag=gpd.sjoin(gdf, geol_clip, how="left", op="within")
+    petro_profile_mag=gpd.sjoin(gdf, geol_clip, how="left", predicate="within")
     grav_ll=zip(grav_long,grav_lat)
     l_den = [Point(i[0],i[1]) for i in grav_ll]
 
@@ -329,9 +329,9 @@ def petrophysics_profile(petrophysics,geology,geol_clip,gdf,grav_long,grav_lat):
 
     gdf_den = GeoDataFrame(np.zeros(len(grav_long)), crs='EPSG:4326', geometry=l_den)
     gdf_den=gdf_den.to_crs('EPSG:28350')
-    geol_code = gpd.sjoin(gdf_den, geology, how="left", op="within")
+    geol_code = gpd.sjoin(gdf_den, geology, how="left", predicate="within")
 
-    petro_profile_den=gpd.sjoin(gdf_den, geol_clip, how="left", op="within")
+    petro_profile_den=gpd.sjoin(gdf_den, geol_clip, how="left", predicate="within")
     
     return(petrophysics,geol_clip,petro_profile_mag,petro_profile_den,geol_code)
 
