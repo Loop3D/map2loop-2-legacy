@@ -88,7 +88,10 @@ class MapData:
         if self.filenames[datatype] != filename:
             self.filenames[datatype] = filename
             self.data_states[datatype] = Datastate.UNLOADED
-            self.dirtyflags[datatype] = True
+            if filename == '':
+                self.dirtyflags[datatype] = False
+            else:
+                self.dirtyflags[datatype] = True
 
     @beartype.beartype
     def get_filename(self,datatype:Datatype):
@@ -327,22 +330,22 @@ class MapData:
             # print(sub_geol, self.config.geology_filename_wkt, self.config.c_l, hint_flag)
             Topology.save_geol_wkt(sub_geol, self.config.geology_filename_wkt, self.config.c_l, hint_flag, self.config.verbose_level)
         else:
-            print(f"Cannot export geology data as it only loaded to {self.data_states[Datatype.GEOLOGY]} status")
+            print(f"Cannot export geology data as it only loaded to {self.data_states[Datatype.GEOLOGY].name} status")
 
         # Check mineral deposits data status and export to a WKT format file
         if self.dirtyflags[Datatype.MINERAL_DEPOSIT] == True:
             self.load_map_data(Datatype.MINERAL_DEPOSIT)
-        if self.data_states[Datatype.MINERAL_DEPOSIT] == Datastate.COMPLETE:
+        if self.get_filename(Datatype.MINERAL_DEPOSIT) == "":
+            pass
+        elif self.data_states[Datatype.MINERAL_DEPOSIT] == Datastate.COMPLETE:
             mindeps = self.get_map_data(Datatype.MINERAL_DEPOSIT)
             if mindeps is not None:
                 columns = ['geometry', self.config.c_l['msc'], self.config.c_l['msn'], self.config.c_l['mst'],
                     self.config.c_l['mtc'], self.config.c_l['mscm'], self.config.c_l['mcom']]
                 sub_mindep = mindeps[columns]
                 Topology.save_mindep_wkt(sub_mindep, self.config.mindep_filename_wkt, self.config.c_l)
-        elif self.get_filename(Datatype.MINERAL_DEPOSIT) == "":
-            pass
         else:
-            print(f"Cannot export mineral deposit data as it only loaded to {self.data_states[Datatype.MINERAL_DEPOSIT]} status")
+            print(f"Cannot export mineral deposit data as it only loaded to {self.data_states[Datatype.MINERAL_DEPOSIT].name} status")
 
 
         # Check structure data status and export to a WKT format file
@@ -354,7 +357,7 @@ class MapData:
             sub_pts = orientations[columns]
             Topology.save_structure_wkt(sub_pts, self.config.structure_filename_wkt, self.config.c_l)
         else:
-            print(f"Cannot export structure data as it only loaded to {self.data_states[Datatype.STRUCTURE]} status")
+            print(f"Cannot export structure data as it only loaded to {self.data_states[Datatype.STRUCTURE].name} status")
 
         # Check faults data status and export to a WKT format file
         if self.dirtyflags[Datatype.FAULT] == True:
@@ -365,7 +368,7 @@ class MapData:
             sub_lines = faults[columns]
             Topology.save_faults_wkt(sub_lines, self.config.fault_filename_wkt, self.config.c_l)
         else:
-            print(f"Cannot export fault data as it only loaded to {self.data_states[Datatype.FAULT]} status")
+            print(f"Cannot export fault data as it only loaded to {self.data_states[Datatype.FAULT].name} status")
 
     def load_dtm(self):
         source = self.filenames[Datatype.DTM]

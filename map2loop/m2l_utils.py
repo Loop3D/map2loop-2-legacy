@@ -942,7 +942,7 @@ def plot_bedding_stereonets(config, map_data):
     orientations = map_data.get_map_data(Datatype.STRUCTURE).copy()
     is_bed = orientations[config.c_l['sf']].str.contains(config.c_l['bedding'], regex=False)
 
-    orientations = orientations[is_bed] 
+    orientations = orientations[is_bed]
     groups = geology[config.c_l['g']].unique()
     codes = geology[config.c_l['c']].unique()
     if config.verbose_level != VerboseLevel.NONE:
@@ -1229,7 +1229,7 @@ def save_dtm_ascii(dtm_path):
             header.write('{},{},{},{}\n'.format(pixelx,pixely,band1.shape[0],band1.shape[1]))
             header.write('{},{},{},{}\n'.format(dtm.bounds.left,dtm.bounds.bottom,dtm.bounds.right,dtm.bounds.top))
         band1=band1.T
-    
+
         band1.tofile(os.path.join(dtm_path,'dtm_rp.csv'), sep = ',')
 
 def save_parameters(model_name,vtk_model_path,proj,foliation_params,fault_params,st_bbox,m2lv,LSv):
@@ -1245,7 +1245,7 @@ def save_parameters(model_name,vtk_model_path,proj,foliation_params,fault_params
     f.write('workflow: '+str(proj.workflow).replace(", '",",\n'")+'\n')
     f.write('bbox_LL: '+str(st_bbox)+'\n')
     f.write('bbox_3d: '+str(proj.config.bbox_3d)+'\n')
-    f.write('proj_crs: '+str(proj.config.proj_crs)+'\n')  
+    f.write('proj_crs: '+str(proj.config.proj_crs)+'\n')
     f.write('geology_layer: '+str(proj.geology_file)+'\n')
     f.write('dtm_layer: '+str(proj.dtm_file)+'\n')
     f.write('fault_layer: '+str(proj.fault_file)+'\n')
@@ -1260,7 +1260,7 @@ def save_parameters(model_name,vtk_model_path,proj,foliation_params,fault_params
     f.write('foliation_params: '+str(foliation_params)+'\n')
     f.close()
 
-timer_decorator_enabled = True
+timer_decorator_enabled = False
 def timer_decorator(func):
     @functools.wraps(func)
     def decorator(*args,**kwargs):

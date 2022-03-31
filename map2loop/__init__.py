@@ -41,7 +41,7 @@ fault_loopdata = {
     'QLD':
     'http://13.211.217.129:8080/geoserver/QLD/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=QLD:qld_faults_folds_28355&bbox={BBOX_STR}&srsName=EPSG:28355&outputFormat=shape-zip',
     'SA':
-    'http://13.211.217.129:8080/geoserver/SA/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=SA:2m_linear_structures_28354&bbox={BBOX_STR}&srs=EPSG:28354&outputFormat=shape-zip',
+    'http://13.211.217.129:8080/geoserver/SA/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=SA:2m_linear_structures&bbox={BBOX_STR}&srs=EPSG:28354&outputFormat=shape-zip',
     'VIC': 
     'http://13.211.217.129:8080/geoserver/VIC/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=VIC:geolstructure_250k_ln_28355&bbox={BBOX_STR}&srs=EPSG:28355&outputFormat=shape-zip',
     'NSW':  
@@ -56,7 +56,7 @@ fold_loopdata = {
     'QLD':
     'http://13.211.217.129:8080/geoserver/QLD/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=QLD:qld_faults_folds_28355&bbox={BBOX_STR}&srsName=EPSG:28355&outputFormat=shape-zip',
     'SA':
-    'http://13.211.217.129:8080/geoserver/SA/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=SA:2m_linear_structures_28354&bbox={BBOX_STR}&srs=EPSG:28354&outputFormat=shape-zip',
+    'http://13.211.217.129:8080/geoserver/SA/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=SA:2m_linear_structures&bbox={BBOX_STR}&srs=EPSG:28354&outputFormat=shape-zip',
     'VIC':     
     'http://13.211.217.129:8080/geoserver/VIC/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=VIC:geolstructure_250k_ln_28355&bbox={BBOX_STR}&srs=EPSG:28355&outputFormat=shape-zip',
     'NSW': 

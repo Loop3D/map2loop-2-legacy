@@ -65,7 +65,7 @@ class Project(object):
         quiet: string, optional, deprecated
             A filter for turning off matplotlib graphs and log output to console, defaults to "None" (options "None", "no-figures", "All")
         verbose_level: m2l_enums.VerboseLevel, optional
-             An enum to set the filter for turning off matplotlib graphs and log output to console, defaults to VerboseLevel.ALL 
+             An enum to set the filter for turning off matplotlib graphs and log output to console, defaults to VerboseLevel.ALL
         project_path: string, optional
             The path to store temporary project data, defaults to ".\\m2l_data"
         overwrite: string, optional
@@ -138,7 +138,7 @@ class Project(object):
             self.map_data.set_filename(Datatype.METADATA,metafiles[self.state])
             self.map_data.set_filename(Datatype.DTM,"AU")
 
-        # Set or replace filenames with incoming filenames 
+        # Set or replace filenames with incoming filenames
         if geology_filename != "":
             self.map_data.set_filename(Datatype.GEOLOGY,geology_filename)
         if structure_filename != "":
@@ -243,7 +243,7 @@ class Project(object):
         # Make matplotlib comply with interface/cmd line window managers
         import matplotlib
 
-        # Put Qt4Agg last as it includes GPL code through pyqt 
+        # Put Qt4Agg last as it includes GPL code through pyqt
         # and is not included in Loop distributions
         gui_env = ["PS", "TkAgg", "GTK3Agg", "WXAgg", "Qt4Agg"]
         all_backends = list(set([*gui_env, *matplotlib.rcsetup.all_backends]))
@@ -359,7 +359,7 @@ class Project(object):
 
         if overwrite != None:
             warnings.warn('NOTE: the "overwrite" parameter has moved from the update_config function to the project initialisation call')
-        
+
         if self.errorState != ErrorState.NONE:
             print("ERROR: Error state -", self.errorStateMsg)
             return
@@ -380,7 +380,7 @@ class Project(object):
         if bbox_valid == False:
             print("Invalid bounding box specified, attempting to get one from the map files")
             bbox_3d, project_crs = self.map_data.calculate_bounding_box_and_projection()
-        
+
         if bbox_3d is None:
             bbox_3d = {'minx':0,'maxx':1000,',miny':0,'maxy':1000,'base':-10000,'top':1200}
         if project_crs is None:
@@ -431,7 +431,7 @@ class Project(object):
             print("ERROR: Error state set at ", self.errorStateMsg)
             return
 
-        # set orientation/structure data to recreate with dirty flag and unloaded state 
+        # set orientation/structure data to recreate with dirty flag and unloaded state
         # because half way through run process (merge_structure_with geology)
         # the geopandas is fundamentally changed which breaks export_wkt_format_files call
         # TODO: Fix so that both version of orientations are possible without reloading the file
@@ -476,7 +476,7 @@ class Project(object):
             self.__process_plutons()
             pbar.update(10) #80%
 
-            # Seismic section 
+            # Seismic section
             if (self.workflow['seismic_section']):
                 self.__extract_section_features()
 
@@ -497,11 +497,11 @@ class Project(object):
             self.config.save_cmap(self.workflow)
 
             point_data=m2l_geometry.combine_point_data(self.config.output_path,self.config.tmp_path)
-            
+
             Gloop = Topology.make_Loop_graph(self.config, self.map_data, point_data)
             nx.write_gml(Gloop, os.path.join(self.config.output_path,'loop.gml'))
             Topology.colour_Loop_graph(self.config.output_path,'loop')
-            
+
             # TODO: Fix map2graph and make it a proper object
             if(self.config.run_flags['map2graph']):
                 try:
@@ -520,7 +520,7 @@ class Project(object):
                         self.config.run_flags['formation_formation_weight'],
                         self.config.run_flags['fault_formation_weight'])
                 except:
-                    print("Topology.map2graph failed")          
+                    print("Topology.map2graph failed")
 
             # TODO: Fix map2graph and make it a proper object
             if(self.config.run_flags['granular_map2graph']):
@@ -538,7 +538,7 @@ class Project(object):
                         self.config.run_flags['formation_formation_weight'],
                         self.config.run_flags['fault_formation_weight'])
                 except:
-                    print("Topology.granular_map2graph failed")          
+                    print("Topology.granular_map2graph failed")
 
             m2l_geometry.update_fault_layer(self.config, self.map_data)
 
@@ -557,7 +557,7 @@ class Project(object):
         mindep_filename = ""
         if self.map_data.get_map_data(Datatype.MINERAL_DEPOSIT) is not None:
             mindep_filename = self.config.mindep_filename_wkt
- 
+
         # TODO: Simplify. Note: this is external so have to match fix to map2model module
         run_log = map2model.run(self.config.graph_path,
                                 self.config.geology_filename_wkt,
@@ -629,7 +629,7 @@ class Project(object):
         dip_dir_grid = np.ones((y, x))
         dip_dir_grid = dip_dir_grid * -999
         contact_grid = np.ones((y, x))
-        contact_grid = contact_grid * -999        
+        contact_grid = contact_grid * -999
         polarity_grid = np.ones((y, x))
         polarity_grid = polarity_grid * -999
         for i, row in combo_interp.iterrows():

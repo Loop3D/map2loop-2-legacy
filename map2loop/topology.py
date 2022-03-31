@@ -585,7 +585,7 @@ class Topology(object):
                         if(uf_array[i, k] == 1):
                             sg_array[supergroups.loc[summary.loc[ind]['supergroup']]['index'],k]=1
 
-                            
+
             i=i+1
 
         sg = open(os.path.join(config.output_path, 'supergroup-fault-relationships.csv'), 'w')
@@ -600,8 +600,8 @@ class Topology(object):
 
                 sg.write(','+str(sg_array[sgroups['index'],i]))
             sg.write("\n")
-            
-        sg.close()        
+
+        sg.close()
 
         uf = open(os.path.join(config.graph_path, 'fault-fault-intersection.txt'), 'r')
         contents = uf.readlines()
@@ -672,18 +672,18 @@ class Topology(object):
             ff.write('\n')
 
         ff.close()
- 
+
         if config.verbose_level == VerboseLevel.ALL and len(unique_list_ff) > 0:
             import matplotlib.pyplot as plt
             fig, ax = plt.subplots()
             nx.draw(G, ax=ax, with_labels=True, font_weight='bold')
             plt.title("Fault Network")
             plt.show()
-        
+
         GD = G.copy()
         edges = list(G.edges)
         cycles = list(nx.simple_cycles(G))
- 
+
         for i in range(0, len(edges)):  # remove first edge from fault cycle
             for j in range(0, len(cycles)):
                 if (edges[i][0] == cycles[j][0]
@@ -721,11 +721,11 @@ class Topology(object):
         f.write('fault_1,fault_2,angle,topol\n')
         for e in GD.edges():
             f.write('{},{},{},{}\n'.format(e[0],e[1],GD[e[0]][e[1]]['angle'],GD[e[0]][e[1]]['topol']))
-        f.close() 
+        f.close()
 
         if config.verbose_level != VerboseLevel.NONE:
             print('edges saved as :',os.path.join(config.tmp_path, "fault_network_edges.csv"))
-        
+
         try:
             if config.verbose_level != VerboseLevel.NONE:
                 print('cycles', list(nx.simple_cycles(GD)))
@@ -1010,17 +1010,17 @@ class Topology(object):
                                    'Group', 'Super_Group', 'l', 'm', 'n'])
         super_group.set_index('Group', inplace=True)
 
-        # geol = gpd.read_file(os.path.join(config.tmp_path, 'geol_clip.shp')) 
+        # geol = gpd.read_file(os.path.join(config.tmp_path, 'geol_clip.shp'))
         local_geol = map_data.get_map_data(Datatype.GEOLOGY).copy()
         local_geol.drop_duplicates(subset=config.c_l['c'], keep="first",inplace=True)
         local_geol=local_geol.set_index(config.c_l['g'])
-        
+
         sg_index = 0
         for i in range(0, len(group_girdle)):
-            #if(config.c_l['intrusive'] in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][config.c_l['r1']] 
+            #if(config.c_l['intrusive'] in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][config.c_l['r1']]
             #and config.c_l['sill'] not in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][config.c_l['ds']]):
             if group_girdle.iloc[i].name in local_geol[config.c_l['c']]:
-                if(config.c_l['intrusive'] in local_geol.loc[group_girdle.iloc[i].name][config.c_l['r1']] 
+                if(config.c_l['intrusive'] in local_geol.loc[group_girdle.iloc[i].name][config.c_l['r1']]
                 and config.c_l['sill'] not in local_geol.loc[group_girdle.iloc[i].name][config.c_l['ds']]):
                     sg_index = sg_index+1
                     sgname = 'Super_Group_'+str(sg_index)
@@ -1084,7 +1084,7 @@ class Topology(object):
                 if(s == sg['Super_Group']):
                     temp.append(ind)
             super_groups.append(temp)
- 
+
         f = open(os.path.join(config.tmp_path, 'super_groups.csv'), 'w')
         for sg in super_groups:
             for s in sg:
@@ -1152,7 +1152,7 @@ class Topology(object):
             print('no cycles')
 
         nx.write_gml(Gp, os.path.join(graph_path, 'ASUD_strat.gml'))
-    
+
     ####################################
     # combine multiple outputs into single graph that contains all infor needed by LoopStructural
     #
@@ -1188,7 +1188,7 @@ class Topology(object):
                                     NumberInGroup=s['number in group'],
                                     MinAge=strats.loc[s.name][config.c_l['min']],
                                     MaxAge=strats.loc[s.name][config.c_l['max']]
-                                    
+
                         )
             else:
                 Gloop.add_node(s.name,s_colour=s['colour'],ntype="formation",
@@ -1200,10 +1200,10 @@ class Topology(object):
                                     NumberInGroup=s['number in group'],
                                     MinAge=0,
                                     MaxAge=1
-                                    
+
                         )
 
-        
+
         # add formation-formation stratigraphy to graph as edges
         i=0
         for ind,s in Astrat.iterrows():
@@ -1217,7 +1217,7 @@ class Topology(object):
         for ind,f in Af_d.iterrows():
             Gloop.add_node(f['Fault'],ntype="fault")
 
-        #add fault centroid to node     
+        #add fault centroid to node
         Afgeom = pd.read_csv(os.path.join(config.output_path, 'faults.csv'), sep=",")
 
         pd.to_numeric(Afgeom["X"], downcast="float")
@@ -1236,8 +1236,8 @@ class Topology(object):
             Gloop[e[0]][e[1]]['Angle']=Gf.edges[e]['angle']
             Gloop[e[0]][e[1]]['Topol']=Gf.edges[e]['topol']
             Gloop[e[0]][e[1]]['etype']='fault_fault'
-        
-                    
+
+
         #add fault dimension info to fault nodes
         Af_d = pd.read_csv(os.path.join(config.output_path, 'fault_dimensions.csv'), sep=",")
         fault_l=pd.DataFrame(Af_d['Fault'])
@@ -1268,34 +1268,34 @@ class Topology(object):
             r_90_dip=np.radians(90-dip)
             sin_dd=np.sin(r_dd)
             cos_dd=np.cos(r_dd)
-            
+
             cos_90_dip=np.cos(r_90_dip)
             sin_90_dip=np.sin(r_90_dip)
-            
+
             l=sin_dd*cos_90_dip
             m=cos_dd*cos_90_dip
             n=sin_90_dip
             return(l, m, n)
 
-        l,m,n=convert_dd_lmn(Af_o['dip'],Af_o['DipDirection']) 
+        l,m,n=convert_dd_lmn(Af_o['dip'],Af_o['DipDirection'])
         faults=pd.DataFrame(l,columns=['l'])
         faults['m']=m
-        faults['n']=n    
+        faults['n']=n
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             if(len(Af_d)>=config.run_flags['fault_orientation_clusters']):
                 k_means_o = cluster.KMeans(n_clusters=config.run_flags['fault_orientation_clusters'], max_iter=50, random_state=1)
-                k_means_o.fit(faults) 
+                k_means_o.fit(faults)
                 labels_o = k_means_o.labels_
                 clusters_o=pd.DataFrame(labels_o, columns=['cluster_o'])
 
             if(len(Af_d)>=config.run_flags['fault_length_clusters']):
                 k_means_l = cluster.KMeans(n_clusters=config.run_flags['fault_length_clusters'], max_iter=50, random_state=1)
-                k_means_l.fit(fault_l) 
+                k_means_l.fit(fault_l)
                 labels_l = k_means_l.labels_
                 clusters_l=pd.DataFrame(labels_l, columns=['cluster_l'])
- 
+
         Af_o=Af_o.reset_index()
         if(len(Af_d)>=config.run_flags['fault_orientation_clusters']):
             Af_o['cluster_o']=clusters_o['cluster_o']
@@ -1317,10 +1317,10 @@ class Topology(object):
                         Gloop.nodes[n]['LengthCluster']=Af_o.loc[n]['cluster_l']
                     else:
                         Gloop.nodes[n]['LengthCluster']=-1
-                       
-        
+
+
         #add centrality measures to fault nodes
-        
+
         Gfcc=nx.closeness_centrality(Gf)
         Gfbc=nx.betweenness_centrality(Gf)
 
@@ -1333,14 +1333,14 @@ class Topology(object):
                     Gloop.nodes[n]['ClosenessCentrality']=-1
                     Gloop.nodes[n]['BetweennessCentrality']=-1
 
-        
+
 
         #add formation thickness info to formation nodes
         As_t = pd.read_csv(os.path.join(config.output_path, 'formation_summary_thicknesses.csv'), sep=",")
         As_t=As_t.set_index('formation')
 
         for n in Gloop.nodes:
-            if(not "Fault" in n and not "Point_data" in n):   
+            if(not "Fault" in n and not "Point_data" in n):
                 if( As_t.loc[n].name in Gloop.nodes):
                     if(np.isnan(As_t.loc[n]['thickness std'])):
                         Gloop.nodes[n]['ThicknessStd']=-1
@@ -1396,10 +1396,10 @@ class Topology(object):
                             Gloop.add_edge(supergroups[g],g+'_gp')
                             Gloop[supergroups[g]][g+'_gp']['etype']='supergroup_group'
                 sgi += 1
-        
+
         # add all geolocated data to a single unconnected node
         Gloop.add_node('Point_data',ntype='points',data=point_data)
-        
+
         with map_data.get_map_data(Datatype.DTM).open() as dtm:
             dtm_data = dtm.read(1)
             bounds = dtm.bounds
@@ -1411,9 +1411,9 @@ class Topology(object):
             yscale = (maxy-miny)/dtm_data.shape[0]
             Gloop.add_node('DTM_data',ntype='dtm',data=str(dtm_data.tolist()),shape=str(dtm_data.shape),
                             minx=minx,miny=miny,maxx=maxx,maxy=maxy,xscale=xscale,yscale=yscale)
-        
+
         Gloop.add_node('bbox',ntype='bbox',data=str(config.bbox))
-        
+
         Gloop.add_node('dst_crs',ntype='dst_crs',data=str(map_data.working_projection))
 
         config_metadata={
@@ -1434,8 +1434,8 @@ class Topology(object):
             'local':config.local
         }
         Gloop.add_node('metadata',ntype='metadata',run_flags=str(config.run_flags),c_l=str(config.c_l),config=str(config_metadata))
-        return(Gloop)        
-    
+        return(Gloop)
+
     def colour_Loop_graph(output_path,prefix):
         with open(os.path.join(output_path,prefix+'.gml')) as graph:
             new_graph=open(os.path.join(output_path,prefix+'_colour.gml'),"w")
@@ -1485,7 +1485,7 @@ class Topology(object):
     ####################################
 
     def make_complete_Loop_graph(Gloop,tmp_path,output_path,fault_orientation_clusters,fault_length_clusters,point_data,dtm_file,dst_crs,c_l,run_flags,config,bbox):
-        
+
 
         #add group-fault edges to graph
         Af_s = pd.read_csv(os.path.join(output_path, 'unit-fault-relationships.csv'), sep=",")
