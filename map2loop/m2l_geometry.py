@@ -57,7 +57,8 @@ def save_orientations(config:Config, map_data:MapData, workflow):
     dtb_null = map_data.dtb_null
     is_bed = structures[config.c_l['sf']].str.contains(config.c_l['bedding'], regex=False)
 
-    structure_clip = structures[is_bed]    
+    structure_clip = structures[is_bed] 
+    print(structure_clip.columns)   
     i = 0
     f = open(os.path.join(config.output_path, 'orientations.csv'), "w")
     f.write("X,Y,Z,azimuth,dip,polarity,formation\n")
@@ -782,7 +783,7 @@ def save_faults(config:Config, map_data:MapData, workflow:dict):
                         fault_dip = 90.0
                         # null specifc dip defined
                         #print(config.c_l['fdipdir_flag'] ,str(flt[config.c_l['fdipdir']]), int(flt[config.c_l['fdip']]) , int(config.c_l['fdipnull']),str(flt[config.c_l['fdipest']]),config.run_flags['fault_dip'])
-                        if(int(flt[config.c_l['fdip']]) == int(config.c_l['fdipnull'])):
+                        if(int(float(flt[config.c_l['fdip']])) == int(float(config.c_l['fdipnull']))):
                             # dip estimate defined
                             if(not str(flt[config.c_l['fdipest']]) == '-999'):
                                 #print("1")
@@ -805,27 +806,32 @@ def save_faults(config:Config, map_data:MapData, workflow:dict):
                         else:
                             #print("4")
                             # specific dip defined
-                            fault_dip = int(flt[config.c_l['fdip']])
+                            fault_dip = int(float(flt[config.c_l['fdip']]))
 
-                        
                         # numeric dip direction defined
-                        if(config.c_l['fdipdir_flag'] == 'num' and not str(flt[config.c_l['fdipdir']]) == 'None' and not str(int(flt[config.c_l['fdipdir']])) == config.c_l['fdipnull']):
-                            azimuth = flt[config.c_l['fdipdir']]
+                        if(config.c_l['fdipdir_flag'] == 'num'):
+                            if pd.notna(flt[config.c_l['fdipdir']]):
+                                azimuth = flt[config.c_l['fdipdir']]
+                            else:
+                                azimuth=azimuth_fault                            
+
                         # alpha dip direction defined or no numeric dd defined
                         elif(flt[config.c_l['fdip']] == -999 or config.run_flags['fault_dip'] == -999):
                             #print('az_before',fault_name,azimuth_fault)
                             azimuth = (azimuth_fault+(180*random.randint(0,1)))%360
                             #print('az_after',fault_name,azimuth)
-                        elif (not str(flt[config.c_l['fdipdir']]) == 'None' and not str(int(flt[config.c_l['fdip']])) == config.c_l['fdipnull']):
+                            # TODO: Fix comparison of str version of two floats are comparing floats is very inaccurate
+                            #       Also if this logic works 'lsx' is not defined at this point
+                        elif (not str(flt[config.c_l['fdipdir']]) == 'None' and not str(float(flt[config.c_l['fdip']])) == str(float(config.c_l['fdipnull']))):
                             dotprod = degrees(acos(
                                 (-lsx*dip_dirs[flt[config.c_l['fdipdir']]][0])+(lsy*dip_dirs[flt[config.c_l['fdipdir']]][1])))
                             if(dotprod > 45):
                                 fault_dip = -fault_dip
                         else:
                             azimuth=azimuth_fault
-                        
+
                         l,m,n=m2l_utils.ddd2dircos((90-fault_dip),azimuth)
-                        #print('fault_name,l,m,n,azimuth_fault,dip',fault_name,l,m,n,azimuth,fault_dip) 
+                        #print('fault_name,l,m,n,azimuth_fault,dip',fault_name,l,m,n,azimuth,fault_dip)
                         first = True
                         incLength = 0
                         for afs in flt_ls.coords:
@@ -898,7 +904,7 @@ def save_faults(config:Config, map_data:MapData, workflow:dict):
                                 # ostr = str(afs[0])+","+str(afs[1])+","+str(height)+","+fault_name+"\n"
                                 f.write(ostr)
                             i = i+1
-                        
+
                         strike = strike*1.25
                         r = random.randint(1, 256)-1
                         g = random.randint(1, 256)-1
@@ -3423,7 +3429,7 @@ def save_basal_contacts_orientations_csv(config:Config, map_data:MapData, workfl
                     print('other basal contact geom ignored',contact.geometry.type)
     f.close()
     fp.close()
-
+    
 
 def process_sills(output_path, geol_clip, dtm, dtb, dtb_null, cover_map, contact_decimate, c_l, dip_grid, x, y, spacing, bbox, buffer):
 

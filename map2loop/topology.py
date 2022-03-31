@@ -534,12 +534,12 @@ class Topology(object):
 
         ug = open(os.path.join(config.output_path, 'group-fault-relationships.csv'), 'w')
         ug.write('group')
-        for k in range(1, len(uf_rel.iloc[0])):
+        for k in range(1, len(uf_rel.columns)):
             ug.write(','+uf_rel.columns[k])
         ug.write("\n")
         for i in range(0, ngroups):
             ug.write(groups[i].replace("\n", ""))
-            for k in range(1, len(uf_rel.iloc[0])):
+            for k in range(1, len(uf_rel.columns)):
                 if(gf_array[i-1, k] == '1'):
                     ug.write(',1')
                 else:
@@ -574,14 +574,14 @@ class Topology(object):
 
         group_faults.set_index('group',inplace=True)
         uf_array=group_faults.to_numpy()
-        sg_array=np.zeros((len(supergroups),len(uf_rel.iloc[0])-1))
+        sg_array=np.zeros((len(supergroups),len(uf_rel.columns)-1))
         supergroups.set_index(0, inplace=True)
 
         i=0
         for  ind,gp in group_faults.iterrows():
             for ind2,sgroup in summary.iterrows():
                 if(sgroup['supergroup'] == summary.loc[ind]['supergroup']):
-                    for k in range(0, len(uf_rel.iloc[0])-1):
+                    for k in range(0, len(uf_rel.columns)-1):
                         if(uf_array[i, k] == 1):
                             sg_array[supergroups.loc[summary.loc[ind]['supergroup']]['index'],k]=1
 
@@ -590,7 +590,7 @@ class Topology(object):
 
         sg = open(os.path.join(config.output_path, 'supergroup-fault-relationships.csv'), 'w')
         sg.write('supergroup')
-        for k in range(1, len(uf_rel.iloc[0])):
+        for k in range(1, len(uf_rel.columns)):
             sg.write(','+uf_rel.columns[k])
         sg.write("\n")
         for k,sgroups in supergroups.iterrows():
@@ -1002,7 +1002,7 @@ class Topology(object):
         group_girdle.columns = ['plunge', 'bearing', 'num orientations']
         group_girdle.sort_values(
             by='num orientations', ascending=False, inplace=True)
-        display(group_girdle)
+        #print(group_girdle)
 
         l, m, n = m2l_utils.ddd2dircos(
             group_girdle.iloc[0]['plunge'], group_girdle.iloc[0]['bearing'])
@@ -1023,7 +1023,6 @@ class Topology(object):
                 if(config.c_l['intrusive'] in local_geol.loc[group_girdle.iloc[i].name][config.c_l['r1']] 
                 and config.c_l['sill'] not in local_geol.loc[group_girdle.iloc[i].name][config.c_l['ds']]):
                     sg_index = sg_index+1
-                    #print('not found',sg_index)
                     sgname = 'Super_Group_'+str(sg_index)
                     super_group_new = pd.DataFrame(
                         [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
@@ -1031,6 +1030,7 @@ class Topology(object):
                     super_group = super_group.append(super_group_new)
 
                 elif(group_girdle.iloc[i]['num orientations'] > 5):
+                    #print('>5',group_girdle.iloc[i].name)
                     l, m, n = m2l_utils.ddd2dircos(
                         group_girdle.iloc[i]['plunge'], group_girdle.iloc[i]['bearing'])
 
@@ -1060,12 +1060,13 @@ class Topology(object):
                         super_group_new.set_index('Group', inplace=True)
                         super_group = super_group.append(super_group_new)
                 else:  # not enough orientations to test, so lumped with group with most orientations
+                    #print('<5',group_girdle.iloc[i].name)
                     sgname = 'Super_Group_'+str(0)
                     super_group_old = pd.DataFrame(
                         [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
                     super_group_old.set_index('Group', inplace=True)
                     super_group = super_group.append(super_group_old)
-
+        #print('super group from stereonets',super_group)
         use_gcode3 = []
         for ind, sg in super_group.iterrows():
             clean = ind.replace(" ", "_").replace("-", "_")

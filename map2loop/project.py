@@ -1,7 +1,6 @@
 from logging.handlers import WatchedFileHandler
 import shutil
 import os
-from tabnanny import verbose
 import warnings
 from tqdm import tqdm
 
@@ -550,7 +549,7 @@ class Project(object):
             pbar.update(20) #100%
 
     def update_loop_project_file(self):
-        """ A functinon to convert multiple csv and map2loop output files into a single loop project file
+        """ A function to convert multiple csv and map2loop output files into a single loop project file
         """
         m2l_export.export_to_projectfile(self.loop_project_filename, self.config)
 
