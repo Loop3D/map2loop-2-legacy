@@ -1571,9 +1571,8 @@ def interpolate_contacts_grid(contacts, calc, xcoords_group, ycoords_group):
     else:
         return(0, 0, 0)
 
-
 @beartype.beartype
-def interpolation_grids(config:Config, map_data, basal_contacts_filename:str, super_groups:list) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def interpolation_grids(config:Config, map_data, basal_contacts_filename:str, super_groups:list):# -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     geology = map_data.get_map_data(Datatype.GEOLOGY).copy()
     orientations = map_data.get_map_data(Datatype.STRUCTURE).copy()
     
