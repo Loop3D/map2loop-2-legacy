@@ -552,6 +552,7 @@ class Project(object):
         """ A function to convert multiple csv and map2loop output files into a single loop project file
         """
         m2l_export.export_to_projectfile(self.loop_project_filename, self.config)
+        self.map_data.export_dtm(os.path.join(self.project_path,"dtm","dtm_rp.tif"))
 
     def __run_map2model(self):
         mindep_filename = ""
