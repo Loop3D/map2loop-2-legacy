@@ -1027,7 +1027,7 @@ class Topology(object):
                     super_group_new = pd.DataFrame(
                         [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
                     super_group_new.set_index('Group', inplace=True)
-                    super_group = super_group.append(super_group_new)
+                    super_group = pd.concat([super_group,super_group_new])
 
                 elif(group_girdle.iloc[i]['num orientations'] > 5):
                     #print('>5',group_girdle.iloc[i].name)
@@ -1048,7 +1048,7 @@ class Topology(object):
                             super_group_old = pd.DataFrame(
                                 [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
                             super_group_old.set_index('Group', inplace=True)
-                            super_group = super_group.append(super_group_old)
+                            super_group = pd.concat([super_group,super_group_old])
                         sg_i = sg_i+1
                     if(not found):
 
@@ -1058,14 +1058,14 @@ class Topology(object):
                         super_group_new = pd.DataFrame(
                             [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
                         super_group_new.set_index('Group', inplace=True)
-                        super_group = super_group.append(super_group_new)
+                        super_group = pd.concat([super_group,super_group_new])
                 else:  # not enough orientations to test, so lumped with group with most orientations
                     #print('<5',group_girdle.iloc[i].name)
                     sgname = 'Super_Group_'+str(0)
                     super_group_old = pd.DataFrame(
                         [[group_girdle[i:i+1].index[0], sgname, l, m, n]], columns=['Group', 'Super_Group', 'l', 'm', 'n'])
                     super_group_old.set_index('Group', inplace=True)
-                    super_group = super_group.append(super_group_old)
+                    super_group = pd.concat([super_group,super_group_old])
         #print('super group from stereonets',super_group)
         use_gcode3 = []
         for ind, sg in super_group.iterrows():

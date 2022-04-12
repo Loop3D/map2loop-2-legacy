@@ -1,3 +1,4 @@
+from codecs import ignore_errors
 import os
 import sys
 import geopandas as gpd
@@ -19,15 +20,16 @@ from .config import Config
 
 # explodes polylines and modifies objectid for exploded parts
 def explode_polylines(indf, c_l, dst_crs):
-    # indf = gpd.GeoDataFrame.from_file(indata)
     outdf = gpd.GeoDataFrame(columns=indf.columns, crs=dst_crs)
     for idx, row in indf.iterrows():
         if type(row.geometry) == LineString:
-            outdf = outdf.append(row, ignore_index=True)
+            rowdf = gpd.GeoDataFrame(data=dict(row), index=[0])
+            outdf = pd.concat([outdf,rowdf],ignore_index=True)
         if type(row.geometry) == MultiLineString:
             multdf = gpd.GeoDataFrame(columns=indf.columns, crs=dst_crs)
             recs = len(row.geometry)
-            multdf = multdf.append([row]*recs, ignore_index=True)
+            rowdf = gpd.GeoDataFrame(data=dict(row), index=[0])
+            multdf = pd.concat([multdf,[rowdf]*recs], ignore_index=True)
             i = 0
             for geom in range(recs):
                 multdf.loc[geom, 'geometry'] = row.geometry[geom]
@@ -36,7 +38,7 @@ def explode_polylines(indf, c_l, dst_crs):
                 print('map2loop warning: Fault_' +
                       multdf.loc[geom, c_l['o']], 'is one of a set of duplicates, so renumbering')
                 i = i+1
-            outdf = outdf.append(multdf, ignore_index=True)
+            outdf = pd.concat([outdf,multdf], ignore_index=True)
     return outdf
 
 

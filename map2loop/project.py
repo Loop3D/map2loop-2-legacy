@@ -566,7 +566,7 @@ class Project(object):
                                 mindep_filename,
                                 self.config.bbox_3d,
                                 self.config.c_l,
-                                self.config.verbose_level != VerboseLevel.NONE,
+                                self.config.verbose_level == VerboseLevel.NONE,
                                 self.config.run_flags['deposits']
                                 )
         if self.config.verbose_level != VerboseLevel.NONE:
