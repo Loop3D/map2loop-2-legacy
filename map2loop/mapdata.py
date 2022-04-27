@@ -500,3 +500,10 @@ class MapData:
         faults = self.get_map_data(Datatype.FAULT)
         if type(faults) != None and len(faults) > 0:
             m2l_interpolation.process_fault_throw_and_near_faults_from_grid(self.config, self, workflow, dip_grid, dip_dir_grid)
+
+    @beartype.beartype
+    def export_dtm(self, filename:str):
+        with self.get_map_data(Datatype.DTM).open() as dtm:
+            if dtm != None:
+                with rasterio.open(os.path.join(filename),"w",**(dtm.profile)) as dst:
+                    dst.write(dtm.read())
