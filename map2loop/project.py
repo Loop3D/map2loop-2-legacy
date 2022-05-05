@@ -18,6 +18,8 @@ from . import (geology_loopdata, structure_loopdata, fault_loopdata, fold_loopda
                mindep_loopdata, metafiles, clut_paths, m2l_export)
 
 from .mapdata import MapData
+from .stratigraphic_column import StratigraphicColumn
+from .deformation_history import DeformationHistory
 from .config import Config
 from .m2l_enums import Datastate, Datatype, ErrorState, VerboseLevel
 
@@ -111,6 +113,8 @@ class Project(object):
         self.errorState = ErrorState.NONE
         self.errorStateMsg = ""
         self.map_data = MapData()
+        self.stratigraphicColumn = StratigraphicColumn()
+        self.deformationHistory = DeformationHistory()
 
         # Sanity check on working projection parameter
         if type(working_projection) == str:
