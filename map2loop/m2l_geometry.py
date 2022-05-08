@@ -2234,6 +2234,10 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
             fs.write(ostr)
     fs.close()
 
+    new_asc=tidy_strat(tmp_path)
+    new_asc.to_csv(os.path.join(tmp_path,'all_sorts_clean.csv'), index  =  None, header = True)
+
+
     # add colours (hardwired to GSWA or the moment
     # if(clut_path  == ''):
     # asc = pd.read_csv(os.path.join(tmp_path,'all_sorts_clean.csv'),",")
@@ -2281,6 +2285,56 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
 
     fac.close()
 """
+def tidy_strat(tmp_path):
+    asg=pd.read_csv(os.path.join(tmp_path,'age_sorted_groups.csv'))
+    asc=pd.read_csv(os.path.join(tmp_path,'all_sorts_clean.csv'))
+    
+    asg=asg.set_index('group_')
+    if asc.group.str.contains('cover').any():  # add cover row if needed
+        df = pd.DataFrame(
+        {
+          "index":-1,
+          "min": 0,
+          "max": 0,
+          "ave": 0
+        }
+         ,index=['cover']
+        )
+        asg=pd.concat([df,asg])
+    
+    ave=asg.loc[asc.group]['ave']
+    ave=pd.DataFrame(ave)
+    idx = pd.Index(range(len(ave)))
+    ave=ave.set_index(idx)
+    asc['ave']=ave['ave']    
+    
+    new_asc=asc[asc.supergroup=='-99999999999999999xyz']
+    for sg in asc.supergroup.unique():
+        asc_sg=asc[asc.supergroup==sg]
+        df2 = asc_sg.sort_values(['ave', 'index in group'],
+                  ascending = [True, True])
+        new_asc=pd.concat([new_asc,df2])
+    
+    sg_age={}
+    for sg in asc.supergroup.unique():
+        sga=asc[asc.supergroup==sg].ave.mean()
+        sg_age[sg]={'sg_ave':sga}
+    
+    sg_age_df=pd.DataFrame.from_dict(sg_age,orient='index')
+    sg_age_df=sg_age_df.sort_values('sg_ave')
+    
+    new_asc2=new_asc[new_asc.supergroup=='-99999999999999999xyz']
+    for sg,age in sg_age_df.iterrows():
+        asc_sg=new_asc[new_asc.supergroup==sg]
+        df2 = asc_sg.sort_values(['ave', 'index in group'],
+                  ascending = [True, True])
+        new_asc2=pd.concat([new_asc2,df2])
+
+    new_asc2=new_asc2.drop('ave',axis=1)
+    new_asc2=new_asc2.reset_index()
+    new_asc2=new_asc2.drop('level_0',axis=1)
+    new_asc2['index']=new_asc2.index
+    return(new_asc2)
 
 ####################################################
 # calculate distance between two points (duplicate from m2l_utils??
