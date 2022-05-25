@@ -157,128 +157,175 @@ def check_structure_map(orientations, c_l, m2l_warnings, m2l_errors, verbose_lev
         if verbose_level != VerboseLevel.NONE:
             show_metadata(orientations, "orientations layer")
     return orientations
+def _explode_intrusives(geology):
+    """Break multipart geometries of intrusions into individual features
 
-def check_geology_map(geology, c_l, drift_prefix, m2l_warnings, m2l_errors, verbose_level=VerboseLevel.ALL):
+    Parameters
+    ----------
+    geology : _type_
+        _description_
+    """
+    geol_clip_tmp=geology.copy(deep=False)
+    #print('raw',len(geol_clip_tmp))
+    geol_clip_tmp.crs=geology.crs
+    geol_clip_tmp=geol_clip_tmp.dissolve(by='UNIT_NAME',aggfunc = 'first')
+    geol_clip_tmp=geol_clip_tmp[geol_clip_tmp['ROCKTYPE1'].str.contains('INTRUSIVE') & ~geol_clip_tmp['DEPOSITION'].str.contains('SILL')]
+    #print('tmp',len(geol_clip_tmp))
+    geol_clip_tmp.reset_index(inplace=True)
+    geol_clip_tmp=geol_clip_tmp.explode(index_parts=False,ignore_index=True)
+    if('level_0' in geol_clip_tmp.columns):
+        geol_clip_tmp.drop(labels='level_0', axis=1,inplace=True)
+
+    geol_clip_tmp.reset_index(inplace=True)
+    geol_clip_not=geology[(~geology['ROCKTYPE1'].str.contains('INTRUSIVE')) | geology['DEPOSITION'].str.contains('SILL') ]
+    #print('not',len(geol_clip_not))
+    geol_clip_not.index = pd.RangeIndex(start=10000, stop=10000+len(geol_clip_not), step=1)
+    if('level_0' in geol_clip_not.columns):
+        geol_clip_not.drop(labels='level_0', axis=1,inplace=True)
+    geol_clip_not.reset_index(inplace=True)
+    geol_clip_tmp['UNIT_NAME']=geol_clip_tmp['UNIT_NAME'].astype(str)+'_'+geol_clip_tmp.index.astype(str)
+    geol_clip_tmp['GEOLOGY_FEATURE_ID']=geol_clip_tmp.index
+    geol_clip_tmp['GROUP']=geol_clip_tmp['UNIT_NAME']
+
+    geology = pd.concat([geol_clip_tmp, geol_clip_not], sort=False)
+#print('geol',len(geology))
+    # #TODO Lg- not sure what level_0/level_1 are for...
+    if('level_0' in geology.columns):
+        geology.drop(labels='level_0', axis=1,inplace=True)
+    if('level_1' in geology.columns):
+        geology.drop(labels='level_1', axis=1,inplace=True)
+    return geology
+
+
+def check_geology_map(geology, c_l={}, ignore_codes=[], m2l_warnings=[], m2l_errors=[], explode_intrusives=True, verbose_level=VerboseLevel.ALL) -> gpd.GeoDataFrame:
+    """Checks whether the geological map is valid or not, appends any errors to a string.
+
+    Parameters
+    ----------
+    geology : GeoDataFrame
+        _description_
+    c_l : dict, optional
+        dictionary for converting fields into m2l requirements, by default {}
+    ignore_codes : list, optional
+        Code or prefix of a code that are skipped by m2l, e.g. cover , by default []
+    m2l_warnings : list, optional
+        _description_, by default []
+    m2l_error : list, optional
+        _description_, by default []
+    explode_intrusives : bool, optional
+        whether to break each of the intrusions into separate features, by default True
+    verbose_level : _type_, optional
+        _description_, by default VerboseLevel.ALL
+
+    Returns
+    -------
+    gpd.GeoDataFrame
+        geology geodataframe with the corrections applied
+
+    Raises
+    ------
+    ValueError
+        Error when the geology file is none or not a geodataframe
+    ValueError
+        Error when the geology file is empty
+    """
+    new_mapping = {'c':'UNIT_NAME','u':'CODE','r1':'ROCKTYPE1','r2':'ROCKTYPE2','ds':'DEPOSITION','r2':'ROCKTYPE2','sill':'SILL',
+    'min':'MIN_AGE','max':'MAX_AGE','volcanic':'VOLCANIC','intrusive':'INTRUSIVE','g':'GROUP','o':'GEOLOGY_FEATURE_ID','g2':'GROUP2'}
     # Process geology polygons
-    if geology is not None:
-        if(not geology.empty):
-            if not c_l['o'] in geology.columns:
-                # print(geology.columns)
-                geology = geology.reset_index()
-                geology[c_l['o']] = geology.index
+    # temporary map between old c_l and new_mapping
+    geology = geology.rename(columns=dict(zip(c_l.values(),[ new_mapping[item] if item in new_mapping else item for item in c_l.keys() ])))
+    if geology is None or type(geology) != gpd.GeoDataFrame:
+        raise ValueError('geology layer not found')
+    if len(geology)==0:
+        raise ValueError('geology layer is empty')
+    if 'GEOLOGY_FEATURE_ID' not in geology.columns: #object id
+        # print(geology.columns)
+        geology = geology.reset_index()
+        geology['GEOLOGY_FEATURE_ID'] = geology.index
+    
 
-            #make each pluton its own formation and group
-            if( not c_l['r1'] in geology.columns):
-                m2l_warnings.append('No extra litho for geology polygons')
-                c_l['r1'] = 'r1'
-                geology[c_l['r1']] = 'Nope'
-            if( not c_l['ds'] in geology.columns):
-                m2l_warnings.append('No extra litho for geology polygons')
-                c_l['ds'] = 'ds'
-                geology[c_l['ds']] = 'Nope'
-            geology[c_l['r1']].fillna('not known', inplace=True)
-            geology[c_l['ds']].fillna('not known', inplace=True)
-            explode_intrusives=True
-            if(explode_intrusives):
-                geol_clip_tmp=geology.copy(deep=False)
-                #print('raw',len(geol_clip_tmp))
-                geol_clip_tmp.crs=geology.crs
-                geol_clip_tmp=geol_clip_tmp.dissolve(by=c_l['c'],aggfunc = 'first')
-                geol_clip_tmp=geol_clip_tmp[geol_clip_tmp[c_l['r1']].str.contains(c_l['intrusive']) & ~geol_clip_tmp[c_l['ds']].str.contains(c_l['sill'])]
-                #print('tmp',len(geol_clip_tmp))
-                geol_clip_tmp.reset_index(inplace=True)
-                geol_clip_tmp=geol_clip_tmp.explode(index_parts=False,ignore_index=True)
-                if('level_0' in geol_clip_tmp.columns):
-                    geol_clip_tmp.drop(labels='level_0', axis=1,inplace=True)
+    #make each pluton its own formation and group
+    if 'ROCKTYPE1' not in geology.columns: 
+        m2l_warnings.append('No extra litho for geology polygons')
+        geology['ROCKTYPE1'] = np.nan
+    if 'DEPOSITION' not in geology.columns:
+        # deposition
+        m2l_warnings.append('No extra litho for geology polygons')
+        geology['DEPOSITION'] = np.nan
+    geology['ROCKTYPE1'].fillna('not known', inplace=True)
+    geology['DEPOSITION'].fillna('not known', inplace=True)
+    
+    
+    if(explode_intrusives):
+        geology = _explode_intrusives(geology)
+        
+    
+    geology['MAX_AGE']=geology['MAX_AGE'].astype(np.float64)            
+    geology['MIN_AGE']=geology['MIN_AGE'].astype(np.float64)            
+    unique_g = set(geology['GEOLOGY_FEATURE_ID'])
+    
+    unique_c = list(set(geology['UNIT_NAME']))
+    if(len(unique_c)<2):
+        m2l_errors.append('The selected area only has one formation in it, so no model can be calculated')
 
-                geol_clip_tmp.reset_index(inplace=True)
-                geol_clip_not=geology[(~geology[c_l['r1']].str.contains(c_l['intrusive'])) | geology[c_l['ds']].str.contains(c_l['sill']) ]
-                #print('not',len(geol_clip_not))
-                geol_clip_not.index = pd.RangeIndex(start=10000, stop=10000+len(geol_clip_not), step=1)
-                if('level_0' in geol_clip_not.columns):
-                    geol_clip_not.drop(labels='level_0', axis=1,inplace=True)
-                geol_clip_not.reset_index(inplace=True)
-                geol_clip_tmp[c_l['c']]=geol_clip_tmp[c_l['c']].astype(str)+'_'+geol_clip_tmp.index.astype(str)
-                geol_clip_tmp[c_l['o']]=geol_clip_tmp.index
-                geol_clip_tmp[c_l['g']]=geol_clip_tmp[c_l['c']]
+    if(not len(unique_g) == len(geology)):
+        m2l_warnings.append('duplicate geology polygon unique IDs')
 
-                geology = pd.concat([geol_clip_tmp, geol_clip_not], sort=False)
-            #print('geol',len(geology))
-                if('level_0' in geology.columns):
-                    geology.drop(labels='level_0', axis=1,inplace=True)
-                if('level_1' in geology.columns):
-                    geology.drop(labels='level_1', axis=1,inplace=True)
-            
-            geology[c_l['max']]=geology[c_l['max']].astype(np.float64)            
-            geology[c_l['min']]=geology[c_l['min']].astype(np.float64)            
-            unique_g = set(geology[c_l['o']])
-            
-            unique_c = list(set(geology[c_l['c']]))
-            if(len(unique_c)<2):
-                m2l_errors.append('The selected area only has one formation in it, so no model can be calculated')
+    nans = geology['UNIT_NAME'].isnull().sum()
+    if(nans > 0):
+        m2l_errors.append(''+str(nans)+' NaN/blank found in column "' +
+                            str('UNIT_NAME')+'" of geology file, please fix')
 
-            if(not len(unique_g) == len(geology)):
-                m2l_warnings.append('duplicate geology polygon unique IDs')
+    if('GROUP' == 'No_col' or not 'GROUP' in geology.columns):
+        m2l_warnings.append(
+            'No secondary strat coding for geology polygons')
+        geology['GROUP'] = "Top"
+    #print(geology.columns)
+    geology = geology.replace(r'^\s+$', np.nan, regex=True)
+    geology = geology.replace(',', ' ', regex=True)
+    geology['GROUP'].fillna(geology['GROUP2'], inplace=True)
+    geology['GROUP'].fillna(geology['UNIT_NAME'], inplace=True)
 
-            nans = geology[c_l['c']].isnull().sum()
+
+    if('ROCKTYPE2' == 'No_col' or not 'ROCKTYPE2' in geology.columns):
+        m2l_warnings.append('No more extra litho for geology polygons')
+        geology['ROCKTYPE2'] = 'Nope'
+
+    if('MIN_AGE' not in geology.columns):
+        m2l_warnings.append('No min age for geology polygons')
+        geology['MIN_AGE'] = 0
+
+    if('MAX_AGE' not in geology.columns):
+        m2l_warnings.append('No max age for geology polygons')
+        geology['MAX_AGE'] = 100
+
+    if('UNIT_NAME' not in geology.columns):
+        m2l_errors.append(
+            'Must have primary strat coding field for geology polygons')
+
+    for code in ('UNIT_NAME', 'GROUP', 'g2', 'DEPOSITION', 'u', 'ROCKTYPE1'):
+        if(code in geology.columns):
+
+            geology[code].str.replace(",", " ")
+            if(code == 'UNIT_NAME' or code == 'GROUP' or code == 'g2'):
+                geology[code]=geology[code].str.replace("[ -\?]", "_",regex=True)
+                # geology[c_l[code]]=geology[c_l[code]].str.replace("-", "_")
+                # geology[c_l[code]]=geology[c_l[code]].str.replace("?", "_",regex=False)
+
+            nans = geology[code].isnull().sum()
             if(nans > 0):
-                m2l_errors.append(''+str(nans)+' NaN/blank found in column "' +
-                                  str(c_l['c'])+'" of geology file, please fix')
+                m2l_warnings.append(''+str(nans)+' NaN/blank found in column "'+str(
+                    code)+'" of geology file, replacing with 0')
+                geology[code].fillna("0", inplace=True)
+    # print('drift_prefix',drift_prefix)
+    for code in ignore_codes:
+        # print('drift',drift)
+        geology = geology[~geology['CODE'].str.startswith(code)]
 
-            if(c_l['g'] == 'No_col' or not c_l['g'] in geology.columns):
-                m2l_warnings.append(
-                    'No secondary strat coding for geology polygons')
-                c_l['g'] = 'group'
-                geology[c_l['g']] = "Top"
-            #print(geology.columns)
-            geology = geology.replace(r'^\s+$', np.nan, regex=True)
-            geology = geology.replace(',', ' ', regex=True)
-            geology[c_l['g']].fillna(geology[c_l['g2']], inplace=True)
-            geology[c_l['g']].fillna(geology[c_l['c']], inplace=True)
-
-
-            if(c_l['r2'] == 'No_col' or not c_l['r2'] in geology.columns):
-                m2l_warnings.append('No more extra litho for geology polygons')
-                c_l['r2'] = 'r2'
-                geology[c_l['r2']] = 'Nope'
-
-            if(c_l['min'] == 'No_col' or not c_l['min'] in geology.columns):
-                m2l_warnings.append('No min age for geology polygons')
-                c_l['min'] = 'min'
-                geology[c_l['min']] = 0
-
-            if(c_l['max'] == 'No_col' or not c_l['max'] in geology.columns):
-                m2l_warnings.append('No max age for geology polygons')
-                c_l['max'] = 'max'
-                geology[c_l['max']] = 100
-
-            if(c_l['c'] == 'No_col' or not c_l['c'] in geology.columns):
-                m2l_errors.append(
-                    'Must have primary strat coding field for geology polygons')
-
-            for code in ('c', 'g', 'g2', 'ds', 'u', 'r1'):
-                if(c_l[code] in geology.columns):
-
-                    geology[c_l[code]].str.replace(",", " ")
-                    if(code == 'c' or code == 'g' or code == 'g2'):
-                        geology[c_l[code]]=geology[c_l[code]].str.replace("[ -\?]", "_",regex=True)
-                        # geology[c_l[code]]=geology[c_l[code]].str.replace("-", "_")
-                        # geology[c_l[code]]=geology[c_l[code]].str.replace("?", "_",regex=False)
-
-                    nans = geology[c_l[code]].isnull().sum()
-                    if(nans > 0):
-                        m2l_warnings.append(''+str(nans)+' NaN/blank found in column "'+str(
-                            c_l[code])+'" of geology file, replacing with 0')
-                        geology[c_l[code]].fillna("0", inplace=True)
-            # print('drift_prefix',drift_prefix)
-            for drift in drift_prefix:
-                # print('drift',drift)
-                geology = geology[~geology[c_l['u']].str.startswith(drift)]
-
-            if verbose_level != VerboseLevel.NONE:
-                show_metadata(geology, "geology layer")
-        else:
-            print('No geology in area, projection may be inconsistent')
+    if verbose_level != VerboseLevel.NONE:
+        show_metadata(geology, "geology layer")
+    else:
+        print('No geology in area, projection may be inconsistent')
     return geology
 
 def check_fold_map(folds, c_l, m2l_warnings, m2l_errors, verbose_level=VerboseLevel.ALL):

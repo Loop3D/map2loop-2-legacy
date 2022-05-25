@@ -170,7 +170,7 @@ class Config(object):
         # Make colours consistent from map to model
         formations = sorted([
             formation.replace(" ", "_").replace('-', '_') for formation in
-            list(set(self.map_data.get_map_data(Datatype.GEOLOGY)[self.c_l['c']].to_numpy()))
+            list(set(self.map_data.get_map_data(Datatype.GEOLOGY)['UNIT_NAME'].to_numpy()))
         ])
         temp_colours = [""] * len(formations)
         self.colour_dict = dict(zip(formations, temp_colours))

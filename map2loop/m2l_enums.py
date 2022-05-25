@@ -1,4 +1,4 @@
-from enum import IntEnum
+from enum import IntEnum, Enum
 
 class Datatype(IntEnum):
     GEOLOGY = 0
@@ -33,3 +33,5 @@ class VerboseLevel(IntEnum):
     NONE = 0
     TEXTONLY = 1
     ALL = 2
+
+

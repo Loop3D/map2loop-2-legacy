@@ -216,7 +216,7 @@ class MapData:
         _warnings = []
         _errors = []
         if datatype == Datatype.GEOLOGY:
-            self.data[Datatype.GEOLOGY] = m2l_map_checker.check_geology_map(self.data[Datatype.GEOLOGY],self.config.c_l,self.config.run_flags['drift_prefix'],_warnings,_errors,self.config.verbose_level)
+            self.data[Datatype.GEOLOGY] = m2l_map_checker.check_geology_map(self.data[Datatype.GEOLOGY],self.config.c_l,self.config.run_flags['drift_prefix'],_warnings,_errors,True,self.config.verbose_level)
         if datatype == Datatype.STRUCTURE:
             self.data[Datatype.STRUCTURE] = m2l_map_checker.check_structure_map(self.data[Datatype.STRUCTURE],self.config.c_l,_warnings,_errors,self.config.verbose_level)
         if datatype == Datatype.FAULT:
