@@ -786,7 +786,6 @@ def save_faults(config:Config, map_data:MapData, workflow:dict):
                         if(int(float(flt[config.c_l['fdip']])) == int(float(config.c_l['fdipnull']))):
                             # dip estimate defined
                             if(not str(flt[config.c_l['fdipest']]) == '-999'):
-                                #print("1")
                                 i = 0
                                 for choice in split:
                                     if(flt[config.c_l['o']] == '-1'):
@@ -798,19 +797,17 @@ def save_faults(config:Config, map_data:MapData, workflow:dict):
                                     i = i+1
                             else:
                                 if(flt[config.c_l['fdip']] == -999 or config.run_flags['fault_dip'] == -999):  # random flag
-                                    #print("2")
                                     fault_dip = random.randint(60, 90)
                                 else:
-                                    #print("3")
                                     fault_dip = config.run_flags['fault_dip']
                         else:
-                            #print("4")
+                            print("4")
                             # specific dip defined
                             fault_dip = int(float(flt[config.c_l['fdip']]))
 
                         # numeric dip direction defined
                         if(config.c_l['fdipdir_flag'] == 'num'):
-                            if pd.notna(flt[config.c_l['fdipdir']]):
+                            if pd.notna(flt[config.c_l['fdipdir']]) and flt[config.c_l['fdipdir']] != '-999':
                                 azimuth = flt[config.c_l['fdipdir']]
                             else:
                                 azimuth=azimuth_fault
@@ -822,14 +819,15 @@ def save_faults(config:Config, map_data:MapData, workflow:dict):
                             #print('az_after',fault_name,azimuth)
                             # TODO: Fix comparison of str version of two floats are comparing floats is very inaccurate
                             #       Also if this logic works 'lsx' is not defined at this point
-                        elif (not str(flt[config.c_l['fdipdir']]) == 'None' and not str(float(flt[config.c_l['fdip']])) == str(float(config.c_l['fdipnull']))):
+                        elif (not str(flt[config.c_l['fdipdir']]) == 'None' and not str(float(flt[config.c_l['fdip']])) == str(float(config.c_l['fdipnull'])) and flt[config.c_l['fdipdir']] != '-999'):
                             dotprod = degrees(acos(
-                                (-lsx*dip_dirs[flt[config.c_l['fdipdir']]][0])+(lsy*dip_dirs[flt[config.c_l['fdipdir']]][1])))
+                                (-dlsx*dip_dirs[flt[config.c_l['fdipdir']]][0])+(dlsy*dip_dirs[flt[config.c_l['fdipdir']]][1])))
                             if(dotprod > 45):
                                 fault_dip = -fault_dip
                         else:
                             azimuth=azimuth_fault
-
+                        #print("indx,azimuth,azimuth_fault,flt[c_l['fdipdir']],pd.notna( flt[c_l['fdipdir']]),fault_dip_var, c_l['fdipnull'],flt[c_l['fdip']]")
+                        #print( indx,azimuth,azimuth_fault,flt[c_l['fdipdir']],pd.notna( flt[c_l['fdipdir']]),fault_dip_var, c_l['fdipnull'],flt[c_l['fdip']])
                         l,m,n=m2l_utils.ddd2dircos((90-fault_dip),azimuth)
                         #print('fault_name,l,m,n,azimuth_fault,dip',fault_name,l,m,n,azimuth,fault_dip)
                         first = True
