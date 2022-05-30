@@ -14,8 +14,8 @@ from .topology import Topology
 import map2model
 from . import (m2l_interpolation, m2l_utils, m2l_geometry)
 from .map2graph import Map2Graph
-from . import (geology_loopdata, structure_loopdata, fault_loopdata, fold_loopdata,
-               mindep_loopdata, metafiles, clut_paths, m2l_export)
+# from . import (geology_loopdata, structure_loopdata, fault_loopdata, fold_loopdata,
+#                mindep_loopdata, metafiles, clut_paths, m2l_export)
 
 from .mapdata import MapData
 from .stratigraphic_column import StratigraphicColumn
@@ -241,75 +241,6 @@ class Project(object):
             while os.path.exists(directory):
                 pass
 
-    def setup_matplotlib(self):
-        """ Sets the backend of matplotlib by preference of permissive to restrictive licences
-        """
-        # Make matplotlib comply with interface/cmd line window managers
-        import matplotlib
-
-        # Put Qt4Agg last as it includes GPL code through pyqt
-        # and is not included in Loop distributions
-        gui_env = ["PS", "TkAgg", "GTK3Agg", "WXAgg", "Qt4Agg"]
-        all_backends = list(set([*gui_env, *matplotlib.rcsetup.all_backends]))
-
-        for gui in all_backends:
-            try:
-                matplotlib.use(gui, warn=False, force=True)
-                from matplotlib import pyplot as plt
-                break
-            except:
-                continue
-
-    @beartype.beartype
-    def update_workflow(self, model_engine:str):
-        """ Set unique run flags depending on model engine to tailor outputs.
-
-        Parameters
-        ----------
-        model_engine: string
-            The program or output type for the project to aim for
-        """
-
-        workflow = {'model_engine': model_engine,
-                    "seismic_section": False,
-                    "cover_map": False,
-                    "near_fault_interpolations": False,
-                    "fold_axial_traces": False,
-                    "stereonets": True,
-                    "formation_thickness": True,
-                    "polarity": False,
-                    "strat_offset": True,
-                    'contact_dips': True,
-                    'drillholes': False,
-                    'cover_contacts':True,
-                    'cover_orientations':True
-        }
-
-        if (workflow['model_engine'] == 'geomodeller'):
-            workflow.update({
-                'near_fault_interpolations': True,
-                'stereonets': False,
-                'strat_offset': False,
-            })
-        elif (workflow['model_engine'] == 'loopstructural'):
-            workflow.update({
-                'stereonets': False,
-            })
-        elif (workflow['model_engine'] == 'gempy'):
-            workflow.update({
-                'fold_axial_traces': True,
-                'stereonets': False,
-                'formation_thickness': False,
-                'strat_offset': False,
-           })
-        elif (workflow['model_engine'] == 'noddy'):
-            workflow.update({
-                'stereonets': False,
-                'formation_thickness': False,
-                'strat_offset': False,
-            })
-        self.workflow = workflow
-
     @m2l_utils.timer_decorator
     @beartype.beartype
     def update_config(self,
@@ -424,6 +355,50 @@ class Project(object):
                         )
 
         self.map_data.load_all_map_data(self.config)
+
+    def get_unit_thicknesses(self) -> dict:
+        """This is a getter method for returning the thicknesses of all
+        of the stratigraphic units on the map
+
+        Returns
+        -------
+        dict
+            dict containing the unit name as the key and the thickness as the value
+        """
+        self._calculate_unit_thicknesses()
+
+    def get_stratigraphic_units(self) -> list:
+        """This is a getter method for returning the names of all of the
+        stratigraphic units on the map
+
+        Returns
+        -------
+        list
+            list of strings containing the unit names
+        """
+        return []
+
+    def get_fault_displacement(self):
+        pass
+
+    def get_basal_contacts(self):
+        pass
+
+    def get_fault_topology(self):
+        pass
+
+    def get_stratigraphic_column(self):
+        pass
+
+    def get_stratigraphic_orientations(self):
+        pass
+
+    def _calculate_unit_thicknesses(self):
+        
+        return {}
+    
+    def _extract_basal_contacts(self):
+        pass
 
     @m2l_utils.timer_decorator
     def run(self):

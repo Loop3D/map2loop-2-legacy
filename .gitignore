@@ -207,5 +207,6 @@ dmypy.json
 .history
 .vscode/
 
-
+docs/build
+docs/source/_autosummary/*
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,c++,cmake
