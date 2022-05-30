@@ -5,7 +5,7 @@ import geopandas as gpd
 import pandas as pd
 from math import acos, sqrt, cos, sin, degrees, radians, fabs, atan2, fmod, isnan, atan, asin
 from . import m2l_utils
-from .m2l_map_checker import densify
+# from .m2l_map_checker import densify
 from . import m2l_interpolation
 import numpy as np
 import os
@@ -17,6 +17,8 @@ import beartype
 from .m2l_enums import Datatype, VerboseLevel
 from .config import Config
 from .mapdata import MapData
+from osgeo import ogr
+from shapely.wkt import loads
 
 ####################################################
 # Export orientation data in csv format with heights and strat code added
@@ -67,7 +69,7 @@ def save_orientations(config:Config, map_data:MapData, workflow):
             if(not str(apoint[config.c_l['r1']]) == 'nan'):
 
                 if(not config.c_l['intrusive'] in apoint[config.c_l['r1']]):
-                    if(apoint[config.c_l['d']] != 0 and m2l_utils.mod_safe(i, config.run_flags['orientation_decimate']) == 0):
+                    if(apoint[config.c_l['d']] != 0 and i % config.run_flags['orientation_decimate'] == 0):
                         locations = [
                             (apoint['geometry'].x, apoint['geometry'].y)]
                         if(apoint['geometry'].x > dtm.bounds[0] and apoint['geometry'].x < dtm.bounds[2] and
@@ -101,7 +103,7 @@ def save_orientations(config:Config, map_data:MapData, workflow):
                 if(not str(apoint[config.c_l['r1']]) == 'nan'):
 
                     if(not config.c_l['intrusive'] in apoint[config.c_l['r1']]):
-                        if(apoint[config.c_l['d']] != 0 and m2l_utils.mod_safe(i, config.run_flags['orientation_decimate']) == 0):
+                        if(apoint[config.c_l['d']] != 0 and i % config.run_flags['orientation_decimate'] == 0):
                             locations = [
                                 (apoint['geometry'].x, apoint['geometry'].y)]
                             if(apoint['geometry'].x > dtm.bounds[0] and apoint['geometry'].x < dtm.bounds[2] and
@@ -443,7 +445,7 @@ def save_basal_contacts(config:Config, map_data:MapData, workflow:dict) -> gpd.G
                                         id = id+1
                                         for lineC in LineStringC.geoms:  # process all linestrings
                                             # decimate to reduce number of points, but also take second and third point of a series to keep gempy happy
-                                            if(m2l_utils.mod_safe(k, config.run_flags['contact_decimate']) == 0 or k == int((len(LineStringC.geoms)-1)/2) or k == len(LineStringC.geoms)-1):
+                                            if(k % config.run_flags['contact_decimate'] == 0 or k == int((len(LineStringC.geoms)-1)/2) or k == len(LineStringC.geoms)-1):
                                                 # doesn't like point right on edge?
                                                 locations = [
                                                     (lineC.coords[0][0], lineC.coords[0][1])]
@@ -608,7 +610,7 @@ def save_basal_contacts_csv(contacts:gpd.GeoDataFrame, config:Config, map_data:M
                 for line in contact.geometry.geoms:
                     # continuation of line
                     if(line.coords[0][0] == lastx and line.coords[0][1] == lasty):
-                        if(m2l_utils.mod_safe(i, config.run_flags['contact_decimate']) == 0 or i == int((len(contact.geometry.geoms)-1)/2) or i == len(contact.geometry.geoms)-1):
+                        if(i % config.run_flags['contact_decimate'] == 0 or i == int((len(contact.geometry.geoms)-1)/2) or i == len(contact.geometry.geoms)-1):
                             locations = [
                                 (line.coords[0][0], line.coords[0][1])]
                             height = m2l_utils.value_from_dtm_dtb(
@@ -860,7 +862,7 @@ def save_faults(config:Config, map_data:MapData, workflow:dict):
                                 lasty = afs[1]
                                 # print(fault_name,incLength)
                             # decimate to reduce number of points, but also take mid and end points of a series to keep some shape
-                            if(m2l_utils.mod_safe(i, config.run_flags['fault_decimate']) == 0 or i == int((len(flt_ls.coords)-1)/2) or i == len(flt_ls.coords)-1):
+                            if(i % config.run_flags['fault_decimate'] == 0 or i == int((len(flt_ls.coords)-1)/2) or i == len(flt_ls.coords)-1):
                                 if(saved == 0):
                                     p1x = afs[0]
                                     p1y = afs[1]
@@ -1006,7 +1008,7 @@ def save_faults(config:Config, map_data:MapData, workflow:dict):
                             saved = 0
                             for afs in flt_ls.coords:
                                 # decimate to reduce number of points, but also take mid and end points of a series to keep some shape
-                                if(m2l_utils.mod_safe(i, config.run_flags['fault_decimate']) == 0 or i == int((len(flt_ls.coords)-1)/2) or i == len(flt_ls.coords)-1):
+                                if(i % config.run_flags['fault_decimate'] == 0 or i == int((len(flt_ls.coords)-1)/2) or i == len(flt_ls.coords)-1):
                                     if(saved == 0):
                                         p1x = afs[0]
                                         p1y = afs[1]
@@ -1054,73 +1056,6 @@ def save_faults(config:Config, map_data:MapData, workflow:dict):
         print("fault dimensions saved as", os.path.join(config.output_path, 'fault_dimensions.csv'))
     random.seed()
 
-#########################################
-# Save faults as contact info and make vertical (for the moment)
-# old code, to be deleted?
-#########################################
-
-
-def old_save_faults(path_faults, path_fault_orientations, dtm, dtb, dtb_null, cover_map, c_l, fault_decimate, fault_min_len, fault_dip):
-    faults_clip = gpd.read_file(path_faults)
-    f = open(os.path.join(path_fault_orientations, 'faults.csv'), "w")
-    f.write("X,Y,Z,formation\n")
-    fo = open(os.path.join(path_fault_orientations,
-                           'fault_orientations.csv'), "w")
-    fo.write("X,Y,Z,DipDirection,dip,DipPolarity,formation\n")
-    # fo.write("X,Y,Z,azimuth,dip,polarity,formation\n")
-    fd = open(os.path.join(path_fault_orientations, 'fault_dimensions.csv'), "w")
-    fd.write("Fault,HorizontalRadius,VerticalRadius,InfluenceDistance\n")
-    # fd.write("Fault_ID,strike,dip_direction,down_dip\n")
-
-    for indx, flt in faults_clip.iterrows():
-        if(c_l['fault'].lower() in flt[c_l['f']].lower()):
-            fault_name = 'Fault_'+str(flt[c_l['o']])
-            flt_ls = LineString(flt.geometry)
-            dlsx = flt_ls.coords[0][0]-flt_ls.coords[len(flt_ls.coords)-1][0]
-            dlsy = flt_ls.coords[0][1]-flt_ls.coords[len(flt_ls.coords)-1][1]
-            strike = sqrt((dlsx*dlsx)+(dlsy*dlsy))
-            if(strike > fault_min_len):
-                i = 0
-                for afs in flt_ls.coords:
-                    # decimate to reduce number of points, but also take mid and end points of a series to keep some shape
-                    if(m2l_utils.mod_safe(i, fault_decimate) == 0 or i == int((len(flt_ls.coords)-1)/2) or i == len(flt_ls.coords)-1):
-                        locations = [(afs[0], afs[1])]
-                        height = m2l_utils.value_from_dtm_dtb(
-                            dtm, dtb, dtb_null, cover_map, locations)
-                        ostr = "{},{},{},{}\n"\
-                            .format(afs[0], afs[1], height, fault_name)
-                        # ostr = str(afs[0])+","+str(afs[1])+","+str(height)+","+fault_name+"\n"
-                        f.write(ostr)
-                    i = i+1
-                if(dlsx == 0.0 or dlsy == 0.0):
-                    continue
-                lsx = dlsx/sqrt((dlsx*dlsx)+(dlsy*dlsy))
-                lsy = dlsy/sqrt((dlsx*dlsx)+(dlsy*dlsy))
-                # normal to line segment
-                azimuth = degrees(atan2(lsy, -lsx)) % 180
-                locations = [(flt_ls.coords[int((len(afs)-1)/2)]
-                              [0], flt_ls.coords[int((len(afs)-1)/2)][1])]
-                height = m2l_utils.value_from_dtm_dtb(
-                    dtm, dtb, dtb_null, cover_map, locations)
-                ostr = "{},{},{},{},{},{},{}\n"\
-                    .format(flt_ls.coords[int((len(flt_ls.coords)-1)/2)][0], flt_ls.coords[int((len(flt_ls.coords)-1)/2)][1], height, azimuth, fault_dip, 1, fault_name)
-                # ostr = str(flt_ls.coords[int((len(flt_ls.coords)-1)/2)][0])+","+str(flt_ls.coords[int((len(flt_ls.coords)-1)/2)][1])+","+height+","+str(azimuth)+","+str(fault_dip)+",1,"+fault_name+"\n"
-                fo.write(ostr)
-                ostr = "{},{},{},{}\n"\
-                    .format(fault_name, strike/2, strike/2, strike/4.0)
-                # ostr = fault_name+","+str(strike/2)+","+str(strike/2)+","+str(strike/4.0)+"\n"
-                fd.write(ostr)
-
-    f.close()
-    fo.close()
-    fd.close()
-    print("fault orientations saved as",
-          os.path.join(path_fault_orientations, 'fault_orientations.csv'))
-    print("fault positions saved as", os.path.join(
-        path_fault_orientations, 'faults.csv'))
-    print("fault dimensions saved as",
-          os.path.join(path_fault_orientations, 'fault_dimensions.csv'))
-
 ########################################
 # Save fold axial traces
 #
@@ -1156,7 +1091,7 @@ def save_fold_axial_traces(config:Config, map_data:MapData, workflow:dict):
                     for afs in fold_ls.coords:
                         if(config.c_l['fold'].lower() in fold[config.c_l['ff']].lower()):
                             # decimate to reduce number of points, but also take mid and end points of a series to keep some shape
-                            if(m2l_utils.mod_safe(i, config.run_flags['fold_decimate']) == 0 or i == int((len(fold_ls.coords)-1)/2) or i == len(fold_ls.coords)-1):
+                            if(i % config.run_flags['fold_decimate'] == 0 or i == int((len(fold_ls.coords)-1)/2) or i == len(fold_ls.coords)-1):
                                 locations = [(afs[0], afs[1])]
                                 height = m2l_utils.value_from_dtm_dtb(
                                     dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
@@ -1172,7 +1107,7 @@ def save_fold_axial_traces(config:Config, map_data:MapData, workflow:dict):
                 for afs in fold_ls.coords:
                     if(config.c_l['fold'].lower() in fold[config.c_l['ff']].lower()):
                         # decimate to reduce number of points, but also take mid and end points of a series to keep some shape
-                        if(m2l_utils.mod_safe(i, config.run_flags['fold_decimate']) == 0 or i == int((len(fold_ls.coords)-1)/2) or i == len(fold_ls.coords)-1):
+                        if(i % config.run_flags['fold_decimate'] == 0 or i == int((len(fold_ls.coords)-1)/2) or i == len(fold_ls.coords)-1):
                             locations = [(afs[0], afs[1])]
                             height = m2l_utils.value_from_dtm_dtb(
                                 dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
@@ -1418,7 +1353,7 @@ def process_plutons(config:Config, map_data, workflow:dict):
                             for lineC in LineStringC:  # process all linestrings
                                 if(lineC.wkt.split(" ")[0] == 'LINESTRING'):
                                     # decimate to reduce number of points, but also take second and third point of a series to keep gempy happy
-                                    if(m2l_utils.mod_safe(k, config.run_flags['contact_decimate']) == 0 or k == int((len(LineStringC)-1)/2) or k == len(LineStringC)-1):
+                                    if(k % config.run_flags['contact_decimate'] == 0 or k == int((len(LineStringC)-1)/2) or k == len(LineStringC)-1):
                                         dlsx = lineC.coords[0][0] - \
                                             lineC.coords[1][0]
                                         dlsy = lineC.coords[0][1] - \
@@ -1470,7 +1405,7 @@ def process_plutons(config:Config, map_data, workflow:dict):
                             k = 0
                             lineC = LineString(LineStringC)
                             # decimate to reduce number of points, but also take second and third point of a series to keep gempy happy
-                            if(m2l_utils.mod_safe(k, config.run_flags['contact_decimate']) == 0 or k == int((len(LineStringC)-1)/2) or k == len(LineStringC)-1):
+                            if(k % config.run_flags['contact_decimate'] == 0 or k == int((len(LineStringC)-1)/2) or k == len(LineStringC)-1):
                                 # doesn't like point right on edge?
                                 locations = [
                                     (lineC.coords[0][0], lineC.coords[0][1])]
@@ -1503,7 +1438,7 @@ def process_plutons(config:Config, map_data, workflow:dict):
                                     allpts += 1
 
                             # decimate to reduce number of points, but also take second and third point of a series to keep gempy happy
-                            if(m2l_utils.mod_safe(k, config.run_flags['contact_decimate']) == 0 or k == int((len(LineStringC)-1)/2) or k == len(LineStringC)-1):
+                            if(k % config.run_flags['contact_decimate'] == 0 or k == int((len(LineStringC)-1)/2) or k == len(LineStringC)-1):
                                 dlsx = lineC.coords[0][0]-lineC.coords[1][0]
                                 dlsy = lineC.coords[0][1]-lineC.coords[1][1]
                                 lsx = dlsx/sqrt((dlsx*dlsx)+(dlsy*dlsy))
@@ -2492,7 +2427,7 @@ def save_fold_axial_traces_orientations(config:Config, map_data:MapData, workflo
                         if(config.c_l['fold'].lower() in fold[config.c_l['ff']].lower()):
                             # save out current geometry of FAT
                             # decimate to reduce number of points, but also take mid and end points of a series to keep some shape
-                            if(m2l_utils.mod_safe(i, config.run_flags['fold_decimate']) == 0 or i == int((len(fold_ls.coords)-1)/2) or i == len(fold_ls.coords)-1):
+                            if(i % config.run_flags['fold_decimate'] == 0 or i == int((len(fold_ls.coords)-1)/2) or i == len(fold_ls.coords)-1):
                                 locations = [(afs[0], afs[1])]
                                 height = m2l_utils.value_from_dtm_dtb(
                                     dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
@@ -2568,7 +2503,7 @@ def save_fold_axial_traces_orientations(config:Config, map_data:MapData, workflo
                     if(config.c_l['fold'].lower() in fold[config.c_l['ff']].lower()):
                         # save out current geometry of FAT
                         # decimate to reduce number of points, but also take mid and end points of a series to keep some shape
-                        if(m2l_utils.mod_safe(i, config.run_flags['fold_decimate']) == 0 or i == int((len(fold_ls.coords)-1)/2) or i == len(fold_ls.coords)-1):
+                        if(i % config.run_flags['fold_decimate'] == 0 or i == int((len(fold_ls.coords)-1)/2) or i == len(fold_ls.coords)-1):
                             locations = [(afs[0], afs[1])]
                             height = m2l_utils.value_from_dtm_dtb(
                                 dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
@@ -3085,7 +3020,7 @@ def process_cover(config:Config, map_data:MapData, workflow:dict, use_vector:boo
             k = 0
             for pt in coords['exterior_coords']:
                 # decimate to reduce number of points, but also take second and third point of a series
-                if(m2l_utils.mod_safe(k, config.run_flags['contact_decimate']) == 0 or k == int((len(coords['exterior_coords'])-1)/2) or k == len(coords['exterior_coords'])-1):
+                if(k % config.run_flags['contact_decimate'] == 0 or k == int((len(coords['exterior_coords'])-1)/2) or k == len(coords['exterior_coords'])-1):
                     if(pt[0] > bbox[0] and pt[0] < bbox[2] and
                             pt[1] > bbox[1] and pt[1] < bbox[3]):
 
@@ -3111,7 +3046,7 @@ def process_cover(config:Config, map_data:MapData, workflow:dict, use_vector:boo
                     for pts in coords['interior_coords'][i+1:i+2]:
                         for pt in pts:
                             # decimate to reduce number of points, but also take second and third point of a series
-                            if(m2l_utils.mod_safe(k, config.run_flags['contact_decimate']) == 0 or k == int((len(coords['interior_coords'])-1)/2) or k == len(coords['interior_coords'])-1):
+                            if(k % config.run_flags['contact_decimate'] == 0 or k == int((len(coords['interior_coords'])-1)/2) or k == len(coords['interior_coords'])-1):
                                 if(pt[0] > bbox[0] and pt[0] < bbox[2] and
                                         pt[1] > bbox[1] and pt[1] < bbox[3]):
 
@@ -3188,7 +3123,7 @@ def process_cover(config:Config, map_data:MapData, workflow:dict, use_vector:boo
                     first = False
                 # decimate to reduce number of points, but also take second and third point of a series
                 locations = [(pt[0],pt[1])]
-                if(m2l_utils.mod_safe(k, config.run_flags['contact_decimate']) == 0 or k == int((len(coords['exterior_coords'])-1)/2) or k == len(coords['exterior_coords'])-1):
+                if(k % config.run_flags['contact_decimate'] == 0 or k == int((len(coords['exterior_coords'])-1)/2) or k == len(coords['exterior_coords'])-1):
                     if(pt[0] > bbox[0] and pt[0] < bbox[2] and
                             pt[1] > bbox[1] and pt[1] < bbox[3]):
                         dlsx = lastx-pt[0]
@@ -3238,7 +3173,7 @@ def process_cover(config:Config, map_data:MapData, workflow:dict, use_vector:boo
                                 first = False
                             # decimate to reduce number of points, but also take second and third point of a series
                             locations = [(pt[0],pt[1])]
-                            if(m2l_utils.mod_safe(k, config.run_flags['contact_decimate']) == 0 or k == int((len(coords['interior_coords'])-1)/2) or k == len(coords['interior_coords'])-1):
+                            if(k % config.run_flags['contact_decimate'] == 0 or k == int((len(coords['interior_coords'])-1)/2) or k == len(coords['interior_coords'])-1):
                                 if(pt[0] > bbox[0] and pt[0] < bbox[2] and
                                         pt[1] > bbox[1] and pt[1] < bbox[3]):
 
@@ -3324,7 +3259,7 @@ def save_basal_contacts_orientations_csv(config:Config, map_data:MapData, workfl
             if (contact.geometry.type == 'MultiLineString'): #why not LineString?
                 for line in contact.geometry.geoms:
                     first_in_line = True
-                    if(m2l_utils.mod_safe(i, config.run_flags['contact_decimate']) == 0):
+                    if(i % config.run_flags['contact_decimate'] == 0):
                         if(first):
                             lastx = line.coords[0][0]
                             lasty = line.coords[0][1]
@@ -3455,7 +3390,7 @@ def process_sills(output_path, geol_clip, dtm, dtb, dtb_null, cover_map, contact
                             first = True
                             if(lineC.wkt.split(" ")[0] == 'LINESTRING'):
                                 # decimate to reduce number of points, but also take second and third point of a series to keep gempy happy
-                                if(m2l_utils.mod_safe(k, contact_decimate) == 0 or k == int((len(LineStringC)-1)/2) or k == len(LineStringC)-1):
+                                if(k % contact_decimate == 0 or k == int((len(LineStringC)-1)/2) or k == len(LineStringC)-1):
                                     # doesn't like point right on edge?
 
                                     locations = [
@@ -3861,3 +3796,12 @@ def save_interpolation_parameters(config:Config):
 
     object_ip_df=pd.DataFrame.from_dict(object_ip, orient='index')
     object_ip_df.to_csv(os.path.join(config.output_path,'object_ip.csv'),index=None)
+
+def densify(geom, spacing):
+    wkt = geom.wkt  # Get wkt
+    geom = ogr.CreateGeometryFromWkt(wkt)
+    # Modify the geometry such it has no segment longer than the given (maximum) length.
+    geom.Segmentize(spacing)
+    wkt2 = geom.ExportToWkt()
+    new = loads(wkt2)
+    return new

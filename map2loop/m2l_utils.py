@@ -13,7 +13,7 @@ from rasterio.warp import calculate_default_transform, reproject, Resampling
 from rasterio.transform import from_origin
 from rasterio import features
 import rasterio.mask
-import re  # typo? check
+import re
 import os
 from urllib.request import urlopen
 from math import sin, cos, atan, atan2, asin, radians, degrees, sqrt, pow, acos, fmod, fabs, isnan, floor
@@ -24,36 +24,6 @@ import time
 import functools
 import beartype
 from .m2l_enums import Datatype, VerboseLevel
-#from osgeo import gdal
-
-quiet = False
-
-############################################
-# first test
-############################################
-
-
-def hw():
-    print("Hello world")
-
-############################################
-# calculate mod with 0 meaning no mod
-#
-# mod_safe(a,b)
-# Args:
-# a number
-# b modulus Returns: modulus of a,b or 0 if b==0
-#
-# Calculate a modulo b (a%b) for decimation with special case of b=0 resulting in no decimation.
-############################################
-
-
-def mod_safe(a, b):
-
-    if(b == 0):
-        return(0)
-    else:
-        return(a % b)
 
 ############################################
 # get value from a rasterio raster at location x,y (real world coords)
@@ -1005,50 +975,6 @@ def plot_bedding_stereonets(config, map_data):
                 print("----------------------------------------------------------------------------------------------------------------------")
                 print(gp, "observations has no observations")
 
-    if(False):
-        for gp in groups:
-
-            print("----------------------------------------------------------------------------------------------------------------------")
-            print(gp)
-            # display(all_sorts2)
-            ind = 0
-            orientations2 = orientations[orientations[config.c_l['g']] == gp]
-
-            for code in codes:
-                orientations3 = orientations2[orientations2[config.c_l['c']] == code]
-                ind2 = int(fmod(ind, 3))
-                if(len(orientations3) > 0):
-                    print(code, "observations n=", len(orientations3))
-                # display(orientations2)
-                if(len(orientations3) > 0):
-                    if(ind2 == 0):
-                        fig, ax = mplstereonet.subplots(1, 3, figsize=(15, 15))
-                    if(config.c_l['otype'] == 'dip direction'):
-                        strikes = orientations3[config.c_l['dd']].values - 90
-                    else:
-                        strikes = orientations3[config.c_l['dd']].values
-
-                    dips = orientations3[config.c_l['d']].values
-
-                    cax = ax[ind2].density_contourf(
-                        strikes, dips, measurement='poles')
-                    ax[ind2].pole(strikes, dips, markersize=5, color='w')
-                    ax[ind2].grid(True)
-                    # fig.colorbar(cax)
-                    text = ax[ind2].text(2.2, 1.37, code, color='b')
-
-                    # Fit a plane to the girdle of the distribution and display it.
-                    fit_strike, fit_dip = mplstereonet.fit_girdle(
-                        strikes, dips)
-                    print('strike/dip of girdle', fit_strike, '/', fit_dip)
-
-                    if(ind2 == 2) and not quiet:
-                        plt.show()
-
-                    ind = ind+1
-
-            if(ind > 0 and not ind2 == 2) and not quiet:
-                plt.show()
     return(group_girdle)
 
 @beartype.beartype
@@ -1108,7 +1034,6 @@ def plot_bedding_stereonets_old(orientations, all_sorts, verbose_level:VerboseLe
         if verbose_level != VerboseLevel.NONE:
             print("----------------------------------------------------------------------------------------------------------------------")
             print(gp)
-        # display(all_sorts2)
         ind = 0
 
         for indx, as2 in all_sorts2.iterrows():
@@ -1116,7 +1041,6 @@ def plot_bedding_stereonets_old(orientations, all_sorts, verbose_level:VerboseLe
             orientations2 = orientations[orientations["formation"] == indx]
             if verbose_level != VerboseLevel.NONE:
                 print(indx, "observations n=", len(orientations2))
-            # display(orientations2)
             if verbose_level == VerboseLevel.ALL:
                 if(len(orientations2) > 0):
                     if(ind2 == 0):
@@ -1172,22 +1096,6 @@ def display(element):
             IPython.display(element)
         except Exception as e:
             return False
-
-
-def print(*args, **kwargs):
-    global quiet
-    if not quiet:
-        return builtins.print(*args, **kwargs)
-
-
-def enable_quiet_mode():
-    global quiet
-    quiet = True
-
-
-def disable_quiet_mode():
-    global quiet
-    quiet = False
 
 def save_dtm_mesh(dtm_path,output_path):
     import rasterio

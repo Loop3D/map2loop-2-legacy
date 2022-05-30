@@ -28,17 +28,17 @@ class DeformationHistory(object):
 
     def findfault(self,id):
         if type(id) == int:
-            return self.faults[id]
+            return self.faults[self.faults['faultId']==id]
         elif type(id) == str:
-            return self.faults[self.faults['name']==id]
+            return self.faults[self.faults.index==id]
         else:
             print("ERROR: Unknown identifier type used to find fault")
 
     def findfold(self,id):
         if type(id) == int:
-            return self.folds[id]
+            return self.folds[self.folds['foldId']==id]
         elif type(id) == str:
-            return self.folds[self.folds['name']==id]
+            return self.folds[self.folds.index==id]
         else:
             print("ERROR: Unknown identifier type used to find fold")
 

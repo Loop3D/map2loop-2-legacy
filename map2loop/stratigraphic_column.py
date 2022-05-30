@@ -24,17 +24,17 @@ class StratigraphicColumn(object):
 
     def findStratigraphicUnit(self,id):
         if type(id) == int:
-            return self.stratigraphicUnits[id]
+            return self.stratigraphicUnits[self.stratigraphicUnits['layerId']==id]
         elif type(id) == str:
-            return self.stratigraphicUnits[self.stratigraphicUnits['name']==id]
+            return self.stratigraphicUnits[self.stratigraphicUnits.index==id]
         else:
             print("ERROR: Unknown identifier type used to find stratigraphic unit")
 
     def findLithologyUnit(self,id):
         if type(id) == int:
-            return self.lithologyUnits[id]
+            return self.lithologyUnits[self.lithologyUnits['layerId']==id]
         elif type(id) == str:
-            return self.lithologyUnits[self.lithologyUnits['name']==id]
+            return self.lithologyUnits[self.lithologyUnits.index==id]
         else:
             print("ERROR: Unknown identifier type used to find lithology unit")
 
@@ -43,7 +43,7 @@ class StratigraphicColumn(object):
             if 'name' in unit.keys():
                 if unit['name'] in self.stratigraphicUnits.index:
                     print('Replacing stratigraphic unit', unit['name'])
-                self.stratigraphicUnits[unit['name']] = unit
+                self.stratigraphicUnits.loc[unit['name']] = unit
             else:
                 print('No name field in stratigraphic unit', unit)
         else:
@@ -54,7 +54,7 @@ class StratigraphicColumn(object):
             if 'name' in unit.keys():
                 if unit['name'] in self.lithologyUnits.index:
                     print('Replacing lithology unit', unit['name'])
-                self.lithologyUnits[unit['name']] = unit
+                self.lithologyUnits.loc[unit['name']] = unit
             else:
                 print('No name field in lithology unit', unit)
         else:

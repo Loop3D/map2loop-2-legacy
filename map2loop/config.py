@@ -38,7 +38,7 @@ class Config(object):
             'dtb_null':-2147483648,
             'cover_dip':10,
             'cover_spacing':5000,
-            'orientation_decimate': 0,
+            'orientation_decimate': 1,
             'contact_decimate': 5,
             'intrusion_mode': 0,
             'interpolation_spacing': 500,
@@ -114,6 +114,11 @@ class Config(object):
             # TODO: Add sanity checks for run_flags updated from user
             if self.run_flags['interpolation_spacing'] < 0:
                 self.run_flags['interpolation_spacing'] = - self.run_flags['interpolation_spacing']
+            self.run_flags['orientation_decimate'] = max(self.run_flags['orientation_decimate'],1)
+            self.run_flags['contact_decimate'] = max(self.run_flags['contact_decimate'],1)
+            self.run_flags['fault_decimate'] = max(self.run_flags['fault_decimate'],1)
+            self.run_flags['contact_orientation_decimate'] = max(self.run_flags['contact_orientation_decimate'],1)
+            self.run_flags['fold_decimate'] = max(self.run_flags['fold_decimate'],1)
         else:
             print('run_flags must be a dictionary, setting config run flags to the defaults.')
 

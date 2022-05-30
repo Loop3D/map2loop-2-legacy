@@ -142,6 +142,30 @@ def plot(x, y, z, grid):
     plt.colorbar()
 
 ######################################
+# switch function to select which intepolator to call
+#
+# interpolator_switch(calc, x, y, z, xi, yi)
+# Args:
+# calc string naming the interpolator to use
+# x,y coordinates of points to be interpolated
+# z value to be interpolated
+# xi,yi grid of points where interpolation of z will be calculated - sci_py version of Simple Inverse Distance Weighting interpolation of observations z at x,y locations returned at locations defined by xi,yi arrays
+#
+######################################
+def interpolator_switch(calc, x, y, z, xi, yi):
+    if(calc == 'simple_idw'):
+        val = simple_idw(x, y, z, xi, yi)
+    elif(calc == 'scipy_idw'):
+        val = scipy_idw(x, y, z, xi, yi)
+    elif(calc == 'scipy_LNDI'):
+        val = scipy_LNDI(x, y, z, xi, yi)
+    elif(calc == 'scipy_CT'):
+        val = scipy_CT(x, y, z, xi, yi)
+    else:
+        val = scipy_rbf(x, y, z, xi, yi)
+    return val
+
+######################################
 # interpolate three data arrays using various schemes
 #
 # call_interpolator(calc,x,y,l,m,n,xi,yi,nx,ny,fault_flag)
@@ -159,43 +183,16 @@ def plot(x, y, z, grid):
 def call_interpolator(calc, x, y, l, m, n, xi, yi, nx, ny, fault_flag):
     # Calculate IDW or other interpolators
 
-    if(calc == 'simple_idw'):
-        ZIl = simple_idw(x, y, l, xi, yi)
-    elif(calc == 'scipy_idw'):
-        ZIl = scipy_idw(x, y, l, xi, yi)
-    elif(calc == 'scipy_LNDI'):
-        ZIl = scipy_LNDI(x, y, l, xi, yi)
-    elif(calc == 'scipy_CT'):
-        ZIl = scipy_CT(x, y, l, xi, yi)
-    else:
-        ZIl = scipy_rbf(x, y, l, xi, yi)
+    ZIl = interpolator_switch(calc, x, y, l, xi, yi)
     if(not fault_flag):
         ZIl = ZIl.reshape((ny, nx))
 
-    if(calc == 'simple_idw'):
-        ZIm = simple_idw(x, y, m, xi, yi)
-    elif(calc == 'scipy_idw'):
-        ZIm = scipy_idw(x, y, m, xi, yi)
-    elif(calc == 'scipy_LNDI'):
-        ZIm = scipy_LNDI(x, y, m, xi, yi)
-    elif(calc == 'scipy_CT'):
-        ZIm = scipy_CT(x, y, m, xi, yi)
-    else:
-        ZIm = scipy_rbf(x, y, m, xi, yi)
+    ZIm = interpolator_switch(calc, x, y, m, xi, yi)
     if(not fault_flag):
         ZIm = ZIm.reshape((ny, nx))
 
     if(type(n) is not int):
-        if(calc == 'simple_idw'):
-            ZIn = simple_idw(x, y, n, xi, yi)
-        elif(calc == 'scipy_idw'):
-            ZIn = scipy_idw(x, y, n, xi, yi)
-        elif(calc == 'scipy_LNDI'):
-            ZIn = scipy_LNDI(x, y, n, xi, yi)
-        elif(calc == 'scipy_CT'):
-            ZIn = scipy_CT(x, y, n, xi, yi)
-        else:
-            ZIn = scipy_rbf(x, y, n, xi, yi)
+        ZIn = interpolator_switch(calc, x, y, n, xi, yi)
         if(not fault_flag):
             ZIn = ZIn.reshape((ny, nx))
     else:
@@ -230,7 +227,7 @@ def interpolate_orientations(structure_file, output_path, bbox, c_l, this_gcode,
 
     if(len(this_gcode) == 1):
         # subset orientations to just those with this group
-        is_gp = structure[c_l['g']] == thisgcode
+        is_gp = structure[c_l['g']] == this_gcode
         gp_structure = structure[is_gp]
         # print('single group')
         # display(gp_structure)
@@ -469,7 +466,7 @@ def interpolate_contacts(geology_file, output_path, dtm, dtb, dtb_null, cover_ma
             # print(i)
             for line in acontact.geometry:  # loop through line segments
                 # print(i,len(acontact.geometry))
-                if(m2l_utils.mod_safe(i, decimate) == 0 and acontact[c_l['g']] in use_gcode):
+                if(i % decimate == 0 and acontact[c_l['g']] in use_gcode):
                     # if(acontact['id']==170):
                     # display(npts,line.coords[0][0],line.coords[1][0])
                     dlsx = line.coords[0][0]-line.coords[1][0]
@@ -498,7 +495,7 @@ def interpolate_contacts(geology_file, output_path, dtm, dtb, dtb_null, cover_ma
         else:
             # display(acontact.geometry,acontact.geometry.coords)
             # for line in acontact: # loop through line segments in LineString
-            if(m2l_utils.mod_safe(i, decimate) == 0 and acontact[c_l['g']] in use_gcode):
+            if(i % decimate == 0 and acontact[c_l['g']] in use_gcode):
                 dlsx = acontact.geometry.coords[0][0] - \
                     acontact.geometry.coords[1][0]
                 dlsy = acontact.geometry.coords[0][1] - \
@@ -647,11 +644,11 @@ def save_contact_vectors(config:Config, map_data, workflow:dict):
     for indx, acontact in geol_file.iterrows():  # loop through distinct linestrings in MultiLineString
         if(acontact.geometry and acontact.geometry.type == 'MultiLineString'):
             for line in acontact.geometry.geoms:  # loop through line segments
-                if(m2l_utils.mod_safe(i, config.run_flags['contact_decimate']) == 0):
+                if(i % config.run_flags['contact_decimate'] == 0):
                     npoint = 1
                 i = i+1
         else:
-            if(m2l_utils.mod_safe(i, config.run_flags['contact_decimate']) == 0):
+            if(i % config.run_flags['contact_decimate'] == 0):
                 npoint = 1
             i = i+1
 
@@ -669,7 +666,7 @@ def save_contact_vectors(config:Config, map_data, workflow:dict):
             # print(i)
             for line in acontact.geometry.geoms:  # loop through line segments
                 # print(i,len(acontact.geometry))
-                if(m2l_utils.mod_safe(i, config.run_flags['contact_decimate']) == 0):
+                if(i % config.run_flags['contact_decimate'] == 0):
                     # if(acontact['id']==170):
                     # display(npts,line.coords[0][0],line.coords[1][0])
                     dlsx = line.coords[0][0]-line.coords[1][0]
@@ -701,7 +698,7 @@ def save_contact_vectors(config:Config, map_data, workflow:dict):
         else:
             # display(acontact.geometry,acontact.geometry.coords)
             # for line in acontact: # loop through line segments in LineString
-            if(acontact.geometry and m2l_utils.mod_safe(i, config.run_flags['contact_decimate']) == 0):
+            if(acontact.geometry and i % config.run_flags['contact_decimate'] == 0):
                 dlsx = acontact.geometry.coords[0][0] - \
                     acontact.geometry.coords[1][0]
                 dlsy = acontact.geometry.coords[0][1] - \
@@ -861,7 +858,7 @@ def interpolate_orientations_with_fat(structure_file, output_path, bbox, c_l, th
 
     if(len(this_gcode) == 1):
         # subset orientations to just those with this group
-        is_gp = structure[c_l['g']] == thisgcode
+        is_gp = structure[c_l['g']] == this_gcode
         gp_structure = structure[is_gp]
         print('single group')
         display(gp_structure)
@@ -1419,39 +1416,10 @@ def process_fault_throw_and_near_orientations(tmp_path, output_path, dtm_reproj_
 def call_interpolator_grid(calc, x, y, l, m, n, xi, yi):
     # Calculate IDW or other interpolators
 
-    if(calc == 'simple_idw'):
-        ZIl = simple_idw(x, y, l, xi, yi)
-    elif(calc == 'scipy_idw'):
-        ZIl = scipy_idw(x, y, l, xi, yi)
-    elif(calc == 'scipy_LNDI'):
-        ZIl = scipy_LNDI(x, y, l, xi, yi)
-    elif(calc == 'scipy_CT'):
-        ZIl = scipy_CT(x, y, l, xi, yi)
-    else:
-        ZIl = scipy_rbf(x, y, l, xi, yi)
-
-    if(calc == 'simple_idw'):
-        ZIm = simple_idw(x, y, m, xi, yi)
-    elif(calc == 'scipy_idw'):
-        ZIm = scipy_idw(x, y, m, xi, yi)
-    elif(calc == 'scipy_LNDI'):
-        ZIm = scipy_LNDI(x, y, m, xi, yi)
-    elif(calc == 'scipy_CT'):
-        ZIm = scipy_CT(x, y, m, xi, yi)
-    else:
-        ZIm = scipy_rbf(x, y, m, xi, yi)
-
+    ZIl = interpolator_switch(calc, x, y, l, xi, yi)
+    ZIm = interpolator_switch(calc, x, y, m, xi, yi)
     if(type(n) is not int):
-        if(calc == 'simple_idw'):
-            ZIn = simple_idw(x, y, n, xi, yi)
-        elif(calc == 'scipy_idw'):
-            ZIn = scipy_idw(x, y, n, xi, yi)
-        elif(calc == 'scipy_LNDI'):
-            ZIn = scipy_LNDI(x, y, n, xi, yi)
-        elif(calc == 'scipy_CT'):
-            ZIn = scipy_CT(x, y, n, xi, yi)
-        else:
-            ZIn = scipy_rbf(x, y, n, xi, yi)
+        ZIn = interpolator_switch(calc, x, y, n, xi, yi)
     else:
         ZIn = 0
 
@@ -1507,10 +1475,6 @@ def interpolate_orientation_grid(structures, calc, xcoords, ycoords, c_l):
     return(l2, m2, n2, dip, dip_direction)
 
 
-def is_odd(num):
-    return num & 0x1
-
-
 def pts2dircos_arr(p1x, p1y, p2x, p2y):
     dx = p1x-p2x
     dy = p1y-p2y
@@ -1524,17 +1488,17 @@ def interpolate_contacts_grid(contacts, calc, xcoords_group, ycoords_group):
     for indx, acontact in contacts.iterrows():  # loop through distinct linestrings in MultiLineString
         if(acontact.geometry.type == 'MultiLineString'):
             for line in acontact.geometry.geoms:
-                if(m2l_utils.mod_safe(i, decimate) == 0):
+                if(i % decimate == 0):
                     listarray.append([line.coords[0][0], line.coords[0][1]])
                 i = i+1
         else:
-            if(m2l_utils.mod_safe(i, decimate) == 0):
+            if(1 % decimate == 0):
                 listarray.append([acontact.geometry.coords[0]
                                   [0], acontact.geometry.coords[0][1]])
             i = i+1
 
     coords = np.array(listarray)
-    if(is_odd(len(coords))):
+    if(len(coords) & 0x1):
         coords2 = coords[:len(coords)-1, :].reshape((int(len(coords)/2), 4))
     else:
         coords2 = coords[:len(coords), :].reshape((int(len(coords)/2), 4))
@@ -1805,7 +1769,7 @@ def process_fault_throw_and_near_faults_from_grid(config:Config, map_data, workf
                     lgroups = []
                     for ind, indl in lcode.iterrows():
                         if(not str(indl[config.c_l['c']]) == 'nan' and not str(indl[config.c_l['r1']]) == 'nan'):
-                            if(m2l_utils.mod_safe(ind, decimate_near) == 0 or ind == len(lcode)-1):
+                            if(ind % decimate_near == 0 or ind == len(lcode)-1):
                                 if((not config.c_l['sill'] in indl[config.c_l['ds']]) or (not config.c_l['intrusive'] in indl[config.c_l['r1']])):
                                     locations = [
                                         (indl.geometry.x, indl.geometry.y)]
@@ -1820,7 +1784,7 @@ def process_fault_throw_and_near_faults_from_grid(config:Config, map_data, workf
                     for ind, indr in rcode.iterrows():
                         if(not str(indr[config.c_l['c']]) == 'nan' and not str(indr[config.c_l['r1']]) == 'nan'):
                             if((not config.c_l['sill'] in indr[config.c_l['ds']]) or (not config.c_l['intrusive'] in indr[config.c_l['r1']])):
-                                if(m2l_utils.mod_safe(ind, decimate_near) == 0 or ind == len(rcode)-1):
+                                if(ind % decimate_near == 0 or ind == len(rcode)-1):
                                     locations = [
                                         (indr.geometry.x, indr.geometry.y)]
                                     last_height_r = m2l_utils.value_from_dtm_dtb(

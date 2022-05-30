@@ -322,13 +322,24 @@ class MapData:
         if self.data_states[Datatype.GEOLOGY] == Datastate.COMPLETE:
             geology = self.get_map_data(Datatype.GEOLOGY)
             hint_flag = False  # use GSWA strat database to provide topology hints
+            # columns = ['geometry', self.config.c_l['o'], self.config.c_l['c'], self.config.c_l['g'],
+                # self.config.c_l['u'], self.config.c_l['min'], self.config.c_l['max'], self.config.c_l['ds'],
+                # self.config.c_l['r1'], self.config.c_l['r2']]
             columns = ['geometry', self.config.c_l['o'], self.config.c_l['c'], self.config.c_l['g'],
-                self.config.c_l['u'], self.config.c_l['min'], self.config.c_l['max'], self.config.c_l['ds'],
-                self.config.c_l['r1'], self.config.c_l['r2']]
+                self.config.c_l['min'], self.config.c_l['max'], self.config.c_l['u'],
+                self.config.c_l['r1'], self.config.c_l['r2'], self.config.c_l['ds']]
             sub_geol = geology[columns]
             sub_geol.reset_index(inplace=True,drop=True)
+            df = sub_geol.copy()
+            df.rename(columns={'geometry':'WKT',self.config.c_l['u']:self.config.c_l['c'],self.config.c_l['c']:self.config.c_l['u']},inplace=True)
+            df.columns = df.columns.str.replace('\n','')
+            df[self.config.c_l['min']] = df[self.config.c_l['min']].replace("None",0)
+            df[self.config.c_l['max']] = df[self.config.c_l['max']].replace("None",4500000000)
+            df[self.config.c_l['g']] = df[self.config.c_l['g']].replace("None","")
+            df[self.config.c_l['r2']] = df[self.config.c_l['r2']].replace("","None")
+            df.to_csv(self.config.geology_filename_wkt, index=False, sep="\t")
             # print(sub_geol, self.config.geology_filename_wkt, self.config.c_l, hint_flag)
-            Topology.save_geol_wkt(sub_geol, self.config.geology_filename_wkt, self.config.c_l, hint_flag, self.config.verbose_level)
+            # Topology.save_geol_wkt(sub_geol, self.config.geology_filename_wkt, self.config.c_l, hint_flag, self.config.verbose_level)
         else:
             print(f"Cannot export geology data as it only loaded to {self.data_states[Datatype.GEOLOGY].name} status")
 
