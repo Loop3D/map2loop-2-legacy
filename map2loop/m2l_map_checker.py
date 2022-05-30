@@ -1,18 +1,11 @@
 import os
-import sys
 import geopandas as gpd
 from shapely.geometry import LineString, Polygon, MultiLineString, MultiPolygon
-from . import m2l_utils
 import warnings
 import numpy as np
 import pandas as pd
 from math import sqrt
-from .m2l_utils import print
-from shapely.wkt import loads
-import re
-from osgeo import ogr
-from shapely.wkt import loads
-# from .mapdata import MapData
+# from .mapdata import MapData # Creates a circular dependency
 from .m2l_enums import Datatype, Datastate, VerboseLevel
 import beartype
 from .config import Config
@@ -47,8 +40,7 @@ def check_all_maps(mapdata, config:Config, use_roi_clip, roi_clip_path, verbose_
     m2l_errors = []
     m2l_warnings = []
     if(config.bbox[3]<config.bbox[1] or config.bbox[2]<config.bbox[0] or config.bbox_3d['top']<config.bbox_3d['base']):
-        m2l_errors.append(
-                'bounding box has negative range for x or y or z')
+        m2l_errors.append('bounding box has negative range for x or y or z')
     
     f=open(os.path.join(config.tmp_path,'bbox.csv'),'w')
     f.write('minx,miny,maxx,maxy,lower,upper\n')
@@ -102,60 +94,93 @@ def check_all_maps(mapdata, config:Config, use_roi_clip, roi_clip_path, verbose_
         mapdata.data_states[Datatype.MINERAL_DEPOSIT] = Datastate.CONVERTED
         output_modified_maps(orientations,geology,folds,faults,mindeps,polygo,config.c_l,mapdata.working_projection,config.tmp_path)
 
+def rename_columns(dataframe, original, replacement, m2l_errors, verbose_level=VerboseLevel.ALL):
+    if dataframe is not None and original != replacement:
+        if original in dataframe.columns:
+            if replacement in dataframe.columns:
+                dataframe.rename(columns={replacement:'old_'+replacement,original:replacement},inplace=True)
+                if verbose_level!=VerboseLevel.NONE:
+                    print(f"Moving column {replacement} to \"old_{replacement}\"")
+            else:
+                dataframe.rename(columns={original:replacement},inplace=True)
+        else:
+            m2l_errors.append(f"ERROR: data does not contain column {original}")
+    return dataframe
+
 def check_structure_map(orientations, c_l, m2l_warnings, m2l_errors, verbose_level=VerboseLevel.ALL):
     # Process orientation points
-    if orientations is not None:
-        if(c_l['sf'] == c_l['ds']):
-            new_code = 'NEW_'+c_l['sf']
-            new_code = new_code[:10]
-            orientations.rename(columns={c_l['sf']: new_code}, errors="raise",inplace=True)
-            m2l_warnings.append('To avoid conflict with geology field of same name, orientation field named "' +
-                                str(c_l['sf'])+'" renamed to "'+new_code+'"')
-            c_l['sf'] = new_code
-        else:
-            new_code = ''
-            # orientations = orientations2.copy()
-        if(c_l['bo'] == c_l['ds'] and not new_code == ''):
-            c_l['bo'] = new_code
+    if orientations is None or type(orientations) != gpd.GeoDataFrame:
+        m2l_errors.append("No structure map found")
+        return None
+        
+    # Error if insufficient sturucture points
+    if(len(orientations) < 2):
+        m2l_errors.append('not enough orientations to complete calculations (need at least 2), projection may be inconsistent')
 
-        if (c_l['otype'] == 'strike' or c_l['dd'] not in orientations.columns):
-            if verbose_level != VerboseLevel.NONE:
-                print("converting strike/dip orientation to dipdir/dip")
-            orientations['azimuth2'] = orientations.apply(lambda row: row['strike'] + 90.0, axis=1)
-            c_l['dd'] = 'azimuth2'
-            c_l['otype'] = 'dip direction'
-
-        if(len(orientations) < 2):
-            m2l_errors.append(
-                'not enough orientations to complete calculations (need at least 2), projection may be inconsistent')
-
-        orientations = orientations.replace(r'^\s+$', np.nan, regex=True)
-        orientations = orientations[orientations[c_l['d']] != -999]
-        for code in ('sf', 'd', 'dd', 'gi'):
-            if not c_l[code] in orientations.columns:
-                if(code == 'sf'):
-                    orientations[c_l[code]] = 'Bed'
-                    m2l_warnings.append(
-                        'field named "'+str(c_l[code])+'" added with default value "Bed"')
-                elif(not code == 'gi'):
-                    m2l_errors.append('"'+c_l[code]+'" field needed')
-                else:
-                    m2l_warnings.append(
-                        'field named "'+str(c_l[code])+'" added with default value')
-                    orientations[c_l[code]] = np.arange(len(orientations))
-            else:
-                nans = orientations[c_l[code]].isnull().sum()
-                if(nans > 0):
-                    m2l_warnings.append(''+str(nans)+' NaN/blank found in column "'+str(
-                        c_l[code])+'" of orientations file, replacing with 0')
-                    orientations[c_l[code]].fillna("0", inplace=True)
-
-        unique_o = set(orientations[c_l['gi']])
-
-        if(not len(unique_o) == len(orientations)):
-            m2l_warnings.append('duplicate orientation point unique IDs')
+    # Check for strike and convert to dip direction
+    if c_l['otype'] == 'strike' and 'strike' in orientations.columns:
         if verbose_level != VerboseLevel.NONE:
-            show_metadata(orientations, "orientations layer")
+            print("converting strike/dip orientation to dipdir/dip")
+        orientations[c_l['dd']] = orientations.apply(lambda row: row['strike'] + 90.0, axis=1)
+        c_l['otype'] = 'dip direction'
+
+    # Check for duplicate column references
+    if(c_l['sf'] == c_l['ds']):
+        if c_l['sf'] in orientations.columns:
+            orientations[c_l['ds']] = orientations[c_l['sf']].copy()
+    if c_l['bo'] == c_l['ds']:
+        if c_l['bo'] in orientations.columns:
+            orientations[c_l['bo']] = orientations[c_l['ds']].copy()
+
+    # Fill in missing data with default values
+    if c_l['sf'] not in orientations.columns:
+        orientations[c_l['sf']] = 'Bed'
+        m2l_warnings.append(f"field named '{str(c_l['sf'])}' added with default value \"Bed\"")
+
+    if c_l['ds'] not in orientations.columns:
+        orientations[c_l['ds']] = ''
+        m2l_warnings.append(f"field named '{str(c_l['ds'])}' added with default empty value") 
+
+    if c_l['gi'] not in orientations.columns:
+        orientations[c_l['gi']] = np.arange(len(orientations))
+        m2l_warnings.append(f"field named '{str(c_l['gi'])}' added with default value")
+
+    # Convert whitespace entries to nans
+    orientations = orientations.replace(r'^\s+$', np.nan, regex=True)
+
+    # Warn about number of nans present in data
+    for code in ('sf', 'd', 'dd', 'gi'):
+        if c_l[code] in orientations.columns:
+            nans = orientations[c_l[code]].isnull().sum()
+            if(nans > 0):
+                m2l_warnings.append(f"{str(nans)} NaN/blank found in column '{str(c_l[code])}' of orientations file, replacing with 0")
+                orientations[c_l[code]].fillna(0, inplace=True)
+
+    # Remove orientation entries with unknown dip
+    orientations = orientations[orientations[c_l['d']] != -999]
+
+    unique_o = set(orientations[c_l['gi']])
+    if(not len(unique_o) == len(orientations)):
+        m2l_warnings.append('duplicate orientation point unique IDs')
+
+    # convert c_l codes to meaningful column names
+    # orientations = rename_columns(orientations, c_l['d'], 'DIP', m2l_errors, verbose_level)
+    # orientations = rename_columns(orientations, c_l['dd'], 'DIPDIR', m2l_errors, verbose_level)
+    # orientations = rename_columns(orientations, c_l['sf'], 'STRUCTURE_TYPE', m2l_errors, verbose_level)
+    # orientations = rename_columns(orientations, c_l['ds'], 'DESCRIPTION', m2l_errors, verbose_level)
+    # orientations = rename_columns(orientations, c_l['bo'], 'FOLIATION_TYPE', m2l_errors, verbose_level)
+    # orientations = rename_columns(orientations, c_l['gi'], 'GEOPOINT_ID', m2l_errors, verbose_level)
+
+    # c_l['d'] = 'DIP'
+    # c_l['dd'] = 'DIPDIR'
+    # c_l['sf'] = 'STRUCTURE_TYPE'
+    # c_l['ds'] = 'DESCRIPTION'
+    # c_l['bo'] = 'FOLIATION_TYPE'
+    # c_l['go'] = 'GEOPOINT_ID'
+
+    if verbose_level != VerboseLevel.NONE:
+        show_metadata(orientations, "orientations layer")
+
     return orientations
 def _explode_intrusives(geology):
     """Break multipart geometries of intrusions into individual features
@@ -559,23 +584,6 @@ def output_modified_maps(orientations, geology, folds, faults, mindeps, polygo, 
             geol_clip = gpd.overlay(geology, polygo, how='intersection')
 
             if(len(geol_clip) > 0 ):
-                """
-                geol_gaps=check_gaps(geol_clip)
-                if(len(geol_gaps)>0):
-                    warnings.warn('Gaps between geology polygons, consider editing geology layer or rounding vertices')
-                    print(geol_gaps)
-                    #geol_gaps.to_file(os.path.join(tmp_path,'geology_gaps.shp'))
-                else:
-                    print("No gaps between geology polygons")
-                geol_overlaps=check_overlaps(geol_clip)
-                if(len(geol_overlaps)>0):
-                    warnings.warn('Overlaps between geology polygons, consider editing geology layer or rounding vertices')
-                    print(geol_overlaps)
-                    #geol_overlaps.to_file(os.path.join(tmp_path,'geology_overlaps.shp'))
-
-                else:
-                    print("No overlaps between geology polygons")
-                """
                 geol_clip.crs = dst_crs
                 geol_filename = os.path.join(tmp_path, 'geol_clip.shp')
                 geol_clip.to_file(geol_filename)
@@ -615,111 +623,3 @@ def show_metadata(gdf, name):
     else:
         print("\n", name, " metadata\n--------------------")
         print("    empty file, check contents")
-
-
-#########################################
-#
-# Checks for polygons overlaps and returns geopandas object of overlapping areas
-#
-#########################################
-def check_overlaps(data_temp):
-    data_temp['id'] = data_temp.index
-
-    data_overlaps = gpd.GeoDataFrame()
-    for index, row in data_temp.iterrows():
-        data_temp1 = data_temp.loc[data_temp.id != row.id, ]
-        # check if intersection occured
-        overlaps = data_temp1[data_temp1.geometry.overlaps(
-            row.geometry)]['id'].tolist()
-        if len(overlaps) > 0:
-            # compare the area with threshold
-            for y in overlaps:
-                temp_area = gpd.overlay(
-                    data_temp.loc[data_temp.id == y, ], data_temp.loc[data_temp.id == row.id, ], how='intersection')
-                temp_area = temp_area.loc[temp_area.geometry.area >= 9e-9]
-                if temp_area.shape[0] > 0:
-                    data_overlaps = gpd.GeoDataFrame(
-                        pd.concat([temp_area, data_overlaps], ignore_index=True), crs=data_temp.crs)
-    # get unique of list id
-    if(not data_overlaps.empty):
-        data_overlaps['sorted'] = data_overlaps.apply(
-            lambda y: sorted([y['id_1'], y['id_2']]), axis=1)
-        data_overlaps['sorted'] = data_overlaps.sorted.apply(
-            lambda y: ''.join(str(y)))
-        data_overlaps = data_overlaps.drop_duplicates('sorted')
-        data_overlaps = data_overlaps.reset_index()[
-            ['id_1', 'id_2', 'geometry']]
-        data_overlaps.crs = data_temp.crs
-        return(data_overlaps)
-    else:
-        return('')
-
-#########################################
-#
-# Checks for gaps between polygons and returns geopandas object of missing sections
-#
-#########################################
-
-
-def check_gaps(data_temp):
-    data_temp['id'] = data_temp.index
-    data_temp['diss_id'] = 100
-    data_temp_diss = data_temp.dissolve(by='diss_id')
-    interior = data_temp_diss.interiors.values.tolist()[0]
-    gap_list = []
-    for i in interior:
-        gap_list.append(LineString(i))
-    data_gaps = gpd.GeoDataFrame(geometry=gap_list, crs=data_temp.crs)
-    data_gaps['feature_touches'] = data_gaps.geometry.apply(
-        lambda y: data_temp.loc[data_temp.touches(y)]['id'].tolist())
-    if(not data_gaps.empty):
-        data_gaps.head()
-        return(data_gaps)
-    else:
-        return('')
-
-#########################################
-#
-# truncates polygon or polyline vertices to given precision and saves out as new shapefile
-#
-#########################################
-
-
-def round_vertices(layer_file, precision, output_filename):
-
-    simpledec = re.compile(r"\d*\.\d+")
-
-    def mround(match):
-        return "{:.{}f}".format(float(match.group()), precision)
-
-    layer_file.geometry = layer_file.geometry.apply(
-        lambda x: loads(re.sub(simpledec, mround, x.wkt)))
-    layer_file.to_file(output_filename)
-    print("rounded file written to ", output_filename)
-    # https://gis.stackexchange.com/questions/321518/rounding-coordinates-to-5-decimals-in-geopandas
-
-
-def densify(geom, spacing):
-    wkt = geom.wkt  # Get wkt
-    geom = ogr.CreateGeometryFromWkt(wkt)
-    # Modify the geometry such it has no segment longer than the given (maximum) length.
-    geom.Segmentize(spacing)
-    wkt2 = geom.ExportToWkt()
-    new = loads(wkt2)
-    return new
-
-# spacing=500
-#shapefile['geometry'] = shapefile['geometry'].map(densify)
-
-def densify_polygon_gdf(geology, spacing):
-    geoms=[]    
-    g2=geology.copy()
-    for ind,g in geology.iterrows():
-        g3=densify(g.geometry,spacing)
-        if(g3.geom_type=='Polygon'):
-            geoms.append(Polygon(g3))
-        elif(g3.geom_type=='MultiPolygon'):
-            geoms.append(MultiPolygon(g3))
-
-    g2.geometry=geoms
-    return(g2)
