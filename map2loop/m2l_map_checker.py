@@ -214,8 +214,8 @@ def check_geology_map(geology, c_l={}, ignore_codes=[], m2l_warnings=[], m2l_err
         _description_, by default []
     explode_intrusives : bool, optional
         whether to break each of the intrusions into separate features, by default True
-    verbose_level : _type_, optional
-        _description_, by default VerboseLevel.ALL
+    verbose_level : VerboseLevel, optional
+        change level of m2l output, by default VerboseLevel.ALL
 
     Returns
     -------
