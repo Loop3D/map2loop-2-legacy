@@ -7,17 +7,11 @@ Welcome to map2loop's documentation!
 ====================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :hidden:
 
+   _static/getting_started/index
+   _statuc/user_guide/index
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
 .. autosummary::
    :caption: API
