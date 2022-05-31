@@ -801,7 +801,6 @@ def save_faults(config:Config, map_data:MapData, workflow:dict):
                                 else:
                                     fault_dip = config.run_flags['fault_dip']
                         else:
-                            print("4")
                             # specific dip defined
                             fault_dip = int(float(flt[config.c_l['fdip']]))
 
@@ -1913,8 +1912,8 @@ def tidy_data(config:Config, map_data:MapData, use_group, inputs):
             fs.write(ostr)
     fs.close()
 
-    new_asc=tidy_strat(tmp_path)
-    new_asc.to_csv(os.path.join(tmp_path,'all_sorts_clean.csv'), index  =  None, header = True)
+    new_asc=tidy_strat(config.tmp_path)
+    new_asc.to_csv(os.path.join(config.tmp_path,'all_sorts_clean.csv'), index  =  None, header = True)
 
 
     # add colours (hardwired to GSWA or the moment
