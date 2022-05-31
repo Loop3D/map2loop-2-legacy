@@ -2285,6 +2285,8 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
 
     fac.close()
 """
+
+
 def tidy_strat(tmp_path):
     asg=pd.read_csv(os.path.join(tmp_path,'age_sorted_groups.csv'))
     asc=pd.read_csv(os.path.join(tmp_path,'all_sorts_clean.csv'))
@@ -2302,29 +2304,29 @@ def tidy_strat(tmp_path):
         )
         asg=pd.concat([df,asg])
     
-    ave=asg.loc[asc.group]['ave']
+    ave=asg.loc[asc.group]['ave'] # get ave for each unit in asc
     ave=pd.DataFrame(ave)
     idx = pd.Index(range(len(ave)))
     ave=ave.set_index(idx)
-    asc['ave']=ave['ave']    
+    asc['ave']=ave['ave']     # set ave for each unit in asc
     
     new_asc=asc[asc.supergroup=='-99999999999999999xyz']
-    for sg in asc.supergroup.unique():
+    for sg in asc.supergroup.unique(): # crate new df with groups within supergroups sorted by age then index in group
         asc_sg=asc[asc.supergroup==sg]
         df2 = asc_sg.sort_values(['ave', 'index in group'],
                   ascending = [True, True])
         new_asc=pd.concat([new_asc,df2])
     
     sg_age={}
-    for sg in asc.supergroup.unique():
+    for sg in asc.supergroup.unique(): # calculate ave age of supergroup
         sga=asc[asc.supergroup==sg].ave.mean()
         sg_age[sg]={'sg_ave':sga}
     
     sg_age_df=pd.DataFrame.from_dict(sg_age,orient='index')
-    sg_age_df=sg_age_df.sort_values('sg_ave')
+    sg_age_df=sg_age_df.sort_values('sg_ave') # create df with sorted ave age of supergroups
     
     new_asc2=new_asc[new_asc.supergroup=='-99999999999999999xyz']
-    for sg,age in sg_age_df.iterrows():
+    for sg,age in sg_age_df.iterrows(): # create new df with supergroups sorted by age then index in group
         asc_sg=new_asc[new_asc.supergroup==sg]
         df2 = asc_sg.sort_values(['ave', 'index in group'],
                   ascending = [True, True])
