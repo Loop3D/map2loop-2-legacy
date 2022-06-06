@@ -462,6 +462,7 @@ def check_fault_map(faults, c_l, m2l_warnings, m2l_errors, verbose_level=Verbose
                         c_l[code])+'" of fault file, replacing with -999')
                     faults[c_l[code]].fillna("-999", inplace=True)
 
+        faults[c_l['o']] = faults[c_l['o']].astype(int)
         unique_f = set(faults[c_l['o']])
 
         if(not len(unique_f) == len(faults)):
