@@ -1,5 +1,5 @@
 name: Bug report
-description: Create a bug report to help develop LoopStructural
+description: Create a bug report to help develop map2loop
 title: "[BUG] "
 labels: [bug]
 
@@ -29,8 +29,8 @@ body:
 #     attributes:
 #       label: Versions
 #       description: "Please run the following and paste the results: 
-#       `import sys, LoopStructural, lavavu, pandas, scipy, numpy; print(LoopStructural.__version__,sys.__version__,
-#       lavavu.__version__,pandas.__version__,scipy.__version__,numpy.__version__)
+#       `import sys, map2loop, pandas, scipy, numpy, geopandas, rasterio; print(map2loop.__version__,sys.__version__,
+#       lavavu.__version__,pandas.__version__,scipy.__version__,numpy.__version__,rasterio.__version__,geopandas.__version__)
 #    validations:
 #       required: true
    
