@@ -7,5 +7,6 @@
     "files.associations": {
         "algorithm": "cpp"
     },
-    "restructuredtext.languageServer.disabled": true
+    "restructuredtext.languageServer.disabled": true,
+    "esbonio.server.enabled": false
 }

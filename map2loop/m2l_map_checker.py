@@ -547,8 +547,11 @@ def check_fault_map(
         faults[c_l["o"]] = faults[c_l["o"]].astype(int)
         unique_f = set(faults[c_l["o"]])
 
-        if not len(unique_f) == len(faults):
-            m2l_errors.append("duplicate fault/fold polyline unique IDs")
+        faults[c_l['o']] = faults[c_l['o']].astype(int)
+        unique_f = set(faults[c_l['o']])
+
+        if(not len(unique_f) == len(faults)):
+            m2l_errors.append('duplicate fault/fold polyline unique IDs')
 
         # faults = m2l_utils.clip_shp(faults, polygo)
 

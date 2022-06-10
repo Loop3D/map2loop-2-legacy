@@ -786,7 +786,6 @@ def save_faults(config:Config, map_data:MapData, workflow:dict):
                         if(int(float(flt[config.c_l['fdip']])) == int(float(config.c_l['fdipnull']))):
                             # dip estimate defined
                             if(not str(flt[config.c_l['fdipest']]) == '-999'):
-                                #print("1")
                                 i = 0
                                 for choice in split:
                                     if(flt[config.c_l['o']] == '-1'):
@@ -798,19 +797,16 @@ def save_faults(config:Config, map_data:MapData, workflow:dict):
                                     i = i+1
                             else:
                                 if(flt[config.c_l['fdip']] == -999 or config.run_flags['fault_dip'] == -999):  # random flag
-                                    #print("2")
                                     fault_dip = random.randint(60, 90)
                                 else:
-                                    #print("3")
                                     fault_dip = config.run_flags['fault_dip']
                         else:
-                            #print("4")
                             # specific dip defined
                             fault_dip = int(float(flt[config.c_l['fdip']]))
 
                         # numeric dip direction defined
                         if(config.c_l['fdipdir_flag'] == 'num'):
-                            if pd.notna(flt[config.c_l['fdipdir']]):
+                            if pd.notna(flt[config.c_l['fdipdir']]) and flt[config.c_l['fdipdir']] != '-999':
                                 azimuth = flt[config.c_l['fdipdir']]
                             else:
                                 azimuth=azimuth_fault
@@ -822,14 +818,15 @@ def save_faults(config:Config, map_data:MapData, workflow:dict):
                             #print('az_after',fault_name,azimuth)
                             # TODO: Fix comparison of str version of two floats are comparing floats is very inaccurate
                             #       Also if this logic works 'lsx' is not defined at this point
-                        elif (not str(flt[config.c_l['fdipdir']]) == 'None' and not str(float(flt[config.c_l['fdip']])) == str(float(config.c_l['fdipnull']))):
+                        elif (not str(flt[config.c_l['fdipdir']]) == 'None' and not str(float(flt[config.c_l['fdip']])) == str(float(config.c_l['fdipnull'])) and flt[config.c_l['fdipdir']] != '-999'):
                             dotprod = degrees(acos(
-                                (-lsx*dip_dirs[flt[config.c_l['fdipdir']]][0])+(lsy*dip_dirs[flt[config.c_l['fdipdir']]][1])))
+                                (-dlsx*dip_dirs[flt[config.c_l['fdipdir']]][0])+(dlsy*dip_dirs[flt[config.c_l['fdipdir']]][1])))
                             if(dotprod > 45):
                                 fault_dip = -fault_dip
                         else:
                             azimuth=azimuth_fault
-
+                        #print("indx,azimuth,azimuth_fault,flt[c_l['fdipdir']],pd.notna( flt[c_l['fdipdir']]),fault_dip_var, c_l['fdipnull'],flt[c_l['fdip']]")
+                        #print( indx,azimuth,azimuth_fault,flt[c_l['fdipdir']],pd.notna( flt[c_l['fdipdir']]),fault_dip_var, c_l['fdipnull'],flt[c_l['fdip']])
                         l,m,n=m2l_utils.ddd2dircos((90-fault_dip),azimuth)
                         #print('fault_name,l,m,n,azimuth_fault,dip',fault_name,l,m,n,azimuth,fault_dip)
                         first = True
@@ -1915,6 +1912,10 @@ def tidy_data(config:Config, map_data:MapData, use_group, inputs):
             fs.write(ostr)
     fs.close()
 
+    new_asc=tidy_strat(config.tmp_path)
+    new_asc.to_csv(os.path.join(config.tmp_path,'all_sorts_clean.csv'), index  =  None, header = True)
+
+
     # add colours (hardwired to GSWA or the moment
     # if(config.clut_path  == ''):
     # asc = pd.read_csv(os.path.join(config.tmp_path,'all_sorts_clean.csv'),sep=",")
@@ -1962,6 +1963,58 @@ def tidy_data(config:Config, map_data:MapData, use_group, inputs):
 
     fac.close()
 """
+
+
+def tidy_strat(tmp_path):
+    asg=pd.read_csv(os.path.join(tmp_path,'age_sorted_groups.csv'))
+    asc=pd.read_csv(os.path.join(tmp_path,'all_sorts_clean.csv'))
+    
+    asg=asg.set_index('group_')
+    if asc.group.str.contains('cover').any():  # add cover row if needed
+        df = pd.DataFrame(
+        {
+          "index":-1,
+          "min": 0,
+          "max": 0,
+          "ave": 0
+        }
+         ,index=['cover']
+        )
+        asg=pd.concat([df,asg])
+    
+    ave=asg.loc[asc.group]['ave'] # get ave for each unit in asc
+    ave=pd.DataFrame(ave)
+    idx = pd.Index(range(len(ave)))
+    ave=ave.set_index(idx)
+    asc['ave']=ave['ave']     # set ave for each unit in asc
+    
+    new_asc=asc[asc.supergroup=='-99999999999999999xyz']
+    for sg in asc.supergroup.unique(): # crate new df with groups within supergroups sorted by age then index in group
+        asc_sg=asc[asc.supergroup==sg]
+        df2 = asc_sg.sort_values(['ave', 'index in group'],
+                  ascending = [True, True])
+        new_asc=pd.concat([new_asc,df2])
+    
+    sg_age={}
+    for sg in asc.supergroup.unique(): # calculate ave age of supergroup
+        sga=asc[asc.supergroup==sg].ave.mean()
+        sg_age[sg]={'sg_ave':sga}
+    
+    sg_age_df=pd.DataFrame.from_dict(sg_age,orient='index')
+    sg_age_df=sg_age_df.sort_values('sg_ave') # create df with sorted ave age of supergroups
+    
+    new_asc2=new_asc[new_asc.supergroup=='-99999999999999999xyz']
+    for sg,age in sg_age_df.iterrows(): # create new df with supergroups sorted by age then index in group
+        asc_sg=new_asc[new_asc.supergroup==sg]
+        df2 = asc_sg.sort_values(['ave', 'index in group'],
+                  ascending = [True, True])
+        new_asc2=pd.concat([new_asc2,df2])
+
+    new_asc2=new_asc2.drop('ave',axis=1)
+    new_asc2=new_asc2.reset_index()
+    new_asc2=new_asc2.drop('level_0',axis=1)
+    new_asc2['index']=new_asc2.index
+    return(new_asc2)
 
 ####################################################
 # calculate distance between two points (duplicate from m2l_utils??
