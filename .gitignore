@@ -210,3 +210,6 @@ dmypy.json
 
 
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,c++,cmake
+#ignore automatically generated doc files
+docs/source/_autosummary 
+ 
