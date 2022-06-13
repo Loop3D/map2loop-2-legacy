@@ -558,6 +558,7 @@ class Project(object):
         m2l_export.export_to_projectfile(self.loop_project_filename, self.config)
         self.map_data.export_dtm(os.path.join(self.project_path,"dtm","dtm_rp.tif"))
 
+    @m2l_utils.timer_decorator
     def __run_map2model(self):
         mindep_filename = ""
         if self.map_data.get_map_data(Datatype.MINERAL_DEPOSIT) is not None:
@@ -587,10 +588,10 @@ class Project(object):
         if self.config.verbose_level != VerboseLevel.NONE:
             print("Generating topology graph display and unit groups...")
 
-        self.topology_graph = nx.read_gml(self.config.strat_graph_filename, label='id')
-        selected_nodes = [n for n, v in self.topology_graph.nodes(data=True) if n >= 0]
+        self.topology_graph_labels, self.topology_graph = Topology.get_series(self.config.strat_graph_filename, 'id')
 
         if self.config.verbose_level != VerboseLevel.NONE:
+            selected_nodes = [n for n, v in self.topology_graph.nodes(data=True) if n >= 0]
             nx.draw_networkx(self.topology_graph,
                              pos=nx.kamada_kawai_layout(self.topology_graph),
                              arrows=True,
@@ -609,12 +610,12 @@ class Project(object):
                     print(node[0], " ", elem)
 
         # Save groups of stratigraphic units
-        groups, self.topology_graph_labels, topology_graph = Topology.get_series(self.config.strat_graph_filename, 'id')
-        Topology.save_units(topology_graph, self.topology_graph_labels, self.config)
+        Topology.save_units(self.topology_graph, self.topology_graph_labels, self.config)
 
     # Interpolates a regular grid of orientations from an shapefile of
     # arbitrarily-located points and saves out four csv files of l, m & n
     # direction cosines and dip dip direction data
+    @m2l_utils.timer_decorator
     def __test_interpolation(self):
         # TODO: Add basal contacts to storage structure
         basal_contacts_filename = os.path.join(self.config.tmp_path, 'basal_contacts.shp')
@@ -677,9 +678,11 @@ class Project(object):
             plt.title('Interpolated Contacts')
             plt.show()
 
+    @m2l_utils.timer_decorator
     def __process_plutons(self):
         m2l_geometry.process_plutons(self.config, self.map_data, self.workflow)
 
+    @m2l_utils.timer_decorator
     def __extract_section_features(self):
         # Extract faults and basal contacts of groups from seismic sections
         # input geology file (if local)
@@ -732,11 +735,13 @@ class Project(object):
                               index=None,
                               header=True)
 
+    @m2l_utils.timer_decorator
     def __propagate_contact_dips(self):
         if self.config.verbose_level != VerboseLevel.NONE:
             print("Propagating dips along contacts...")
         m2l_geometry.save_basal_contacts_orientations_csv(self.config, self.map_data, self.workflow)
 
+    @m2l_utils.timer_decorator
     def __calc_thickness(self):
         # Estimate formation thickness and normalised formation thickness
         # basal_contacts_filename = os.path.join(self.config.tmp_path, 'basal_contacts.shp')
@@ -755,6 +760,7 @@ class Project(object):
                 'norm_th', 'x', 'y', True, 'numeric', "Normalised Thicknesses"
             )
 
+    @m2l_utils.timer_decorator
     def __create_fold_axial_trace_points(self):
         folds_clip = self.map_data.get_map_data(Datatype.FOLD).copy()
         # folds_clip = gpd.read_file(self.fold_filename)
@@ -764,6 +770,7 @@ class Project(object):
             # TODO : better approximation / multithread / numba
             m2l_geometry.save_fold_axial_traces_orientations(self.config, self.map_data, self.workflow)
 
+    @m2l_utils.timer_decorator
     def __postprocess(self):
 
         if (self.workflow['model_engine'] == 'geomodeller'):
@@ -861,6 +868,7 @@ class Project(object):
             warnings.warn(e)
             warnings.warn("WARNING: Could not save geology graphic")
 
+    @m2l_utils.timer_decorator
     def __extract_drillholes(self):
         dhdb_filename = self.map_data.get_map_data(Datatype.DRILLHOLE) # input drill hole file (if local)
         dh = gpd.read_file(dhdb_filename, bbox=self.bbox)

@@ -162,17 +162,10 @@ class Topology(object):
         G = nx.read_gml(path_in, label=id_label)
 
         glabels = {}
-        groups = 0
-        nlist = list(G.nodes)
-        for n in nlist:  # Find out total number of groups and their names groups
-            if "isGroup" in G.nodes[n]:
-                groups += 1
-                glabels[n] = (
-                    G.nodes[n]["LabelGraphics"]["text"]
-                    .replace(" ", "_")
-                    .replace("-", "_")
-                )
-        return (groups, glabels, G)
+        for n in list(G.nodes):  # Find out total number of groups and their names groups
+            if('isGroup' in G.nodes[n]):
+                glabels[n] = G.nodes[n]['LabelGraphics']['text'].replace(" ", "_").replace("-", "_")
+        return(glabels, G)
 
     ####################################
     # parse stratigraphy GML file to save units for each series

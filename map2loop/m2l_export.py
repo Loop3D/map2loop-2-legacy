@@ -1671,6 +1671,7 @@ def export_to_projectfile(loopFilename, config:Config, overwrite:bool=False):
             'group': 'supergroup'
         })
 
+    # Change to formation_summary_thicknesses to get all layers and also dont' need to calc thickness again
     stratigraphicLayers = pd.read_csv(os.path.join(config.output_path, "formation_thicknesses.csv"))
 
     stratAges = pd.read_csv(os.path.join(config.tmp_path, 'age_sorted_groups.csv'))[['group_', 'min', 'max']]
