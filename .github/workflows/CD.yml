@@ -20,7 +20,7 @@ jobs:
       - name: Installing dependencies
         shell: bash -l {0}
         run: |
-          conda install -c conda-forge numpy pandas geopandas pyproj shapley rasterio descartes matplotlib-base networkx scipy owslib tqdm map2model mplstereonet hjson loopprojectfile beartype cftime>=1.4.0-y
+          conda install -c conda-forge -c loop3d numpy pandas geopandas pyproj shapley rasterio descartes matplotlib-base networkx scipy owslib tqdm map2model mplstereonet hjson loopprojectfile beartype cftime>=1.4.0-y
           
           
       - name: Checking formatting of code
