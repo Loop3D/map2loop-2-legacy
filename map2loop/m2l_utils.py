@@ -1120,13 +1120,13 @@ def plot_bedding_stereonets(config, map_data):
         print("groups", groups, "\ncodes", codes)
 
     if config.c_l["otype"] == "dip direction":
-        strikes = orientations[config.c_l["dd"]].values - 90
+        strikes = orientations[config.c_l["dd"]].values.astype(float) - 90
     else:
-        strikes = orientations[config.c_l["dd"]].values
+        strikes = orientations[config.c_l["dd"]].values.astype(float)
 
     if config.verbose_level != VerboseLevel.NONE:
         fig, ax = mplstereonet.subplots(figsize=(7, 7))
-        dips = orientations[config.c_l["d"]].values
+        dips = orientations[config.c_l["d"]].values.astype(float)
         cax = ax.density_contourf(strikes, dips, measurement="poles")
         ax.pole(strikes, dips, markersize=5, color="w")
         ax.grid(True)
@@ -1149,11 +1149,11 @@ def plot_bedding_stereonets(config, map_data):
 
             ax = None
             if config.c_l["otype"] == "dip direction":
-                strikes = all_orientations[config.c_l["dd"]].values - 90
+                strikes = all_orientations[config.c_l["dd"]].values.astype(float) - 90
             else:
-                strikes = all_orientations[config.c_l["dd"]].values
+                strikes = all_orientations[config.c_l["dd"]].values.astype(float)
 
-            dips = all_orientations[config.c_l["d"]].values
+            dips = all_orientations[config.c_l["d"]].values.astype(float)
             fit_strike, fit_dip = mplstereonet.fit_girdle(strikes, dips)
             (plunge,), (bearing,) = mplstereonet.pole2plunge_bearing(
                 fit_strike, fit_dip
