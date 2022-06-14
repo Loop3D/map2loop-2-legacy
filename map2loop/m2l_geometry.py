@@ -1228,12 +1228,15 @@ def save_faults(config: Config, map_data: MapData, workflow: dict):
                             == str(float(config.c_l["fdipnull"]))
                             and flt[config.c_l["fdipdir"]] != "-999"
                         ):
+                            lsx = dlsx / sqrt((dlsx * dlsx) + (dlsy * dlsy))
+                            lsy = dlsy / sqrt((dlsx * dlsx) + (dlsy * dlsy))
                             dotprod = degrees(
                                 acos(
-                                    (-dlsx * dip_dirs[flt[config.c_l["fdipdir"]]][0])
-                                    + (dlsy * dip_dirs[flt[config.c_l["fdipdir"]]][1])
+                                    (-lsx * dip_dirs[flt[config.c_l["fdipdir"]]][0])
+                                    + (lsy * dip_dirs[flt[config.c_l["fdipdir"]]][1])
                                 )
                             )
+                            
                             if dotprod > 45:
                                 fault_dip = -fault_dip
                         else:
