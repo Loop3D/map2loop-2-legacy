@@ -868,11 +868,12 @@ def save_faults(path_faults, output_path, dtm, dtb, dtb_null, cover_map, c_l, fa
                                 # ostr = str(afs[0])+","+str(afs[1])+","+str(height)+","+fault_name+"\n"
                                 f.write(ostr)
                                 #dip projection equivalent of surface fault
-                                proj_scale=-((bbox_base-float(height))/n)
-                                ostr = "{},{},{},{}\n"\
+                                if(fabs(n)>0.0): #avoids hz faults divide by zero
+                                    proj_scale=-((bbox_base-float(height))/n)
+                                    ostr = "{},{},{},{}\n"\
                                         .format(afs[0]+(l*proj_scale)+1, afs[1]+(m*proj_scale)+1, float(height)-(n*proj_scale)+1, fault_name)
-                                # ostr = str(afs[0])+","+str(afs[1])+","+str(height)+","+fault_name+"\n"
-                                f.write(ostr)
+                                    # ostr = str(afs[0])+","+str(afs[1])+","+str(height)+","+fault_name+"\n"
+                                    f.write(ostr)
                             i = i+1
 
                         strike = strike*1.25
@@ -2238,7 +2239,7 @@ def tidy_data(output_path, tmp_path, clut_path, use_group, use_interpolations, u
     new_asc.to_csv(os.path.join(tmp_path,'all_sorts_clean.csv'), index  =  None, header = True)
 
 
-    # add colours (hardwired to GSWA or the moment
+    # add colours (hardwired to GSWA or the moment!
     # if(clut_path  == ''):
     # asc = pd.read_csv(os.path.join(tmp_path,'all_sorts_clean.csv'),",")
     # colours = []
