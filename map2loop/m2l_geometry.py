@@ -4408,7 +4408,9 @@ def fault_strat_offset(config: Config, map_data: MapData):
         lgdf = gpd.GeoDataFrame(crs=map_data.working_projection, geometry=lgeomList)
         rgdf = gpd.GeoDataFrame(crs=map_data.working_projection, geometry=rgeomList)
         lcode = gpd.sjoin(lgdf, local_geology, how="left", predicate="within")
+        lcode = lcode[~lcode.index.duplicated(keep='first')]
         rcode = gpd.sjoin(rgdf, local_geology, how="left", predicate="within")
+        rcode = rcode[~rcode.index.duplicated(keep='first')]
 
         # For each set of joined points fill a 2D list (data) with point information and
         # what formation is left and right of it, (also list strat column difference and
