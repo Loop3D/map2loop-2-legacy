@@ -1,3 +1,10 @@
+"""
+map2loop API
+============
+
+"""
+
+from .project import Project
 # if you add a variable in here it can be changed from within python code e.g.
 # import map2loop
 # map2loop._clut_path = newpath
