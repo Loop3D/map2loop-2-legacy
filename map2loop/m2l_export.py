@@ -668,12 +668,9 @@ def loop2geomodeller2(model_name, test_data_path, tmp_path, output_path,
     all_sorts = np.genfromtxt(os.path.join(tmp_path, 'all_sorts_clean.csv'), delimiter=',', dtype='U100')
     nformations = len(all_sorts)
 
-    ostr.append(
-        '#---------------------------------------------------------------\n')
-    ostr.append(
-        '#-----------------------Create Formations-----------------------\n')
-    ostr.append(
-        '#---------------------------------------------------------------\n')
+    ostr.append('#---------------------------------------------------------------\n')
+    ostr.append('#-----------------------Create Formations-----------------------\n')
+    ostr.append('#---------------------------------------------------------------\n')
 
     for i in range(1, nformations):
         if (not all_sorts[i, 4] in empty_fm):
@@ -844,12 +841,9 @@ def loop2geomodeller2(model_name, test_data_path, tmp_path, output_path,
             ostr.append('    }\n')
             ostr.append('}\n')
 
-    ostr.append(
-        '#---------------------------------------------------------------\n')
-    ostr.append(
-        '#-----------------------Import 3D fault data ---Base Model------\n')
-    ostr.append(
-        '#---------------------------------------------------------------\n')
+    ostr.append('#---------------------------------------------------------------\n')
+    ostr.append('#-----------------------Import 3D fault data ---Base Model------\n')
+    ostr.append('#---------------------------------------------------------------\n')
 
     contacts = pd.read_csv(os.path.join(output_path, 'faults.csv'), sep=',')
     faults = pd.read_csv(os.path.join(output_path, 'fault_dimensions.csv'), sep=',')
@@ -916,27 +910,19 @@ def loop2geomodeller2(model_name, test_data_path, tmp_path, output_path,
         # print(edges[i][0],edges[i][1])
         cycles = list(nx.simple_cycles(G))
         # display(cycles)
-        ostr.append(
-            '#---------------------------------------------------------------\n'
-        )
-        ostr.append(
-            '#-----------------------Link faults with faults ----------------\n'
-        )
-        ostr.append(
-            '#---------------------------------------------------------------\n'
-        )
+        ostr.append('#---------------------------------------------------------------\n')
+        ostr.append('#-----------------------Link faults with faults ----------------\n')
+        ostr.append('#---------------------------------------------------------------\n')
         ostr.append('GeomodellerTask {\n')
         ostr.append('    LinkFaultsWithFaults {\n')
 
         for i in range(0, len(edges)):
             found = False
             for j in range(0, len(cycles)):
-                if (edges[i][0] == cycles[j][0]
-                        and edges[i][1] == cycles[j][1]):
+                if (edges[i][0] == cycles[j][0] and edges[i][1] == cycles[j][1]):
                     found = True  # fault pair is first two elements in a cycle list so don't save to taskfile
             if (not found):
-                ostr2 = '        FaultStopsOnFaults{ fault: "' + edges[i][
-                    1] + '"; stopson: "' + edges[i][0] + '"}\n'
+                ostr2 = '        FaultStopsOnFaults{ fault: "' + edges[i][1] + '"; stopson: "' + edges[i][0] + '"}\n'
                 ostr.append(ostr2)
 
         ostr.append('    }\n')
@@ -1736,28 +1722,19 @@ def export_to_projectfile(loopFilename, config:Config, overwrite:bool=False):
     faultObs['posOnly'] = 1
     faultsJoined = pd.concat([faults, faultObs])
     if (len(faultDims) > 0):
-        faultEvents = np.zeros(faultDims.shape[0],
-                               LoopProjectFile.faultEventType)
+        faultEvents = np.zeros(faultDims.shape[0], LoopProjectFile.faultEventType)
         # The fault eventId is called formation for some reason
         faultEvents['name'] = faultDims['formation']
         faultEvents['enabled'] = 1
         faultEvents['rank'] = 0
         faultEvents['type'] = 0
-        faultEvents['minAge'] = np.arange(minStratAge, maxStratAge,
-                                          (maxStratAge - minStratAge) /
-                                          faultDims.shape[0])
+        faultEvents['minAge'] = np.linspace(minStratAge, maxStratAge, faultDims.shape[0])
         faultEvents['maxAge'] = faultEvents['minAge']
         avgDisplacements = []
         avgDownthrowDir = []
         for formationName in faultDims['formation'].unique():
-            avgDisplacements.append(
-                np.average(faultDisplacements[faultDisplacements['formation']
-                                              == formationName]
-                           ['vertical_displacement']))
-            avgDownthrowDir.append(
-                np.average(
-                    faultDisplacements[faultDisplacements['formation'] ==
-                                       formationName]['downthrow_dir']))
+            avgDisplacements.append(np.average(faultDisplacements[faultDisplacements['formation'] == formationName]['vertical_displacement']))
+            avgDownthrowDir.append(np.average( faultDisplacements[faultDisplacements['formation'] == formationName]['downthrow_dir']))
         faultEvents['avgDisplacement'] = avgDisplacements
         faultEvents['avgDownthrowDir'] = avgDownthrowDir
         faultEvents['influenceDistance'] = faultDims['InfluenceDistance']
@@ -1781,10 +1758,7 @@ def export_to_projectfile(loopFilename, config:Config, overwrite:bool=False):
         faultsData['dipPolarity'] = faultsJoined['DipPolarity']
         faultsData['displacement'] = 0
         faultsData['posOnly'] = faultsJoined['posOnly']
-        resp = LoopProjectFile.Set(loopFilename,
-                                   "faultObservations",
-                                   data=faultsData,
-                                   verbose=True)
+        resp = LoopProjectFile.Set(loopFilename, "faultObservations", data=faultsData, verbose=True)
         if resp["errorFlag"]:
             print(resp["errorString"])
 
@@ -1794,9 +1768,7 @@ def export_to_projectfile(loopFilename, config:Config, overwrite:bool=False):
     for form in contacts['formation']:
         a = bytes(form, 'ascii')
         if a in stratigraphicLogData['name']:
-            layerIds.append(
-                int(stratigraphicLogData[stratigraphicLogData['name'] == a]
-                    ['layerId']))
+            layerIds.append(int(stratigraphicLogData[stratigraphicLogData['name'] == a]['layerId']))
         else:
             layerIds.append(0)
     contactsData = np.zeros(contacts.shape[0], LoopProjectFile.contactObservationType)

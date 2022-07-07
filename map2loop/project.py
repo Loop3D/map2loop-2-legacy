@@ -117,7 +117,7 @@ class Project(object):
         self.deformationHistory = DeformationHistory()
 
         # Sanity check on working projection parameter
-        if type(working_projection) == str:
+        if type(working_projection) == str or type(working_projection) == int:
             self.map_data.set_working_projection(working_projection)
         elif type(working_projection) == dict:
             warnings.warn("NOTE: the 'working_projection' parameter will soon no longer accept projection in {'init':'EPSG:28350'} format, please use the string 'EPSG:28350' format instead")
@@ -193,9 +193,6 @@ class Project(object):
                 os.mkdir(os.path.join(project_path,subdir))
         self.project_path = project_path
 
-        self.local = True
-        if self.state in ["WA", "NSW", "VIC", "SA", "QLD", "ACT", "TAS"]:
-            self.local = False
         self.loop_project_filename = loop_project_filename
         self.update_workflow(model_engine)
         self.setup_matplotlib()
@@ -313,12 +310,9 @@ class Project(object):
     @m2l_utils.timer_decorator
     @beartype.beartype
     def update_config(self,
-                      out_dir:str,
                       overwrite=None,
-                      loop_project_filename:str="",
                       bbox_3d=None,
                       dtm_crs:str='EPSG:4326',
-                      project_crs:str=None,
                       step_out:float=0.1,
                       clut_path='',
                       model_engine="",
@@ -328,8 +322,6 @@ class Project(object):
 
         Parameters
         ----------
-        out_dir: string
-            The name of the sub-directory to store working and output files
         overwrite: string/None, deprecated
             Old flag to indicate whether to overwrite the output directory
         loop_project_filename: string, optional
@@ -338,8 +330,6 @@ class Project(object):
             The bounding box of the region to apply map2loop to. Defaults to limits of geology_filename data if not specified
         dtm_crs: string, optional
             The projection of the digital terrain map. Defaults to 'EPSG:4326' (WGS84 Lat/Long)
-        project_crs: string
-            The projection use internally for map2loop. Defaults to 'EPSG:28350' (MGA Zone 50 ~Western Australia)
         step_out: float, optional
             A buffer area in degrees to expand the digital terrain map to ensure coverage of region of interest. Default is 0.1
         quiet: string, optional, deprecated
@@ -371,8 +361,9 @@ class Project(object):
         if model_engine != "":
             self.update_workflow(model_engine)
 
-        if loop_project_filename != "":
-            self.loop_project_filename = loop_project_filename
+        if "loop_project_filename" in kwargs:
+            warnings.warn("loop_project_filename is deprecated in update_config and will be removed in later versions of map2loop.  Please use the project loop_project_filename instead", DeprecationWarning)
+            self.loop_project_filename = kwargs["loop_project_filename"]
 
         bbox_valid = False
         if isinstance(bbox_3d,dict) and 'minx' in bbox_3d and 'maxx' in bbox_3d \
@@ -382,18 +373,25 @@ class Project(object):
                bbox_3d['base'] < bbox_3d['top']:
                 bbox_valid = True
         if bbox_valid == False:
-            print("Invalid bounding box specified, attempting to get one from the map files")
+            warnings.warn("Invalid bounding box specified, attempting to get bounding box and projection from the map files")
             bbox_3d, project_crs = self.map_data.calculate_bounding_box_and_projection()
+            self.map_data.set_working_projection(project_crs)
 
         if bbox_3d is None:
             bbox_3d = {'minx':0,'maxx':1000,',miny':0,'maxy':1000,'base':-10000,'top':1200}
-        if project_crs is None:
-            project_crs = 'EPSG:28350'
-            if "proj_crs" in kwargs:
-                warnings.warn("proj_crs is deprecated and will be removed in later versions of map2loop.  Please use the parameter project_crs instead", DeprecationWarning)
-                project_crs = kwargs['proj_crs']
 
-        bbox_str = "{},{},{},{},{}".format(bbox_3d['minx'], bbox_3d['miny'], bbox_3d['maxx'], bbox_3d['maxy'],project_crs)
+        if self.map_data.working_projection == None:
+            if project_crs in kwargs:
+                warnings.warn("project_crs in update_config is deprecated and will be removed in later versions of map2loop.  Please use the working_projection parameter in Project instead", DeprecationWarning)
+                project_crs = kwargs['proj_crs']
+            elif "proj_crs" in kwargs:
+                warnings.warn("proj_crs in update_config is deprecated and will be removed in later versions of map2loop.  Please use the working_projection parameter in Project instead", DeprecationWarning)
+                project_crs = kwargs['proj_crs']
+            else:
+                project_crs = 'EPSG:28350'
+            self.map_data.set_working_projection(project_crs)
+
+        bbox_str = "{},{},{},{},{}".format(bbox_3d['minx'], bbox_3d['miny'], bbox_3d['maxx'], bbox_3d['maxy'],self.map_data.working_projection)
         self.map_data.update_filenames_with_bounding_box(bbox_str)
 
         bbox = tuple(
@@ -404,20 +402,19 @@ class Project(object):
         lon_point_list = [minx, maxx, maxx, minx, minx]
         bbox_geom = Polygon(zip(lon_point_list, lat_point_list))
         polygon = gpd.GeoDataFrame(
-            index=[0], crs=project_crs, geometry=[bbox_geom])
+            index=[0], crs=self.map_data.working_projection, geometry=[bbox_geom])
 
         if clut_path == "":
             if self.state in ["WA", "NSW", "VIC", "SA", "QLD", "ACT", "TAS"]:
                 clut_path = clut_paths[self.state]
 
         self.config.update(
-                            out_dir,
+                            self.project_path,
                             bbox_3d,
                             polygon,
                             step_out,
                             dtm_crs,
-                            project_crs,
-                            self.local,
+                            self.map_data.working_projection,
                             self.map_data.get_filename(Datatype.METADATA),
                             clut_path=clut_path,
                             run_flags=run_flags

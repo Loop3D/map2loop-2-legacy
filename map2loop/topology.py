@@ -1896,7 +1896,6 @@ class Topology(object):
             "step_out": config.step_out,
             "dtm_crs": config.dtm_crs,
             "project_crs": map_data.working_projection,
-            "local": config.local,
         }
         Gloop.add_node(
             "metadata",

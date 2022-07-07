@@ -83,7 +83,6 @@ class Config(object):
                  step_out,
                  dtm_crs,
                  project_crs,
-                 local,
                  metadata_filename:str="",
                  clut_path:str="",
                  run_flags=dict(),
@@ -133,7 +132,6 @@ class Config(object):
 
         self.dtm_crs = dtm_crs
         self.project_crs = project_crs
-        self.local = local
 
         self.read_metadata(metadata_filename)
         self.create_cmap()

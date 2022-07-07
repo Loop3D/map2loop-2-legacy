@@ -469,7 +469,7 @@ def check_geology_map(
                 geol_clip_tmp = geology.copy(deep=False)
                 # print('raw',len(geol_clip_tmp))
                 geol_clip_tmp.crs = geology.crs
-                geol_clip_tmp = geol_clip_tmp.dissolve(by=c_l["c"], aggfunc="first")
+                # geol_clip_tmp = geol_clip_tmp.dissolve(by=c_l["c"], aggfunc="first")
                 geol_clip_tmp = geol_clip_tmp[
                     geol_clip_tmp[c_l["r1"]].str.contains(c_l["intrusive"])
                     & ~geol_clip_tmp[c_l["ds"]].str.contains(c_l["sill"])
