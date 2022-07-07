@@ -78,9 +78,7 @@ def save_orientations(config: Config, map_data: MapData, workflow):
     dtm = map_data.get_map_data(Datatype.DTM).open()
     dtb = map_data.dtb
     dtb_null = map_data.dtb_null
-    is_bed = structures[config.c_l["sf"]].str.contains(
-        config.c_l["bedding"], regex=False
-    )
+    is_bed = structures['FEATURE_TYPE'].str.contains(config.c_l['bedding'], regex=False)
 
     structure_clip = structures[is_bed]
     # print(structure_clip.columns)
@@ -88,38 +86,26 @@ def save_orientations(config: Config, map_data: MapData, workflow):
     f = open(os.path.join(config.output_path, "orientations.csv"), "w")
     f.write("X,Y,Z,azimuth,dip,polarity,formation\n")
     for indx, apoint in structure_clip.iterrows():
-        if(not str(apoint[config.c_l['r1']]) == 'None'):
-            if(not str(apoint[config.c_l['r1']]) == 'nan'):
+        if(not str(apoint['ROCKTYPE1']) == 'None'):
+            if(not str(apoint['ROCKTYPE1']) == 'nan'):
 
-                if(not config.c_l['intrusive'] in apoint[config.c_l['r1']]):
-                    if(apoint[config.c_l['d']] != 0 and i % config.run_flags['orientation_decimate'] == 0):
+                if(not config.c_l['intrusive'] in apoint['ROCKTYPE1']):
+                    if(apoint['DIP'] != 0 and i % config.run_flags['orientation_decimate'] == 0):
                         locations = [
                             (apoint['geometry'].x, apoint['geometry'].y)]
                         if(apoint['geometry'].x > dtm.bounds[0] and apoint['geometry'].x < dtm.bounds[2] and
                                 apoint['geometry'].y > dtm.bounds[1] and apoint['geometry'].y < dtm.bounds[3]):
                             height = m2l_utils.value_from_dtm_dtb(
-                                dtm, dtb, dtb_null, workflow["cover_map"], locations
-                            )
-                            if config.c_l["otype"] == "strike":
-                                dipdir = apoint[config.c_l["dd"]] + 90
-                            else:
-                                dipdir = apoint[config.c_l["dd"]]
-                            if apoint[config.c_l["bo"]] != config.c_l["btype"]:
+                                dtm, dtb, dtb_null, workflow['cover_map'], locations)
+                            dipdir = apoint['DIPDIR']
+                            if(apoint['FOLIATION_TYPE'] != config.c_l['btype']):
                                 polarity = 1
                             else:
                                 polarity = 0
-                            ostr = "{},{},{},{},{},{},{}\n".format(
-                                apoint["geometry"].x,
-                                apoint["geometry"].y,
-                                height,
-                                dipdir,
-                                apoint[config.c_l["d"]],
-                                polarity,
-                                apoint[config.c_l["c"]]
-                                .replace(" ", "_")
-                                .replace("-", "_"),
-                            )
-                            # ostr = str(apoint['geometry'].x)+","+str(apoint['geometry'].y)+","+height+","+str(dipdir)+","+str(apoint[config.c_l['d']])+",1,"+str(apoint[config.c_l['c']].replace(" ","_").replace("-","_"))+"\n"
+                            ostr = "{},{},{},{},{},{},{}\n"\
+                                .format(apoint['geometry'].x, apoint['geometry'].y, height, dipdir, apoint['DIP'],
+                                        polarity, apoint['UNIT_NAME'].replace(" ", "_").replace("-", "_"))
+                            # ostr = str(apoint['geometry'].x)+","+str(apoint['geometry'].y)+","+height+","+str(dipdir)+","+str(apoint['DIP'])+",1,"+str(apoint['UNIT_NAME'].replace(" ","_").replace("-","_"))+"\n"
                             f.write(ostr)
                     i = i + 1
 
@@ -147,47 +133,34 @@ def save_orientations(config: Config, map_data: MapData, workflow):
         f = open(os.path.join(config.output_path, "secondary_orientations.csv"), "w")
         f.write("X,Y,Z,type,azimuth,dip,polarity,formation\n")
         for indx, apoint in structures.iterrows():
-            if(not str(apoint[config.c_l['r1']]) == 'None'):
-                if(not str(apoint[config.c_l['r1']]) == 'nan'):
+            if(not str(apoint['ROCKTYPE1']) == 'None'):
+                if(not str(apoint['ROCKTYPE1']) == 'nan'):
 
-                    if(not config.c_l['intrusive'] in apoint[config.c_l['r1']]):
-                        if(apoint[config.c_l['d']] != 0 and i % config.run_flags['orientation_decimate'] == 0):
+                    if(not config.c_l['intrusive'] in apoint['ROCKTYPE1']):
+                        if(apoint['DIP'] != 0 and i % config.run_flags['orientation_decimate'] == 0):
                             locations = [
                                 (apoint['geometry'].x, apoint['geometry'].y)]
                             if(apoint['geometry'].x > dtm.bounds[0] and apoint['geometry'].x < dtm.bounds[2] and
                                     apoint['geometry'].y > dtm.bounds[1] and apoint['geometry'].y < dtm.bounds[3]):
                                 height = m2l_utils.value_from_dtm_dtb(
-                                    dtm, dtb, dtb_null, workflow["cover_map"], locations
-                                )
-                                if config.c_l["otype"] == "strike":
-                                    dipdir = apoint[config.c_l["dd"]] + 90
-                                else:
-                                    dipdir = apoint[config.c_l["dd"]]
+                                    dtm, dtb, dtb_null, workflow['cover_map'], locations)
+                                dipdir = apoint['DIPDIR']
                                 polarity = 1
                                 index = 0
                                 sl_codes_test = config.c_l["sl_codes"].split(",")
                                 sl_code_found = ""
                                 for sli in sl_codes_test:
-                                    # print(index,sli,apoint[config.c_l['sl']])
-                                    if apoint[config.c_l["sl"]] == sli:
-                                        sl_code_found = sl_code_list[index]
-                                        # print(index,"apoint[config.c_l['sl']]",apoint[config.c_l['sl']],"config.c_l['sl']",config.c_l['sl'],'sl_code_found',sl_code_found)
+                                    #print(index,sli,apoint[config.c_l['sl']])
+                                    if(apoint['STRUCTURAL_LAYER']==sli):
+                                        sl_code_found=sl_code_list[index]
+                                        #print(index,"apoint['STRUCTURAL_LAYER']",apoint['STRUCTURAL_LAYER'],"'STRUCTURAL_LAYER'",'STRUCTURAL_LAYER','sl_code_found',sl_code_found)
                                         break
-                                    index = index + 1
-                                if not sl_code_found == "":
-                                    ostr = "{},{},{},{},{},{},{},{}\n".format(
-                                        apoint["geometry"].x,
-                                        apoint["geometry"].y,
-                                        height,
-                                        sl_code_found,
-                                        dipdir,
-                                        apoint[config.c_l["d"]],
-                                        polarity,
-                                        apoint[config.c_l["c"]]
-                                        .replace(" ", "_")
-                                        .replace("-", "_"),
-                                    )
-                                    # ostr = str(apoint['geometry'].x)+","+str(apoint['geometry'].y)+","+height+","+str(dipdir)+","+str(apoint[config.c_l['d']])+",1,"+str(apoint[config.c_l['c']].replace(" ","_").replace("-","_"))+"\n"
+                                    index=index+1
+                                if(not sl_code_found==''):
+                                    ostr = "{},{},{},{},{},{},{},{}\n"\
+                                        .format(apoint['geometry'].x, apoint['geometry'].y, height, sl_code_found,dipdir, apoint['DIP'],
+                                            polarity, apoint['UNIT_NAME'])
+                                    # ostr = str(apoint['geometry'].x)+","+str(apoint['geometry'].y)+","+height+","+str(dipdir)+","+str(apoint['DIP'])+",1,"+str(apoint['UNIT_NAME'].replace(" ","_").replace("-","_"))+"\n"
                                     f.write(ostr)
                         i = i + 1
 
@@ -257,10 +230,10 @@ def create_orientations(config: Config, map_data: MapData, workflow: dict):
     structures = map_data.get_map_data(Datatype.STRUCTURE)
     for i in range(1, ngroups):
         for indx, apoint in structures.iterrows():
-            if str(apoint[config.c_l["g"]]) == "None":
-                agroup = apoint[config.c_l["c"]].replace(" ", "_").replace("-", "_")
+            if(str(apoint['GROUP']) == 'None'):
+                agroup = apoint['UNIT_NAME']
             else:
-                agroup = apoint[config.c_l["g"]].replace(" ", "_").replace("-", "_")
+                agroup = apoint['GROUP']
             # print(agroup)
             if groups[i][0] == agroup:
                 lgroups = list(groups[i])
@@ -273,7 +246,7 @@ def create_orientations(config: Config, map_data: MapData, workflow: dict):
     geology = map_data.get_map_data(Datatype.GEOLOGY)
     for i in range(0, ngroups):
         for indx, apoly in geology.iterrows():
-            agroup = apoint[config.c_l["g"]].replace(" ", "_").replace("-", "_")
+            agroup = apoint['GROUP']
             # print(agroup)
             if groups[i][0] == agroup:
                 lgroups = list(groups[i])
@@ -283,7 +256,7 @@ def create_orientations(config: Config, map_data: MapData, workflow: dict):
 
     all_codes = []
     for ind, ageol in geology.iterrows():  # central polygon
-        all_codes.append(ageol[config.c_l["c"]])
+        all_codes.append(ageol['UNIT_NAME'])
 
     # print("Contacts----------\n",len(set(all_codes)),set(all_codes))
 
@@ -295,12 +268,8 @@ def create_orientations(config: Config, map_data: MapData, workflow: dict):
     for i in range(0, ngroups):
         if groups[i][1] == 0:
             for indx, ageol in geology.iterrows():
-                if (
-                    ageol[config.c_l["c"]].replace("-", "_") == groups[i][0]
-                    and groups[i][1] == 0
-                    and not config.c_l["intrusive"] in ageol[config.c_l["r1"]]
-                ):
-                    apoly = Polygon(ageol["geometry"])
+                if(ageol['UNIT_NAME'].replace("-", "_") == groups[i][0] and groups[i][1] == 0 and not config.c_l['intrusive'] in ageol['ROCKTYPE1']):
+                    apoly = Polygon(ageol['geometry'])
                     apoint = apoly.representative_point()
                     # print(apoint.x,apoint.y)
                     locations = [(apoint.x, apoint.y)]
@@ -313,19 +282,12 @@ def create_orientations(config: Config, map_data: MapData, workflow: dict):
                     )
                     if height == -999:
                         print("point off map", locations)
-                        height = 0  # needs a better solution!
-                    ostr = "{},{},{},{},{},{},{}\n".format(
-                        apoint.x,
-                        apoint.y,
-                        height,
-                        0,
-                        45,
-                        1,
-                        ageol[config.c_l["c"]].replace(" ", "_").replace("-", "_"),
-                    )
-                    # ostr = str(apoint.x)+","+str(apoint.y)+","+height+",0,45,1"+","+str(ageol[config.c_l['c']].replace(" ","_").replace("-","_"))+"\n"
+                        height = 0   # needs a better solution!
+                    ostr = "{},{},{},{},{},{},{}\n"\
+                        .format(apoint.x, apoint.y, height, 0, 45, 1, ageol['UNIT_NAME'])
+                    # ostr = str(apoint.x)+","+str(apoint.y)+","+height+",0,45,1"+","+str(ageol['UNIT_NAME'])+"\n"
                     f.write(ostr)
-                    # plt.title(str(ageol[config.c_l['c']].replace(" ","_").replace("-","_")))
+                    # plt.title(str(ageol['UNIT_NAME']))
                     # plt.scatter(apoint.x,apoint.y,color = "red")
                     # plt.plot(*apoly.exterior.xy)
                     # plt.show()
@@ -423,27 +385,13 @@ def save_basal_contacts(
 
     for indx, ageol in all_geom.iterrows():  # central polygon
         all_coords = extract_poly_coords(ageol.geometry, 0)
-        plist += (
-            i,
-            list(all_coords["exterior_coords"]),
-            ageol[config.c_l["c"]],
-            ageol[config.c_l["ds"]],
-            ageol[config.c_l["g"]],
-            ageol[config.c_l["r1"]],
-            ageol[config.c_l["o"]],
-        )
-        i = i + 1
-        for j in range(0, len(all_coords["interior_coords"]), 2):
-            plist += (
-                i,
-                list(all_coords["interior_coords"][j + 1]),
-                ageol[config.c_l["c"]],
-                ageol[config.c_l["ds"]],
-                ageol[config.c_l["g"]],
-                ageol[config.c_l["r1"]],
-                ageol[config.c_l["o"]],
-            )
-            i = i + 1
+        plist += (i, list(all_coords['exterior_coords']), ageol['UNIT_NAME'],
+                  ageol['DESCRIPTION'], ageol['GROUP'], ageol['ROCKTYPE1'], ageol['GEOMETRY_OBJECT_ID'])
+        i = i+1
+        for j in range(0, len(all_coords['interior_coords']), 2):
+            plist += (i, list(all_coords['interior_coords'][j+1]), ageol['UNIT_NAME'],
+                      ageol['DESCRIPTION'], ageol['GROUP'], ageol['ROCKTYPE1'], ageol['GEOMETRY_OBJECT_ID'])
+            i = i+1
 
     dtm = map_data.get_map_data(Datatype.DTM).open()
     ag = open(os.path.join(config.tmp_path, "all_sorts.csv"), "r")
@@ -554,11 +502,9 @@ def save_basal_contacts(
                                     ):
                                         # print("debug:GC")
                                         continue
-                                    elif (
-                                        LineStringC.wkt.split(" ")[0] == "MULTIPOLYGON"
-                                        or LineStringC.wkt.split(" ")[0] == "POLYGON"
-                                    ):
-                                        # print("debug:MP,P", ageol[config.c_l['c']])
+                                    elif(LineStringC.wkt.split(" ")[0] == 'MULTIPOLYGON' or
+                                         LineStringC.wkt.split(" ")[0] == 'POLYGON'):
+                                        # print("debug:MP,P", ageol['UNIT_NAME'])
                                         pass
 
                                     elif (
@@ -567,34 +513,14 @@ def save_basal_contacts(
                                     ):
                                         k = 0
 
-                                        if str(plist[a_poly + 4]) == "None":
-                                            ls_dict[id] = {
-                                                "id": id,
-                                                config.c_l["c"]: plist[a_poly + 2]
-                                                .replace(" ", "_")
-                                                .replace("-", "_"),
-                                                config.c_l["g"]: plist[a_poly + 2]
-                                                .replace(" ", "_")
-                                                .replace("-", "_"),
-                                                "geometry": LineStringC,
-                                            }
+                                        if(str(plist[a_poly+4]) == 'None'):
+                                            ls_dict[id] = {"id": id, 'UNIT_NAME': plist[a_poly+2].replace(" ", "_").replace(
+                                                "-", "_"), 'GROUP': plist[a_poly+2].replace(" ", "_").replace("-", "_"), "geometry": LineStringC}
                                         else:
-                                            ls_dict[id] = {
-                                                "id": id,
-                                                config.c_l["c"]: plist[a_poly + 2]
-                                                .replace(" ", "_")
-                                                .replace("-", "_"),
-                                                config.c_l["g"]: plist[a_poly + 4]
-                                                .replace(" ", "_")
-                                                .replace("-", "_"),
-                                                "geometry": LineStringC,
-                                            }
-                                        id = id + 1
-                                        for (
-                                            lineC
-                                        ) in (
-                                            LineStringC.geoms
-                                        ):  # process all linestrings
+                                            ls_dict[id] = {"id": id, 'UNIT_NAME': plist[a_poly+2].replace(" ", "_").replace(
+                                                "-", "_"), 'GROUP': plist[a_poly+4].replace(" ", "_").replace("-", "_"), "geometry": LineStringC}
+                                        id = id+1
+                                        for lineC in LineStringC.geoms:  # process all linestrings
                                             # decimate to reduce number of points, but also take second and third point of a series to keep gempy happy
                                             if(k % config.run_flags['contact_decimate'] == 0 or k == int((len(LineStringC.geoms)-1)/2) or k == len(LineStringC.geoms)-1):
                                                 # doesn't like point right on edge?
@@ -633,52 +559,13 @@ def save_basal_contacts(
                                                     # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+str(plist[a_poly+2].replace(" ","_").replace("-","_"))+"\n"
                                                     ac.write(ostr)
                                                     allc.write(
-                                                        agp
-                                                        + ","
-                                                        + str(ageol[config.c_l["o"]])
-                                                        + ","
-                                                        + ostr
-                                                    )
-                                                    if str(plist[a_poly + 4]) == "None":
-                                                        ls_dict_decimate[
-                                                            deci_points
-                                                        ] = {
-                                                            "id": allpts,
-                                                            config.c_l["c"]: plist[
-                                                                a_poly + 2
-                                                            ]
-                                                            .replace(" ", "_")
-                                                            .replace("-", "_"),
-                                                            config.c_l["g"]: plist[
-                                                                a_poly + 2
-                                                            ]
-                                                            .replace(" ", "_")
-                                                            .replace("-", "_"),
-                                                            "geometry": Point(
-                                                                lineC.coords[0][0],
-                                                                lineC.coords[0][1],
-                                                            ),
-                                                        }
+                                                        agp+","+str(ageol['GEOMETRY_OBJECT_ID'])+","+ostr)
+                                                    if(str(plist[a_poly+4]) == 'None'):
+                                                        ls_dict_decimate[deci_points] = {"id": allpts, 'UNIT_NAME': plist[a_poly+2].replace(" ", "_").replace(
+                                                            "-", "_"), 'GROUP': plist[a_poly+2].replace(" ", "_").replace("-", "_"), "geometry": Point(lineC.coords[0][0], lineC.coords[0][1])}
                                                     else:
-                                                        ls_dict_decimate[
-                                                            deci_points
-                                                        ] = {
-                                                            "id": allpts,
-                                                            config.c_l["c"]: plist[
-                                                                a_poly + 2
-                                                            ]
-                                                            .replace(" ", "_")
-                                                            .replace("-", "_"),
-                                                            config.c_l["g"]: plist[
-                                                                a_poly + 4
-                                                            ]
-                                                            .replace(" ", "_")
-                                                            .replace("-", "_"),
-                                                            "geometry": Point(
-                                                                lineC.coords[0][0],
-                                                                lineC.coords[0][1],
-                                                            ),
-                                                        }
+                                                        ls_dict_decimate[deci_points] = {"id": allpts, 'UNIT_NAME': plist[a_poly+2].replace(" ", "_").replace(
+                                                            "-", "_"), 'GROUP': plist[a_poly+4].replace(" ", "_").replace("-", "_"), "geometry": Point(lineC.coords[0][0], lineC.coords[0][1])}
                                                     allpts += 1
                                                     deci_points = deci_points + 1
                                                 else:
@@ -720,12 +607,7 @@ def save_basal_contacts(
                                                     )
                                                     # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+str(plist[a_poly+2].replace(" ","_").replace("-","_"))+"\n"
                                                     allc.write(
-                                                        agp
-                                                        + ","
-                                                        + str(ageol[config.c_l["o"]])
-                                                        + ","
-                                                        + ostr
-                                                    )
+                                                        agp+","+str(ageol['GEOMETRY_OBJECT_ID'])+","+ostr)
                                                     allpts += 1
                                             k += 1
                                     # apparently this is not needed
@@ -788,12 +670,8 @@ def save_basal_no_faults(config: Config, map_data: MapData) -> gpd.GeoDataFrame:
     contacts = map_data.basal_contacts
     if faults is not None:
         faults_clip_all = faults.copy()
-        faults_clip = faults_clip_all[
-            faults_clip_all[config.c_l["f"]]
-            .str.lower()
-            .str.contains(config.c_l["fault"].lower())
-        ]
-        faults_clip = faults_clip.dropna(subset=["geometry"])
+        faults_clip = faults_clip_all[faults_clip_all['FEATURE'].str.lower().str.contains(config.c_l['fault'].lower())]
+        faults_clip = faults_clip.dropna(subset=['geometry'])
 
         # df = pd.DataFrame.from_dict(map_data.basal_contacts, "index")
         # print(df)
@@ -823,16 +701,7 @@ def save_basal_no_faults(config: Config, map_data: MapData) -> gpd.GeoDataFrame:
             if cnf_copy.iloc[j].geom_type == "GeometryCollection":
                 cnf_copy.drop([j, j], inplace=True)
             else:  # save to dataframe
-                ls_nf[j] = {
-                    "id": j,
-                    config.c_l["c"]: contacts.iloc[j][config.c_l["c"]]
-                    .replace(" ", "_")
-                    .replace("-", "_"),
-                    config.c_l["g"]: contacts.iloc[j][config.c_l["g"]]
-                    .replace(" ", "_")
-                    .replace("-", "_"),
-                    "geometry": cnf_copy.iloc[j],
-                }
+                ls_nf[j] = {"id": j, 'UNIT_NAME': contacts.iloc[j]['UNIT_NAME'], 'GROUP': contacts.iloc[j]['GROUP'], "geometry": cnf_copy.iloc[j]}
 
         df_nf = pd.DataFrame.from_dict(ls_nf, "index")
 
@@ -886,50 +755,26 @@ def save_basal_contacts_csv(
                             locations = [
                                 (line.coords[0][0], line.coords[0][1])]
                             height = m2l_utils.value_from_dtm_dtb(
-                                dtm,
-                                map_data.dtb,
-                                map_data.dtb_null,
-                                workflow["cover_map"],
-                                locations,
-                            )
-                            ostr = "{},{},{},{}\n".format(
-                                line.coords[0][0],
-                                line.coords[0][1],
-                                height,
-                                contact[config.c_l["c"]],
-                            )
-                            # ostr = str(line.coords[0][0])+','+str(line.coords[0][1])+','+str(height)+','+str(contact[config.c_l['c']])+'\n'
+                                dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
+                            ostr = "{},{},{},{}\n"\
+                                .format(line.coords[0][0], line.coords[0][1], height, contact['UNIT_NAME'])
+                            # ostr = str(line.coords[0][0])+','+str(line.coords[0][1])+','+str(height)+','+str(contact['UNIT_NAME'])+'\n'
                             f.write(ostr)
                     else:  # new line
                         if not first:
                             locations = [(lastx, lasty)]
                             height = m2l_utils.value_from_dtm_dtb(
-                                dtm,
-                                map_data.dtb,
-                                map_data.dtb_null,
-                                workflow["cover_map"],
-                                locations,
-                            )
-                            ostr = "{},{},{},{}\n".format(
-                                lastx, lasty, height, contact[config.c_l["c"]]
-                            )
-                            # ostr = str(lastx)+','+str(lasty)+','+str(height)+','+str(contact[config.c_l['c']])+'\n'
+                                dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
+                            ostr = "{},{},{},{}\n"\
+                                .format(lastx, lasty, height, contact['UNIT_NAME'])
+                            # ostr = str(lastx)+','+str(lasty)+','+str(height)+','+str(contact['UNIT_NAME'])+'\n'
                             f.write(ostr)
                         locations = [(line.coords[0][0], line.coords[0][1])]
                         height = m2l_utils.value_from_dtm_dtb(
-                            dtm,
-                            map_data.dtb,
-                            map_data.dtb_null,
-                            workflow["cover_map"],
-                            locations,
-                        )
-                        ostr = "{},{},{},{}\n".format(
-                            line.coords[0][0],
-                            line.coords[0][1],
-                            height,
-                            contact[config.c_l["c"]],
-                        )
-                        # ostr = str(line.coords[0][0])+','+str(line.coords[0][1])+','+str(height)+','+str(contact[config.c_l['c']])+'\n'
+                            dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
+                        ostr = "{},{},{},{}\n"\
+                            .format(line.coords[0][0], line.coords[0][1], height, contact['UNIT_NAME'])
+                        # ostr = str(line.coords[0][0])+','+str(line.coords[0][1])+','+str(height)+','+str(contact['UNIT_NAME'])+'\n'
                         f.write(ostr)
                         first = False
                     i = i + 1
@@ -941,37 +786,19 @@ def save_basal_contacts_csv(
                     (contact.geometry.coords[0][0], contact.geometry.coords[0][1])
                 ]
                 height = m2l_utils.value_from_dtm_dtb(
-                    dtm,
-                    map_data.dtb,
-                    map_data.dtb_null,
-                    workflow["cover_map"],
-                    locations,
-                )
-                ostr = "{},{},{},{}\n".format(
-                    contact.geometry.coords[0][0],
-                    contact.geometry.coords[0][1],
-                    height,
-                    contact[config.c_l["c"]],
-                )
-                # ostr = str(contact.geometry.coords[0][0])+','+str(contact.geometry.coords[0][1])+','+str(height)+','+str(contact[config.c_l['c']])+'\n'
+                    dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
+                ostr = "{},{},{},{}\n"\
+                    .format(contact.geometry.coords[0][0], contact.geometry.coords[0][1], height, contact['UNIT_NAME'])
+                # ostr = str(contact.geometry.coords[0][0])+','+str(contact.geometry.coords[0][1])+','+str(height)+','+str(contact['UNIT_NAME'])+'\n'
                 f.write(ostr)
                 locations = [
                     (contact.geometry.coords[1][0], contact.geometry.coords[1][1])
                 ]
                 height = m2l_utils.value_from_dtm_dtb(
-                    dtm,
-                    map_data.dtb,
-                    map_data.dtb_null,
-                    workflow["cover_map"],
-                    locations,
-                )
-                ostr = "{},{},{},{}\n".format(
-                    contact.geometry.coords[1][0],
-                    contact.geometry.coords[1][1],
-                    height,
-                    contact[config.c_l["c"]],
-                )
-                # ostr = str(contact.geometry.coords[1][0])+','+str(contact.geometry.coords[1][1])+','+str(height)+','+str(contact[config.c_l['c']])+'\n'
+                    dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
+                ostr = "{},{},{},{}\n"\
+                    .format(contact.geometry.coords[1][0], contact.geometry.coords[1][1], height, contact['UNIT_NAME'])
+                # ostr = str(contact.geometry.coords[1][0])+','+str(contact.geometry.coords[1][1])+','+str(height)+','+str(contact['UNIT_NAME'])+'\n'
                 f.write(ostr)
     f.close()
     if config.verbose_level != VerboseLevel.NONE:
@@ -1123,8 +950,8 @@ def save_faults(config: Config, map_data: MapData, workflow: dict):
         }
         random.seed(1)
         for indx, flt in local_faults.iterrows():
-            if config.c_l["fault"].lower() in flt[config.c_l["f"]].lower():
-                fault_name = "Fault_" + str(flt[config.c_l["o"]])
+            if(config.c_l['fault'].lower() in flt['FEATURE'].lower()):
+                fault_name = 'Fault_'+str(flt['GEOMETRY_OBJECT_ID'])
                 # display(flt.geometry.type)
                 if flt.geometry.type == "LineString":
                     flt_ls = LineString(flt.geometry)
@@ -1142,71 +969,46 @@ def save_faults(config: Config, map_data: MapData, workflow: dict):
                         saved = 0
                         fault_dip = 90.0
                         # null specifc dip defined
-                        # print(config.c_l['fdipdir_flag'] ,str(flt[config.c_l['fdipdir']]), int(flt[config.c_l['fdip']]) , int(config.c_l['fdipnull']),str(flt[config.c_l['fdipest']]),config.run_flags['fault_dip'])
-                        if int(float(flt[config.c_l["fdip"]])) == int(
-                            float(config.c_l["fdipnull"])
-                        ):
+                        #print(config.c_l['fdipdir_flag'] ,str(flt[config.c_l['fdipdir']]), int(flt[config.c_l['fdip']]) , int(config.c_l['fdipnull']),str(flt[config.c_l['fdipest']]),config.run_flags['fault_dip'])
+                        if(int(float(flt['DIP'])) == int(float(config.c_l['fdipnull']))):
                             # dip estimate defined
-                            if not str(flt[config.c_l["fdipest"]]) == "-999":
+                            if(not str(flt['DIP_ESTIMATE']) == '-999'):
                                 i = 0
                                 for choice in split:
-                                    if flt[config.c_l["o"]] == "-1":
+                                    if(flt['GEOMETRY_OBJECT_ID'] == '-1'):
                                         print(choice)
-                                    if choice == flt[config.c_l["fdipest"]]:
-                                        fault_dip = int(fault_dip_choices[i + 1])
-                                        if flt[config.c_l["o"]] == "-1":
-                                            print("found_dip", fault_dip)
-                                    i = i + 1
+                                    if(choice == flt['DIP_ESTIMATE']):
+                                        fault_dip = int(fault_dip_choices[i+1])
+                                        if(flt['GEOMETRY_OBJECT_ID'] == '-1'):
+                                            print('found_dip', fault_dip)
+                                    i = i+1
                             else:
-                                if (
-                                    flt[config.c_l["fdip"]] == -999
-                                    or config.run_flags["fault_dip"] == -999
-                                ):  # random flag
+                                if(flt['DIP'] == -999 or config.run_flags['fault_dip'] == -999):  # random flag
                                     fault_dip = random.randint(60, 90)
                                 else:
                                     fault_dip = config.run_flags["fault_dip"]
                         else:
                             # specific dip defined
-                            fault_dip = int(float(flt[config.c_l["fdip"]]))
+                            fault_dip = int(float(flt['DIP']))
 
                         # numeric dip direction defined
-                        if config.c_l["fdipdir_flag"] == "num":
-                            if (
-                                pd.notna(flt[config.c_l["fdipdir"]])
-                                and flt[config.c_l["fdipdir"]] != "-999"
-                            ):
-                                azimuth = flt[config.c_l["fdipdir"]]
+                        if(config.c_l['fdipdir_flag'] == 'num'):
+                            if pd.notna(flt['DIPDIR']) and flt['DIPDIR'] != '-999':
+                                azimuth = flt['DIPDIR']
                             else:
                                 azimuth = azimuth_fault
 
                         # alpha dip direction defined or no numeric dd defined
-                        elif (
-                            flt[config.c_l["fdip"]] == -999
-                            or config.run_flags["fault_dip"] == -999
-                        ):
-                            # print('az_before',fault_name,azimuth_fault)
-                            azimuth = (
-                                azimuth_fault + (180 * random.randint(0, 1))
-                            ) % 360
-                            # print('az_after',fault_name,azimuth)
+                        elif(flt['DIP'] == -999 or config.run_flags['fault_dip'] == -999):
+                            #print('az_before',fault_name,azimuth_fault)
+                            azimuth = (azimuth_fault+(180*random.randint(0,1)))%360
+                            #print('az_after',fault_name,azimuth)
                             # TODO: Fix comparison of str version of two floats are comparing floats is very inaccurate
                             #       Also if this logic works 'lsx' is not defined at this point
-                        elif (
-                            not str(flt[config.c_l["fdipdir"]]) == "None"
-                            and not str(float(flt[config.c_l["fdip"]]))
-                            == str(float(config.c_l["fdipnull"]))
-                            and flt[config.c_l["fdipdir"]] != "-999"
-                        ):
-                            lsx = dlsx / sqrt((dlsx * dlsx) + (dlsy * dlsy))
-                            lsy = dlsy / sqrt((dlsx * dlsx) + (dlsy * dlsy))
-                            dotprod = degrees(
-                                acos(
-                                    (-lsx * dip_dirs[flt[config.c_l["fdipdir"]]][0])
-                                    + (lsy * dip_dirs[flt[config.c_l["fdipdir"]]][1])
-                                )
-                            )
-                            
-                            if dotprod > 45:
+                        elif (not str(flt['DIPDIR']) == 'None' and not str(float(flt['DIP'])) == str(float(config.c_l['fdipnull'])) and flt['DIPDIR'] != '-999'):
+                            dotprod = degrees(acos(
+                                (-dlsx*dip_dirs[flt['DIPDIR']][0])+(dlsy*dip_dirs[flt['DIPDIR']][1])))
+                            if(dotprod > 45):
                                 fault_dip = -fault_dip
                         else:
                             azimuth = azimuth_fault
@@ -1582,33 +1384,23 @@ def save_fold_axial_traces(config: Config, map_data: MapData, workflow: dict):
     folds_clip = folds_clip.dropna(subset=["geometry"])
 
     for indx, fold in folds_clip.iterrows():
-        fold_name = str(fold[config.c_l["o"]])
-        if not str(fold.geometry.type) == "None":
-            if fold.geometry.type == "MultiLineString":
+        fold_name = str(fold['GEOMETRY_OBJECT_ID'])
+        if(not str(fold.geometry.type) == 'None'):
+            if(fold.geometry.type == 'MultiLineString'):
                 for mls in fold.geometry:
                     fold_ls = LineString(mls)
 
                     i = 0
                     for afs in fold_ls.coords:
-                        if config.c_l["fold"].lower() in fold[config.c_l["ff"]].lower():
+                        if(config.c_l['fold'].lower() in fold['FEATURE'].lower()):
                             # decimate to reduce number of points, but also take mid and end points of a series to keep some shape
                             if(i % config.run_flags['fold_decimate'] == 0 or i == int((len(fold_ls.coords)-1)/2) or i == len(fold_ls.coords)-1):
                                 locations = [(afs[0], afs[1])]
                                 height = m2l_utils.value_from_dtm_dtb(
-                                    dtm,
-                                    map_data.dtb,
-                                    map_data.dtb_null,
-                                    workflow["cover_map"],
-                                    locations,
-                                )
-                                ostr = "{},{},{},FA_{},{}\n".format(
-                                    afs[0],
-                                    afs[1],
-                                    height,
-                                    fold_name,
-                                    fold[config.c_l["t"]].replace(",", ""),
-                                )
-                                # ostr = str(afs[0])+','+str(afs[1])+','+str(height)+','+'FA_'+fold_name+','+fold[config.c_l['t']].replace(',','')+'\n'
+                                    dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
+                                ostr = "{},{},{},FA_{},{}\n"\
+                                    .format(afs[0], afs[1], height, fold_name, fold['TYPE'].replace(',', ''))
+                                # ostr = str(afs[0])+','+str(afs[1])+','+str(height)+','+'FA_'+fold_name+','+fold['TYPE'].replace(',','')+'\n'
                                 fo.write(ostr)
                         i = i + 1
             else:
@@ -1616,25 +1408,15 @@ def save_fold_axial_traces(config: Config, map_data: MapData, workflow: dict):
 
                 i = 0
                 for afs in fold_ls.coords:
-                    if config.c_l["fold"].lower() in fold[config.c_l["ff"]].lower():
+                    if(config.c_l['fold'].lower() in fold['FEATURE'].lower()):
                         # decimate to reduce number of points, but also take mid and end points of a series to keep some shape
                         if(i % config.run_flags['fold_decimate'] == 0 or i == int((len(fold_ls.coords)-1)/2) or i == len(fold_ls.coords)-1):
                             locations = [(afs[0], afs[1])]
                             height = m2l_utils.value_from_dtm_dtb(
-                                dtm,
-                                map_data.dtb,
-                                map_data.dtb_null,
-                                workflow["cover_map"],
-                                locations,
-                            )
-                            ostr = "{},{},{},FA_{},{}\n".format(
-                                afs[0],
-                                afs[1],
-                                height,
-                                fold_name,
-                                fold[config.c_l["t"]].replace(",", ""),
-                            )
-                            # ostr = str(afs[0])+','+str(afs[1])+','+str(height)+','+'FA_'+fold_name+','+fold[config.c_l['t']].replace(',','')+'\n'
+                                dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
+                            ostr = "{},{},{},FA_{},{}\n"\
+                                .format(afs[0], afs[1], height, fold_name, fold['TYPE'].replace(',', ''))
+                            # ostr = str(afs[0])+','+str(afs[1])+','+str(height)+','+'FA_'+fold_name+','+fold['TYPE'].replace(',','')+'\n'
                             fo.write(ostr)
                     i = i + 1
 
@@ -1805,30 +1587,30 @@ def process_plutons(config: Config, map_data, workflow: dict):
     geology = map_data.get_map_data(Datatype.GEOLOGY)
     geol_clip = geology[geology.area > config.run_flags["min_pluton_area"]]
     for indx, ageol in geol_clip.iterrows():
-        ades = str(ageol[config.c_l["ds"]])
-        arck = str(ageol[config.c_l["r1"]])
-        if str(ageol[config.c_l["g"]]) == "None":
-            agroup = str(ageol[config.c_l["c"]])
+        ades = str(ageol['DESCRIPTION'])
+        arck = str(ageol['ROCKTYPE1'])
+        if(str(ageol['GROUP']) == 'None'):
+            agroup = str(ageol['UNIT_NAME'])
         else:
-            agroup = str(ageol[config.c_l["g"]])
+            agroup = str(ageol['GROUP'])
 
         for i in range(0, ngroups):
-            if gp_names[i] == agroup:
-                if int(ageol[config.c_l["max"]]) > gp_ages[i][0]:
-                    gp_ages[i][0] = ageol[config.c_l["max"]]
-                if int(ageol[config.c_l["min"]]) < gp_ages[i][1]:
-                    gp_ages[i][1] = ageol[config.c_l["min"]]
-        if config.c_l["intrusive"] in arck and config.c_l["sill"] not in ades:
-            newgp = str(ageol[config.c_l["c"]])
-            if str(ageol[config.c_l["g"]]) == "None":
-                agp = str(ageol[config.c_l["c"]])
+            if (gp_names[i] == agroup):
+                if(int(ageol['MAX_AGE']) > gp_ages[i][0]):
+                    gp_ages[i][0] = ageol['MAX_AGE']
+                if(int(ageol['MIN_AGE']) < gp_ages[i][1]):
+                    gp_ages[i][1] = ageol['MIN_AGE']
+        if(config.c_l['intrusive'] in arck and config.c_l['sill'] not in ades):
+            newgp = str(ageol['UNIT_NAME'])
+            if(str(ageol['GROUP']) == 'None'):
+                agp = str(ageol['UNIT_NAME'])
             else:
-                agp = str(ageol[config.c_l["g"]])
+                agp = str(ageol['GROUP'])
 
             if not newgp in gp_names:
                 gp_names[ngroups] = newgp
-                gp_ages[ngroups][0] = ageol[config.c_l["max"]]
-                gp_ages[ngroups][1] = ageol[config.c_l["min"]]
+                gp_ages[ngroups][0] = ageol['MAX_AGE']
+                gp_ages[ngroups][1] = ageol['MIN_AGE']
                 gp_ages[ngroups][2] = ngroups
                 ngroups = ngroups + 1
 
@@ -1888,22 +1670,13 @@ def process_plutons(config: Config, map_data, workflow: dict):
 
             neighbours = []
             j += 1
-            central_age = ageol[config.c_l["min"]]  # absolute age of central polygon
+            central_age = ageol['MIN_AGE']  # absolute age of central polygon
             central_poly = ageol.geometry
             for ind, bgeol in geol_clip.iterrows():  # potential neighbouring polygons
                 if ageol.geometry != bgeol.geometry:  # do not compare with self
                     if ageol.geometry.intersects(bgeol.geometry):  # is a neighbour
                         neighbours.append(
-                            [
-                                (
-                                    bgeol[config.c_l["c"]],
-                                    bgeol[config.c_l["min"]],
-                                    bgeol[config.c_l["r1"]],
-                                    bgeol[config.c_l["ds"]],
-                                    bgeol.geometry,
-                                )
-                            ]
-                        )
+                            [(bgeol['UNIT_NAME'], bgeol['MIN_AGE'], bgeol['ROCKTYPE1'], bgeol['DESCRIPTION'], bgeol.geometry)])
             # display(neighbours)
             if len(neighbours) > 0:
                 for i in range(0, len(neighbours)):
@@ -1929,11 +1702,7 @@ def process_plutons(config: Config, map_data, workflow: dict):
                             or LineStringC.wkt.split(" ")[0] == "POLYGON"
                         ):  # ignore polygon intersections for now, worry about them later!
                             if config.verbose_level != VerboseLevel.NONE:
-                                print(
-                                    ageol[config.c_l["o"]],
-                                    "debug:",
-                                    LineStringC.wkt.split(" ")[0],
-                                )
+                                print(ageol['GEOMETRY_OBJECT_ID'], "debug:", LineStringC.wkt.split(" ")[0])
                             continue
 
                         elif (
@@ -1941,14 +1710,10 @@ def process_plutons(config: Config, map_data, workflow: dict):
                             or LineStringC.wkt.split(" ")[0] == "GEOMETRYCOLLECTION"
                         ):
                             k = 0
-                            ls_dict[id] = {
-                                "id": id,
-                                config.c_l["c"]: newgp,
-                                config.c_l["g"]: newgp,
-                                "geometry": LineStringC,
-                            }
-                            id = id + 1
-                            first = True  # use first found dist so all arcs converge to same point
+                            ls_dict[id] = {"id": id, 'UNIT_NAME': newgp,
+                                           'GROUP': newgp, "geometry": LineStringC}
+                            id = id+1
+                            first=True # use first found dist so all arcs converge to same point
                             for lineC in LineStringC:  # process all linestrings
                                 if lineC.wkt.split(" ")[0] == "LINESTRING":
                                     # decimate to reduce number of points, but also take second and third point of a series to keep gempy happy
@@ -2049,20 +1814,9 @@ def process_plutons(config: Config, map_data, workflow: dict):
                                     # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
                                     ac.write(ostr)
                                     allc.write(
-                                        agp
-                                        + ","
-                                        + str(ageol[config.c_l["o"]])
-                                        + ","
-                                        + ostr
-                                    )
-                                    ls_dict_decimate[allpts] = {
-                                        "id": allpts,
-                                        config.c_l["c"]: newgp,
-                                        config.c_l["g"]: newgp,
-                                        "geometry": Point(
-                                            lineC.coords[0][0], lineC.coords[0][1]
-                                        ),
-                                    }
+                                        agp+","+str(ageol['GEOMETRY_ONJECT_ID'])+","+ostr)
+                                    ls_dict_decimate[allpts] = {"id": allpts, 'UNIT_NAME': newgp, 'GROUP': newgp, "geometry": Point(
+                                        lineC.coords[0][0], lineC.coords[0][1])}
                                     allpts += 1
                                 else:
                                     continue
@@ -2089,12 +1843,7 @@ def process_plutons(config: Config, map_data, workflow: dict):
                                     # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+newgp.replace(" ","_").replace("-","_")+"\n"
                                     # ls_dict_decimate[allpts]  =  {"id": id,"CODE":ageol['CODE'],"GROUP_":ageol['GROUP_'], "geometry": Point(lineC.coords[0][0],lineC.coords[0][1])}
                                     allc.write(
-                                        agp
-                                        + ","
-                                        + str(ageol[config.c_l["o"]])
-                                        + ","
-                                        + ostr
-                                    )
+                                        agp+","+str(ageol['UNIT_NAME'])+","+ostr)
                                     allpts += 1
 
                             # decimate to reduce number of points, but also take second and third point of a series to keep gempy happy
@@ -2542,20 +2291,16 @@ def tidy_data(config: Config, map_data: MapData, use_group, inputs):
     )
 
     geol = map_data.get_map_data(Datatype.GEOLOGY).copy()
-    geol = geol.drop_duplicates(subset=config.c_l["c"], keep="first")
-    geol[config.c_l["c"]] = geol[config.c_l["c"]].replace("-", "_")
+    geol = geol.drop_duplicates(subset='UNIT_NAME', keep="first")
+    geol['UNIT_NAME'] = geol['UNIT_NAME'].replace('-','_')
     # geol=geol.set_index('code')
-    slist = []
-    for ind, unit in all_sorts.iterrows():
-        df = geol[geol[config.c_l["c"]] == unit["code"]]
-        if unit["code"] == "cover" or unit["code"] == "cover_up":
-            slist.append("cover")
-        elif (
-            len(df) > 0
-            and config.c_l["intrusive"] in df[config.c_l["r1"]]
-            and config.c_l["sill"] not in df[config.c_l["ds"]]
-        ):
-            slist.append("intrusion")
+    slist=[]
+    for ind,unit in all_sorts.iterrows():
+        df = geol[geol['UNIT_NAME']==unit['code']]
+        if(unit['code']=='cover' or unit['code']=='cover_up' ):
+            slist.append('cover')
+        elif(len(df)>0 and config.c_l['intrusive'] in df['ROCKTYPE1'] and config.c_l['sill'] not in df['DESCRIPTION']):
+            slist.append('intrusion')
         else:
             slist.append("sediment")
 
@@ -2995,16 +2740,13 @@ def calc_thickness_with_grid(config: Config, map_data: MapData):
     # all_sorts.set_index('code',inplace=True)
     geol = map_data.get_map_data(Datatype.GEOLOGY).copy()
     # geol=gpd.read_file(os.path.join(config.tmp_path, 'geol_clip.shp'))
-    geol.drop_duplicates(subset=config.c_l["c"], inplace=True)
-    # geol.set_index(config.c_l['c'],inplace=True)
-    drops = geol[
-        geol[config.c_l["ds"]].str.contains(config.c_l["sill"])
-        & geol[config.c_l["r1"]].str.contains(config.c_l["intrusive"])
-    ]
-    for ind, drop in drops.iterrows():
-        all_sorts.drop(labels=drop.name, inplace=True, errors="ignore")
-    all_sorts["code"] = all_sorts.index
-    all_sorts["index"] = all_sorts["index2"]
+    geol.drop_duplicates(subset='UNIT_NAME',inplace=True)
+    # geol.set_index('UNIT_NAME',inplace=True)
+    drops=geol[geol['DESCRIPTION'].str.contains(config.c_l['sill']) & geol['ROCKTYPE1'].str.contains(config.c_l['intrusive'])]
+    for ind,drop in drops.iterrows():
+        all_sorts.drop(labels=drop.name,inplace=True,errors='ignore')
+    all_sorts['code']=all_sorts.index
+    all_sorts['index']=all_sorts['index2']
     # all_sorts.set_index('index2',inplace=True)
 
     contacts = pd.read_csv(contact_points_file)
@@ -3047,9 +2789,8 @@ def calc_thickness_with_grid(config: Config, map_data: MapData):
             if ctextcode[k] == apair["code"]:
 
                 # subset contacts to just those with 'a' code
-                is_contacta = (
-                    contact_lines[config.c_l["c"]] == all_sorts.iloc[g - 1]["code"]
-                )
+                is_contacta = contact_lines['UNIT_NAME'
+                                            ] == all_sorts.iloc[g-1]['code']
                 acontacts = contact_lines[is_contacta]
                 i = 0
                 for (
@@ -3234,9 +2975,8 @@ def calc_min_thickness_with_grid(config: Config, map_data: MapData):
                 if ctextcode[k] == apair["code"]:
 
                     # subset contacts to just those with 'a' code
-                    is_contacta = (
-                        contact_lines[config.c_l["c"]] != all_sorts.iloc[g - 1]["code"]
-                    )
+                    is_contacta = contact_lines['UNIT_NAME'
+                                                ] != all_sorts.iloc[g-1]['code']
                     acontacts = contact_lines[is_contacta]
                     i = 0
                     for (
@@ -3455,35 +3195,25 @@ def save_fold_axial_traces_orientations(
     dummy = []
     dummy.append(1)
     for indx, fold in folds_clip.iterrows():
-        fold_name = str(fold[config.c_l["o"]])
-        if not str(fold.geometry.type) == "None":
-            if fold.geometry.type == "MultiLineString":
+        fold_name = str(fold['GEOMETRY_OBJECT_ID'])
+        if(not str(fold.geometry.type) == 'None'):
+            if(fold.geometry.type == 'MultiLineString'):
                 for mls in fold.geometry:
                     fold_ls = LineString(mls)
 
                     i = 0
                     first = True
                     for afs in fold_ls.coords:
-                        if config.c_l["fold"].lower() in fold[config.c_l["ff"]].lower():
+                        if(config.c_l['fold'].lower() in fold['FEATURE'].lower()):
                             # save out current geometry of FAT
                             # decimate to reduce number of points, but also take mid and end points of a series to keep some shape
                             if(i % config.run_flags['fold_decimate'] == 0 or i == int((len(fold_ls.coords)-1)/2) or i == len(fold_ls.coords)-1):
                                 locations = [(afs[0], afs[1])]
                                 height = m2l_utils.value_from_dtm_dtb(
-                                    dtm,
-                                    map_data.dtb,
-                                    map_data.dtb_null,
-                                    workflow["cover_map"],
-                                    locations,
-                                )
-                                ostr = "{},{},{},FA_{},{}\n".format(
-                                    afs[0],
-                                    afs[1],
-                                    height,
-                                    fold_name,
-                                    fold[config.c_l["t"]].replace(",", ""),
-                                )
-                                # ostr = str(afs[0])+','+str(afs[1])+','+str(height)+','+'FA_'+fold_name+','+fold[config.c_l['t']].replace(',','')+'\n'
+                                    dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
+                                ostr = "{},{},{},FA_{},{}\n"\
+                                    .format(afs[0], afs[1], height, fold_name, fold['TYPE'].replace(',', ''))
+                                # ostr = str(afs[0])+','+str(afs[1])+','+str(height)+','+'FA_'+fold_name+','+fold['TYPE'].replace(',','')+'\n'
                                 fo.write(ostr)
                                 # calculate FAT normal offsets
                                 first = False
@@ -3514,14 +3244,13 @@ def save_fold_axial_traces_orientations(
                                     dip_dir = map_data.dip_dir_grid[r, c]
 
                                     dip2, dipdir2 = m2l_utils.dircos2ddd(
-                                        -m, l, cos(radians(dip))
-                                    )
-                                    if config.c_l["syn"] in fold[config.c_l["t"]]:
-                                        dipdir2 = dipdir2 + 180
+                                        -m, l, cos(radians(dip)))
+                                    if(config.c_l['syn'] in fold['TYPE']):
+                                        dipdir2 = dipdir2+180
 
-                                    lc = sin(radians(dip_dir - 90))
-                                    mc = cos(radians(dip_dir - 90))
-                                    dotprod = fabs((l * lc) + (m * mc))
+                                    lc = sin(radians(dip_dir-90))
+                                    mc = cos(radians(dip_dir-90))
+                                    dotprod = fabs((l*lc)+(m*mc))
                                     # print(dotprod,midx,midy,minind,contacts[minind,2],l,m,lc,mc)
                                     # if FAT is sub-parallel to local interpolated contacts, save out as orientations
                                     if dotprod > 0.85:
@@ -3532,39 +3261,14 @@ def save_fold_axial_traces_orientations(
                                             geometry=geometry,
                                         )
                                         structure_code = gpd.sjoin(
-                                            gdf, geology, how="left", predicate="within"
-                                        )
-                                        if (
-                                            not str(
-                                                structure_code.iloc[0][config.c_l["c"]]
-                                            )
-                                            == "nan"
-                                        ):
+                                            gdf, geology, how="left", predicate="within")
+                                        if(not str(structure_code.iloc[0]['UNIT_NAME']) == 'nan'):
                                             locations = [(midxr, midyr)]
                                             height = m2l_utils.value_from_dtm_dtb(
-                                                dtm,
-                                                map_data.dtb,
-                                                map_data.dtb_null,
-                                                workflow["cover_map"],
-                                                locations,
-                                            )
-                                            ostr = "{},{},{},{},{},{},{},{}\n".format(
-                                                midxr,
-                                                midyr,
-                                                height,
-                                                dipdir2,
-                                                int(dip),
-                                                1,
-                                                str(
-                                                    structure_code.iloc[0][
-                                                        config.c_l["c"]
-                                                    ]
-                                                )
-                                                .replace(" ", "_")
-                                                .replace("-", "_"),
-                                                structure_code.iloc[0][config.c_l["g"]],
-                                            )
-                                            # ostr = str(midxr)+','+str(midyr)+','+str(height)+','+str(dipdir)+','+str(int(dip))+',1,'+str(structure_code.iloc[0][config.c_l['c']]).replace(" ","_").replace("-","_")+','+str(structure_code.iloc[0][config.c_l['g']])+'\n'
+                                                dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
+                                            ostr = "{},{},{},{},{},{},{},{}\n"\
+                                                .format(midxr, midyr, height, dipdir2, int(dip), 1, str(structure_code.iloc[0]['UNIT_NAME']).replace(" ", "_").replace("-", "_"), structure_code.iloc[0]['GROUP'])
+                                            # ostr = str(midxr)+','+str(midyr)+','+str(height)+','+str(dipdir)+','+str(int(dip))+',1,'+str(structure_code.iloc[0]['UNIT_NAME']).replace(" ","_").replace("-","_")+','+str(structure_code.iloc[0]['GROUP])+'\n'
                                             f.write(ostr)
 
                                         geometry = [Point(midxl, midyl)]
@@ -3574,39 +3278,14 @@ def save_fold_axial_traces_orientations(
                                             geometry=geometry,
                                         )
                                         structure_code = gpd.sjoin(
-                                            gdf, geology, how="left", predicate="within"
-                                        )
-                                        if (
-                                            not str(
-                                                structure_code.iloc[0][config.c_l["c"]]
-                                            )
-                                            == "nan"
-                                        ):
+                                            gdf, geology, how="left", predicate="within")
+                                        if(not str(structure_code.iloc[0]['UNIT_NAME']) == 'nan'):
                                             locations = [(midxl, midyl)]
                                             height = m2l_utils.value_from_dtm_dtb(
-                                                dtm,
-                                                map_data.dtb,
-                                                map_data.dtb_null,
-                                                workflow["cover_map"],
-                                                locations,
-                                            )
-                                            ostr = "{},{},{},{},{},{},{},{}\n".format(
-                                                midxl,
-                                                midyl,
-                                                height,
-                                                dipdir2 + 180,
-                                                int(dip),
-                                                1,
-                                                str(
-                                                    structure_code.iloc[0][
-                                                        config.c_l["c"]
-                                                    ]
-                                                )
-                                                .replace(" ", "_")
-                                                .replace("-", "_"),
-                                                structure_code.iloc[0][config.c_l["g"]],
-                                            )
-                                            # ostr = str(midxl)+','+str(midyl)+','+str(height)+','+str(dipdir+180)+','+str(int(dip))+',1,'+str(structure_code.iloc[0][config.c_l['c']]).replace(" ","_").replace("-","_")+','+str(structure_code.iloc[0][config.c_l['g']])+'\n'
+                                                dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
+                                            ostr = "{},{},{},{},{},{},{},{}\n"\
+                                                .format(midxl, midyl, height, dipdir2+180, int(dip), 1, str(structure_code.iloc[0]['UNIT_NAME']).replace(" ", "_").replace("-", "_"), structure_code.iloc[0]['GROUP'])
+                                            # ostr = str(midxl)+','+str(midyl)+','+str(height)+','+str(dipdir+180)+','+str(int(dip))+',1,'+str(structure_code.iloc[0]['UNIT_NAME']).replace(" ","_").replace("-","_")+','+str(structure_code.iloc[0]['GROUP'])+'\n'
                                             f.write(ostr)
 
                         i = i + 1
@@ -3615,26 +3294,16 @@ def save_fold_axial_traces_orientations(
                 i = 0
                 first = True
                 for afs in fold_ls.coords:
-                    if config.c_l["fold"].lower() in fold[config.c_l["ff"]].lower():
+                    if(config.c_l['fold'].lower() in fold['FEATURE'].lower()):
                         # save out current geometry of FAT
                         # decimate to reduce number of points, but also take mid and end points of a series to keep some shape
                         if(i % config.run_flags['fold_decimate'] == 0 or i == int((len(fold_ls.coords)-1)/2) or i == len(fold_ls.coords)-1):
                             locations = [(afs[0], afs[1])]
                             height = m2l_utils.value_from_dtm_dtb(
-                                dtm,
-                                map_data.dtb,
-                                map_data.dtb_null,
-                                workflow["cover_map"],
-                                locations,
-                            )
-                            ostr = "{},{},{},FA_{},{}\n".format(
-                                afs[0],
-                                afs[1],
-                                height,
-                                fold_name,
-                                fold[config.c_l["t"]].replace(",", ""),
-                            )
-                            # ostr = str(afs[0])+','+str(afs[1])+','+str(height)+','+'FA_'+fold_name+','+fold[config.c_l['t']].replace(',','')+'\n'
+                                dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
+                            ostr = "{},{},{},FA_{},{}\n"\
+                                .format(afs[0], afs[1], height, fold_name, fold['TYPE'].replace(',', ''))
+                            # ostr = str(afs[0])+','+str(afs[1])+','+str(height)+','+'FA_'+fold_name+','+fold['TYPE'].replace(',','')+'\n'
                             fo.write(ostr)
                             # calculate FAT normal offsets
                             if not first:
@@ -3661,13 +3330,12 @@ def save_fold_axial_traces_orientations(
                                     dip = config.run_flags["close_dip"]
                                 dipdir = map_data.dip_dir_grid[r, c]
                                 dip2, dipdir2 = m2l_utils.dircos2ddd(
-                                    -m, l, cos(radians(dip))
-                                )
-                                if config.c_l["syn"] in fold[config.c_l["t"]]:
-                                    dipdir2 = dipdir2 + 180
-                                lc = sin(radians(dipdir - 90))
-                                mc = cos(radians(dipdir - 90))
-                                dotprod = fabs((l * lc) + (m * mc))
+                                    -m, l, cos(radians(dip)))
+                                if(config.c_l['syn'] in fold['TYPE']):
+                                    dipdir2 = dipdir2+180
+                                lc = sin(radians(dipdir-90))
+                                mc = cos(radians(dipdir-90))
+                                dotprod = fabs((l*lc)+(m*mc))
                                 # print(dotprod,midx,midy,minind,contacts[minind,2],l,m,lc,mc)
                                 # if FAT is sub-parallel to local interpolated contacts, save out as orientations
                                 if dotprod > 0.85:
@@ -3678,33 +3346,14 @@ def save_fold_axial_traces_orientations(
                                         geometry=geometry,
                                     )
                                     structure_code = gpd.sjoin(
-                                        gdf, geology, how="left", predicate="within"
-                                    )
-                                    if (
-                                        not str(structure_code.iloc[0][config.c_l["c"]])
-                                        == "nan"
-                                    ):
+                                        gdf, geology, how="left", predicate="within")
+                                    if(not str(structure_code.iloc[0]['UNIT_NAME']) == 'nan'):
                                         locations = [(midxr, midyr)]
                                         height = m2l_utils.value_from_dtm_dtb(
-                                            dtm,
-                                            map_data.dtb,
-                                            map_data.dtb_null,
-                                            workflow["cover_map"],
-                                            locations,
-                                        )
-                                        ostr = "{},{},{},{},{},{},{},{}\n".format(
-                                            midxr,
-                                            midyr,
-                                            height,
-                                            dipdir2,
-                                            int(dip),
-                                            1,
-                                            str(structure_code.iloc[0][config.c_l["c"]])
-                                            .replace(" ", "_")
-                                            .replace("-", "_"),
-                                            structure_code.iloc[0][config.c_l["g"]],
-                                        )
-                                        # ostr = str(midxr)+','+str(midyr)+','+str(height)+','+str(dipdir)+','+str(int(dip))+',1,'+str(structure_code.iloc[0][config.c_l['c']]).replace(" ","_").replace("-","_")+','+str(structure_code.iloc[0][config.c_l['g']])+'\n'
+                                            dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
+                                        ostr = "{},{},{},{},{},{},{},{}\n"\
+                                            .format(midxr, midyr, height, dipdir2, int(dip), 1, str(structure_code.iloc[0]['UNIT_NAME']).replace(" ", "_").replace("-", "_"), structure_code.iloc[0]['GROUP'])
+                                        # ostr = str(midxr)+','+str(midyr)+','+str(height)+','+str(dipdir)+','+str(int(dip))+',1,'+str(structure_code.iloc[0]['UNIT_NAME']).replace(" ","_").replace("-","_")+','+str(structure_code.iloc[0]['GROUP'])+'\n'
                                         f.write(ostr)
 
                                     geometry = [Point(midxl, midyl)]
@@ -3714,33 +3363,14 @@ def save_fold_axial_traces_orientations(
                                         geometry=geometry,
                                     )
                                     structure_code = gpd.sjoin(
-                                        gdf, geology, how="left", predicate="within"
-                                    )
-                                    if (
-                                        not str(structure_code.iloc[0][config.c_l["c"]])
-                                        == "nan"
-                                    ):
+                                        gdf, geology, how="left", predicate="within")
+                                    if(not str(structure_code.iloc[0]['UNIT_NAME']) == 'nan'):
                                         locations = [(midxl, midyl)]
                                         height = m2l_utils.value_from_dtm_dtb(
-                                            dtm,
-                                            map_data.dtb,
-                                            map_data.dtb_null,
-                                            workflow["cover_map"],
-                                            locations,
-                                        )
-                                        ostr = "{},{},{},{},{},{},{},{}\n".format(
-                                            midxl,
-                                            midyl,
-                                            height,
-                                            dipdir2 + 180,
-                                            int(dip),
-                                            1,
-                                            str(structure_code.iloc[0][config.c_l["c"]])
-                                            .replace(" ", "_")
-                                            .replace("-", "_"),
-                                            structure_code.iloc[0][config.c_l["g"]],
-                                        )
-                                        # ostr = str(midxl)+','+str(midyl)+','+str(height)+','+str(dipdir+180)+','+str(int(dip))+',1,'+str(structure_code.iloc[0][config.c_l['c']]).replace(" ","_").replace("-","_")+','+str(structure_code.iloc[0][config.c_l['g']])+'\n'
+                                            dtm, map_data.dtb, map_data.dtb_null, workflow['cover_map'], locations)
+                                        ostr = "{},{},{},{},{},{},{},{}\n"\
+                                            .format(midxl, midyl, height, dipdir2+180, int(dip), 1, str(structure_code.iloc[0]['UNIT_NAME']).replace(" ", "_").replace("-", "_"), structure_code.iloc[0]['GROUP'])
+                                        # ostr = str(midxl)+','+str(midyl)+','+str(height)+','+str(dipdir+180)+','+str(int(dip))+',1,'+str(structure_code.iloc[0]['UNIT_NAME']).replace(" ","_").replace("-","_")+','+str(structure_code.iloc[0]['GROUP'])+'\n'
                                         f.write(ostr)
                             first = False
                             lastx = afs[0]
@@ -3943,12 +3573,9 @@ def save_orientations_with_polarity(config: Config, map_data: MapData):
         close_x = 0
         close_y = 0
 
-        for (
-            indx2,
-            acontact,
-        ) in contact_lines.iterrows():  # loop through distinct linestrings dipdir +180
-            if acontact[config.c_l["c"]] in codes:
-                if not str(acontact.geometry) == "None":
+        for indx2, acontact in contact_lines.iterrows():  # loop through distinct linestrings dipdir +180
+            if(acontact['UNIT_NAME'] in codes):
+                if(not str(acontact.geometry) == 'None'):
                     isects = ddline.intersection(acontact.geometry)
                     if isects.geom_type == "MultiPoint":
                         for pt in isects:
@@ -3958,7 +3585,7 @@ def save_orientations_with_polarity(config: Config, map_data: MapData):
                                 )
                                 if dist < close_dist:
                                     close_dist = dist
-                                    close_fm = acontact[config.c_l["c"]]
+                                    close_fm = acontact['UNIT_NAME']
                                     close_x = pt.x
                                     close_y = pt.y
                                     sign = 1
@@ -3969,7 +3596,7 @@ def save_orientations_with_polarity(config: Config, map_data: MapData):
                             )
                             if dist < close_dist:
                                 close_dist = dist
-                                close_fm = acontact[config.c_l["c"]]
+                                close_fm = acontact['UNIT_NAME']
                                 close_x = isects.x
                                 close_y = isects.y
                                 sign = 1
@@ -3980,12 +3607,9 @@ def save_orientations_with_polarity(config: Config, map_data: MapData):
         p2 = Point((dx2 + float(anori["X"]), dy2 + float(anori["Y"])))
         ddline = LineString((p1, p2))
 
-        for (
-            indx2,
-            acontact,
-        ) in contact_lines.iterrows():  # loop through distinct linestrings dipdir
-            if acontact[config.c_l["c"]] in codes:
-                if not str(acontact.geometry) == "None":
+        for indx2, acontact in contact_lines.iterrows():  # loop through distinct linestrings dipdir
+            if(acontact['UNIT_NAME'] in codes):
+                if(not str(acontact.geometry) == 'None'):
                     isects = ddline.intersection(acontact.geometry)
                     if isects.geom_type == "MultiPoint":
                         for pt in isects:
@@ -3995,7 +3619,7 @@ def save_orientations_with_polarity(config: Config, map_data: MapData):
                                 )
                                 if dist < close_dist:
                                     close_dist = dist
-                                    close_fm = acontact[config.c_l["c"]]
+                                    close_fm = acontact['UNIT_NAME']
                                     close_x = pt.x
                                     close_y = pt.y
                                     sign = 0
@@ -4006,7 +3630,7 @@ def save_orientations_with_polarity(config: Config, map_data: MapData):
                             )
                             if dist < close_dist:
                                 close_dist = dist
-                                close_fm = acontact[config.c_l["c"]]
+                                close_fm = acontact['UNIT_NAME']
                                 close_x = isects.x
                                 close_y = isects.y
                                 sign = 0
@@ -4178,7 +3802,7 @@ def fault_strat_offset(config: Config, map_data: MapData):
         ymidsList = []
         faultIds = []
         for index, fault in local_faults.iterrows():
-            if "Fault_" + str(fault[config.c_l["o"]]) in fault_names:
+            if('Fault_'+str(fault['GEOMETRY_OBJECT_ID']) in fault_names):
                 L = fault.geometry.coords
                 avg = lambda x0, x1: (x0 + x1) / 2
                 xmids = [
@@ -4217,7 +3841,7 @@ def fault_strat_offset(config: Config, map_data: MapData):
                 ]
                 xmidsList += xmids
                 ymidsList += ymids
-                faultIds += [fault[config.c_l["o"]]] * len(xmids)
+                faultIds += [fault['GEOMETRY_OBJECT_ID']] * len(xmids)
 
         # Create geometry from left and right points list and join with geology to
         # find which formation the point lands in
@@ -4232,14 +3856,11 @@ def fault_strat_offset(config: Config, map_data: MapData):
         # what formation is left and right of it, (also list strat column difference and
         # thus minimum throw for the fault at that position)
         for i in range(0, len(lcode)):
-            if (
-                not str(lcode.iloc[i][config.c_l["c"]]) == "nan"
-                and not str(rcode.iloc[i][config.c_l["c"]]) == "nan"
-            ):
-                lcode_fm = lcode.iloc[i][config.c_l["c"]]
-                rcode_fm = rcode.iloc[i][config.c_l["c"]]
+            if(not str(lcode.iloc[i]['UNIT_NAME']) == 'nan' and not str(rcode.iloc[i]['UNIT_NAME']) == 'nan'):
+                lcode_fm = lcode.iloc[i]['UNIT_NAME']
+                rcode_fm = rcode.iloc[i]['UNIT_NAME']
 
-                if lcode_fm in codes and rcode_fm in codes:
+                if(lcode_fm in codes and rcode_fm in codes):
                     fm_l = int(new_als.loc[lcode_fm]["index"])
                     fm_r = int(new_als.loc[rcode_fm]["index"])
 
@@ -4672,7 +4293,7 @@ def save_basal_contacts_orientations_csv(
     dtm = map_data.get_map_data(Datatype.DTM).open()
     for index, contact in contacts[:-1].iterrows():
         i = 0
-        # print(contact[config.c_l['c']])
+        # print(contact['UNIT_NAME'])
         first = True
         if contact.geometry != None and contact.geometry != first_geom:
             if contact.geometry.type == "MultiLineString":  # why not LineString?
@@ -4789,40 +4410,21 @@ def save_basal_contacts_orientations_csv(
                                     dip = 90
 
                             else:
-                                dip = config.run_flags["contact_dip"]
-                            gap = m2l_utils.ptsdist(
-                                lastx, lasty, line.coords[0][0], line.coords[0][1]
-                            )
-                            if dip != -999 and gap < 2000:
-                                ostr = "{},{},{},{},{},{},{}\n".format(
-                                    midx,
-                                    midy,
-                                    height,
-                                    dipdir,
-                                    str(dip),
-                                    polarity,
-                                    str(contact[config.c_l["c"]])
-                                    .replace(" ", "_")
-                                    .replace("-", "_"),
-                                )
-                                # ostr = str(midx)+','+str(midy)+','+str(height)+','+str(dipdir)+','+str(config.run_flags['contact_dip'])+',1,'+str(contact[config.c_l['c']]).replace(" ","_").replace("-","_")+'\n'
+                                dip = config.run_flags['contact_dip']
+                            gap=m2l_utils.ptsdist(lastx, lasty, line.coords[0][0], line.coords[0][1])
+                            if(dip != -999 and gap<2000):
+                                ostr = "{},{},{},{},{},{},{}\n"\
+                                    .format(midx, midy, height, dipdir, str(dip), polarity, str(contact['UNIT_NAME']).replace(" ", "_").replace("-", "_"))
+                                # ostr = str(midx)+','+str(midy)+','+str(height)+','+str(dipdir)+','+str(config.run_flags['contact_dip'])+',1,'+str(contact['UNIT_NAME']).replace(" ","_").replace("-","_")+'\n'
                                 f.write(ostr)
 
-                                l, m, n = m2l_utils.ddd2dircos(90.0 - dip, dipdir)
-                                ostr = "{},{},{},{}\n".format(
-                                    midx - (l * height_above_offset),
-                                    midy - (m * height_above_offset),
-                                    float(height) + (n * height_above_offset),
-                                    contact[config.c_l["c"]],
-                                )
+                                l,m,n=m2l_utils.ddd2dircos(90.0-dip,dipdir)
+                                ostr = "{},{},{},{}\n"\
+                                    .format(midx-(l*height_above_offset), midy-(m*height_above_offset), float(height)+(n*height_above_offset), contact['UNIT_NAME'])
                                 fp.write(ostr)
 
-                                ostr = "{},{},{},{}\n".format(
-                                    midx + (l * depth_below_offset),
-                                    midy + (m * depth_below_offset),
-                                    float(height) - (n * depth_below_offset),
-                                    contact[config.c_l["c"]],
-                                )
+                                ostr = "{},{},{},{}\n"\
+                                    .format(midx+(l*depth_below_offset), midy+(m*depth_below_offset), float(height)-(n*depth_below_offset), contact['UNIT_NAME'])
                                 fp.write(ostr)
                             lastx = line.coords[0][0]
                             lasty = line.coords[0][1]
@@ -5481,14 +5083,12 @@ def lmn_from_line_dip(x1, y1, z1, x2, y2, z2, dip):
 
 
 @beartype.beartype
-def update_fault_layer(config: Config, map_data: MapData):
-    local_faults = map_data.get_map_data(Datatype.FAULT).copy()
-    local_faults["name"] = local_faults[config.c_l["o"]].apply(
-        lambda id: "Fault_" + str(id)
-    )
-    # display(local_faults)
-    Gloop = nx.read_gml(config.output_path + "/loop.gml")
-    fnodes_all = []
+def update_fault_layer(config:Config, map_data:MapData):
+    local_faults=map_data.get_map_data(Datatype.FAULT).copy()
+    local_faults['name']=local_faults['GEOMETRY_OBJECT_ID'].apply(lambda id: 'Fault_' + str(id))
+    #display(local_faults)
+    Gloop=nx.read_gml(config.output_path+'/loop.gml')
+    fnodes_all=[]
     for v in Gloop.nodes():
         if Gloop.nodes[v]["ntype"] == "fault":
             fnodes_all.append(v)

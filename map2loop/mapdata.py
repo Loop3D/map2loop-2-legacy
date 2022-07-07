@@ -404,7 +404,8 @@ class MapData:
             self.data[Datatype.GEOLOGY] is not None
             and self.data[Datatype.STRUCTURE] is not None
         ):
-            columns = ["geometry", c_l["d"], c_l["dd"], c_l["sf"], c_l["bo"]]
+            # columns = ["geometry", c_l["d"], c_l["dd"], c_l["sf"], c_l["bo"]]
+            columns = ["geometry", "DIP", "DIPDIR", "FEATURE_TYPE", "FOLIATION_TYPE"]
             if "sl" in c_l:
                 columns.append(c_l["sl"])
             columns = list(set(columns))
@@ -447,15 +448,16 @@ class MapData:
                 self.config.c_l['r2'],
                 self.config.c_l['ds']
             ]
+            columns = ["geometry", "GEOMETRY_OBJECT_ID", "UNIT_NAME", "GROUP", "MIN_AGE", "MAX_AGE", "CODE", "ROCKTYPE1", "ROCKTYPE2", "DESCRIPTION"]
             sub_geol = geology[columns]
             sub_geol.reset_index(inplace=True,drop=True)
             df = sub_geol.copy()
-            df.rename(columns={'geometry':'WKT',self.config.c_l['u']:self.config.c_l['c'],self.config.c_l['c']:self.config.c_l['u']},inplace=True)
+            df.rename(columns={'geometry':'WKT',"CODE":"UNIT_NAME","UNIT_NAME":"CODE"},inplace=True)
             df.columns = df.columns.str.replace('\n','')
-            df[self.config.c_l['min']] = df[self.config.c_l['min']].replace("None",0)
-            df[self.config.c_l['max']] = df[self.config.c_l['max']].replace("None",4500000000)
-            df[self.config.c_l['g']] = df[self.config.c_l['g']].replace("None","")
-            df[self.config.c_l['r2']] = df[self.config.c_l['r2']].replace("","None")
+            df["MIN_AGE"] = df["MIN_AGE"].replace("None",0)
+            df["MAX_AGE"] = df["MAX_AGE"].replace("None",4500000000)
+            df["GROUP"] = df["GROUP"].replace("None","")
+            df["ROCKTYPE2"] = df["ROCKTYPE2"].replace("","None")
             df.to_csv(self.config.geology_filename_wkt, index=False, sep="\t")
         else:
             print(
@@ -499,6 +501,12 @@ class MapData:
                 self.config.c_l["d"],
                 self.config.c_l["dd"],
             ]
+            columns = [
+                "geometry",
+                "STRUCTURE_POINT_ID",
+                "DIP",
+                "DIPDIR"
+            ]
             sub_pts = orientations[columns]
             Topology.save_structure_wkt(
                 sub_pts, self.config.structure_filename_wkt, self.config.c_l
@@ -513,7 +521,7 @@ class MapData:
             self.load_map_data(Datatype.FAULT)
         if self.data_states[Datatype.FAULT] == Datastate.COMPLETE:
             faults = self.get_map_data(Datatype.FAULT)
-            columns = ["geometry", self.config.c_l["o"], self.config.c_l["f"]]
+            columns = ["geometry", "GEOMETRY_OBJECT_ID", "FEATURE"]
             sub_lines = faults[columns]
             Topology.save_faults_wkt(
                 sub_lines, self.config.fault_filename_wkt, self.config.c_l
