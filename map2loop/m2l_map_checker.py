@@ -19,14 +19,14 @@ def explode_polylines(indf, c_l, dst_crs):
             outdf = pd.concat([outdf, rowdf], ignore_index=True)
         if type(row.geometry) == MultiLineString:
             multdf = gpd.GeoDataFrame(columns=indf.columns, crs=dst_crs)
-            recs = len(row.geometry)
+            recs = len(row.geometry.geoms)
             row_dict = dict(row)
             row_dict.pop("geometry")
             rowdf = gpd.GeoDataFrame(data=row_dict, index=[0])
             multdf = pd.concat([multdf, *[rowdf] * recs], ignore_index=True)
             i = 0
             for geom in range(recs):
-                multdf.loc[geom, "geometry"] = row.geometry[geom]
+                multdf.loc[geom, "geometry"] = row.geometry.geoms[geom]
                 multdf.loc[geom, c_l["o"]] = (
                     str(multdf.loc[geom, c_l["o"]]) + "_" + str(i)
                 )
@@ -637,7 +637,7 @@ def check_fault_map(
                     # print(flt)
 
         faults["f_length"] = lengths
-        faults = faults[faults["f_length"] > 500]
+        faults = faults[faults["f_length"] > 500].copy()
 
         if verbose_level != VerboseLevel.NONE:
             show_metadata(faults, "fault layer")
