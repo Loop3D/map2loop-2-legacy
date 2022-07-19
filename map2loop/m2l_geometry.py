@@ -78,7 +78,7 @@ def save_orientations(config: Config, map_data: MapData, workflow):
     dtm = map_data.get_map_data(Datatype.DTM).open()
     dtb = map_data.dtb
     dtb_null = map_data.dtb_null
-    is_bed = structures['FEATURE_TYPE'].str.contains(config.c_l['bedding'], regex=False)
+    is_bed = structures['STRUCTURE_TYPE'].str.contains(config.c_l['bedding'], regex=False)
 
     structure_clip = structures[is_bed]
     # print(structure_clip.columns)
@@ -98,7 +98,7 @@ def save_orientations(config: Config, map_data: MapData, workflow):
                             height = m2l_utils.value_from_dtm_dtb(
                                 dtm, dtb, dtb_null, workflow['cover_map'], locations)
                             dipdir = apoint['DIPDIR']
-                            if(apoint['FOLIATION_TYPE'] != config.c_l['btype']):
+                            if(apoint['POLARITY'] != config.c_l['btype']):
                                 polarity = 1
                             else:
                                 polarity = 0
@@ -878,9 +878,9 @@ def save_contacts_with_faults_removed(
                 cdn.geometry.x,
                 cdn.geometry.y,
                 height,
-                cdn[c_l["c"]].replace(" ", "_").replace("-", "_"),
+                cdn["UNIT_NAME"].replace(" ", "_").replace("-", "_"),
             )
-            # ostr = str(cdn.geometry.x)+","+str(cdn.geometry.y)+","+height+","+str(cdn[c_l['c']].replace(" ","_").replace("-","_"))+"\n"
+            # ostr = str(cdn.geometry.x)+","+str(cdn.geometry.y)+","+height+","+str(cdn["UNIT_NAME"].replace(" ","_").replace("-","_"))+"\n"
             ac.write(ostr)
 
         i = i + 1
@@ -969,7 +969,7 @@ def save_faults(config: Config, map_data: MapData, workflow: dict):
                         saved = 0
                         fault_dip = 90.0
                         # null specifc dip defined
-                        #print(config.c_l['fdipdir_flag'] ,str(flt[config.c_l['fdipdir']]), int(flt[config.c_l['fdip']]) , int(config.c_l['fdipnull']),str(flt[config.c_l['fdipest']]),config.run_flags['fault_dip'])
+                        #print(config.c_l['fdipdir_flag'] ,str(flt["DIPDIR"]), int(flt["DIP"]) , int(config.c_l['fdipnull']),str(flt["DIP_ESTIMATE"]),config.run_flags['fault_dip'])
                         if(int(float(flt['DIP'])) == int(float(config.c_l['fdipnull']))):
                             # dip estimate defined
                             if(not str(flt['DIP_ESTIMATE']) == '-999'):
@@ -1012,8 +1012,8 @@ def save_faults(config: Config, map_data: MapData, workflow: dict):
                                 fault_dip = -fault_dip
                         else:
                             azimuth = azimuth_fault
-                        # print("indx,azimuth,azimuth_fault,flt[c_l['fdipdir']],pd.notna( flt[c_l['fdipdir']]),fault_dip_var, c_l['fdipnull'],flt[c_l['fdip']]")
-                        # print( indx,azimuth,azimuth_fault,flt[c_l['fdipdir']],pd.notna( flt[c_l['fdipdir']]),fault_dip_var, c_l['fdipnull'],flt[c_l['fdip']])
+                        # print("indx,azimuth,azimuth_fault,flt["DIPDIR"],pd.notna( flt["DIPDIR"]),fault_dip_var, c_l['fdipnull'],flt["DIP"]")
+                        # print( indx,azimuth,azimuth_fault,flt["DIPDIR"],pd.notna( flt["DIPDIR"]),fault_dip_var, c_l['fdipnull'],flt["DIP"])
                         l, m, n = m2l_utils.ddd2dircos((90 - fault_dip), azimuth)
                         # print('fault_name,l,m,n,azimuth_fault,dip',fault_name,l,m,n,azimuth,fault_dip)
                         first = True
@@ -1026,8 +1026,8 @@ def save_faults(config: Config, map_data: MapData, workflow: dict):
                             # normal to line segment
                             # azimuth = degrees(atan2(lsy, -lsx)) % 180
 
-                            # if(flt[config.c_l['o']] == '-1'):
-                            # print(flt[config.c_l['o']],  int(flt[config.c_l['fdip']]), config.c_l['fdipnull'],str(flt[config.c_l['fdipest']]))
+                            # if(flt[config."GEOMETRY_OBJECT_ID"] == '-1'):
+                            # print(flt[config."GEOMETRY_OBJECT_ID"],  int(flt["DIP"]), config.c_l['fdipnull'],str(flt["DIP_ESTIMATE"]))
 
                             if first:
                                 incLength = 0
@@ -1449,10 +1449,10 @@ def create_basal_contact_orientations(
     i = 0
     for indx, acontact in contacts.iterrows():  # loop through distinct linestrings
         # display(acontact[1].geometry)
-        thegroup = acontact[c_l["g"]].replace("_", " ")
+        thegroup = acontact["GROUP"].replace("_", " ")
         # print("thegroup = ",thegroup)
         # subset orientations to just those with this group
-        is_gp = structures[c_l["g"]] == thegroup
+        is_gp = structures["GROUP"] == thegroup
         all_structures = structures[is_gp]
 
         for ind, astr in all_structures.iterrows():  # loop through valid orientations
@@ -1467,8 +1467,8 @@ def create_basal_contact_orientations(
                         segpair = LineString((pair[0], pair[1]))
                         # line segment closest to close point
                         if segpair.distance(np) < 0.0001:
-                            ddx = sin(radians(astr[c_l["d"]]))
-                            ddy = cos(radians(astr[c_l["d"]]))
+                            ddx = sin(radians(astr["DIP"]))
+                            ddy = cos(radians(astr["DIP"]))
                             dlsx = pair[0][0] - pair[1][0]
                             dlsy = pair[0][1] - pair[1][1]
                             lsx = dlsx / sqrt((dlsx * dlsx) + (dlsy * dlsy))
@@ -1493,13 +1493,13 @@ def create_basal_contact_orientations(
                                     np.y,
                                     height,
                                     ls_ddir,
-                                    astr[c_l["d"]],
+                                    astr["DIP"],
                                     1,
-                                    acontact[c_l["c"]]
+                                    acontact["UNIT_NAME"]
                                     .replace(" ", "_")
                                     .replace("-", "_"),
                                 )
-                                # ostr = str(np.x)+","+str(np.y)+","+height+","+str(ls_ddir)+","+str(astr[c_l['d']])+",1,"+acontact[c_l['c']].replace(" ","_").replace("-","_")+"\n"
+                                # ostr = str(np.x)+","+str(np.y)+","+height+","+str(ls_ddir)+","+str(astr["DIP"])+",1,"+acontact["UNIT_NAME"].replace(" ","_").replace("-","_")+"\n"
                                 f.write(ostr)
                                 i = i + 1
 
@@ -2411,15 +2411,15 @@ def tidy_data(config: Config, map_data: MapData, use_group, inputs):
     # else:
     # asc = pd.read_csv(os.path.join(config.tmp_path,'all_sorts_clean.csv'),sep=",")
     # colours = pd.read_csv(config.clut_path,sep=",")
-    # if( config.c_l['c'] == 'CODE'):
-    # code = config.c_l['c'].lower()
+    # if( "UNIT_NAME" == 'CODE'):
+    # code = "UNIT_NAME".lower()
     # else:
     # code = 'UNITNAME'
-    # #code = config.c_l['c']
+    # #code = "UNIT_NAME"
 
     # asc2 = pd.merge(asc, colours, how = 'inner',  left_on = 'code', right_on = code)
     # asc2.drop(['UNITNAME'], axis = 1,inplace = True)
-    # if(not config.c_l['c'] == 'code'):
+    # if(not "UNIT_NAME" == 'code'):
     # asc2.rename(columns  =  {'code_x':'code'}, inplace  =  True)
     # if('code_y' in asc2.columns):
     # asc2.drop(['code_y'], axis = 1,inplace = True)
@@ -2643,7 +2643,7 @@ def calc_thickness(tmp_path, output_path, buffer, max_thickness_allowed, c_l):
                     # if(all_sorts.iloc[g]['group'] == all_sorts.iloc[g-1]['group']):
                     # subset contacts to just those with 'a' code
                     is_contacta = (
-                        contact_lines[c_l["c"]] == all_sorts.iloc[g - 1]["code"]
+                        contact_lines["UNIT_NAME"] == all_sorts.iloc[g - 1]["code"]
                     )
                     acontacts = contact_lines[is_contacta]
                     i = 0
@@ -4458,21 +4458,21 @@ def process_sills(
     buffer,
 ):
 
-    sills = geol_clip[geol_clip[c_l["ds"]].str.contains(c_l["sill"])]
-    sills = sills[sills[c_l["r1"]].str.contains(c_l["intrusive"])]
+    sills = geol_clip[geol_clip["DESCRIPTION"].str.contains(c_l["sill"])]
+    sills = sills[sills["ROCKTYPE1"].str.contains(c_l["intrusive"])]
 
     sill_dict = {}
     i = 0
     for ind, sill in sills.iterrows():
         for ind2, geol in geol_clip.iterrows():
-            if geol[c_l["o"]] != sill[c_l["o"]]:
+            if geol["GEOMETRY_OBJECT_ID"] != sill["GEOMETRY_OBJECT_ID"]:
                 if geol.geometry.intersects(sill.geometry):
                     LineStringC = geol.geometry.intersection(sill.geometry)
                     if (
                         LineStringC.wkt.split(" ")[0] == "MULTIPOLYGON"
                         or LineStringC.wkt.split(" ")[0] == "POLYGON"
                     ):  # ignore polygon intersections for now, worry about them later!
-                        print(geol[c_l["o"]], "debug:", LineStringC.geometry.type)
+                        print(geol["GEOMETRY_OBJECT_ID"], "debug:", LineStringC.geometry.type)
                         continue
 
                     elif (
@@ -4586,8 +4586,8 @@ def process_sills(
                                             "X": lineC.coords[0][0],
                                             "Y": lineC.coords[0][1],
                                             "Z": height,
-                                            "sill_code": sill[c_l["c"]],
-                                            "host_code": geol[c_l["c"]],
+                                            "sill_code": sill["UNIT_NAME"],
+                                            "host_code": geol["UNIT_NAME"],
                                             "outwards": azimuth,
                                             "apparent thickness": app_thickness,
                                             "true thickness": est_thickness,

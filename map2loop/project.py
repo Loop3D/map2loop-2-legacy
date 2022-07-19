@@ -12,7 +12,7 @@ import networkx as nx
 from shapely.geometry import Polygon
 from .topology import Topology
 import map2model
-from . import (m2l_interpolation, m2l_utils, m2l_geometry)
+from . import (m2l_interpolation, m2l_utils, m2l_geometry, m2l_export)
 from .map2graph import Map2Graph
 # from . import (geology_loopdata, structure_loopdata, fault_loopdata, fold_loopdata,
 #                mindep_loopdata, metafiles, clut_paths, m2l_export)
@@ -27,7 +27,7 @@ import beartype
 
 def warning_without_codeline(message, category, filename, lineno, line=''):
     return str(message)
-warnings.formatwarning = warning_without_codeline
+# warnings.formatwarning = warning_without_codeline
 
 from map2loop import mapdata
 
@@ -43,7 +43,6 @@ class Project(object):
         verbose_level:VerboseLevel=VerboseLevel.ALL,
         project_path:str=".\\m2l_data",
         overwrite:str='check',
-        model_engine:str='loopstructural',
         working_projection=None,
         geology_filename:str="",
         fault_filename:str="",
@@ -194,7 +193,20 @@ class Project(object):
         self.project_path = project_path
 
         self.loop_project_filename = loop_project_filename
-        self.update_workflow(model_engine)
+        self.workflow = {'model_engine': 'loopstructural',
+            "seismic_section": False,
+            "cover_map": False,
+            "near_fault_interpolations": False,
+            "fold_axial_traces": False,
+            "stereonets": False,
+            "formation_thickness": True,
+            "polarity": False,
+            "strat_offset": True,
+            'contact_dips': True,
+            'drillholes': False,
+            'cover_contacts':True,
+            'cover_orientations':True
+        }
         self.setup_matplotlib()
 
         # Check that sufficient files exist to proceed with map2loop process
@@ -238,6 +250,25 @@ class Project(object):
             while os.path.exists(directory):
                 pass
 
+    def setup_matplotlib(self):
+        """ Sets the backend of matplotlib by preference of permissive to restrictive licences
+        """
+        # Make matplotlib comply with interface/cmd line window managers
+        import matplotlib
+
+        # Put Qt4Agg last as it includes GPL code through pyqt
+        # and is not included in Loop distributions
+        gui_env = ["PS", "TkAgg", "GTK3Agg", "WXAgg", "Qt4Agg"]
+        all_backends = list(set([*gui_env, *matplotlib.rcsetup.all_backends]))
+
+        for gui in all_backends:
+            try:
+                matplotlib.use(gui, warn=False, force=True)
+                from matplotlib import pyplot as plt
+                break
+            except:
+                continue
+
     @m2l_utils.timer_decorator
     @beartype.beartype
     def update_config(self,
@@ -246,7 +277,6 @@ class Project(object):
                       dtm_crs:str='EPSG:4326',
                       step_out:float=0.1,
                       clut_path='',
-                      model_engine="",
                       run_flags={},
                       **kwargs):
         """ Updates the project variables in the config structure needed for the map2loop process to run
@@ -267,8 +297,6 @@ class Project(object):
             A string to indicate the level of display and printed output ('None' to quiet nothing, 'all' to quiet everything, 'no-figures' to disable plots and allow text output. Defaults to 'None')
         clut_path: string, optional
             The path to a custom map colouring lookup file (crs formatted with columns for formation and colour string)
-        model_engine: string, optional
-            String to re-define the output format and map2loop process. Overrides the Project init function setting
         run_flags: dict, optional
             Additional dictionary options to use such as decimates and fault length limits see https://github.com/Loop3D/map2loop-2/issues/56
         """
@@ -288,9 +316,6 @@ class Project(object):
         if self.errorState != ErrorState.NONE:
             print("ERROR: Error state -", self.errorStateMsg)
             return
-
-        if model_engine != "":
-            self.update_workflow(model_engine)
 
         if "loop_project_filename" in kwargs:
             warnings.warn("loop_project_filename is deprecated in update_config and will be removed in later versions of map2loop.  Please use the project loop_project_filename instead", DeprecationWarning)
@@ -312,7 +337,7 @@ class Project(object):
             bbox_3d = {'minx':0,'maxx':1000,',miny':0,'maxy':1000,'base':-10000,'top':1200}
 
         if self.map_data.working_projection == None:
-            if project_crs in kwargs:
+            if "project_crs" in kwargs:
                 warnings.warn("project_crs in update_config is deprecated and will be removed in later versions of map2loop.  Please use the working_projection parameter in Project instead", DeprecationWarning)
                 project_crs = kwargs['proj_crs']
             elif "proj_crs" in kwargs:
@@ -536,13 +561,33 @@ class Project(object):
         if self.map_data.get_map_data(Datatype.MINERAL_DEPOSIT) is not None:
             mindep_filename = self.config.mindep_filename_wkt
 
+        map2model_c_l = {
+            'o':"GEOMETRY_OBJECT_ID",   # FIELD_COORDINATES
+            'f':"FEATURE",              # FIELD_FAULT_ID
+            'u':"CODE",                 # FIELD_POLYGON_LEVEL1_NAME
+            'g':"GROUP",                # FIELD_POLYGON_LEVEL2_NAME
+            'min':"MIN_AGE",            # FIELD_POLYGON_MIN_AGE
+            'max':"MAX_AGE",            # FIELD_POLYGON_MAX_AGE
+            'c':"UNIT_NAME",            # FIELD_POLYGON_CODE
+            'ds':"DESCRIPTION",         # FIELD_POLYGON_DESCRIPTION
+            'r1':"ROCKTYPE1",           # FIELD_POLYGON_ROCKTYPE1
+            'r2':"ROCKTYPE2",           # FIELD_POLYGON_ROCKTYPE2
+            'msc':self.config.c_l['msc'],   # FIELD_SITE_CODE
+            'mst':self.config.c_l['mst'],   # FIELD_SITE_TYPE
+            'mscm':self.config.c_l['mscm'], # FIELD_SITE_COMMO
+            'fold':self.config.c_l['fold'], # FAULT_AXIAL_FEATURE_NAME
+            'sill':self.config.c_l['sill'], # SILL_STRING
+            'intrusive':self.config.c_l['intrusive'], # IGNEOUS_STRING
+            'volcanic':self.config.c_l['volcanic'],   # VOLCANIC_STRING
+            'deposit_dist':self.config.c_l['deposit_dist']
+        }
         # TODO: Simplify. Note: this is external so have to match fix to map2model module
         run_log = map2model.run(self.config.graph_path,
                                 self.config.geology_filename_wkt,
                                 self.config.fault_filename_wkt,
                                 mindep_filename,
                                 self.config.bbox_3d,
-                                self.config.c_l,
+                                map2model_c_l, # self.config.c_l,
                                 self.config.verbose_level == VerboseLevel.NONE,
                                 self.config.run_flags['deposits']
                                 )
@@ -745,28 +790,13 @@ class Project(object):
     @m2l_utils.timer_decorator
     def __postprocess(self):
 
-        if (self.workflow['model_engine'] == 'geomodeller'):
-            inputs = ('invented_orientations',
-                      'intrusive_orientations',
-                      'fat_orientations',
-                      'fault_tip_contacts',
-                      'contact_orientations')
-        elif (self.workflow['model_engine'] == 'loopstructural'):
-            inputs = ('invented_orientations',
-                      'fat_orientations',
-                      'intrusive_orientations',
-                      'contact_orientations',
-                      'cover_orientations',
-                      'cover_contacts')
-        elif (self.workflow['model_engine'] == 'gempy'):
-            inputs = ('invented_orientations',
-                      'interpolated_orientations',
-                      'fat_orientations',
-                      'contact_orientations')
-        elif (self.workflow['model_engine'] == 'noddy'):
-            inputs = ('')
-        else:
-            inputs = ('')
+        inputs = ('invented_orientations',
+            'fat_orientations',
+            'intrusive_orientations',
+            'contact_orientations',
+            'cover_orientations',
+            'cover_contacts'
+        )
 
         m2l_geometry.tidy_data(self.config, self.map_data, self.use_gcode3, inputs)
         if(self.workflow['cover_map']):
@@ -822,7 +852,7 @@ class Project(object):
             ax.margins(0.0)
             fig.set_facecolor("#ffffff00")
             geology_figure = self.map_data.get_map_data(Datatype.GEOLOGY).copy().plot(
-                column=self.config.c_l['c'],
+                column="UNIT_NAME",
                 ax=ax,
                 figsize=(10, 10),
                 edgecolor='#000000',

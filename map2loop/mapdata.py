@@ -404,8 +404,7 @@ class MapData:
             self.data[Datatype.GEOLOGY] is not None
             and self.data[Datatype.STRUCTURE] is not None
         ):
-            # columns = ["geometry", c_l["d"], c_l["dd"], c_l["sf"], c_l["bo"]]
-            columns = ["geometry", "DIP", "DIPDIR", "FEATURE_TYPE", "FOLIATION_TYPE"]
+            columns = ["geometry", "DIP", "DIPDIR", "STRUCTURE_TYPE", "POLARITY"]
             if "sl" in c_l:
                 columns.append(c_l["sl"])
             columns = list(set(columns))
@@ -420,7 +419,7 @@ class MapData:
             if "index_right" in structure_code.columns:
                 structure_code.drop(columns=["index_right"], inplace=True)
             self.data[Datatype.STRUCTURE] = structure_code[
-                ~structure_code[c_l["o"]].isnull()
+                ~structure_code["GEOMETRY_OBJECT_ID"].isnull()
             ]
 
     @beartype.beartype
@@ -433,20 +432,20 @@ class MapData:
         if self.data_states[Datatype.GEOLOGY] == Datastate.COMPLETE:
             geology = self.get_map_data(Datatype.GEOLOGY)
             hint_flag = False  # use GSWA strat database to provide topology hints
-            # columns = ['geometry', self.config.c_l['o'], self.config.c_l['c'], self.config.c_l['g'],
-                # self.config.c_l['u'], self.config.c_l['min'], self.config.c_l['max'], self.config.c_l['ds'],
-                # self.config.c_l['r1'], self.config.c_l['r2']]
+            # columns = ['geometry', "GEOMETRY_OBJECT_ID", "UNIT_NAME", "GROUP",
+                # "CODE", "MIN_AGE", "MAX_AGE", "DESCRIPTION",
+                # "ROCKTYPE1", "ROCKTYPE2"]
             columns = [
                 "geometry",
-                self.config.c_l['o'],
-                self.config.c_l['c'],
-                self.config.c_l['g'],
-                self.config.c_l['min'],
-                self.config.c_l['max'],
-                self.config.c_l['u'],
-                self.config.c_l['r1'],
-                self.config.c_l['r2'],
-                self.config.c_l['ds']
+                "GEOMETRY_OBJECT_ID",
+                "UNIT_NAME",
+                "GROUP",
+                "MIN_AGE",
+                "MAX_AGE",
+                "CODE",
+                "ROCKTYPE1",
+                "ROCKTYPE2",
+                "DESCRIPTION"
             ]
             columns = ["geometry", "GEOMETRY_OBJECT_ID", "UNIT_NAME", "GROUP", "MIN_AGE", "MAX_AGE", "CODE", "ROCKTYPE1", "ROCKTYPE2", "DESCRIPTION"]
             sub_geol = geology[columns]
@@ -495,12 +494,6 @@ class MapData:
             self.load_map_data(Datatype.STRUCTURE)
         if self.data_states[Datatype.STRUCTURE] == Datastate.COMPLETE:
             orientations = self.get_map_data(Datatype.STRUCTURE)
-            columns = [
-                "geometry",
-                self.config.c_l["gi"],
-                self.config.c_l["d"],
-                self.config.c_l["dd"],
-            ]
             columns = [
                 "geometry",
                 "STRUCTURE_POINT_ID",
@@ -613,7 +606,7 @@ class MapData:
         with fiona.open(self.get_filename(Datatype.COVER_MAP), "r") as shapefile:
             shapes = [feature["geometry"] for feature in shapefile]
 
-        with rasterio.open(self.dtb_grid_file) as src:
+        with rasterio.open(self.get_filename(Datatype.DTB_GRID),"r") as src:
             out_image, out_transform = rasterio.mask.mask(src, shapes, crop=True)
             out_meta = src.meta.copy()
 

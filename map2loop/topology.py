@@ -50,17 +50,17 @@ class Topology(object):
                 "--- COLUMN NAMES IN CSV DATA FILES: -------------------------------------------------------------\n"
             )
             f.write("OBJECT COORDINATES              =WKT\n")
-            f.write("FAULT: ID                       =" + c_l["o"] + "\n")
-            f.write("FAULT: FEATURE                  =" + c_l["f"] + "\n")
-            f.write("POLYGON: ID                     =" + c_l["o"] + "\n")
-            f.write("POLYGON: LEVEL1 NAME            =" + c_l["u"] + "\n")
-            f.write("POLYGON: LEVEL2 NAME            =" + c_l["g"] + "\n")
-            f.write("POLYGON: MIN AGE                =" + c_l["min"] + "\n")
-            f.write("POLYGON: MAX AGE                =" + c_l["max"] + "\n")
-            f.write("POLYGON: CODE                   =" + c_l["c"] + "\n")
-            f.write("POLYGON: DESCRIPTION            =" + c_l["ds"] + "\n")
-            f.write("POLYGON: ROCKTYPE1              =" + c_l["r1"] + "\n")
-            f.write("POLYGON: ROCKTYPE2              =" + c_l["r2"] + "\n")
+            f.write("FAULT: ID                       =" + "GEOMETRY_OBJECT_ID" + "\n")
+            f.write("FAULT: FEATURE                  =" + "FEATURE" + "\n")
+            f.write("POLYGON: ID                     =" + "GEOMETRY_OBJECT_ID" + "\n")
+            f.write("POLYGON: LEVEL1 NAME            =" + "CODE" + "\n")
+            f.write("POLYGON: LEVEL2 NAME            =" + "GROUP" + "\n")
+            f.write("POLYGON: MIN AGE                =" + "MIN_AGE" + "\n")
+            f.write("POLYGON: MAX AGE                =" + "MAX_AGE" + "\n")
+            f.write("POLYGON: CODE                   =" + "UNIT_NAME" + "\n")
+            f.write("POLYGON: DESCRIPTION            =" + "DESCRIPTION" + "\n")
+            f.write("POLYGON: ROCKTYPE1              =" + "ROCKTYPE1" + "\n")
+            f.write("POLYGON: ROCKTYPE2              =" + "ROCKTYPE2" + "\n")
             f.write("DEPOSIT: SITE CODE              =" + c_l["msc"] + "\n")
             f.write("DEPOSIT: SITE TYPE              =" + c_l["mst"] + "\n")
             f.write("DEPOSIT: SITE COMMODITY         =" + c_l["mscm"] + "\n")
@@ -370,16 +370,16 @@ class Topology(object):
         info = []
         ages = []
         for indx, a_poly in geol.iterrows():  # loop through all polygons
-            if str(a_poly[c_l["g"]]) == "None":
+            if str(a_poly["GROUP"]) == "None":
                 grp = (
-                    a_poly[c_l["c"]]
+                    a_poly["UNIT_NAME"]
                     .replace(" ", "_")
                     .replace("-", "_")
                     .replace("?", "_")
                 )
             else:
                 grp = (
-                    a_poly[c_l["g"]]
+                    a_poly["GROUP"]
                     .replace(" ", "_")
                     .replace("-", "_")
                     .replace("?", "_")
@@ -388,7 +388,7 @@ class Topology(object):
             if not grp in groups:
                 groups += [(grp)]
 
-            info += [(grp, a_poly[c_l["min"]], a_poly[c_l["max"]])]
+            info += [(grp, a_poly["MIN_AGE"], a_poly["MAX_AGE"])]
 
         # display(info)
         # display(groups)
@@ -450,9 +450,9 @@ class Topology(object):
         geol = map_data.get_map_data(Datatype.GEOLOGY)
         Topology.abs_age_groups(geol, config.tmp_path, config.c_l)
         local_geol = geol.copy()
-        local_geol.drop_duplicates(subset=config.c_l["c"], inplace=True)
+        local_geol.drop_duplicates(subset="UNIT_NAME", inplace=True)
 
-        local_geol.set_index(config.c_l["c"], inplace=True)
+        local_geol.set_index("UNIT_NAME", inplace=True)
         # display(local_geol)
 
         gp_ages = pd.read_csv(os.path.join(config.tmp_path, "age_sorted_groups.csv"))
@@ -476,23 +476,23 @@ class Topology(object):
                 # print(glabel_0, glabel_1)
                 # print(df[df.CODE == "A-FOh-xs-f"])
                 # exit()
-                if str(local_geol.loc[glabel_0][config.c_l["g"]]) == "None":
+                if str(local_geol.loc[glabel_0]["GROUP"]) == "None":
                     grp0 = (
                         glabel_0.replace(" ", "_").replace("-", "_").replace("?", "_")
                     )
                 else:
                     grp0 = (
-                        local_geol.loc[glabel_0][config.c_l["g"]]
+                        local_geol.loc[glabel_0]["GROUP"]
                         .replace(" ", "_")
                         .replace("-", "_")
                     )
-                if str(local_geol.loc[glabel_1][config.c_l["g"]]) == "None":
+                if str(local_geol.loc[glabel_1]["GROUP"]) == "None":
                     grp1 = (
                         glabel_1.replace(" ", "_").replace("-", "_").replace("?", "_")
                     )
                 else:
                     grp1 = (
-                        local_geol.loc[glabel_1][config.c_l["g"]]
+                        local_geol.loc[glabel_1]["GROUP"]
                         .replace(" ", "_")
                         .replace("-", "_")
                         .replace("?", "_")
@@ -1033,23 +1033,23 @@ class Topology(object):
         f = open(geology_file_csv, "w+")
         f.write(
             "WKT\t"
-            + c_l["o"].replace("\n", "")
+            + "GEOMETRY_OBJECT_ID"
             + "\t"
-            + c_l["u"].replace("\n", "")
+            + "CODE".replace("\n", "")
             + "\t"
-            + c_l["g"].replace("\n", "")
+            + "GROUP"
             + "\t"
-            + c_l["min"].replace("\n", "")
+            + "MIN_AGE".replace("\n", "")
             + "\t"
-            + c_l["max"].replace("\n", "")
+            + "MAX_AGE".replace("\n", "")
             + "\t"
-            + c_l["c"].replace("\n", "")
+            + "UNIT_NAME".replace("\n", "")
             + "\t"
-            + c_l["r1"].replace("\n", "")
+            + "ROCKTYPE1".replace("\n", "")
             + "\t"
-            + c_l["r2"].replace("\n", "")
+            + "ROCKTYPE2".replace("\n", "")
             + "\t"
-            + c_l["ds"].replace("\n", "")
+            + "DESCRIPTION".replace("\n", "")
             + "\n"
         )
         # display(sub_geol)
@@ -1057,33 +1057,33 @@ class Topology(object):
             print(len(sub_geol), " polygons")
         # print(sub_geol)
         for i in range(0, len(sub_geol)):
-            # print('**',sub_geol.loc[i][[c_l['o']]],'++')
+            # print('**',sub_geol.loc[i][["GEOMETRY_OBJECT_ID"]],'++')
             f.write('"' + str(sub_geol.loc[i].geometry) + '"\t')
-            f.write('"' + str(sub_geol.loc[i][c_l["o"]]) + '"\t')
-            f.write('"' + str(sub_geol.loc[i][c_l["c"]]) + '"\t')
+            f.write('"' + str(sub_geol.loc[i]["GEOMETRY_OBJECT_ID"]) + '"\t')
+            f.write('"' + str(sub_geol.loc[i]["UNIT_NAME"]) + '"\t')
             # since map2model is looking for "" not "None"
-            f.write('"' + str(sub_geol.loc[i][c_l["g"]]).replace("None", "") + '"\t')
-            if hint_flag == True and sub_geol.loc[i][c_l["c"]] in hint_list:
-                hint = code_hints.loc[sub_geol.loc[i][c_l["c"]]]["hint"]
+            f.write('"' + str(sub_geol.loc[i]["GROUP"]).replace("None", "") + '"\t')
+            if hint_flag == True and sub_geol.loc[i]["UNIT_NAME"] in hint_list:
+                hint = code_hints.loc[sub_geol.loc[i]["UNIT_NAME"]]["hint"]
             else:
                 hint = 0.0
-            if str(sub_geol.loc[i][c_l["min"]]) == "None":
+            if str(sub_geol.loc[i]["MIN_AGE"]) == "None":
                 min = 0.0
             else:
-                min = sub_geol.loc[i][c_l["min"]].astype("float64") + float(hint)
-            # print(str(sub_geol.loc[i][c_l['max']]))
-            if str(sub_geol.loc[i][c_l["max"]]) == "None":
+                min = sub_geol.loc[i]["MIN_AGE"].astype("float64") + float(hint)
+            # print(str(sub_geol.loc[i]["MAX_AGE"]))
+            if str(sub_geol.loc[i]["MAX_AGE"]) == "None":
                 max = 4500000000
             else:
-                max = sub_geol.loc[i][c_l["max"]].astype("float64") + float(hint)
-            # f.write("\""+str(sub_geol.loc[i][c_l['min']])+"\"\t")
-            # f.write("\""+str(sub_geol.loc[i][c_l['max']])+"\"\t")
+                max = sub_geol.loc[i]["MAX_AGE"].astype("float64") + float(hint)
+            # f.write("\""+str(sub_geol.loc[i]["MIN_AGE"])+"\"\t")
+            # f.write("\""+str(sub_geol.loc[i]["MAX_AGE"])+"\"\t")
             f.write('"' + str(min) + '"\t')
             f.write('"' + str(max) + '"\t')
-            f.write('"' + str(sub_geol.loc[i][c_l["u"]]) + '"\t')
-            f.write('"' + str(sub_geol.loc[i][c_l["r1"]]) + '"\t')
-            f.write('"' + str(sub_geol.loc[i][c_l["r2"]]) + '"\t')
-            f.write('"' + str(sub_geol.loc[i][c_l["ds"]]) + '"\n')
+            f.write('"' + str(sub_geol.loc[i]["CODE"]) + '"\t')
+            f.write('"' + str(sub_geol.loc[i]["ROCKTYPE1"]) + '"\t')
+            f.write('"' + str(sub_geol.loc[i]["ROCKTYPE2"]) + '"\t')
+            f.write('"' + str(sub_geol.loc[i]["DESCRIPTION"]) + '"\n')
         f.close()
 
     ####################################
@@ -1145,7 +1145,7 @@ class Topology(object):
         # Change geometry column name to WKT
         sub_lines.columns = ["WKT"] + list(sub_lines.columns[1:])
         # Filter cells with a feature description containing the word 'fault'
-        mask = sub_lines[c_l["f"]].str.contains(
+        mask = sub_lines["FEATURE"].str.contains(
             "fault", na=False, case=False, regex=True
         )
         sub_faults = sub_lines[mask]
@@ -1171,9 +1171,9 @@ class Topology(object):
         groups = all_sorts["group"].unique()
 
         for indx, flt in faults_clip.iterrows():
-            # print('Fault_'+str(flt[c_l['o']]) )
-            if "Fault_" + str(flt[c_l["o"]]) in fault_dimensions["Fault"].values:
-                # print('Fault_'+str(flt[c_l['o']]),flt.geometry.type,flt.geometry.centroid )
+            # print('Fault_'+str(flt["GEOMETRY_OBJECT_ID"]) )
+            if "Fault_" + str(flt["GEOMETRY_OBJECT_ID"]) in fault_dimensions["Fault"].values:
+                # print('Fault_'+str(flt["GEOMETRY_OBJECT_ID"]),flt.geometry.type,flt.geometry.centroid )
                 if flt.geometry.type == "LineString":
                     flt_ls = LineString(flt.geometry)
                     midx = flt_ls.coords[0][0] + (
@@ -1192,14 +1192,14 @@ class Topology(object):
                     )
                     angle = (360 + degrees(atan2(l, m))) % 360
                     xax = (
-                        fault_dimensions2.loc["Fault_" + str(flt[c_l["o"]])][
+                        fault_dimensions2.loc["Fault_" + str(flt["GEOMETRY_OBJECT_ID"])][
                             "HorizontalRadius"
                         ]
                         * 0.99
                         * 0.81
                     )
                     yax = (
-                        fault_dimensions2.loc["Fault_" + str(flt[c_l["o"]])][
+                        fault_dimensions2.loc["Fault_" + str(flt["GEOMETRY_OBJECT_ID"])][
                             "InfluenceDistance"
                         ]
                         * 0.99
@@ -1257,19 +1257,19 @@ class Topology(object):
                                 else:
                                     has_contacts = False
                                 i = i + 1
-                            # print('Fault_'+str(flt[c_l['o']]),gp,has_contacts)
+                            # print('Fault_'+str(flt["GEOMETRY_OBJECT_ID"]),gp,has_contacts)
                             if not has_contacts:
                                 if (
-                                    gp_fault_rel.loc[gp, "Fault_" + str(flt[c_l["o"]])]
+                                    gp_fault_rel.loc[gp, "Fault_" + str(flt["GEOMETRY_OBJECT_ID"])]
                                     == 1
                                 ):
                                     print(
                                         gp,
-                                        "Fault_" + str(flt[c_l["o"]]),
+                                        "Fault_" + str(flt["GEOMETRY_OBJECT_ID"]),
                                         "combination switched OFF",
                                     )
                                     gp_fault_rel.loc[
-                                        gp, "Fault_" + str(flt[c_l["o"]])
+                                        gp, "Fault_" + str(flt["GEOMETRY_OBJECT_ID"])
                                     ] = 0
 
                 elif (
@@ -1278,114 +1278,10 @@ class Topology(object):
                 ):
                     raise NameError(
                         "map2loop error: Fault_"
-                        + str(flt[c_l["o"]])
+                        + str(flt["GEOMETRY_OBJECT_ID"])
                         + "cannot be analysed as it is a multilinestring,\n  it may be a fault that is clipped into two parts by the bounding box\nfix in original shapefile??"
                     )
                     continue
-                    for pline in flt.geometry:
-                        flt_ls = LineString(pline)
-                        midx = flt_ls.coords[0][0] + (
-                            (
-                                flt_ls.coords[0][0]
-                                - flt_ls.coords[len(flt_ls.coords) - 1][0]
-                            )
-                            / 2
-                        )
-                        midy = flt_ls.coords[0][1] + (
-                            (
-                                flt_ls.coords[0][1]
-                                - flt_ls.coords[len(flt_ls.coords) - 1][1]
-                            )
-                            / 2
-                        )
-                    l, m = m2l_utils.pts2dircos(
-                        flt_ls.coords[0][0],
-                        flt_ls.coords[0][1],
-                        flt_ls.coords[len(flt_ls.coords) - 1][0],
-                        flt_ls.coords[len(flt_ls.coords) - 1][1],
-                    )
-                    angle = (360 + degrees(atan2(l, m))) % 360
-
-                    xax = (
-                        fault_dimensions2.loc["Fault_" + str(flt[c_l["o"]])][
-                            "HorizontalRadius"
-                        ]
-                        * 0.99
-                        * 0.81
-                    )
-                    yax = (
-                        fault_dimensions2.loc["Fault_" + str(flt[c_l["o"]])][
-                            "InfluenceDistance"
-                        ]
-                        * 0.99
-                        * 0.81
-                    )
-                    circle = Point(
-                        flt.geometry.centroid.x, flt.geometry.centroid.y
-                    ).buffer(
-                        1
-                    )  # type(circle)=polygon
-                    ellipse = shapely.affinity.scale(
-                        circle, xax, yax
-                    )  # type(ellipse)=polygon
-                    ellipse = shapely.affinity.rotate(
-                        ellipse, 90 - angle, origin="center", use_radians=False
-                    )
-                    splits = split(ellipse, flt.geometry)
-                    # display(splits)
-                    i = 0
-                    for gp in groups:
-                        if not gp == "cover":
-                            all_sorts2 = all_sorts[all_sorts["group"] == gp]
-                            first = True
-                            for half in splits:
-                                half_poly = Polygon(half)
-                                half_ellipse = gpd.GeoDataFrame(
-                                    index=[0], crs=proj_crs, geometry=[half_poly]
-                                )
-                                has_contacts = True
-                                for indx, as2 in all_sorts2.iterrows():
-                                    contacts2 = contacts[contacts["formation"] == indx]
-                                    if first:
-                                        first = False
-                                        all_contacts = contacts2.copy()
-                                    else:
-                                        all_contacts = pd.concat(
-                                            [all_contacts, contacts2], sort=False
-                                        )
-                                contacts_gdf = gpd.GeoDataFrame(
-                                    all_contacts,
-                                    geometry=[
-                                        Point(x, y)
-                                        for x, y in zip(all_contacts.X, all_contacts.Y)
-                                    ],
-                                )
-                                found = gpd.sjoin(
-                                    contacts_gdf,
-                                    half_ellipse,
-                                    how="inner",
-                                    predicate="within",
-                                )
-
-                                if len(found) > 0 and has_contacts:
-                                    has_contacts = True
-                                else:
-                                    has_contacts = False
-                                i = i + 1
-                            # print('Fault_'+str(flt[c_l['o']]),gp,has_contacts)
-                            if not has_contacts:
-                                if (
-                                    gp_fault_rel.loc[gp, "Fault_" + str(flt[c_l["o"]])]
-                                    == 1
-                                ):
-                                    print(
-                                        gp,
-                                        "Fault_" + str(flt[c_l["o"]]),
-                                        "combination switched OFF",
-                                    )
-                                    gp_fault_rel.loc[
-                                        gp, "Fault_" + str(flt[c_l["o"]])
-                                    ] = 0
 
         gp_fault_rel.to_csv(gp_fault_rel_path)
 
@@ -1407,19 +1303,19 @@ class Topology(object):
 
         # geol = gpd.read_file(os.path.join(config.tmp_path, 'geol_clip.shp'))
         local_geol = map_data.get_map_data(Datatype.GEOLOGY).copy()
-        local_geol.drop_duplicates(subset=config.c_l["c"], keep="first", inplace=True)
-        local_geol = local_geol.set_index(config.c_l["g"])
+        local_geol.drop_duplicates(subset="UNIT_NAME", keep="first", inplace=True)
+        local_geol = local_geol.set_index("GROUP")
 
         sg_index = 0
         for i in range(0, len(group_girdle)):
-            # if(config.c_l['intrusive'] in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][config.c_l['r1']]
-            # and config.c_l['sill'] not in geol.loc[group_girdle.iloc[i].name.replace("_"," ")][config.c_l['ds']]):
-            if group_girdle.iloc[i].name in local_geol[config.c_l["c"]]:
+            # if(config.c_l['intrusive'] in geol.loc[group_girdle.iloc[i].name.replace("_"," ")]["ROCKTYPE1"]
+            # and config.c_l['sill'] not in geol.loc[group_girdle.iloc[i].name.replace("_"," ")]["DESCRIPTION"]):
+            if group_girdle.iloc[i].name in local_geol["UNIT_NAME"]:
                 if (
                     config.c_l["intrusive"]
-                    in local_geol.loc[group_girdle.iloc[i].name][config.c_l["r1"]]
+                    in local_geol.loc[group_girdle.iloc[i].name]["ROCKTYPE1"]
                     and config.c_l["sill"]
-                    not in local_geol.loc[group_girdle.iloc[i].name][config.c_l["ds"]]
+                    not in local_geol.loc[group_girdle.iloc[i].name]["DESCRIPTION"]
                 ):
                     sg_index = sg_index + 1
                     sgname = "Super_Group_" + str(sg_index)
@@ -1581,11 +1477,11 @@ class Topology(object):
     def make_Loop_graph(config: Config, map_data, point_data):
         Gloop = nx.DiGraph()
         strats = map_data.get_map_data(Datatype.GEOLOGY).copy()
-        strats.drop_duplicates(subset=[config.c_l["c"]], inplace=True)
-        strats[config.c_l["c"]] = (
-            strats[config.c_l["c"]].replace(" ", "_").replace("-", "_")
+        strats.drop_duplicates(subset=["UNIT_NAME"], inplace=True)
+        strats["UNIT_NAME"] = (
+            strats["UNIT_NAME"].replace(" ", "_").replace("-", "_")
         )
-        strats.set_index([config.c_l["c"]], inplace=True)
+        strats.set_index(["UNIT_NAME"], inplace=True)
 
         # Load faults and stratigraphy
         Gf = nx.read_gml(os.path.join(config.tmp_path, "fault_network.gml"))
@@ -1607,8 +1503,8 @@ class Topology(object):
                     GroupNumber=s["group number"],
                     IndexInGroup=s["index in group"],
                     NumberInGroup=s["number in group"],
-                    MinAge=strats.loc[s.name][config.c_l["min"]],
-                    MaxAge=strats.loc[s.name][config.c_l["max"]],
+                    MinAge=strats.loc[s.name]["MIN_AGE"],
+                    MaxAge=strats.loc[s.name]["MAX_AGE"],
                 )
             else:
                 Gloop.add_node(

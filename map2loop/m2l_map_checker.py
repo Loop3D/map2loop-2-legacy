@@ -182,17 +182,17 @@ def check_all_maps(
         )
 
 
-def rename_columns(dataframe, original, replacement, m2l_errors, verbose_level=VerboseLevel.ALL):
-    if dataframe is not None and original != replacement:
-        if original in dataframe.columns:
-            if replacement in dataframe.columns:
-                dataframe.rename(columns={replacement:'old_'+replacement,original:replacement},inplace=True)
+def rename_columns(dataframe, original_column_name, replacement_column_name, m2l_errors, verbose_level=VerboseLevel.ALL):
+    if dataframe is not None and original_column_name != replacement_column_name:
+        if original_column_name in dataframe.columns:
+            if replacement_column_name in dataframe.columns:
+                dataframe.rename(columns={replacement_column_name:'old_'+replacement_column_name,original_column_name:replacement_column_name},inplace=True)
                 if verbose_level!=VerboseLevel.NONE:
-                    print(f"Moving column {replacement} to \"old_{replacement}\"")
+                    print(f"Moving column {replacement_column_name} to \"old_{replacement_column_name}\"")
             else:
-                dataframe.rename(columns={original:replacement},inplace=True)
+                dataframe.rename(columns={original_column_name:replacement_column_name},inplace=True)
         else:
-            m2l_errors.append(f"ERROR: data does not contain column {original}")
+            m2l_errors.append(f"ERROR: data does not contain column {original_column_name}")
     return dataframe
 
 def check_structure_map(
@@ -262,7 +262,7 @@ def check_structure_map(
     orientations = rename_columns(orientations, c_l['dd'], 'DIPDIR', m2l_errors, verbose_level)
     orientations = rename_columns(orientations, c_l['sf'], 'STRUCTURE_TYPE', m2l_errors, verbose_level)
     orientations = rename_columns(orientations, c_l['ds'], 'DESCRIPTION', m2l_errors, verbose_level)
-    orientations = rename_columns(orientations, c_l['bo'], 'FOLIATION_TYPE', m2l_errors, verbose_level)
+    orientations = rename_columns(orientations, c_l['bo'], 'POLARITY', m2l_errors, verbose_level)
     orientations = rename_columns(orientations, c_l['gi'], 'STRUCTURE_POINT_ID', m2l_errors, verbose_level)
 
     # Reset c_l labels to new labels (temporary unit all c_l references removed from non-mapchecker code)
@@ -270,7 +270,7 @@ def check_structure_map(
     # c_l['dd'] = 'DIPDIR'
     # c_l['sf'] = 'STRUCTURE_TYPE'
     # c_l['ds'] = 'DESCRIPTION'
-    # c_l['bo'] = 'FOLIATION_TYPE'
+    # c_l['bo'] = 'POLARITY'
     # c_l['go'] = 'STRUCTURE_POINT_ID'
 
     if verbose_level != VerboseLevel.NONE:
@@ -651,7 +651,7 @@ def check_fault_map(
     faults = rename_columns(faults, c_l['fdip'], 'DIP', m2l_errors, verbose_level)
     faults = rename_columns(faults, c_l['fdipdir'], 'DIPDIR', m2l_errors, verbose_level)
     faults = rename_columns(faults, c_l['fdipest'], 'DIP_ESTIMATE', m2l_errors, verbose_level)
-    faults = rename_columns(faults, c_l['fdipest_vals'], 'DIP_TEXT_OPTIONS', m2l_errors, verbose_level)
+    # faults = rename_columns(faults, c_l['fdipest_vals'], 'DIP_TEXT_OPTIONS', m2l_errors, verbose_level)
 
     # Reset c_l labels to new labels (temporary unit all c_l references removed from non-mapchecker code)
     # c_l['f'] = 'FEATURE'

@@ -58,15 +58,15 @@ class Map2Graph(object):
                         g1_snapped = snap(g.geometry, g2.geometry,snap_buffer)
                         all_contacts.append([ind,ind2,g1_snapped.buffer(0).intersection(g2.geometry.buffer(0))])
 
-        groups=geology_clean.drop_duplicates(subset=[c_l['g']])
+        groups=geology_clean.drop_duplicates(subset=["GROUP"])
         #groups.reset_index(inplace=True)
         groups.index= pd.RangeIndex(start=0, stop=len(groups), step=1)
         groups['order'] = groups.index
-        groups.set_index([c_l['g']],inplace=True)
+        groups.set_index(["GROUP"],inplace=True)
             
-        strats=geology_clean.drop_duplicates(subset=[c_l['c']])
-        strats[c_l['c']]=strats[c_l['c']].str.replace(' ','_').replace('-','_')
-        strats.set_index([c_l['c']],inplace=True)
+        strats=geology_clean.drop_duplicates(subset=["UNIT_NAME"])
+        strats["UNIT_NAME"]=strats["UNIT_NAME"].str.replace(' ','_').replace('-','_')
+        strats.set_index(["UNIT_NAME"],inplace=True)
 
         Gloop=nx.DiGraph()
 
@@ -80,22 +80,22 @@ class Map2Graph(object):
         groups['gid']=i
 
         for ind,s in strats.iterrows():
-            Gloop.add_node(s.name,id=index, gid=str(groups.loc[s[c_l['g']]]['gid']),LabelGraphics ='[ text "'+s.name.replace(" ","_").replace("-","_")+'" anchor "n" fontStyle "bold" fontSize 14 ]')
+            Gloop.add_node(s.name,id=index, gid=str(groups.loc[s["GROUP"]]['gid']),LabelGraphics ='[ text "'+s.name.replace(" ","_").replace("-","_")+'" anchor "n" fontStyle "bold" fontSize 14 ]')
             Gloop.nodes[s.name]['ntype']='formation'
             
             index=index+1
 
 
         for c in all_contacts:
-            ave_age0=int(geology_clean.iloc[c[0]][c_l['min']])+((int(geology_clean.iloc[c[0]][c_l['max']])-int(geology_clean.iloc[c[0]][c_l['min']]))/2)
-            ave_age1=int(geology_clean.iloc[c[1]][c_l['min']])+((int(geology_clean.iloc[c[1]][c_l['max']])-int(geology_clean.iloc[c[1]][c_l['min']]))/2)
+            ave_age0=int(geology_clean.iloc[c[0]]["MIN_AGE"])+((int(geology_clean.iloc[c[0]]["MAX_AGE"])-int(geology_clean.iloc[c[0]]["MIN_AGE"]))/2)
+            ave_age1=int(geology_clean.iloc[c[1]]["MIN_AGE"])+((int(geology_clean.iloc[c[1]]["MAX_AGE"])-int(geology_clean.iloc[c[1]]["MIN_AGE"]))/2)
 
             if(ave_age0>ave_age1):
-                Gloop.add_edge(geology_clean.iloc[c[1]][c_l['c']].replace(" ","_").replace("-","_"),geology_clean.iloc[c[0]][c_l['c']].replace(" ","_").replace("-","_"))
-                Gloop[geology_clean.iloc[c[1]][c_l['c']].replace(" ","_").replace("-","_")][geology_clean.iloc[c[0]][c_l['c']].replace(" ","_").replace("-","_")]['etype']='formation_formation'
+                Gloop.add_edge(geology_clean.iloc[c[1]]["UNIT_NAME"].replace(" ","_").replace("-","_"),geology_clean.iloc[c[0]]["UNIT_NAME"].replace(" ","_").replace("-","_"))
+                Gloop[geology_clean.iloc[c[1]]["UNIT_NAME"].replace(" ","_").replace("-","_")][geology_clean.iloc[c[0]]["UNIT_NAME"].replace(" ","_").replace("-","_")]['etype']='formation_formation'
             else:
-                Gloop.add_edge(geology_clean.iloc[c[0]][c_l['c']].replace(" ","_").replace("-","_"),geology_clean.iloc[c[1]][c_l['c']].replace(" ","_").replace("-","_"))
-                Gloop[geology_clean.iloc[c[0]][c_l['c']].replace(" ","_").replace("-","_")][geology_clean.iloc[c[1]][c_l['c']].replace(" ","_").replace("-","_")]['etype']='formation_formation'
+                Gloop.add_edge(geology_clean.iloc[c[0]]["UNIT_NAME"].replace(" ","_").replace("-","_"),geology_clean.iloc[c[1]]["UNIT_NAME"].replace(" ","_").replace("-","_"))
+                Gloop[geology_clean.iloc[c[0]]["UNIT_NAME"].replace(" ","_").replace("-","_")][geology_clean.iloc[c[1]]["UNIT_NAME"].replace(" ","_").replace("-","_")]['etype']='formation_formation'
                 
         nx.write_gml(Gloop, os.path.join(output_path,'pre_loop.gml'))
         return(groups,strats,all_contacts,Gloop)
@@ -165,31 +165,31 @@ class Map2Graph(object):
         i=0
         for c in all_contacts:
             if(c[2].geom_type=='MultiLineString' or c[2].geom_type=='LineString' ): 
-                if( c_l['intrusive'] in geology_clean.iloc[c[0]][c_l['r1']] ):
-                    igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[0]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[1]][c_l['c']], "geometry": c[2]}
-                elif(c_l['intrusive'] in geology_clean.iloc[c[1]][c_l['r1']] ):
-                    igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[1]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[0]][c_l['c']], "geometry": c[2]}
+                if( c_l['intrusive'] in geology_clean.iloc[c[0]]["ROCKTYPE1"] ):
+                    igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[0]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[1]]["UNIT_NAME"], "geometry": c[2]}
+                elif(c_l['intrusive'] in geology_clean.iloc[c[1]]["ROCKTYPE1"] ):
+                    igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[1]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[0]]["UNIT_NAME"], "geometry": c[2]}
                 elif(c[0] in mini_strat_df.index):
-                    if(mini_strat_df.loc[geology_clean.iloc[c[0]][c_l['c']].replace(" ","_").replace("-","_")]['order']>
-                    mini_strat_df.loc[geology_clean.iloc[c[1]][c_l['c']].replace(" ","_").replace("-","_")]['order']):
-                        not_igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[1]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[0]][c_l['c']], "geometry": c[2]}
+                    if(mini_strat_df.loc[geology_clean.iloc[c[0]]["UNIT_NAME"].replace(" ","_").replace("-","_")]['order']>
+                    mini_strat_df.loc[geology_clean.iloc[c[1]]["UNIT_NAME"].replace(" ","_").replace("-","_")]['order']):
+                        not_igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[1]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[0]]["UNIT_NAME"], "geometry": c[2]}
                     else:
-                        not_igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[0]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[1]][c_l['c']], "geometry": c[2]}
+                        not_igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[0]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[1]]["UNIT_NAME"], "geometry": c[2]}
                         
                 i=i+1
             elif(c[2].geom_type=='GeometryCollection' ):
                 for geom in c[2]:
                     if(geom.geom_type=='MultiLineString' or geom.geom_type=='LineString' ):
-                        if( c_l['intrusive'] in geology_clean.iloc[c[0]][c_l['r1']] ):
-                            igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[0]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[1]][c_l['c']], "geometry": geom}
-                        elif(c_l['intrusive'] in geology_clean.iloc[c[1]][c_l['r1']] ):
-                            igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[1]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[0]][c_l['c']], "geometry": geom}
+                        if( c_l['intrusive'] in geology_clean.iloc[c[0]]["ROCKTYPE1"] ):
+                            igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[0]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[1]]["UNIT_NAME"], "geometry": geom}
+                        elif(c_l['intrusive'] in geology_clean.iloc[c[1]]["ROCKTYPE1"] ):
+                            igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[1]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[0]]["UNIT_NAME"], "geometry": geom}
                         elif(c[0] in mini_strat_df.index):
-                            if(mini_strat_df.loc[geology_clean.iloc[c[0]][c_l['c']].replace(" ","_").replace("-","_")]['order']>
-                            mini_strat_df.loc[geology_clean.iloc[c[1]][c_l['c']].replace(" ","_").replace("-","_")]['order']):
-                                not_igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[1]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[0]][c_l['c']], "geometry": geom}
+                            if(mini_strat_df.loc[geology_clean.iloc[c[0]]["UNIT_NAME"].replace(" ","_").replace("-","_")]['order']>
+                            mini_strat_df.loc[geology_clean.iloc[c[1]]["UNIT_NAME"].replace(" ","_").replace("-","_")]['order']):
+                                not_igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[1]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[0]]["UNIT_NAME"], "geometry": geom}
                             else:
-                                not_igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[0]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[1]][c_l['c']], "geometry": geom}
+                                not_igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[0]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[1]]["UNIT_NAME"], "geometry": geom}
                         i=i+1
             
         df = DataFrame.from_dict(igneous_contacts, "index")
@@ -212,17 +212,17 @@ class Map2Graph(object):
         fault_intersections=[]
 
         for ind,f in fault_clean.iterrows():
-            Gloop.add_node('Fault_'+f[c_l['o']])
-            Gloop.nodes['Fault_'+f[c_l['o']]]['ntype']='fault'
-            Gloop.nodes['Fault_'+f[c_l['o']]]['weight']=fault_weight
-            Gfault.add_node('Fault_'+f[c_l['o']])
-            Gfault.nodes['Fault_'+f[c_l['o']]]['ntype']='fault'
+            Gloop.add_node('Fault_'+f["GEOMETRY_OBJECT_ID"])
+            Gloop.nodes['Fault_'+f["GEOMETRY_OBJECT_ID"]]['ntype']='fault'
+            Gloop.nodes['Fault_'+f["GEOMETRY_OBJECT_ID"]]['weight']=fault_weight
+            Gfault.add_node('Fault_'+f["GEOMETRY_OBJECT_ID"])
+            Gfault.nodes['Fault_'+f["GEOMETRY_OBJECT_ID"]]['ntype']='fault'
             for ind2,f2 in fault_clean.iterrows():
-                if(not fault_clean.iloc[ind][c_l['o']]>=fault_clean.iloc[ind2][c_l['o']]):
+                if(not fault_clean.iloc[ind]["GEOMETRY_OBJECT_ID"]>=fault_clean.iloc[ind2]["GEOMETRY_OBJECT_ID"]):
                     if(f.geometry.intersects(f2.geometry)):
-                        fault_intersections.append([fault_clean.iloc[ind][c_l['o']],fault_clean.iloc[ind2][c_l['o']],f.geometry.intersection(f2.geometry)])
+                        fault_intersections.append([fault_clean.iloc[ind]["GEOMETRY_OBJECT_ID"],fault_clean.iloc[ind2]["GEOMETRY_OBJECT_ID"],f.geometry.intersection(f2.geometry)])
 
-        fault_name=fault_clean.set_index(c_l['o'])
+        fault_name=fault_clean.set_index("GEOMETRY_OBJECT_ID")
         eps=.01
         min_ang=30
         for ind,f in fault_name.iterrows():
@@ -299,7 +299,7 @@ class Map2Graph(object):
     
     def fault_formation_intersections(Gloop,output_path,fault_clean,groups,geology_clean_nona,c_l,fault_formation_weight):
         fault_group_array=np.zeros((len(groups),len(fault_clean)), dtype=np.int8)
-        fault_names='Fault_'+fault_clean[c_l['o']]
+        fault_names='Fault_'+fault_clean["GEOMETRY_OBJECT_ID"]
         group_names=list(groups.index)
         group_names=[w.replace(" ","_").replace("-","_") for w in group_names]
 
@@ -313,15 +313,15 @@ class Map2Graph(object):
                     g1_snapped = snap(g.geometry, f.geometry,snap_buffer)
                     x=g1_snapped.intersection(f.geometry)
                     if(x.geom_type!='Point' and x.geom_type!='MultiPoint'):
-                        Gloop.add_edge('Fault_'+f[c_l['o']],g[c_l['g']].replace(" ","_").replace("-","_")+'_gp')
-                        Gloop['Fault_'+f[c_l['o']]][g[c_l['g']].replace(" ","_").replace("-","_")+'_gp']['etype']='fault_group'
+                        Gloop.add_edge('Fault_'+f["GEOMETRY_OBJECT_ID"],g["GROUP"].replace(" ","_").replace("-","_")+'_gp')
+                        Gloop['Fault_'+f["GEOMETRY_OBJECT_ID"]][g["GROUP"].replace(" ","_").replace("-","_")+'_gp']['etype']='fault_group'
 
-                        Gloop.add_edge('Fault_'+f[c_l['o']],g[c_l['c']].replace(" ","_").replace("-","_"))
-                        Gloop['Fault_'+f[c_l['o']]][g[c_l['c']].replace(" ","_").replace("-","_")]['etype']='fault_formation'
-                        fault_group_array[groups.loc[g[c_l['g'].replace(" ","_").replace("-","_")]]['order'],i1]=1
-                        Gloop['Fault_'+f[c_l['o']]][g[c_l['c']].replace(" ","_").replace("-","_")]['weight']=fault_formation_weight
-                        Gloop['Fault_'+f[c_l['o']]][g[c_l['c']].replace(" ","_").replace("-","_")]['fault']='Fault_'+f[c_l['o']]
-                        Gloop['Fault_'+f[c_l['o']]][g[c_l['c']].replace(" ","_").replace("-","_")]['formation']=str(g[c_l['c']].replace(" ","_").replace("-","_"))+'_'+str(g['idx'])
+                        Gloop.add_edge('Fault_'+f["GEOMETRY_OBJECT_ID"],g["UNIT_NAME"].replace(" ","_").replace("-","_"))
+                        Gloop['Fault_'+f["GEOMETRY_OBJECT_ID"]][g["UNIT_NAME"].replace(" ","_").replace("-","_")]['etype']='fault_formation'
+                        fault_group_array[groups.loc[g["GROUP".replace(" ","_").replace("-","_")]]['order'],i1]=1
+                        Gloop['Fault_'+f["GEOMETRY_OBJECT_ID"]][g["UNIT_NAME"].replace(" ","_").replace("-","_")]['weight']=fault_formation_weight
+                        Gloop['Fault_'+f["GEOMETRY_OBJECT_ID"]][g["UNIT_NAME"].replace(" ","_").replace("-","_")]['fault']='Fault_'+f["GEOMETRY_OBJECT_ID"]
+                        Gloop['Fault_'+f["GEOMETRY_OBJECT_ID"]][g["UNIT_NAME"].replace(" ","_").replace("-","_")]['formation']=str(g["UNIT_NAME"].replace(" ","_").replace("-","_"))+'_'+str(g['idx'])
             i1=i1+1
         
         fault_group_df=pd.DataFrame(fault_group_array,index=group_names,columns=fault_names)
@@ -339,8 +339,8 @@ class Map2Graph(object):
 
     def  group_formation_intersections(Gloop,strats,c_l): 
         for ind,s in strats.iterrows():
-            Gloop.add_edge(s[c_l['g']].replace(' ','_').replace('-','_')+'_gp',s.name)
-            Gloop[s[c_l['g']].replace(' ','_').replace('-','_')+'_gp'][s.name]['etype']="group_formation"
+            Gloop.add_edge(s["GROUP"].replace(' ','_').replace('-','_')+'_gp',s.name)
+            Gloop[s["GROUP"].replace(' ','_').replace('-','_')+'_gp'][s.name]['etype']="group_formation"
         return(Gloop)
 
     def mineralisation_proximity(Gloop,output_path,commodity,geology,fault,b_contacts_gdf,i_contacts_gdf,mindep,c_l):
@@ -408,22 +408,22 @@ class Map2Graph(object):
                         i_contacts_gdf[com+'_min']=ic 
 
                     for ind,b in b_contacts_gdf.iterrows():
-                        Gloop.nodes[b[c_l['c']].replace(" ","_").replace("-","_")][com+'_min']=b[com+'_min']
+                        Gloop.nodes[b["UNIT_NAME"].replace(" ","_").replace("-","_")][com+'_min']=b[com+'_min']
 
                     for ind,f in fault.iterrows():
-                        Gloop.nodes['Fault_'+f[c_l['o']]][com+'_min']=f[com+'_min']
+                        Gloop.nodes['Fault_'+f["GEOMETRY_OBJECT_ID"]][com+'_min']=f[com+'_min']
 
                     for ind,i in i_contacts_gdf.iterrows():
-                        Gloop.nodes[i[c_l['c']].replace(" ","_").replace("-","_")][com+'_min']=i[com+'_min']
+                        Gloop.nodes[i["UNIT_NAME"].replace(" ","_").replace("-","_")][com+'_min']=i[com+'_min']
                 else:
                     for ind,b in b_contacts_gdf.iterrows():
-                        Gloop.nodes[b[c_l['c']].replace(" ","_").replace("-","_")][com+'_min']=-1
+                        Gloop.nodes[b["UNIT_NAME"].replace(" ","_").replace("-","_")][com+'_min']=-1
 
                     for ind,f in fault.iterrows():
-                        Gloop.nodes['Fault_'+f[c_l['o']]][com+'_min']=-1
+                        Gloop.nodes['Fault_'+f["GEOMETRY_OBJECT_ID"]][com+'_min']=-1
 
                     for ind,i in i_contacts_gdf.iterrows():
-                        Gloop.nodes[i[c_l['c']].replace(" ","_").replace("-","_")][com+'_min']=-1
+                        Gloop.nodes[i["UNIT_NAME"].replace(" ","_").replace("-","_")][com+'_min']=-1
 
                     if(len(i_contacts_gdf_tmp)>0):
                         i_contacts_gdf[com+'_min']=-1 
@@ -448,8 +448,8 @@ class Map2Graph(object):
         length=0
 
         for ind,s in strats.iterrows():
-            if(c_l['c'] in b_contacts_gdf.index):
-                bcontacts_strat=b_contacts_gdf[b_contacts_gdf[c_l['c']].str.replace(" ","_").replace("-","_")==s.name]
+            if("UNIT_NAME" in b_contacts_gdf.index):
+                bcontacts_strat=b_contacts_gdf[b_contacts_gdf["UNIT_NAME"].str.replace(" ","_").replace("-","_")==s.name]
                 length=0
                 for ind2,b in bcontacts_strat.iterrows():
                     length=length+b.geometry.length
@@ -458,7 +458,7 @@ class Map2Graph(object):
 
         for ind,f in fault.iterrows():
             length=length+f.geometry.length
-            Gloop.nodes['Fault_'+f[c_l['o']]]['fault_length']=int(length)
+            Gloop.nodes['Fault_'+f["GEOMETRY_OBJECT_ID"]]['fault_length']=int(length)
 
             x1=f.geometry.coords[0][0]
             y1=f.geometry.coords[0][1]
@@ -467,10 +467,10 @@ class Map2Graph(object):
             l,m=m2l_utils.pts2dircos(x1,y1,x2,y2)
             dip,dip_dir=m2l_utils.dircos2ddd(l,m,0)
             
-            Gloop.nodes['Fault_'+f[c_l['o']]]['fault_trend']=int(dip_dir%180)
+            Gloop.nodes['Fault_'+f["GEOMETRY_OBJECT_ID"]]['fault_trend']=int(dip_dir%180)
         if(len(i_contacts_gdf)>0):
             for ind,s in strats.iterrows():
-                icontacts_strat=i_contacts_gdf[i_contacts_gdf[c_l['c']].str.replace(" ","_").replace("-","_")==s.name]
+                icontacts_strat=i_contacts_gdf[i_contacts_gdf["UNIT_NAME"].str.replace(" ","_").replace("-","_")==s.name]
                 length=0
                 for ind2,b in icontacts_strat.iterrows():
                     length=length+b.geometry.length
@@ -763,27 +763,27 @@ class Map2Graph(object):
         index=0
 
         for ind,p in geology_exploded.iterrows():
-            Gloop.add_node(ind,id=index, formation=p[c_l['c']].replace(" ","_").replace("-","_"),LabelGraphics ='[ text "'+geology_exploded.iloc[ind][c_l['c']].replace(' ','_').replace('-','_')+'_'+str(ind)+'" anchor "n" fontStyle "bold" fontSize 14 ]')
+            Gloop.add_node(ind,id=index, formation=p["UNIT_NAME"].replace(" ","_").replace("-","_"),LabelGraphics ='[ text "'+geology_exploded.iloc[ind]["UNIT_NAME"].replace(' ','_').replace('-','_')+'_'+str(ind)+'" anchor "n" fontStyle "bold" fontSize 14 ]')
             Gloop.nodes[ind]['ntype']='formation'
             Gloop.nodes[ind]['weight']=formation_weight
             index=index+1
 
 
         for c in all_contacts:
-            ave_age0=int(geology_exploded.iloc[c[0]][c_l['min']])+((int(geology_exploded.iloc[c[0]][c_l['max']])-int(geology_exploded.iloc[c[0]][c_l['min']]))/2)
-            ave_age1=int(geology_exploded.iloc[c[1]][c_l['min']])+((int(geology_exploded.iloc[c[1]][c_l['max']])-int(geology_exploded.iloc[c[1]][c_l['min']]))/2)
+            ave_age0=int(geology_exploded.iloc[c[0]]["MIN_AGE"])+((int(geology_exploded.iloc[c[0]]["MAX_AGE"])-int(geology_exploded.iloc[c[0]]["MIN_AGE"]))/2)
+            ave_age1=int(geology_exploded.iloc[c[1]]["MIN_AGE"])+((int(geology_exploded.iloc[c[1]]["MAX_AGE"])-int(geology_exploded.iloc[c[1]]["MIN_AGE"]))/2)
 
             if(ave_age0>ave_age1):
                 Gloop.add_edge(geology_exploded.iloc[c[1]].name,geology_exploded.iloc[c[0]].name)
                 Gloop[geology_exploded.iloc[c[1]].name][geology_exploded.iloc[c[0]].name]['etype']='formation_formation'
-                Gloop[geology_exploded.iloc[c[1]].name][geology_exploded.iloc[c[0]].name]['formation1']=geology_exploded.iloc[c[0]][c_l['c']].replace(' ','_').replace('-','_')+'_'+str(geology_exploded.iloc[c[0]]['idx'])
-                Gloop[geology_exploded.iloc[c[1]].name][geology_exploded.iloc[c[0]].name]['formation2']=geology_exploded.iloc[c[1]][c_l['c']].replace(' ','_').replace('-','_')+'_'+str(geology_exploded.iloc[c[1]]['idx'])
+                Gloop[geology_exploded.iloc[c[1]].name][geology_exploded.iloc[c[0]].name]['formation1']=geology_exploded.iloc[c[0]]["UNIT_NAME"].replace(' ','_').replace('-','_')+'_'+str(geology_exploded.iloc[c[0]]['idx'])
+                Gloop[geology_exploded.iloc[c[1]].name][geology_exploded.iloc[c[0]].name]['formation2']=geology_exploded.iloc[c[1]]["UNIT_NAME"].replace(' ','_').replace('-','_')+'_'+str(geology_exploded.iloc[c[1]]['idx'])
                 Gloop[geology_exploded.iloc[c[1]].name][geology_exploded.iloc[c[0]].name]['weight']=formation_formation_weight
             else:
                 Gloop.add_edge(geology_exploded.iloc[c[0]].name,geology_exploded.iloc[c[1]].name)
                 Gloop[geology_exploded.iloc[c[0]].name][geology_exploded.iloc[c[1]].name]['etype']='formation_formation'
-                Gloop[geology_exploded.iloc[c[0]].name][geology_exploded.iloc[c[1]].name]['formation1']=geology_exploded.iloc[c[1]][c_l['c']].replace(' ','_').replace('-','_')+'_'+str(geology_exploded.iloc[c[1]]['idx'])
-                Gloop[geology_exploded.iloc[c[0]].name][geology_exploded.iloc[c[1]].name]['formation2']=geology_exploded.iloc[c[0]][c_l['c']].replace(' ','_').replace('-','_')+'_'+str(geology_exploded.iloc[c[0]]['idx'])
+                Gloop[geology_exploded.iloc[c[0]].name][geology_exploded.iloc[c[1]].name]['formation1']=geology_exploded.iloc[c[1]]["UNIT_NAME"].replace(' ','_').replace('-','_')+'_'+str(geology_exploded.iloc[c[1]]['idx'])
+                Gloop[geology_exploded.iloc[c[0]].name][geology_exploded.iloc[c[1]].name]['formation2']=geology_exploded.iloc[c[0]]["UNIT_NAME"].replace(' ','_').replace('-','_')+'_'+str(geology_exploded.iloc[c[0]]['idx'])
                 Gloop[geology_exploded.iloc[c[0]].name][geology_exploded.iloc[c[1]].name]['weight']=formation_formation_weight
                 
         nx.write_gml(Gloop, os.path.join(output_path,'granular_pre_loop.gml'))
@@ -795,31 +795,31 @@ class Map2Graph(object):
         i=0
         for c in all_contacts:
             if(c[2].geom_type=='MultiLineString' or c[2].geom_type=='LineString' ): 
-                if( c_l['intrusive'] in geology_clean.iloc[c[0]][c_l['r1']] ):
-                    igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[0]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[1]][c_l['c']], "geometry": c[2]}
-                elif(c_l['intrusive'] in geology_clean.iloc[c[1]][c_l['r1']] ):
-                    igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[1]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[0]][c_l['c']], "geometry": c[2]}
+                if( c_l['intrusive'] in geology_clean.iloc[c[0]]["ROCKTYPE1"] ):
+                    igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[0]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[1]]["UNIT_NAME"], "geometry": c[2]}
+                elif(c_l['intrusive'] in geology_clean.iloc[c[1]]["ROCKTYPE1"] ):
+                    igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[1]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[0]]["UNIT_NAME"], "geometry": c[2]}
                 else:
-                    if(mini_strat_df.loc[geology_clean.iloc[c[0]][c_l['c']].replace(" ","_").replace("-","_")]['order']>
-                    mini_strat_df.loc[geology_clean.iloc[c[1]][c_l['c']].replace(" ","_").replace("-","_")]['order']):
-                        not_igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[1]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[0]][c_l['c']], "geometry": c[2]}
+                    if(mini_strat_df.loc[geology_clean.iloc[c[0]]["UNIT_NAME"].replace(" ","_").replace("-","_")]['order']>
+                    mini_strat_df.loc[geology_clean.iloc[c[1]]["UNIT_NAME"].replace(" ","_").replace("-","_")]['order']):
+                        not_igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[1]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[0]]["UNIT_NAME"], "geometry": c[2]}
                     else:
-                        not_igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[0]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[1]][c_l['c']], "geometry": c[2]}
+                        not_igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[0]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[1]]["UNIT_NAME"], "geometry": c[2]}
                         
                 i=i+1
             elif(c[2].geom_type=='GeometryCollection' ):
                 for geom in c[2]:
                     if(geom.geom_type=='MultiLineString' or geom.geom_type=='LineString' ):
-                        if( c_l['intrusive'] in geology_clean.iloc[c[0]][c_l['r1']] ):
-                            igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[0]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[1]][c_l['c']], "geometry": geom}
-                        elif(c_l['intrusive'] in geology_clean.iloc[c[1]][c_l['r1']] ):
-                            igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[1]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[0]][c_l['c']], "geometry": geom}
+                        if( c_l['intrusive'] in geology_clean.iloc[c[0]]["ROCKTYPE1"] ):
+                            igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[0]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[1]]["UNIT_NAME"], "geometry": geom}
+                        elif(c_l['intrusive'] in geology_clean.iloc[c[1]]["ROCKTYPE1"] ):
+                            igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[1]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[0]]["UNIT_NAME"], "geometry": geom}
                         else:
-                            if(mini_strat_df.loc[geology_clean.iloc[c[0]][c_l['c']].replace(" ","_").replace("-","_")]['order']>
-                            mini_strat_df.loc[geology_clean.iloc[c[1]][c_l['c']].replace(" ","_").replace("-","_")]['order']):
-                                not_igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[1]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[0]][c_l['c']], "geometry": geom}
+                            if(mini_strat_df.loc[geology_clean.iloc[c[0]]["UNIT_NAME"].replace(" ","_").replace("-","_")]['order']>
+                            mini_strat_df.loc[geology_clean.iloc[c[1]]["UNIT_NAME"].replace(" ","_").replace("-","_")]['order']):
+                                not_igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[1]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[0]]["UNIT_NAME"], "geometry": geom}
                             else:
-                                not_igneous_contacts[i] = {"id": i, c_l['c']: geology_clean.iloc[c[0]][c_l['c']], c_l['c']+'2': geology_clean.iloc[c[1]][c_l['c']], "geometry": geom}
+                                not_igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[0]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[1]]["UNIT_NAME"], "geometry": geom}
                         i=i+1
             
         df = DataFrame.from_dict(igneous_contacts, "index")
@@ -859,7 +859,7 @@ class Map2Graph(object):
                     for ind,g in geology_exploded_tmp.iterrows():
                         fm_count=0
                         for ind2,m in mindep_com.iterrows():
-                            if(m[c_l['c']]==g[c_l['c']]):
+                            if(m["UNIT_NAME"]==g["UNIT_NAME"]):
                                 fm_count=fm_count+1
                         gc.append(fm_count)
                     geology_exploded[com+'_min']=gc    
@@ -877,14 +877,14 @@ class Map2Graph(object):
                         Gloop.nodes[str(ind)][com+'_min']=b[com+'_min']
 
                     for ind,f in fault.iterrows():
-                        Gloop.nodes['Fault_'+f[c_l['o']]][com+'_min']=f[com+'_min']
+                        Gloop.nodes['Fault_'+f["GEOMETRY_OBJECT_ID"]][com+'_min']=f[com+'_min']
 
                 else:
                     for ind,b in geology_exploded.iterrows():
                         Gloop.nodes[str(ind)][com+'_min']=-1
 
                     for ind,f in fault.iterrows():
-                        Gloop.nodes['Fault_'+f[c_l['o']]][com+'_min']=-1
+                        Gloop.nodes['Fault_'+f["GEOMETRY_OBJECT_ID"]][com+'_min']=-1
                     
                     geology_exploded[com+'_min']=-1    
                     fault[com+'_min']=-1    
@@ -914,11 +914,11 @@ class Map2Graph(object):
                     g1_snapped = snap(g.geometry.buffer(snap_buffer).buffer(0), f.geometry.buffer(0),snap_buffer)
                     x=g1_snapped.intersection(f.geometry)
                     if(x.geom_type!='Point' and x.geom_type!='MultiPoint' ):
-                        Gloop.add_edge('Fault_'+f[c_l['o']],str(g.name))
-                        Gloop['Fault_'+f[c_l['o']]][str(g.name)]['etype']='fault_formation'
-                        Gloop['Fault_'+f[c_l['o']]][str(g.name)]['weight']=fault_formation_weight
-                        Gloop['Fault_'+f[c_l['o']]][str(g.name)]['fault']='Fault_'+f[c_l['o']]
-                        Gloop['Fault_'+f[c_l['o']]][str(g.name)]['formation']=str(g[c_l['c']].replace(" ","_").replace("-","_"))+'_'+str(g['idx'])
+                        Gloop.add_edge('Fault_'+f["GEOMETRY_OBJECT_ID"],str(g.name))
+                        Gloop['Fault_'+f["GEOMETRY_OBJECT_ID"]][str(g.name)]['etype']='fault_formation'
+                        Gloop['Fault_'+f["GEOMETRY_OBJECT_ID"]][str(g.name)]['weight']=fault_formation_weight
+                        Gloop['Fault_'+f["GEOMETRY_OBJECT_ID"]][str(g.name)]['fault']='Fault_'+f["GEOMETRY_OBJECT_ID"]
+                        Gloop['Fault_'+f["GEOMETRY_OBJECT_ID"]][str(g.name)]['formation']=str(g["UNIT_NAME"].replace(" ","_").replace("-","_"))+'_'+str(g['idx'])
 
 
         return(Gloop)

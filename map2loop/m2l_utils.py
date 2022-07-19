@@ -1075,25 +1075,23 @@ def plot_bedding_stereonets(config, map_data):
     geology = map_data.get_map_data(Datatype.GEOLOGY)
     # TODO: orientations should be 'clean'
     orientations = map_data.get_map_data(Datatype.STRUCTURE).copy()
-    is_bed = orientations[config.c_l["sf"]].str.contains(
+    is_bed = orientations["STRUCTURE_TYPE"].str.contains(
         config.c_l["bedding"], regex=False
     )
 
     orientations = orientations[is_bed]
-    groups = geology[config.c_l["g"]].unique()
-    codes = geology[config.c_l["c"]].unique()
+    groups = geology["GROUP"].unique()
+    codes = geology["UNIT_NAME"].unique()
     if config.verbose_level != VerboseLevel.NONE:
         print("All observations n=", len(orientations))
         print("groups", groups, "\ncodes", codes)
 
-    if config.c_l["otype"] == "dip direction":
-        strikes = orientations[config.c_l["dd"]].values.astype(float) - 90
-    else:
-        strikes = orientations[config.c_l["dd"]].values.astype(float)
+    # As map_checker converts to dip direction assume orientations are in dip dir
+    strikes = orientations["DIPDIR"].values.astype(float) - 90
 
     if config.verbose_level != VerboseLevel.NONE:
         fig, ax = mplstereonet.subplots(figsize=(7, 7))
-        dips = orientations[config.c_l["d"]].values.astype(float)
+        dips = orientations["DIP"].values.astype(float)
         cax = ax.density_contourf(strikes, dips, measurement="poles")
         ax.pole(strikes, dips, markersize=5, color="w")
         ax.grid(True)
@@ -1102,7 +1100,7 @@ def plot_bedding_stereonets(config, map_data):
         plt.show()
     group_girdle = {}
     for gp in groups:
-        all_orientations = orientations[orientations[config.c_l["g"]] == gp]
+        all_orientations = orientations[orientations["GROUP"] == gp]
         if len(all_orientations) == 1:
             group_girdle[gp] = (-999, -999, 1)
 
@@ -1115,12 +1113,11 @@ def plot_bedding_stereonets(config, map_data):
         elif len(all_orientations) > 0:
 
             ax = None
-            if config.c_l["otype"] == "dip direction":
-                strikes = all_orientations[config.c_l["dd"]].values.astype(float) - 90
-            else:
-                strikes = all_orientations[config.c_l["dd"]].values.astype(float)
 
-            dips = all_orientations[config.c_l["d"]].values.astype(float)
+            # As map_checker converts to dip direction assume orientations are in dip dir
+            strikes = all_orientations["DIPDIR"].values.astype(float) - 90
+
+            dips = all_orientations["DIP"].values.astype(float)
             fit_strike, fit_dip = mplstereonet.fit_girdle(strikes, dips)
             (plunge,), (bearing,) = mplstereonet.pole2plunge_bearing(
                 fit_strike, fit_dip
