@@ -850,7 +850,7 @@ class Project(object):
             else:
                 plt.close(geology_figure)
         except Exception as e:
-            warnings.warn(e)
+            print(e)
             warnings.warn("WARNING: Could not save geology graphic")
 
     def __extract_drillholes(self):

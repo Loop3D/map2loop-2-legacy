@@ -601,7 +601,7 @@ class MapData:
         with fiona.open(self.get_filename(Datatype.COVER_MAP), "r") as shapefile:
             shapes = [feature["geometry"] for feature in shapefile]
 
-        with rasterio.open(self.get_filename(Datatype.DTB_GRID),"w") as src:
+        with rasterio.open(self.get_filename(Datatype.DTB_GRID)) as src:
             out_image, out_transform = rasterio.mask.mask(src, shapes, crop=True)
             out_meta = src.meta.copy()
 
