@@ -162,10 +162,16 @@ class Topology(object):
         G = nx.read_gml(path_in, label=id_label)
 
         glabels = {}
-        for n in list(G.nodes):  # Find out total number of groups and their names groups
-            if('isGroup' in G.nodes[n]):
-                glabels[n] = G.nodes[n]['LabelGraphics']['text'].replace(" ", "_").replace("-", "_")
-        return(glabels, G)
+        for n in list(
+            G.nodes
+        ):  # Find out total number of groups and their names groups
+            if "isGroup" in G.nodes[n]:
+                glabels[n] = (
+                    G.nodes[n]["LabelGraphics"]["text"]
+                    .replace(" ", "_")
+                    .replace("-", "_")
+                )
+        return (glabels, G)
 
     ####################################
     # parse stratigraphy GML file to save units for each series
@@ -1172,7 +1178,10 @@ class Topology(object):
 
         for indx, flt in faults_clip.iterrows():
             # print('Fault_'+str(flt["GEOMETRY_OBJECT_ID"]) )
-            if "Fault_" + str(flt["GEOMETRY_OBJECT_ID"]) in fault_dimensions["Fault"].values:
+            if (
+                "Fault_" + str(flt["GEOMETRY_OBJECT_ID"])
+                in fault_dimensions["Fault"].values
+            ):
                 # print('Fault_'+str(flt["GEOMETRY_OBJECT_ID"]),flt.geometry.type,flt.geometry.centroid )
                 if flt.geometry.type == "LineString":
                     flt_ls = LineString(flt.geometry)
@@ -1192,16 +1201,16 @@ class Topology(object):
                     )
                     angle = (360 + degrees(atan2(l, m))) % 360
                     xax = (
-                        fault_dimensions2.loc["Fault_" + str(flt["GEOMETRY_OBJECT_ID"])][
-                            "HorizontalRadius"
-                        ]
+                        fault_dimensions2.loc[
+                            "Fault_" + str(flt["GEOMETRY_OBJECT_ID"])
+                        ]["HorizontalRadius"]
                         * 0.99
                         * 0.81
                     )
                     yax = (
-                        fault_dimensions2.loc["Fault_" + str(flt["GEOMETRY_OBJECT_ID"])][
-                            "InfluenceDistance"
-                        ]
+                        fault_dimensions2.loc[
+                            "Fault_" + str(flt["GEOMETRY_OBJECT_ID"])
+                        ]["InfluenceDistance"]
                         * 0.99
                         * 0.81
                     )
@@ -1260,7 +1269,9 @@ class Topology(object):
                             # print('Fault_'+str(flt["GEOMETRY_OBJECT_ID"]),gp,has_contacts)
                             if not has_contacts:
                                 if (
-                                    gp_fault_rel.loc[gp, "Fault_" + str(flt["GEOMETRY_OBJECT_ID"])]
+                                    gp_fault_rel.loc[
+                                        gp, "Fault_" + str(flt["GEOMETRY_OBJECT_ID"])
+                                    ]
                                     == 1
                                 ):
                                     print(
@@ -1478,9 +1489,7 @@ class Topology(object):
         Gloop = nx.DiGraph()
         strats = map_data.get_map_data(Datatype.GEOLOGY).copy()
         strats.drop_duplicates(subset=["UNIT_NAME"], inplace=True)
-        strats["UNIT_NAME"] = (
-            strats["UNIT_NAME"].replace(" ", "_").replace("-", "_")
-        )
+        strats["UNIT_NAME"] = strats["UNIT_NAME"].replace(" ", "_").replace("-", "_")
         strats.set_index(["UNIT_NAME"], inplace=True)
 
         # Load faults and stratigraphy

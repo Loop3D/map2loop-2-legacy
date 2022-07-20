@@ -5,6 +5,7 @@ import warnings
 import numpy as np
 import pandas as pd
 from math import sqrt
+
 # from .mapdata import MapData # Creates a circular dependency
 from .m2l_enums import Datatype, Datastate, VerboseLevel
 import beartype
@@ -182,18 +183,38 @@ def check_all_maps(
         )
 
 
-def rename_columns(dataframe, original_column_name, replacement_column_name, m2l_errors, verbose_level=VerboseLevel.ALL):
+def rename_columns(
+    dataframe,
+    original_column_name,
+    replacement_column_name,
+    m2l_errors,
+    verbose_level=VerboseLevel.ALL,
+):
     if dataframe is not None and original_column_name != replacement_column_name:
         if original_column_name in dataframe.columns:
             if replacement_column_name in dataframe.columns:
-                dataframe.rename(columns={replacement_column_name:'old_'+replacement_column_name,original_column_name:replacement_column_name},inplace=True)
-                if verbose_level!=VerboseLevel.NONE:
-                    print(f"Moving column {replacement_column_name} to \"old_{replacement_column_name}\"")
+                dataframe.rename(
+                    columns={
+                        replacement_column_name: "old_" + replacement_column_name,
+                        original_column_name: replacement_column_name,
+                    },
+                    inplace=True,
+                )
+                if verbose_level != VerboseLevel.NONE:
+                    print(
+                        f'Moving column {replacement_column_name} to "old_{replacement_column_name}"'
+                    )
             else:
-                dataframe.rename(columns={original_column_name:replacement_column_name},inplace=True)
+                dataframe.rename(
+                    columns={original_column_name: replacement_column_name},
+                    inplace=True,
+                )
         else:
-            m2l_errors.append(f"ERROR: data does not contain column {original_column_name}")
+            m2l_errors.append(
+                f"ERROR: data does not contain column {original_column_name}"
+            )
     return dataframe
+
 
 def check_structure_map(
     orientations, c_l, m2l_warnings, m2l_errors, verbose_level=VerboseLevel.ALL
@@ -202,68 +223,90 @@ def check_structure_map(
     if orientations is None or type(orientations) != gpd.GeoDataFrame:
         m2l_errors.append("No structure map found")
         return None
-        
+
     # Error if insufficient sturucture points
-    if(len(orientations) < 2):
-        m2l_errors.append('not enough orientations to complete calculations (need at least 2), projection may be inconsistent')
+    if len(orientations) < 2:
+        m2l_errors.append(
+            "not enough orientations to complete calculations (need at least 2), projection may be inconsistent"
+        )
 
     # Check for strike and convert to dip direction
-    if c_l['otype'] == 'strike' and 'strike' in orientations.columns:
+    if c_l["otype"] == "strike" and "strike" in orientations.columns:
         if verbose_level != VerboseLevel.NONE:
             print("converting strike/dip orientation to dipdir/dip")
-        orientations[c_l['dd']] = orientations.apply(lambda row: row['strike'] + 90.0, axis=1)
-        c_l['otype'] = 'dip direction'
+        orientations[c_l["dd"]] = orientations.apply(
+            lambda row: row["strike"] + 90.0, axis=1
+        )
+        c_l["otype"] = "dip direction"
 
     # Check for duplicate column references
-    if(c_l['sf'] == c_l['ds']):
-        if c_l['sf'] in orientations.columns:
-            orientations[c_l['ds']] = orientations[c_l['sf']].copy()
-    if c_l['bo'] == c_l['ds']:
-        if c_l['bo'] in orientations.columns:
-            orientations[c_l['bo']] = orientations[c_l['ds']].copy()
+    if c_l["sf"] == c_l["ds"]:
+        if c_l["sf"] in orientations.columns:
+            orientations[c_l["ds"]] = orientations[c_l["sf"]].copy()
+    if c_l["bo"] == c_l["ds"]:
+        if c_l["bo"] in orientations.columns:
+            orientations[c_l["bo"]] = orientations[c_l["ds"]].copy()
 
     # Fill in missing data with default values
-    if c_l['sf'] not in orientations.columns:
-        orientations[c_l['sf']] = 'Bed'
-        m2l_warnings.append(f"field named '{str(c_l['sf'])}' added with default value \"Bed\"")
+    if c_l["sf"] not in orientations.columns:
+        orientations[c_l["sf"]] = "Bed"
+        m2l_warnings.append(
+            f"field named '{str(c_l['sf'])}' added with default value \"Bed\""
+        )
 
-    if c_l['ds'] not in orientations.columns:
-        orientations[c_l['ds']] = ''
-        m2l_warnings.append(f"field named '{str(c_l['ds'])}' added with default empty value") 
+    if c_l["ds"] not in orientations.columns:
+        orientations[c_l["ds"]] = ""
+        m2l_warnings.append(
+            f"field named '{str(c_l['ds'])}' added with default empty value"
+        )
 
-    if c_l['gi'] not in orientations.columns:
-        orientations[c_l['gi']] = np.arange(len(orientations))
+    if c_l["gi"] not in orientations.columns:
+        orientations[c_l["gi"]] = np.arange(len(orientations))
         m2l_warnings.append(f"field named '{str(c_l['gi'])}' added with default value")
 
     # Convert whitespace entries to nans
-    orientations = orientations.replace(r'^\s+$', np.nan, regex=True)
+    orientations = orientations.replace(r"^\s+$", np.nan, regex=True)
 
     # Warn about number of nans present in data
-    for code in ('sf', 'd', 'dd', 'gi'):
+    for code in ("sf", "d", "dd", "gi"):
         if c_l[code] in orientations.columns:
             nans = orientations[c_l[code]].isnull().sum()
-            if(nans > 0):
-                m2l_warnings.append(f"{str(nans)} NaN/blank found in column '{str(c_l[code])}' of orientations file, replacing with 0")
+            if nans > 0:
+                m2l_warnings.append(
+                    f"{str(nans)} NaN/blank found in column '{str(c_l[code])}' of orientations file, replacing with 0"
+                )
                 orientations[c_l[code]].fillna(0, inplace=True)
 
     # Remove orientation entries with unknown dip
-    orientations = orientations[orientations[c_l['d']] != -999]
+    orientations = orientations[orientations[c_l["d"]] != -999]
 
-    unique_o = set(orientations[c_l['gi']])
-    if(not len(unique_o) == len(orientations)):
-        m2l_warnings.append('duplicate orientation point unique IDs')
+    unique_o = set(orientations[c_l["gi"]])
+    if not len(unique_o) == len(orientations):
+        m2l_warnings.append("duplicate orientation point unique IDs")
 
     # Ensuring type of column is correct
     orientations[c_l["dd"]] = pd.to_numeric(orientations[c_l["dd"]])
     orientations[c_l["d"]] = pd.to_numeric(orientations[c_l["d"]])
 
     # convert c_l codes to meaningful column names
-    orientations = rename_columns(orientations, c_l['d'], 'DIP', m2l_errors, verbose_level)
-    orientations = rename_columns(orientations, c_l['dd'], 'DIPDIR', m2l_errors, verbose_level)
-    orientations = rename_columns(orientations, c_l['sf'], 'STRUCTURE_TYPE', m2l_errors, verbose_level)
-    orientations = rename_columns(orientations, c_l['ds'], 'DESCRIPTION', m2l_errors, verbose_level)
-    orientations = rename_columns(orientations, c_l['bo'], 'POLARITY', m2l_errors, verbose_level)
-    orientations = rename_columns(orientations, c_l['gi'], 'STRUCTURE_POINT_ID', m2l_errors, verbose_level)
+    orientations = rename_columns(
+        orientations, c_l["d"], "DIP", m2l_errors, verbose_level
+    )
+    orientations = rename_columns(
+        orientations, c_l["dd"], "DIPDIR", m2l_errors, verbose_level
+    )
+    orientations = rename_columns(
+        orientations, c_l["sf"], "STRUCTURE_TYPE", m2l_errors, verbose_level
+    )
+    orientations = rename_columns(
+        orientations, c_l["ds"], "DESCRIPTION", m2l_errors, verbose_level
+    )
+    orientations = rename_columns(
+        orientations, c_l["bo"], "POLARITY", m2l_errors, verbose_level
+    )
+    orientations = rename_columns(
+        orientations, c_l["gi"], "STRUCTURE_POINT_ID", m2l_errors, verbose_level
+    )
 
     # Reset c_l labels to new labels (temporary unit all c_l references removed from non-mapchecker code)
     # c_l['d'] = 'DIP'
@@ -278,6 +321,7 @@ def check_structure_map(
 
     return orientations
 
+
 def _explode_intrusives(geology, c_l):
     """Break multipart geometries of intrusions into individual features
 
@@ -286,39 +330,58 @@ def _explode_intrusives(geology, c_l):
     geology : _type_
         _description_
     """
-    geol_clip_tmp=geology.copy(deep=False)
-    #print('raw',len(geol_clip_tmp))
-    geol_clip_tmp.crs=geology.crs
-    geol_clip_tmp=geol_clip_tmp.dissolve(by=c_l['c'],aggfunc = 'first')
+    geol_clip_tmp = geology.copy(deep=False)
+    # print('raw',len(geol_clip_tmp))
+    geol_clip_tmp.crs = geology.crs
+    geol_clip_tmp = geol_clip_tmp.dissolve(by=c_l["c"], aggfunc="first")
     # Note: Can't use INTRUSIVE and SILL like this as they are str field to use for look up not column names
-    geol_clip_tmp=geol_clip_tmp[geol_clip_tmp[c_l['r1']].str.contains(c_l['intrusive']) & ~geol_clip_tmp[c_l['ds']].str.contains(c_l['sill'])]
-    #print('tmp',len(geol_clip_tmp))
+    geol_clip_tmp = geol_clip_tmp[
+        geol_clip_tmp[c_l["r1"]].str.contains(c_l["intrusive"])
+        & ~geol_clip_tmp[c_l["ds"]].str.contains(c_l["sill"])
+    ]
+    # print('tmp',len(geol_clip_tmp))
     geol_clip_tmp.reset_index(inplace=True)
-    geol_clip_tmp=geol_clip_tmp.explode(index_parts=False,ignore_index=True)
-    if('level_0' in geol_clip_tmp.columns):
-        geol_clip_tmp.drop(labels='level_0', axis=1,inplace=True)
+    geol_clip_tmp = geol_clip_tmp.explode(index_parts=False, ignore_index=True)
+    if "level_0" in geol_clip_tmp.columns:
+        geol_clip_tmp.drop(labels="level_0", axis=1, inplace=True)
 
     geol_clip_tmp.reset_index(inplace=True)
-    geol_clip_not=geology[(~geology[c_l['r1']].str.contains(c_l['intrusive'])) | geology[c_l['ds']].str.contains(c_l['sill']) ]
-    #print('not',len(geol_clip_not))
-    geol_clip_not.index = pd.RangeIndex(start=10000, stop=10000+len(geol_clip_not), step=1)
-    if('level_0' in geol_clip_not.columns):
-        geol_clip_not.drop(labels='level_0', axis=1,inplace=True)
+    geol_clip_not = geology[
+        (~geology[c_l["r1"]].str.contains(c_l["intrusive"]))
+        | geology[c_l["ds"]].str.contains(c_l["sill"])
+    ]
+    # print('not',len(geol_clip_not))
+    geol_clip_not.index = pd.RangeIndex(
+        start=10000, stop=10000 + len(geol_clip_not), step=1
+    )
+    if "level_0" in geol_clip_not.columns:
+        geol_clip_not.drop(labels="level_0", axis=1, inplace=True)
     geol_clip_not.reset_index(inplace=True)
-    geol_clip_tmp[c_l['c']]=geol_clip_tmp[c_l['c']].astype(str)+'_'+geol_clip_tmp.index.astype(str)
-    geol_clip_tmp[c_l['o']]=geol_clip_tmp.index
-    geol_clip_tmp[c_l['g']]=geol_clip_tmp[c_l['c']]
+    geol_clip_tmp[c_l["c"]] = (
+        geol_clip_tmp[c_l["c"]].astype(str) + "_" + geol_clip_tmp.index.astype(str)
+    )
+    geol_clip_tmp[c_l["o"]] = geol_clip_tmp.index
+    geol_clip_tmp[c_l["g"]] = geol_clip_tmp[c_l["c"]]
 
     geology = pd.concat([geol_clip_tmp, geol_clip_not], sort=False)
-#print('geol',len(geology))
+    # print('geol',len(geology))
     # #TODO Lg- not sure what level_0/level_1 are for...
-    if('level_0' in geology.columns):
-        geology.drop(labels='level_0', axis=1,inplace=True)
-    if('level_1' in geology.columns):
-        geology.drop(labels='level_1', axis=1,inplace=True)
+    if "level_0" in geology.columns:
+        geology.drop(labels="level_0", axis=1, inplace=True)
+    if "level_1" in geology.columns:
+        geology.drop(labels="level_1", axis=1, inplace=True)
     return geology
 
-def check_geology_map(geology, c_l={}, ignore_codes=[], m2l_warnings=[], m2l_errors=[], explode_intrusives=True, verbose_level=VerboseLevel.ALL) -> gpd.GeoDataFrame:
+
+def check_geology_map(
+    geology,
+    c_l={},
+    ignore_codes=[],
+    m2l_warnings=[],
+    m2l_errors=[],
+    explode_intrusives=True,
+    verbose_level=VerboseLevel.ALL,
+) -> gpd.GeoDataFrame:
     """Checks whether the geological map is valid or not, appends any errors to a string.
 
     Parameters
@@ -355,127 +418,144 @@ def check_geology_map(geology, c_l={}, ignore_codes=[], m2l_warnings=[], m2l_err
         m2l_errors.append("No geology map found")
         return geology
 
-    if len(geology)==0:
+    if len(geology) == 0:
         m2l_errors.append("Empty geology map found")
         return geology
-        
+
     # Need to break these up into column renaming fields and other types e.g. (bedding, intrusive, sill)
     # Do we create a new version of c_l for these search fields???
     # c_l.search_strings = {'volcanic':'VOLCANIC','intrusive':'INTRUSIVE','sill':'SILL'}
     # temporary map between old c_l and new_mapping
     # new_mapping = {'c':'UNIT_NAME','u':'CODE','r1':'ROCKTYPE1','r2':'ROCKTYPE2','ds':'DESCRIPTION','r2':'ROCKTYPE2',
-        # 'min':'MIN_AGE','max':'MAX_AGE','g':'GROUP','o':'GEOLOGY_FEATURE_ID','g2':'GROUP2'}
+    # 'min':'MIN_AGE','max':'MAX_AGE','g':'GROUP','o':'GEOLOGY_FEATURE_ID','g2':'GROUP2'}
     # geology = geology.rename(columns=dict(zip(c_l.values(),[ new_mapping[item] if item in new_mapping else item for item in c_l.keys() ])))
 
-    #make each pluton its own formation and group
-    if c_l['o'] not in geology.columns: #object id
+    # make each pluton its own formation and group
+    if c_l["o"] not in geology.columns:  # object id
         geology = geology.reset_index()
-        geology[c_l['o']] = geology.index
+        geology[c_l["o"]] = geology.index
 
-    #make each pluton its own formation and group
-    if c_l['r1'] not in geology.columns: 
-        m2l_warnings.append('No extra litho for geology polygons')
-        geology[c_l['r1']] = np.nan
-    geology[c_l['r1']].fillna('not known', inplace=True)
+    # make each pluton its own formation and group
+    if c_l["r1"] not in geology.columns:
+        m2l_warnings.append("No extra litho for geology polygons")
+        geology[c_l["r1"]] = np.nan
+    geology[c_l["r1"]].fillna("not known", inplace=True)
 
-    if c_l['ds'] not in geology.columns:
-        m2l_warnings.append('No extra litho for geology polygons')
-        geology[c_l['ds']] = np.nan
-    geology[c_l['ds']].fillna('not known', inplace=True)
-    
-    if(explode_intrusives):
+    if c_l["ds"] not in geology.columns:
+        m2l_warnings.append("No extra litho for geology polygons")
+        geology[c_l["ds"]] = np.nan
+    geology[c_l["ds"]].fillna("not known", inplace=True)
+
+    if explode_intrusives:
         geology = _explode_intrusives(geology, c_l)
 
-    # Convert types    
-    geology[c_l['max']]=geology[c_l['max']].astype(np.float64)            
-    geology[c_l['min']]=geology[c_l['min']].astype(np.float64)            
+    # Convert types
+    geology[c_l["max"]] = geology[c_l["max"]].astype(np.float64)
+    geology[c_l["min"]] = geology[c_l["min"]].astype(np.float64)
 
-    unique_c = list(set(geology[c_l['c']]))
-    if(len(unique_c)<2):
-        m2l_errors.append('The selected area only has one formation in it, so no model can be calculated')
+    unique_c = list(set(geology[c_l["c"]]))
+    if len(unique_c) < 2:
+        m2l_errors.append(
+            "The selected area only has one formation in it, so no model can be calculated"
+        )
 
-    unique_g = set(geology[c_l['o']])
-    if(not len(unique_g) == len(geology)):
-        m2l_warnings.append('duplicate geology polygon unique IDs')
+    unique_g = set(geology[c_l["o"]])
+    if not len(unique_g) == len(geology):
+        m2l_warnings.append("duplicate geology polygon unique IDs")
 
     # Check for nans
-    nans = geology[c_l['c']].isnull().sum()
-    if(nans > 0):
-        m2l_errors.append(''+str(nans)+' NaN/blank found in column "' +
-                            str(c_l['c'])+'" of geology file, please fix')
+    nans = geology[c_l["c"]].isnull().sum()
+    if nans > 0:
+        m2l_errors.append(
+            ""
+            + str(nans)
+            + ' NaN/blank found in column "'
+            + str(c_l["c"])
+            + '" of geology file, please fix'
+        )
 
-
-    if(c_l['g'] == 'No_col' or not c_l['g'] in geology.columns):
-        m2l_warnings.append('No secondary strat coding for geology polygons')
-        geology[c_l['g']] = "Top"
+    if c_l["g"] == "No_col" or not c_l["g"] in geology.columns:
+        m2l_warnings.append("No secondary strat coding for geology polygons")
+        geology[c_l["g"]] = "Top"
 
     # Ensure that group column has some valid information
-    geology = geology.replace(r'^\s+$', np.nan, regex=True)
-    geology = geology.replace(',', ' ', regex=True)
-    geology[c_l['g']].fillna(geology[c_l['g2']], inplace=True)
-    geology[c_l['g']].fillna(geology[c_l['c']], inplace=True)
+    geology = geology.replace(r"^\s+$", np.nan, regex=True)
+    geology = geology.replace(",", " ", regex=True)
+    geology[c_l["g"]].fillna(geology[c_l["g2"]], inplace=True)
+    geology[c_l["g"]].fillna(geology[c_l["c"]], inplace=True)
 
     # Continue filling in missing columns
-    if(c_l['r2'] == 'No_col' or not c_l['r2'] in geology.columns):
-        m2l_warnings.append('No more extra litho for geology polygons')
-        geology[c_l['r2']] = 'Nope'
+    if c_l["r2"] == "No_col" or not c_l["r2"] in geology.columns:
+        m2l_warnings.append("No more extra litho for geology polygons")
+        geology[c_l["r2"]] = "Nope"
 
-    if(c_l['min'] not in geology.columns):
-        m2l_warnings.append('No min age for geology polygons')
-        geology[c_l['min']] = 0
+    if c_l["min"] not in geology.columns:
+        m2l_warnings.append("No min age for geology polygons")
+        geology[c_l["min"]] = 0
 
-    if(c_l['max'] not in geology.columns):
-        m2l_warnings.append('No max age for geology polygons')
-        geology[c_l['max']] = 100
+    if c_l["max"] not in geology.columns:
+        m2l_warnings.append("No max age for geology polygons")
+        geology[c_l["max"]] = 100
 
-    if(c_l['c'] not in geology.columns):
-        m2l_errors.append(
-            'Must have primary strat coding field for geology polygons')
+    if c_l["c"] not in geology.columns:
+        m2l_errors.append("Must have primary strat coding field for geology polygons")
 
-    for code in ('c', 'g', 'g2', 'ds', 'u', 'r1'):
-        if(c_l[code] in geology.columns):
+    for code in ("c", "g", "g2", "ds", "u", "r1"):
+        if c_l[code] in geology.columns:
             geology[c_l[code]].str.replace(",", " ")
-            if(code == 'c' or code == 'g' or code == 'g2'):
-                geology[c_l[code]]=geology[c_l[code]].str.replace("[ -\?]", "_",regex=True)
+            if code == "c" or code == "g" or code == "g2":
+                geology[c_l[code]] = geology[c_l[code]].str.replace(
+                    "[ -\?]", "_", regex=True
+                )
 
             nans = geology[c_l[code]].isnull().sum()
-            if(nans > 0):
-                m2l_warnings.append(''+str(nans)+' NaN/blank found in column "'+str(
-                    c_l[code])+'" of geology file, replacing with 0')
+            if nans > 0:
+                m2l_warnings.append(
+                    ""
+                    + str(nans)
+                    + ' NaN/blank found in column "'
+                    + str(c_l[code])
+                    + '" of geology file, replacing with 0'
+                )
                 geology[c_l[code]].fillna("0", inplace=True)
 
     # Remove geology that has code starting with ignore_codes strings
     for code in ignore_codes:
-        geology = geology[~geology[c_l['u']].str.startswith(code)]
+        geology = geology[~geology[c_l["u"]].str.startswith(code)]
 
     if verbose_level != VerboseLevel.NONE:
         show_metadata(geology, "geology layer")
 
     # convert c_l codes to meaningful column names
-    geology = rename_columns(geology, c_l['g'], 'GROUP', m2l_errors, verbose_level)
-    geology = rename_columns(geology, c_l['u'], 'CODE', m2l_errors, verbose_level)
-    geology = rename_columns(geology, c_l['g2'], 'GROUP2', m2l_errors, verbose_level)
-    geology = rename_columns(geology, c_l['ds'], 'DESCRIPTION', m2l_errors, verbose_level)
-    geology = rename_columns(geology, c_l['c'], 'UNIT_NAME', m2l_errors, verbose_level)
-    geology = rename_columns(geology, c_l['r1'], 'ROCKTYPE1', m2l_errors, verbose_level)
-    geology = rename_columns(geology, c_l['r2'], 'ROCKTYPE2', m2l_errors, verbose_level)
-    geology = rename_columns(geology, c_l['min'], 'MIN_AGE', m2l_errors, verbose_level)
-    geology = rename_columns(geology, c_l['max'], 'MAX_AGE', m2l_errors, verbose_level)
-    geology = rename_columns(geology, c_l['o'], 'GEOMETRY_OBJECT_ID', m2l_errors, verbose_level)
+    geology = rename_columns(geology, c_l["g"], "GROUP", m2l_errors, verbose_level)
+    geology = rename_columns(geology, c_l["u"], "CODE", m2l_errors, verbose_level)
+    geology = rename_columns(geology, c_l["g2"], "GROUP2", m2l_errors, verbose_level)
+    geology = rename_columns(
+        geology, c_l["ds"], "DESCRIPTION", m2l_errors, verbose_level
+    )
+    geology = rename_columns(geology, c_l["c"], "UNIT_NAME", m2l_errors, verbose_level)
+    geology = rename_columns(geology, c_l["r1"], "ROCKTYPE1", m2l_errors, verbose_level)
+    geology = rename_columns(geology, c_l["r2"], "ROCKTYPE2", m2l_errors, verbose_level)
+    geology = rename_columns(geology, c_l["min"], "MIN_AGE", m2l_errors, verbose_level)
+    geology = rename_columns(geology, c_l["max"], "MAX_AGE", m2l_errors, verbose_level)
+    geology = rename_columns(
+        geology, c_l["o"], "GEOMETRY_OBJECT_ID", m2l_errors, verbose_level
+    )
 
     # Reset c_l labels to new labels (temporary unit all c_l references removed from non-mapchecker code)
     # c_l['g'] = 'GROUP'
     # c_l['u'] = 'CODE'
     # c_l['g2'] = 'GROUP2'
-    #c_l['ds'] = 'DESCRIPTION'
+    # c_l['ds'] = 'DESCRIPTION'
     # c_l['c'] = 'UNIT_NAME'
     # c_l['r1'] = 'ROCKTYPE1'
     # c_l['r2'] = 'ROCKTYPE2'
     # c_l['min'] = 'MIN_AGE'
     # c_l['max'] = 'MAX_AGE'
-    #c_l['o'] = 'GEOMETRY_OBJECT_ID'
+    # c_l['o'] = 'GEOMETRY_OBJECT_ID'
 
     return geology
+
 
 def check_fold_map(
     folds, c_l, m2l_warnings, m2l_errors, verbose_level=VerboseLevel.ALL
@@ -550,7 +630,9 @@ def check_fault_map(
 
     # Check for missing columns and fill with default values
     if not c_l["o"] in faults.columns:
-        m2l_warnings.append('field named "' + str(c_l["o"]) + '" added with default value')
+        m2l_warnings.append(
+            'field named "' + str(c_l["o"]) + '" added with default value'
+        )
         faults[c_l["o"]] = np.arange(len(faults))
 
     if c_l["f"] == "No_col" or not c_l["f"] in faults.columns:
@@ -597,21 +679,18 @@ def check_fault_map(
                 )
                 faults[c_l[code]].fillna("-999", inplace=True)
 
-    # 
+    #
     faults[c_l["o"]] = faults[c_l["o"]].astype(int)
 
     # Check for duplicates and warn
     unique_f = set(faults[c_l["o"]])
-    if(not len(unique_f) == len(faults)):
-        m2l_errors.append('duplicate fault/fold polyline unique IDs')
-
+    if not len(unique_f) == len(faults):
+        m2l_errors.append("duplicate fault/fold polyline unique IDs")
 
     if len(faults) > 0:
         faults_explode = explode_polylines(faults, c_l, faults.crs)
         if len(faults_explode) > len(faults):
-            m2l_warnings.append(
-                "some faults are MultiPolyLines, and have been split"
-            )
+            m2l_warnings.append("some faults are MultiPolyLines, and have been split")
         # faults_explode.to_crs = dst_crs
         faults = faults_explode
 
@@ -643,14 +722,18 @@ def check_fault_map(
             show_metadata(faults, "fault layer")
     else:
         m2l_warnings.append("No faults in area, projection may be inconsistent")
-    
+
     # convert c_l codes to meaningful column names
-    faults = rename_columns(faults, c_l['f'], 'FEATURE', m2l_errors, verbose_level)
-    faults = rename_columns(faults, c_l['o'], 'GEOMETRY_OBJECT_ID', m2l_errors, verbose_level)
-    faults = rename_columns(faults, c_l['n'], 'NAME', m2l_errors, verbose_level)
-    faults = rename_columns(faults, c_l['fdip'], 'DIP', m2l_errors, verbose_level)
-    faults = rename_columns(faults, c_l['fdipdir'], 'DIPDIR', m2l_errors, verbose_level)
-    faults = rename_columns(faults, c_l['fdipest'], 'DIP_ESTIMATE', m2l_errors, verbose_level)
+    faults = rename_columns(faults, c_l["f"], "FEATURE", m2l_errors, verbose_level)
+    faults = rename_columns(
+        faults, c_l["o"], "GEOMETRY_OBJECT_ID", m2l_errors, verbose_level
+    )
+    faults = rename_columns(faults, c_l["n"], "NAME", m2l_errors, verbose_level)
+    faults = rename_columns(faults, c_l["fdip"], "DIP", m2l_errors, verbose_level)
+    faults = rename_columns(faults, c_l["fdipdir"], "DIPDIR", m2l_errors, verbose_level)
+    faults = rename_columns(
+        faults, c_l["fdipest"], "DIP_ESTIMATE", m2l_errors, verbose_level
+    )
     # faults = rename_columns(faults, c_l['fdipest_vals'], 'DIP_TEXT_OPTIONS', m2l_errors, verbose_level)
 
     # Reset c_l labels to new labels (temporary unit all c_l references removed from non-mapchecker code)

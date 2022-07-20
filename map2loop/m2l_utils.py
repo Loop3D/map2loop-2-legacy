@@ -1147,7 +1147,8 @@ def plot_bedding_stereonets(config, map_data):
                 )
                 print(gp, "observations has no observations")
 
-    return(group_girdle)
+    return group_girdle
+
 
 @beartype.beartype
 def plot_bedding_stereonets_old(orientations, all_sorts, verbose_level: VerboseLevel):
@@ -1276,7 +1277,8 @@ def display(element):
         except Exception as e:
             return False
 
-def save_dtm_mesh(dtm_path,output_path):
+
+def save_dtm_mesh(dtm_path, output_path):
     import rasterio
 
     path_in = dtm_path + "/dtm_rp.tif"

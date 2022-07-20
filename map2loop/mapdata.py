@@ -433,8 +433,8 @@ class MapData:
             geology = self.get_map_data(Datatype.GEOLOGY)
             hint_flag = False  # use GSWA strat database to provide topology hints
             # columns = ['geometry', "GEOMETRY_OBJECT_ID", "UNIT_NAME", "GROUP",
-                # "CODE", "MIN_AGE", "MAX_AGE", "DESCRIPTION",
-                # "ROCKTYPE1", "ROCKTYPE2"]
+            # "CODE", "MIN_AGE", "MAX_AGE", "DESCRIPTION",
+            # "ROCKTYPE1", "ROCKTYPE2"]
             columns = [
                 "geometry",
                 "GEOMETRY_OBJECT_ID",
@@ -445,18 +445,32 @@ class MapData:
                 "CODE",
                 "ROCKTYPE1",
                 "ROCKTYPE2",
-                "DESCRIPTION"
+                "DESCRIPTION",
             ]
-            columns = ["geometry", "GEOMETRY_OBJECT_ID", "UNIT_NAME", "GROUP", "MIN_AGE", "MAX_AGE", "CODE", "ROCKTYPE1", "ROCKTYPE2", "DESCRIPTION"]
+            columns = [
+                "geometry",
+                "GEOMETRY_OBJECT_ID",
+                "UNIT_NAME",
+                "GROUP",
+                "MIN_AGE",
+                "MAX_AGE",
+                "CODE",
+                "ROCKTYPE1",
+                "ROCKTYPE2",
+                "DESCRIPTION",
+            ]
             sub_geol = geology[columns]
-            sub_geol.reset_index(inplace=True,drop=True)
+            sub_geol.reset_index(inplace=True, drop=True)
             df = sub_geol.copy()
-            df.rename(columns={'geometry':'WKT',"CODE":"UNIT_NAME","UNIT_NAME":"CODE"},inplace=True)
-            df.columns = df.columns.str.replace('\n','')
-            df["MIN_AGE"] = df["MIN_AGE"].replace("None",0)
-            df["MAX_AGE"] = df["MAX_AGE"].replace("None",4500000000)
-            df["GROUP"] = df["GROUP"].replace("None","")
-            df["ROCKTYPE2"] = df["ROCKTYPE2"].replace("","None")
+            df.rename(
+                columns={"geometry": "WKT", "CODE": "UNIT_NAME", "UNIT_NAME": "CODE"},
+                inplace=True,
+            )
+            df.columns = df.columns.str.replace("\n", "")
+            df["MIN_AGE"] = df["MIN_AGE"].replace("None", 0)
+            df["MAX_AGE"] = df["MAX_AGE"].replace("None", 4500000000)
+            df["GROUP"] = df["GROUP"].replace("None", "")
+            df["ROCKTYPE2"] = df["ROCKTYPE2"].replace("", "None")
             df.to_csv(self.config.geology_filename_wkt, index=False, sep="\t")
         else:
             print(
@@ -494,12 +508,7 @@ class MapData:
             self.load_map_data(Datatype.STRUCTURE)
         if self.data_states[Datatype.STRUCTURE] == Datastate.COMPLETE:
             orientations = self.get_map_data(Datatype.STRUCTURE)
-            columns = [
-                "geometry",
-                "STRUCTURE_POINT_ID",
-                "DIP",
-                "DIPDIR"
-            ]
+            columns = ["geometry", "STRUCTURE_POINT_ID", "DIP", "DIPDIR"]
             sub_pts = orientations[columns]
             Topology.save_structure_wkt(
                 sub_pts, self.config.structure_filename_wkt, self.config.c_l
@@ -606,7 +615,7 @@ class MapData:
         with fiona.open(self.get_filename(Datatype.COVER_MAP), "r") as shapefile:
             shapes = [feature["geometry"] for feature in shapefile]
 
-        with rasterio.open(self.get_filename(Datatype.DTB_GRID),"r") as src:
+        with rasterio.open(self.get_filename(Datatype.DTB_GRID), "r") as src:
             out_image, out_transform = rasterio.mask.mask(src, shapes, crop=True)
             out_meta = src.meta.copy()
 
