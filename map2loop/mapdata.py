@@ -564,7 +564,7 @@ class MapData:
                     done = True
                     success = True
                 except Exception as e:
-                    print(e)
+                    warnings.warn(str(e))
                     time.sleep(1)
                     i += 1
         else:

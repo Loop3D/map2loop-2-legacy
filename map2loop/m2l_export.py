@@ -4,12 +4,7 @@ import random
 import numpy as np
 import pandas as pd
 import os
-import sys
-import geopandas as gpd
 import rasterio
-from rasterio import plot
-from rasterio.plot import show
-from rasterio.mask import mask
 from rasterio.transform import from_origin
 from rasterio.io import MemoryFile
 import matplotlib
@@ -1753,11 +1748,32 @@ def export_to_projectfile(loopFilename, config: Config, overwrite: bool = False)
     )[["code", "group", "colour"]].rename(
         columns={"code": "formation", "group": "supergroup"}
     )
-
     # Change to formation_summary_thicknesses to get all layers and also dont' need to calc thickness again
     stratigraphicLayers = pd.read_csv(
         os.path.join(config.output_path, "formation_thicknesses.csv")
     )
+    thickness = {}
+    sum = 0
+    num = 0
+    for f in form2supergroup["formation"]:
+        # Ignore cover or cover_up layers
+        if f == "cover" or f == "cover_up":
+            pass
+        elif len(stratigraphicLayers[stratigraphicLayers["formation"] == f]):
+            thickness[f] = np.median(
+                stratigraphicLayers[stratigraphicLayers["formation"] == f]["thickness"]
+            )
+            sum += thickness[f]
+            num += 1
+        else:
+            thickness[f] = -1
+    # Note: thickness of unit without any thickness values is the mean thickness of those with values
+    mean_thickness = sum / num
+    for f in form2supergroup["formation"]:
+        if f == "cover" or f == "cover_up":
+            pass
+        elif thickness[f] == -1:
+            thickness[f] = mean_thickness
 
     stratAges = pd.read_csv(os.path.join(config.tmp_path, "age_sorted_groups.csv"))[
         ["group_", "min", "max"]
@@ -1765,12 +1781,10 @@ def export_to_projectfile(loopFilename, config: Config, overwrite: bool = False)
     stratAges.rename(
         columns={"group_": "supergroup", "min": "minAge", "max": "maxAge"}, inplace=True
     )
-    stratLayers = pd.merge(form2supergroup, stratigraphicLayers, on=["formation"])
-    stratLayers = pd.merge(stratLayers, stratAges, on=["supergroup"])
+    stratLayers = pd.merge(form2supergroup, stratAges, on=["supergroup"])
     stratLayers["colour1Red"] = [int(a[1:3], 16) for a in stratLayers["colour"]]
     stratLayers["colour1Green"] = [int(a[3:5], 16) for a in stratLayers["colour"]]
     stratLayers["colour1Blue"] = [int(a[5:7], 16) for a in stratLayers["colour"]]
-    thickness = {}
     uniqueLayers = stratLayers[
         [
             "formation",
@@ -1782,10 +1796,6 @@ def export_to_projectfile(loopFilename, config: Config, overwrite: bool = False)
             "maxAge",
         ]
     ].drop_duplicates(subset="formation")
-    for f in uniqueLayers["formation"]:
-        thickness[f] = np.mean(
-            stratigraphicLayers[stratigraphicLayers["formation"] == f]["thickness"]
-        )
     stratigraphicLogData = np.zeros(
         uniqueLayers.shape[0], LoopProjectFile.stratigraphicLayerType
     )

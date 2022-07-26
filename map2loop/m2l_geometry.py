@@ -1,12 +1,8 @@
-from shapely import geometry
 from shapely.geometry import (
-    shape,
     Polygon,
     LineString,
     Point,
-    MultiLineString,
     MultiPolygon,
-    box,
 )
 import matplotlib.pyplot as plt
 import geopandas as gpd
@@ -27,7 +23,6 @@ from math import (
 )
 from . import m2l_utils
 
-# from .m2l_map_checker import densify
 from . import m2l_interpolation
 import numpy as np
 import os
@@ -375,7 +370,7 @@ def extract_poly_coords(geom, i):
     elif geom.type == "MultiPolygon":
         exterior_coords = []
         interior_coords = []
-        for part in geom:
+        for part in geom.geoms:
             epc = extract_poly_coords(part, i)  # Recursive call
             exterior_coords += epc["exterior_coords"]
             interior_coords += epc["interior_coords"]
@@ -1959,7 +1954,7 @@ def process_plutons(config: Config, map_data, workflow: dict):
                             }
                             id = id + 1
                             first = True  # use first found dist so all arcs converge to same point
-                            for lineC in LineStringC:  # process all linestrings
+                            for lineC in LineStringC.geoms:  # process all linestrings
                                 if lineC.wkt.split(" ")[0] == "LINESTRING":
                                     # decimate to reduce number of points, but also take second and third point of a series to keep gempy happy
                                     if (

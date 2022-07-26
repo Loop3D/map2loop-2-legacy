@@ -1,4 +1,3 @@
-from logging.handlers import WatchedFileHandler
 import shutil
 import os
 import warnings
@@ -14,15 +13,6 @@ from .topology import Topology
 import map2model
 from . import m2l_interpolation, m2l_utils, m2l_geometry, m2l_export
 from .map2graph import Map2Graph
-from . import (
-    geology_loopdata,
-    structure_loopdata,
-    fault_loopdata,
-    fold_loopdata,
-    mindep_loopdata,
-    metafiles,
-    clut_paths,
-)
 
 from .mapdata import MapData
 from .stratigraphic_column import StratigraphicColumn
@@ -1027,7 +1017,7 @@ class Project(object):
             else:
                 plt.close(geology_figure)
         except Exception as e:
-            print(e)
+            warnings.warn(str(e))
             warnings.warn("WARNING: Could not save geology graphic")
 
     @m2l_utils.timer_decorator

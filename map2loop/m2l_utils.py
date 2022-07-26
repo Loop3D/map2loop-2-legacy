@@ -1,5 +1,4 @@
 import sys
-import builtins
 import geopandas as gpd
 import pandas as pd
 from map2loop.m2l_enums import VerboseLevel
@@ -19,7 +18,6 @@ from urllib.request import urlopen
 from math import (
     sin,
     cos,
-    atan,
     atan2,
     asin,
     radians,
@@ -29,11 +27,9 @@ from math import (
     acos,
     fmod,
     fabs,
-    isnan,
     floor,
 )
 from owslib.wcs import WebCoverageService
-from scipy.interpolate import griddata
 import netCDF4
 import time
 import functools
@@ -947,9 +943,9 @@ def ddd2dircos(dip, dipdir):
 
 def dircos2ddd(l, m, n):
     if m > 0:
-        dipdir = (360 + degrees(atan(l / m))) % 360
+        dipdir = (360 + degrees(atan2(l, m))) % 360
     elif m < 0:
-        dipdir = (540 + degrees(atan(l / m))) % 360
+        dipdir = (540 + degrees(atan2(l, m))) % 360
     else:
         dipdir = 90
     dip = 90 - degrees(asin(n))
@@ -1353,16 +1349,32 @@ def save_parameters(
     f.write("bbox_LL: " + str(st_bbox) + "\n")
     f.write("bbox_3d: " + str(proj.config.bbox_3d) + "\n")
     f.write("proj_crs: " + str(proj.map_data.working_projection) + "\n")
-    f.write("geology_layer: " + str(proj.map_data.get_filename(Datatype.GEOLOGY)) + "\n")
+    f.write(
+        "geology_layer: " + str(proj.map_data.get_filename(Datatype.GEOLOGY)) + "\n"
+    )
     f.write("dtm_layer: " + str(proj.map_data.get_filename(Datatype.DTM)) + "\n")
     f.write("fault_layer: " + str(proj.map_data.get_filename(Datatype.FAULT)) + "\n")
     f.write("fold_layer: " + str(proj.map_data.get_filename(Datatype.FOLD)) + "\n")
-    f.write("structure_layer: " + str(proj.map_data.get_filename(Datatype.STRUCTURE)) + "\n")
-    f.write("mindep_layer: " + str(proj.map_data.get_filename(Datatype.MINERAL_DEPOSIT)) + "\n")
-    f.write("section_layer: " + str(proj.map_data.get_filename(Datatype.SECTION)) + "\n")
-    f.write("drillhole_layer: " + str(proj.map_data.get_filename(Datatype.DRILLHOLE)) + "\n")
-    f.write("dtb_grid_layer: " + str(proj.map_data.get_filename(Datatype.DTB_GRID)) + "\n")
-    f.write("cover_map_layer: " + str(proj.map_data.get_filename(Datatype.COVER_MAP)) + "\n")
+    f.write(
+        "structure_layer: " + str(proj.map_data.get_filename(Datatype.STRUCTURE)) + "\n"
+    )
+    f.write(
+        "mindep_layer: "
+        + str(proj.map_data.get_filename(Datatype.MINERAL_DEPOSIT))
+        + "\n"
+    )
+    f.write(
+        "section_layer: " + str(proj.map_data.get_filename(Datatype.SECTION)) + "\n"
+    )
+    f.write(
+        "drillhole_layer: " + str(proj.map_data.get_filename(Datatype.DRILLHOLE)) + "\n"
+    )
+    f.write(
+        "dtb_grid_layer: " + str(proj.map_data.get_filename(Datatype.DTB_GRID)) + "\n"
+    )
+    f.write(
+        "cover_map_layer: " + str(proj.map_data.get_filename(Datatype.COVER_MAP)) + "\n"
+    )
     f.write("fault_params: " + str(fault_params) + "\n")
     f.write("foliation_params: " + str(foliation_params) + "\n")
     f.close()

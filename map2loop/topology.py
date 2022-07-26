@@ -6,20 +6,15 @@ import matplotlib.pyplot as plt
 import geopandas as gpd
 import pandas as pd
 import numpy as np
-import functools
-import operator
 import shapely.affinity
 from shapely.ops import split
 from shapely.geometry import (
     Point,
     LineString,
-    MultiLineString,
-    GeometryCollection,
     Polygon,
 )
 from math import degrees, atan2, acos, degrees
 import warnings
-import rasterio
 import beartype
 
 from . import m2l_utils
@@ -1417,7 +1412,7 @@ class Topology(object):
         try:
             ASUD = pd.read_csv(asud_strat_file, sep=",")
         except Exception as e:
-            print(e)
+            warnings.warn(str(e))
             return
 
         for e in G.edges:
@@ -1618,7 +1613,7 @@ class Topology(object):
         faults["n"] = n
 
         with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+            # warnings.simplefilter("ignore")
             if len(Af_d) >= config.run_flags["fault_orientation_clusters"]:
                 k_means_o = cluster.KMeans(
                     n_clusters=config.run_flags["fault_orientation_clusters"],

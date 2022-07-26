@@ -2,9 +2,6 @@ import numpy as np
 from scipy.interpolate import Rbf
 import matplotlib.pyplot as plt
 from math import (
-    sin,
-    cos,
-    atan,
     atan2,
     asin,
     radians,
@@ -21,7 +18,7 @@ import geopandas as gpd
 from geopandas import GeoDataFrame
 import pandas as pd
 import os
-from shapely.geometry import Polygon, LineString, Point
+from shapely.geometry import LineString, Point
 from . import m2l_utils
 import rasterio
 from .m2l_enums import Datatype, VerboseLevel
@@ -2326,8 +2323,9 @@ def interpolation_grids(
     lscaled = -scale * contact_interp["m"]
     mscaled = scale * contact_interp["l"]
     scale2 = np.sqrt(orientation_interp["l"] ** 2 + orientation_interp["m"] ** 2)
-    loscaled = np.where(scale2 > 0, contact_interp["l"] / scale2, 0)
-    moscaled = np.where(scale2 > 0, contact_interp["m"] / scale2, 0)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        loscaled = np.where(scale2 > 0, contact_interp["l"] / scale2, 0)
+        moscaled = np.where(scale2 > 0, contact_interp["m"] / scale2, 0)
     dotproduct = (-contact_interp["m"] * loscaled) + (contact_interp["l"] * moscaled)
 
     # lscaled=np.where(dotproduct<0, -lscaled,lscaled)

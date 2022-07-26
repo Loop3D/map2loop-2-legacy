@@ -1,17 +1,10 @@
-import os
-import netCDF4
 import numpy as np
-from geophys_utils import NetCDFGridUtils
-from geophys_utils import get_netcdf_edge_points, points2convex_hull
 import matplotlib.pyplot as plt
-import time
-import map2loop.SpaceTime as st
 from math import sqrt, pi
 import geopandas as gpd
 import pandas as pd
 from shapely.geometry import Point
 from geopandas import GeoDataFrame
-from math import floor
 
 
 def plot_profile(petro_data, geophys_data, code, title, axis):

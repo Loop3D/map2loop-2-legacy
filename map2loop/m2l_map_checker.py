@@ -1,6 +1,6 @@
 import os
 import geopandas as gpd
-from shapely.geometry import LineString, Polygon, MultiLineString, MultiPolygon
+from shapely.geometry import LineString, Polygon, MultiLineString
 import warnings
 import numpy as np
 import pandas as pd
@@ -118,7 +118,7 @@ def check_all_maps(
         config.run_flags["drift_prefix"],
         m2l_warnings,
         m2l_errors,
-        verbose_level,
+        verbose_level=verbose_level,
     )
     folds = check_fold_map(
         mapdata.get_map_data(Datatype.FOLD),
@@ -242,10 +242,18 @@ def check_structure_map(
     # Check for duplicate column references
     if c_l["sf"] == c_l["ds"]:
         if c_l["sf"] in orientations.columns:
-            orientations[c_l["ds"]] = orientations[c_l["sf"]].copy()
+            orientations = rename_columns(
+                orientations, c_l["sf"], "STRUCTURE_TYPE", m2l_errors, verbose_level
+            )
+            orientations[c_l["ds"]] = orientations["STRUCTURE_TYPE"].copy()
+            c_l["sf"] = "STRUCTURE_TYPE"
     if c_l["bo"] == c_l["ds"]:
         if c_l["bo"] in orientations.columns:
-            orientations[c_l["bo"]] = orientations[c_l["ds"]].copy()
+            orientations = rename_columns(
+                orientations, c_l["bo"], "POLARITY", m2l_errors, verbose_level
+            )
+            orientations[c_l["ds"]] = orientations["POLARITY"].copy()
+            c_l["bo"] = "POLARITY"
 
     # Fill in missing data with default values
     if c_l["sf"] not in orientations.columns:
@@ -722,6 +730,12 @@ def check_fault_map(
             show_metadata(faults, "fault layer")
     else:
         m2l_warnings.append("No faults in area, projection may be inconsistent")
+
+    if c_l["o"] == c_l["n"]:
+        if c_l["n"] in faults.columns:
+            faults = rename_columns(faults, c_l["n"], "NAME", m2l_errors, verbose_level)
+            faults[c_l["o"]] = faults["NAME"].copy()
+            c_l["n"] = "NAME"
 
     # convert c_l codes to meaningful column names
     faults = rename_columns(faults, c_l["f"], "FEATURE", m2l_errors, verbose_level)
