@@ -1501,7 +1501,7 @@ class Topology(object):
         # add formation stratigraphy to graph as nodes
         Astrat = Astrat.set_index("code")
         for ind, s in Astrat.iterrows():
-            if s.name != "cover":
+            if s.name != "cover" and s.name != "cover_up":
                 Gloop.add_node(
                     s.name,
                     s_colour=s["colour"],
