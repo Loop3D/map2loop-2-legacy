@@ -393,7 +393,7 @@ def check_geology_map(
                     geology[c_l[code]].str.replace(",", " ")
                     if code == "c" or code == "g" or code == "g2":
                         geology[c_l[code]] = geology[c_l[code]].str.replace(
-                            "[ -\?]", "_", regex=True
+                            "[ -/?]", "_", regex=True
                         )
                         # geology[c_l[code]]=geology[c_l[code]].str.replace("-", "_")
                         # geology[c_l[code]]=geology[c_l[code]].str.replace("?", "_",regex=False)
