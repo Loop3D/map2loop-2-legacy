@@ -3,7 +3,7 @@ pandas
 geopandas
 pyproj
 shapely
-rasterio
+rasterio<=1.2.10
 descartes
 matplotlib-base
 networkx
