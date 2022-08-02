@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.2.6](https://www.github.com/Loop3D/map2loop-2/compare/v1.2.5...v1.2.6) (2022-08-02)
+
+
+### Bug Fixes
+
+* remove osx conda build ([7209704](https://www.github.com/Loop3D/map2loop-2/commit/72097049f479714c9c3e73941bb978e4523977b4))
+
 ### [1.2.5](https://www.github.com/Loop3D/map2loop-2/compare/v1.2.4...v1.2.5) (2022-08-02)
 
 
