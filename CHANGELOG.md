@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.2.4](https://www.github.com/Loop3D/map2loop-2/compare/v1.2.3...v1.2.4) (2022-08-02)
+
+
+### Bug Fixes
+
+* Temporary fix to avoid rasterio/gdal conflicts ([23e5f6a](https://www.github.com/Loop3D/map2loop-2/commit/23e5f6a9fce11281add61161fb0d6637b37d1da9))
+
 ### [1.2.3](https://www.github.com/Loop3D/map2loop-2/compare/v1.2.2...v1.2.3) (2022-07-27)
 
 
