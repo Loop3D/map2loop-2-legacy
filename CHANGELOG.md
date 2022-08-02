@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.2.5](https://www.github.com/Loop3D/map2loop-2/compare/v1.2.4...v1.2.5) (2022-08-02)
+
+
+### Bug Fixes
+
+* Add python version to continuous integration ([6835882](https://www.github.com/Loop3D/map2loop-2/commit/6835882ab1f3723e016ed7fd4bee71419be996fc))
+
 ### [1.2.4](https://www.github.com/Loop3D/map2loop-2/compare/v1.2.3...v1.2.4) (2022-08-02)
 
 

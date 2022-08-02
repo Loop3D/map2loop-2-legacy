@@ -2,7 +2,7 @@
 # import map2loop
 # map2loop._clut_path = newpath
 
-__version__ = "1.2.4"
+__version__ = "1.2.5"
 
 geology_loopdata = {
     'WA':
