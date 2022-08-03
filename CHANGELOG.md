@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.2.8](https://www.github.com/Loop3D/map2loop-2/compare/v1.2.7...v1.2.8) (2022-08-03)
+
+
+### Bug Fixes
+
+* change rasterio dependency to enable python 3.7 to work ([2fb5b80](https://www.github.com/Loop3D/map2loop-2/commit/2fb5b80ad9c86afae9b3d79fef2acfceea4e0d43))
+
 ### [1.2.7](https://www.github.com/Loop3D/map2loop-2/compare/v1.2.6...v1.2.7) (2022-08-02)
 
 
