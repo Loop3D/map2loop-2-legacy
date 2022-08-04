@@ -338,16 +338,19 @@ class MapData:
                     )
 
     @beartype.beartype
-    def save_all_map_data(self, project_dir: str):
+    def save_all_map_data(self, output_dir: str, extension: str=".csv"):
         for i in Datatype:
-            self.save_map_data(project_dir, i)
+            self.save_map_data(output_dir, i, extension)
 
     @beartype.beartype
-    def save_map_data(self, project_dir: str, datatype: Datatype):
+    def save_map_data(self, output_dir: str, datatype: Datatype, extension: str=".csv"):
         if self.data_states[datatype] == Datastate.CONVERTED:
             try:
-                filename = os.path.join(project_dir, "tmp", datatype.name, ".csv")
-                self.data[datatype].write_csv(filename)
+                filename = os.path.join(output_dir, datatype.name, extension)
+                if extension == ".csv":
+                    self.data[datatype].write_csv(filename)
+                else:
+                    self.data[datatype].to_file(filename)
             except:
                 warnings.warn(
                     f"Failed to save {datatype.name} to file named {filename}\n"

@@ -1042,3 +1042,15 @@ class Project(object):
         else:
             if self.config.verbose_level != VerboseLevel.NONE:
                 print("No drillhole data for merging.")
+
+    @beartype.beartype
+    def save_mapdata_to_shapefiles(self, path:str):
+        if not os.path.exists(path):
+            os.mkdir(path)
+        self.map_data.save_all_map_data(path,".shp")
+
+    @beartype.beartype
+    def save_mapdata_to_csvs(self, path:str):
+        if not os.path.exists(path):
+            os.mkdir(path)
+        self.map_data.save_all_map_data(path)
