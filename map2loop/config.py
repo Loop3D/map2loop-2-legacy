@@ -113,7 +113,7 @@ class Config(object):
 
         if isinstance(run_flags, dict):
             for key in run_flags:
-                if not key in self.run_flags:
+                if key not in self.run_flags:
                     warnings.warn(f"config run_flags key {key} is not a valid option")
             self.run_flags.update(run_flags)
             # TODO: Add sanity checks for run_flags updated from user
@@ -184,7 +184,7 @@ class Config(object):
                             for key in self.c_l.keys():
                                 try:
                                     self.c_l[key] = self.c_l[key].lower()
-                                except Exception as e:
+                                except Exception:
                                     pass
             else:
                 with open(filename) as raw_data:
@@ -219,12 +219,12 @@ class Config(object):
                     colour = colour_ref[colour_ref["code"] == key]["colour"].to_numpy()[
                         0
                     ]
-                except Exception as e:
+                except Exception:
                     try:
                         colour = colour_ref[colour_ref["UNITNAME"] == key][
                             "colour"
                         ].to_numpy()[0]
-                    except Exception as e:
+                    except Exception:
                         print(
                             "formation "
                             + formation
@@ -239,7 +239,7 @@ class Config(object):
                 self.colour_dict[formation] = colour
                 # print(key, colour)
 
-        except Exception as e:
+        except Exception:
             # Otherwise, just append a random set
             self.clut_path = ""
             random_colours = [

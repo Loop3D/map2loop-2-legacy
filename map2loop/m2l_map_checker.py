@@ -11,6 +11,7 @@ from .m2l_enums import Datatype, Datastate, VerboseLevel
 import beartype
 from .config import Config
 
+
 # explodes polylines and modifies objectid for exploded parts
 def explode_polylines(indf, c_l, dst_crs):
     outdf = gpd.GeoDataFrame(columns=indf.columns, crs=dst_crs)
@@ -342,7 +343,8 @@ def _explode_intrusives(geology, c_l):
     # print('raw',len(geol_clip_tmp))
     geol_clip_tmp.crs = geology.crs
     geol_clip_tmp = geol_clip_tmp.dissolve(by=c_l["c"], aggfunc="first")
-    # Note: Can't use INTRUSIVE and SILL like this as they are str field to use for look up not column names
+    # Note: Can't use "INTRUSIVE" and "SILL" in place of c_l["..."] as they are str field
+    # to use for look up not column names
     geol_clip_tmp = geol_clip_tmp[
         geol_clip_tmp[c_l["r1"]].str.contains(c_l["intrusive"])
         & ~geol_clip_tmp[c_l["ds"]].str.contains(c_l["sill"])
@@ -437,6 +439,7 @@ def check_geology_map(
     # new_mapping = {'c':'UNIT_NAME','u':'CODE','r1':'ROCKTYPE1','r2':'ROCKTYPE2','ds':'DESCRIPTION','r2':'ROCKTYPE2',
     # 'min':'MIN_AGE','max':'MAX_AGE','g':'GROUP','o':'GEOLOGY_FEATURE_ID','g2':'GROUP2'}
     # geology = geology.rename(columns=dict(zip(c_l.values(),[ new_mapping[item] if item in new_mapping else item for item in c_l.keys() ])))
+    # Remapping done at the end of function
 
     # make each pluton its own formation and group
     if c_l["o"] not in geology.columns:  # object id
@@ -513,7 +516,7 @@ def check_geology_map(
             geology[c_l[code]].str.replace(",", " ")
             if code == "c" or code == "g" or code == "g2":
                 geology[c_l[code]] = geology[c_l[code]].str.replace(
-                    "[ -\?]", "_", regex=True
+                    "[ -/?]", "_", regex=True
                 )
 
             nans = geology[c_l[code]].isnull().sum()
@@ -549,18 +552,6 @@ def check_geology_map(
     geology = rename_columns(
         geology, c_l["o"], "GEOMETRY_OBJECT_ID", m2l_errors, verbose_level
     )
-
-    # Reset c_l labels to new labels (temporary unit all c_l references removed from non-mapchecker code)
-    # c_l['g'] = 'GROUP'
-    # c_l['u'] = 'CODE'
-    # c_l['g2'] = 'GROUP2'
-    # c_l['ds'] = 'DESCRIPTION'
-    # c_l['c'] = 'UNIT_NAME'
-    # c_l['r1'] = 'ROCKTYPE1'
-    # c_l['r2'] = 'ROCKTYPE2'
-    # c_l['min'] = 'MIN_AGE'
-    # c_l['max'] = 'MAX_AGE'
-    # c_l['o'] = 'GEOMETRY_OBJECT_ID'
 
     return geology
 
@@ -795,7 +786,7 @@ def check_mindep_map(
             if verbose_level != VerboseLevel.NONE:
                 show_metadata(mindeps, "mindeps layer")
 
-        except Exception as e:
+        except Exception:
             m2l_warnings.append("no mindeps for analysis")
             mindeps = 0
 
@@ -868,7 +859,7 @@ def output_modified_maps(
                 mindep_filename = os.path.join(tmp_path, "mindeps_clip.shp")
                 mindeps.crs = dst_crs
                 mindeps.to_file(mindep_filename)
-        except Exception as e:
+        except Exception:
             print("Not clipping mindeps, dataframe is empty")
     print("\nNo errors found, clipped and updated files saved to tmp")
 
@@ -890,7 +881,7 @@ def show_metadata(gdf, name):
         print("    # items", len(gdf))
         types = []
         for i, g in gdf.iterrows():
-            if not g.geometry.type in types:
+            if g.geometry.type not in types:
                 types.append(g.geometry.type)
 
         print("    Data types", types)

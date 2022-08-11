@@ -10,7 +10,6 @@ from shapely.geometry import Point
 from shapely.ops import snap
 from map2loop import m2l_utils
 from math import acos, degrees
-from . import m2l_utils
 
 close_f = 1000
 close_b = 1000
@@ -628,7 +627,7 @@ class Map2Graph(object):
         c_l,
     ):
         commodities = commodity.split(",")
-        if not "NONE" in commodity:
+        if "NONE" not in commodity:
             commodities.append("NONE")
         fault_tmp = fault.copy()
         b_contacts_gdf_tmp = b_contacts_gdf.copy()
@@ -1257,7 +1256,7 @@ class Map2Graph(object):
         not_igneous_contacts={}
         i=0
         for c in all_contacts:
-            if(c[2].geom_type=='MultiLineString' or c[2].geom_type=='LineString' ): 
+            if(c[2].geom_type=='MultiLineString' or c[2].geom_type=='LineString' ):
                 if( c_l['intrusive'] in geology_clean.iloc[c[0]]["ROCKTYPE1"] ):
                     igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[0]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[1]]["UNIT_NAME"], "geometry": c[2]}
                 elif(c_l['intrusive'] in geology_clean.iloc[c[1]]["ROCKTYPE1"] ):
@@ -1268,7 +1267,7 @@ class Map2Graph(object):
                         not_igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[1]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[0]]["UNIT_NAME"], "geometry": c[2]}
                     else:
                         not_igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[0]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[1]]["UNIT_NAME"], "geometry": c[2]}
-                        
+
                 i=i+1
             elif(c[2].geom_type=='GeometryCollection' ):
                 for geom in c[2]:
@@ -1284,7 +1283,7 @@ class Map2Graph(object):
                             else:
                                 not_igneous_contacts[i] = {"id": i, "UNIT_NAME": geology_clean.iloc[c[0]]["UNIT_NAME"], "UNIT_NAME"+'2': geology_clean.iloc[c[1]]["UNIT_NAME"], "geometry": geom}
                         i=i+1
-            
+
         df = DataFrame.from_dict(igneous_contacts, "index")
         if(len(df)>0):
             i_contacts_gdf = GeoDataFrame(df, crs=geology_clean.crs, geometry='geometry')
@@ -1304,7 +1303,7 @@ class Map2Graph(object):
         Gloop, output_path, fault, geology_exploded, mindep, commodity, c_l
     ):
         commodities = commodity.split(",")
-        if not "NONE" in commodity:
+        if "NONE" not in commodity:
             commodities.append("NONE")
         fault_tmp = fault.copy()
         geology_exploded_tmp = geology_exploded.copy()

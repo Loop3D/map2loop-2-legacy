@@ -13,7 +13,7 @@ from .topology import Topology
 import map2model
 from . import m2l_interpolation, m2l_utils, m2l_geometry, m2l_export
 from .map2graph import Map2Graph
-
+from . import geology_loopdata, structure_loopdata, fault_loopdata, fold_loopdata, mindep_loopdata, metafiles, clut_paths
 from .mapdata import MapData
 from .stratigraphic_column import StratigraphicColumn
 from .deformation_history import DeformationHistory
@@ -25,11 +25,7 @@ import beartype
 
 def warning_without_codeline(message, category, filename, lineno, line=""):
     return str(message)
-
-
 # warnings.formatwarning = warning_without_codeline
-
-from map2loop import mapdata
 
 
 class Project(object):
@@ -183,7 +179,7 @@ class Project(object):
             print(
                 'WARNING: Overwrite should be a string value {"true", "in-place", "false"} ...'
             )
-            if self.overwrite == True:
+            if self.overwrite is True:
                 self.overwrite = "true"
             else:
                 self.overwrite = "false"
@@ -290,7 +286,7 @@ class Project(object):
                 from matplotlib import pyplot as plt
 
                 break
-            except:
+            except Exception:
                 continue
 
     @m2l_utils.timer_decorator
@@ -339,7 +335,7 @@ class Project(object):
             elif kwargs["quiet"] == "all":
                 self.config.verbose_level = VerboseLevel.NONE
 
-        if overwrite != None:
+        if overwrite is not None:
             warnings.warn(
                 'NOTE: the "overwrite" parameter has moved from the update_config function to the project initialisation call'
             )
@@ -369,7 +365,7 @@ class Project(object):
                 and bbox_3d["base"] < bbox_3d["top"]
             ):
                 bbox_valid = True
-        if bbox_valid == False:
+        if bbox_valid is False:
             warnings.warn(
                 "Invalid bounding box specified, attempting to get bounding box and projection from the map files"
             )
@@ -386,7 +382,7 @@ class Project(object):
                 "top": 1200,
             }
 
-        if self.map_data.working_projection == None:
+        if self.map_data.working_projection is None:
             if "project_crs" in kwargs:
                 warnings.warn(
                     "project_crs in update_config is deprecated and will be removed in later versions of map2loop.  Please use the working_projection parameter in Project instead",
@@ -590,7 +586,7 @@ class Project(object):
                         self.config.run_flags["formation_formation_weight"],
                         self.config.run_flags["fault_formation_weight"],
                     )
-                except:
+                except Exception:
                     print("Topology.map2graph failed")
 
             # TODO: Fix map2graph and make it a proper object
@@ -609,12 +605,13 @@ class Project(object):
                         self.config.run_flags["formation_formation_weight"],
                         self.config.run_flags["fault_formation_weight"],
                     )
-                except:
+                except Exception:
                     print("Topology.granular_map2graph failed")
 
             m2l_geometry.update_fault_layer(self.config, self.map_data)
 
             self.update_loop_project_file()
+            self.map_data.export_dtm(os.path.join(self.project_path, "dtm", "dtm_rp.tif"))
 
             self.__export_png()
 
@@ -623,7 +620,6 @@ class Project(object):
     def update_loop_project_file(self):
         """A function to convert multiple csv and map2loop output files into a single loop project file"""
         m2l_export.export_to_projectfile(self.loop_project_filename, self.config)
-        self.map_data.export_dtm(os.path.join(self.project_path, "dtm", "dtm_rp.tif"))
 
     @m2l_utils.timer_decorator
     def __run_map2model(self):

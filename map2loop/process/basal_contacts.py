@@ -2,6 +2,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
+
 def extract_basal_contacts(geology_polygons,column_names):
     """Create a geodataframe with all of the contact lines
     between features in the geology_polygons dataset
@@ -18,7 +19,7 @@ def extract_basal_contacts(geology_polygons,column_names):
             data.append(geom)
     series = gpd.GeoSeries(data)
     # we want to create a final dataframe with all of the lines but we want to maintain the
-    # link to the original features, so copy the indexes from the original feature into the 
+    # link to the original features, so copy the indexes from the original feature into the
     # new dataframe
     interior = gpd.GeoDataFrame(geometry=series)
     interior['indexes'] = indexes
@@ -40,12 +41,12 @@ def extract_basal_contacts(geology_polygons,column_names):
     linestrings = []
     data = []
     for i in range(intersection_matrix.shape[0]):
-        intersection_matrix[i,i]=False
+        intersection_matrix[i,i] = False
         for j in lines.loc[intersection_matrix[i,:]].index:
-            #if lines[i,['age']]
+            # if lines[i,['age']]
             l = lines.loc[j,'geometry']
             linestrings.append(lines.loc[i,:].geometry.intersection(
-                                            l)) 
+                                            l))
             data.append([])
 
     basal_contacts = gpd.gpd.GeoSeries(linestrings)

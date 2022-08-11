@@ -119,7 +119,7 @@ class MapData:
         Check that all filenames are set and valid
         """
         for datatype in Datatype:
-            if self.filenames[datatype] == None:
+            if self.filenames[datatype] is None:
                 warnings.warn(f"Warning: Filename for {str(datatype)} is not set\n")
                 return False
         return True
@@ -132,7 +132,7 @@ class MapData:
         Args:
             config (Config, optional): The config structure to use for map data if not already specified. Defaults to None.
         """
-        if config == None:
+        if config is None:
             config = self.config
         else:
             self.config = config
@@ -158,19 +158,19 @@ class MapData:
             datatype (Datatype): The datatype to load
         """
         if (
-            self.filenames[datatype] == None
+            self.filenames[datatype] is None
             or self.data_states[datatype] == Datastate.UNNAMED
         ):
             warnings.warn(
                 f"Datatype {datatype.name} is not set and so cannot be loaded\n"
             )
-        elif self.dirtyflags[datatype] == True:
+        elif self.dirtyflags[datatype] is True:
             if self.data_states[datatype] == Datastate.UNLOADED:
                 # Load data from file
                 try:
                     self.data[datatype] = geopandas.read_file(self.filenames[datatype])
                     self.data_states[datatype] = Datastate.LOADED
-                except:
+                except Exception:
                     sys.stdout.flush()
                     sys.stderr.flush()
                     warnings.warn(
@@ -210,19 +210,19 @@ class MapData:
             datatype (Datatype): The rasterio datatype to load
         """
         if (
-            self.filenames[datatype] == None
+            self.filenames[datatype] is None
             or self.data_states[datatype] == Datastate.UNNAMED
         ):
             warnings.warn(
                 f"Datatype {datatype.name} is not set and so cannot be loaded\n"
             )
-        elif self.dirtyflags[datatype] == True:
+        elif self.dirtyflags[datatype] is True:
             if self.data_states[datatype] == Datastate.UNLOADED:
                 # Load data from file
                 try:
                     self.data[datatype] = rasterio.open(self.filenames[datatype])
                     self.data_states[datatype] = Datastate.LOADED
-                except:
+                except Exception:
                     sys.stdout.flush()
                     sys.stderr.flush()
                     warnings.warn(
@@ -322,11 +322,11 @@ class MapData:
 
     @beartype.beartype
     def set_working_projection_on_map_data(self, datatype: Datatype):
-        if self.working_projection == None:
+        if self.working_projection is None:
             print("No working projection set leaving map data in original projection")
         else:
             if self.data_states[datatype] >= Datastate.LOADED:
-                if self.data[datatype].crs == None:
+                if self.data[datatype].crs is None:
                     print(
                         "No projection on original map data, assigning working_projection",
                         self.working_projection,
@@ -338,12 +338,12 @@ class MapData:
                     )
 
     @beartype.beartype
-    def save_all_map_data(self, output_dir: str, extension: str=".csv"):
+    def save_all_map_data(self, output_dir: str, extension: str = ".csv"):
         for i in Datatype:
             self.save_map_data(output_dir, i, extension)
 
     @beartype.beartype
-    def save_map_data(self, output_dir: str, datatype: Datatype, extension: str=".csv"):
+    def save_map_data(self, output_dir: str, datatype: Datatype, extension: str = ".csv"):
         if self.data_states[datatype] == Datastate.CONVERTED:
             try:
                 filename = os.path.join(output_dir, datatype.name, extension)
@@ -351,7 +351,7 @@ class MapData:
                     self.data[datatype].write_csv(filename)
                 else:
                     self.data[datatype].to_file(filename)
-            except:
+            except Exception:
                 warnings.warn(
                     f"Failed to save {datatype.name} to file named {filename}\n"
                 )
@@ -365,7 +365,7 @@ class MapData:
     @beartype.beartype
     def update_filenames_with_bounding_box(self, boundingbox_str: str):
         valid = self.check_filenames()
-        if valid == False:
+        if valid is False:
             raise ValueError("Filenames are invalid")
         for i in Datatype:
             self.filenames[i] = self.filenames[i].replace("{BBOX_STR}", boundingbox_str)
@@ -373,13 +373,13 @@ class MapData:
     @beartype.beartype
     def update_filenames_with_projection(self, projection_str: str):
         valid = self.check_filenames()
-        if valid == False:
+        if valid is False:
             raise ValueError("Filenames are invalid")
         for i in Datatype:
             self.filenames[i] = self.filenames[i].replace("{PROJ_STR}", projection_str)
 
     def calculate_bounding_box_and_projection(self):
-        if self.filenames[Datatype.GEOLOGY] == None:
+        if self.filenames[Datatype.GEOLOGY] is None:
             return None, None
         temp_geology_filename = self.filenames[Datatype.GEOLOGY].replace(
             "{BBOX_STR}", ""
@@ -430,11 +430,11 @@ class MapData:
         # TODO: - Move away from tab seperators entirely (topology and map2model)
 
         # Check geology data status and export to a WKT format file
-        if self.dirtyflags[Datatype.GEOLOGY] == True:
+        if self.dirtyflags[Datatype.GEOLOGY] is True:
             self.load_map_data(Datatype.GEOLOGY)
         if self.data_states[Datatype.GEOLOGY] == Datastate.COMPLETE:
             geology = self.get_map_data(Datatype.GEOLOGY)
-            hint_flag = False  # use GSWA strat database to provide topology hints
+            # hint_flag = False  # use GSWA strat database to provide topology hints
             # columns = ['geometry', "GEOMETRY_OBJECT_ID", "UNIT_NAME", "GROUP",
             # "CODE", "MIN_AGE", "MAX_AGE", "DESCRIPTION",
             # "ROCKTYPE1", "ROCKTYPE2"]
@@ -481,7 +481,7 @@ class MapData:
             )
 
         # Check mineral deposits data status and export to a WKT format file
-        if self.dirtyflags[Datatype.MINERAL_DEPOSIT] == True:
+        if self.dirtyflags[Datatype.MINERAL_DEPOSIT] is True:
             self.load_map_data(Datatype.MINERAL_DEPOSIT)
         if self.get_filename(Datatype.MINERAL_DEPOSIT) == "":
             pass
@@ -507,7 +507,7 @@ class MapData:
             )
 
         # Check structure data status and export to a WKT format file
-        if self.dirtyflags[Datatype.STRUCTURE] == True:
+        if self.dirtyflags[Datatype.STRUCTURE] is True:
             self.load_map_data(Datatype.STRUCTURE)
         if self.data_states[Datatype.STRUCTURE] == Datastate.COMPLETE:
             orientations = self.get_map_data(Datatype.STRUCTURE)
@@ -522,7 +522,7 @@ class MapData:
             )
 
         # Check faults data status and export to a WKT format file
-        if self.dirtyflags[Datatype.FAULT] == True:
+        if self.dirtyflags[Datatype.FAULT] is True:
             self.load_map_data(Datatype.FAULT)
         if self.data_states[Datatype.FAULT] == Datastate.COMPLETE:
             faults = self.get_map_data(Datatype.FAULT)
@@ -575,7 +575,7 @@ class MapData:
                 self.config.polygon, self.working_projection, url=source
             )
             success = True
-        if success == False:
+        if success is False:
             raise NameError(
                 f"map2loop error: Could not access DTM server after {num_attempts} attempts"
             )
@@ -596,8 +596,8 @@ class MapData:
 
     @beartype.beartype
     def calc_depth_grid(self, workflow: dict):
-        dtm = self.get_map_data(Datatype.DTM).open()
-        if self.get_map_data(Datatype.DTB_GRID) == None:
+        # dtm = self.get_map_data(Datatype.DTM).open()
+        if self.get_map_data(Datatype.DTB_GRID) is None:
             self.dtb = 0
             self.dtb_null = 0
 
@@ -606,8 +606,8 @@ class MapData:
             return
 
         dtb_null = self.config.run_flags["dtb_null"]
-        cover_dip = self.config.run_flags["cover_dip"]
-        cover_spacing = self.config.run_flags["cover_spacing"]
+        # cover_dip = self.config.run_flags["cover_dip"]
+        # cover_spacing = self.config.run_flags["cover_spacing"]
         # print(workflow['cover_map'],dtb_null,cover_dip,cover_spacing,self.get_filename(Datatype.COVER_MAP))
         # TODO: DTB need to be defined, every function call bellow here that has a False boolean is referencing to the workflow['cover_map'] flag
         # dtb grid clipped to cover map
@@ -695,7 +695,7 @@ class MapData:
         m2l_geometry.save_faults(self.config, self, workflow)
 
         faults = self.get_map_data(Datatype.FAULT)
-        if type(faults) != None and len(faults) > 0:
+        if type(faults) is not None and len(faults) > 0:
             m2l_interpolation.process_fault_throw_and_near_faults_from_grid(
                 self.config, self, workflow, dip_grid, dip_dir_grid
             )
@@ -703,6 +703,6 @@ class MapData:
     @beartype.beartype
     def export_dtm(self, filename: str):
         with self.get_map_data(Datatype.DTM).open() as dtm:
-            if dtm != None:
+            if dtm is not None:
                 with rasterio.open(os.path.join(filename), "w", **(dtm.profile)) as dst:
                     dst.write(dtm.read())

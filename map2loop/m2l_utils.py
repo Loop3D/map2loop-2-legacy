@@ -2,16 +2,14 @@ import sys
 import geopandas as gpd
 import pandas as pd
 from map2loop.m2l_enums import VerboseLevel
+from map2loop.m2l_enums import Datatype
 from shapely.geometry.polygon import Polygon
 from shapely.geometry.multipolygon import MultiPolygon
-from shapely.geometry import Point
 import numpy as np
 import rasterio
-import fiona
-from rasterio.warp import calculate_default_transform, reproject, Resampling
-from rasterio.transform import from_origin
-from rasterio import features
+import rasterio.warp
 import rasterio.mask
+import fiona
 import re
 import os
 from urllib.request import urlopen
@@ -34,7 +32,6 @@ import netCDF4
 import time
 import functools
 import beartype
-from .m2l_enums import Datatype, VerboseLevel
 
 ############################################
 # get value from a rasterio raster at location x,y (real world coords)
@@ -270,7 +267,7 @@ def get_dtm_hawaii(
     # import re
 
     grid = (
-        re.sub("\[.*\]", "", data[1])
+        re.sub("\\[.*\\]", "", data[1])
         .replace(",", "")
         .replace("elev.elev", "")
         .replace("\n", " ")
@@ -291,7 +288,7 @@ def get_dtm_hawaii(
     OPeNDAP = OPeNDAP.astype("int16")
     OPeNDAP = np.flipud(OPeNDAP)
 
-    transform = from_origin(minlong, maxlat, 0.008333333, 0.008333333)
+    transform = rasterio.transform.from_origin(minlong, maxlat, 0.008333333, 0.008333333)
 
     new_dataset = rasterio.open(
         path_out,
@@ -450,7 +447,7 @@ def get_dtm(path_out, minlong, maxlong, minlat, maxlat, url="AU"):
 
 def reproject_dtm(path_in, path_out, src_crs, dst_crs):
     with rasterio.open(path_in) as src:
-        transform, width, height = calculate_default_transform(
+        transform, width, height = rasterio.warp.calculate_default_transform(
             src.crs, dst_crs, src.width, src.height, *src.bounds
         )
         kwargs = src.meta.copy()
@@ -460,14 +457,14 @@ def reproject_dtm(path_in, path_out, src_crs, dst_crs):
 
         with rasterio.open(path_out, "w", **kwargs) as dst:
             for i in range(1, src.count + 1):
-                reproject(
+                rasterio.warp.reproject(
                     source=rasterio.band(src, i),
                     destination=rasterio.band(dst, i),
                     src_transform=src.transform,
                     src_crs=src.crs,
                     dst_transform=transform,
                     dst_crs=dst_crs,
-                    resampling=Resampling.nearest,
+                    resampling=rasterio.warp.Resampling.nearest,
                 )
             dst.close()
     print("reprojected dtm geotif saved as", path_out)
@@ -569,7 +566,7 @@ def load_and_reproject_dtm(
         dataset = rasterio.open(url)
 
     # Given an open rasterio dataset reproject it into dst_crs
-    new_transform, new_width, new_height = calculate_default_transform(
+    new_transform, new_width, new_height = rasterio.warp.calculate_default_transform(
         dataset.crs, dst_crs, dataset.width, dataset.height, *dataset.bounds
     )
     params = dataset.meta.copy()
@@ -585,7 +582,7 @@ def load_and_reproject_dtm(
     reprojected_dtm = rasterio.io.MemoryFile()
     with reprojected_dtm.open(**params) as dst:
         data = np.zeros((new_width, new_height), dtype=np.float64)
-        reproject(
+        rasterio.warp.reproject(
             dataset.read(),
             data,
             src_transform=dataset.transform,
@@ -883,7 +880,7 @@ def save_clip_to_bbox(path, geom, minx, maxx, miny, maxy, dst_crs):
 
 try:
     import httplib
-except:
+except Exception:
     import http.client as httplib
 
 ####################################################
@@ -902,7 +899,7 @@ def have_access(url):
         conn.close()
         print("available: " + url)
         return True
-    except:
+    except Exception:
         conn.close()
         print("NOT available: " + url)
         return False
@@ -1088,7 +1085,7 @@ def plot_bedding_stereonets(config, map_data):
     if config.verbose_level != VerboseLevel.NONE:
         fig, ax = mplstereonet.subplots(figsize=(7, 7))
         dips = orientations["DIP"].values.astype(float)
-        cax = ax.density_contourf(strikes, dips, measurement="poles")
+        ax.density_contourf(strikes, dips, measurement="poles")
         ax.pole(strikes, dips, markersize=5, color="w")
         ax.grid(True)
         # text = ax.text(2.2, 1.37, "All data", color='b')
@@ -1128,7 +1125,7 @@ def plot_bedding_stereonets(config, map_data):
                 print("strike/dip of girdle", fit_strike, "/", fit_dip)
             if config.verbose_level == VerboseLevel.ALL:
                 fig, ax = mplstereonet.subplots(figsize=(5, 5))
-                cax = ax.density_contourf(strikes, dips, measurement="poles")
+                ax.density_contourf(strikes, dips, measurement="poles")
                 ax.pole(strikes, dips, markersize=5, color="w")
                 ax.grid(True)
                 # text = ax.text(2.2, 1.37, gp, color='b')
@@ -1159,7 +1156,7 @@ def plot_bedding_stereonets_old(orientations, all_sorts, verbose_level: VerboseL
         fig, ax = mplstereonet.subplots(figsize=(7, 7))
         strikes = orientations["azimuth"].values - 90
         dips = orientations["dip"].values
-        cax = ax.density_contourf(strikes, dips, measurement="poles")
+        ax.density_contourf(strikes, dips, measurement="poles")
         ax.pole(strikes, dips, markersize=5, color="w")
         ax.grid(True)
         # text = ax.text(2.2, 1.37, "All data", color='b')
@@ -1170,7 +1167,6 @@ def plot_bedding_stereonets_old(orientations, all_sorts, verbose_level: VerboseL
         all_sorts2 = all_sorts[all_sorts["group"] == gp]
         all_sorts2.set_index("code", inplace=True)
 
-        frames = {}
         first = True
         for indx, as2 in all_sorts2.iterrows():
             orientations2 = orientations[orientations["formation"] == indx]
@@ -1192,10 +1188,10 @@ def plot_bedding_stereonets_old(orientations, all_sorts, verbose_level: VerboseL
                 fig, ax = mplstereonet.subplots(figsize=(5, 5))
                 strikes = all_orientations["azimuth"].values - 90
                 dips = all_orientations["dip"].values
-                cax = ax.density_contourf(strikes, dips, measurement="poles")
+                ax.density_contourf(strikes, dips, measurement="poles")
                 ax.pole(strikes, dips, markersize=5, color="w")
                 ax.grid(True)
-                text = ax.text(2.2, 1.37, gp, color="b")
+                ax.text(2.2, 1.37, gp, color="b")
                 plt.title(gp)
                 plt.show()
 
@@ -1222,11 +1218,11 @@ def plot_bedding_stereonets_old(orientations, all_sorts, verbose_level: VerboseL
                     strikes = orientations2["azimuth"].values - 90
                     dips = orientations2["dip"].values
 
-                    cax = ax[ind2].density_contourf(strikes, dips, measurement="poles")
+                    ax[ind2].density_contourf(strikes, dips, measurement="poles")
                     ax[ind2].pole(strikes, dips, markersize=5, color="w")
                     ax[ind2].grid(True)
                     # fig.colorbar(cax)
-                    text = ax[ind2].text(2.2, 1.37, indx, color="b")
+                    ax[ind2].text(2.2, 1.37, indx, color="b")
 
                     # Fit a plane to the girdle of the distribution and display it.
                     fit_strike, fit_dip = mplstereonet.fit_girdle(strikes, dips)
@@ -1270,7 +1266,7 @@ def display(element):
             from IPython.display import display, Image, HTML
 
             IPython.display(element)
-        except Exception as e:
+        except Exception:
             return False
 
 

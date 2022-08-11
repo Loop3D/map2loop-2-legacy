@@ -4,7 +4,6 @@ from shapely.geometry import (
     Point,
     MultiPolygon,
 )
-import matplotlib.pyplot as plt
 import geopandas as gpd
 import pandas as pd
 from math import (
@@ -532,7 +531,7 @@ def save_basal_contacts(
                                     a_snapped = snap(a_polygon, b_polygon, 10)
                                     try:
                                         LineStringC = a_snapped.intersection(b_polygon)
-                                    except:
+                                    except Exception:
                                         print(
                                             "unable to intersect polygons",
                                             a_poly,
@@ -1011,8 +1010,8 @@ def save_contacts_with_faults_removed(
 ):
     faults_clip = gpd.read_file(path_fault)
 
-    df = pd.DataFrame.from_dict(ls_dict, "index")
-    contacts = gpd.GeoDataFrame(df, crs=dst_crs, geometry="geometry")
+    # df = pd.DataFrame.from_dict(ls_dict, "index")
+    # contacts = gpd.GeoDataFrame(df, crs=dst_crs, geometry="geometry")
     faults_clip = faults_clip.dropna(subset=["geometry"])
 
     # defines buffer around faults where strat nodes will be removed
@@ -1030,7 +1029,7 @@ def save_contacts_with_faults_removed(
         ~contacts_nf_deci.geometry.within(all_fz)
     ]
 
-    cnf_de_copy = contacts_decimate_nofaults.copy()
+    # cnf_de_copy = contacts_decimate_nofaults.copy()
 
     ac = open(os.path.join(path_out, "contacts4.csv"), "w")
     ac.write("X,Y,Z,formation\n")
@@ -1830,7 +1829,7 @@ def process_plutons(config: Config, map_data, workflow: dict):
             else:
                 agp = str(ageol["GROUP"])
 
-            if not newgp in gp_names:
+            if newgp not in gp_names:
                 gp_names[ngroups] = newgp
                 gp_ages[ngroups][0] = ageol["MAX_AGE"]
                 gp_ages[ngroups][1] = ageol["MIN_AGE"]
@@ -1893,7 +1892,7 @@ def process_plutons(config: Config, map_data, workflow: dict):
 
             neighbours = []
             j += 1
-            central_age = ageol["MIN_AGE"]  # absolute age of central polygon
+            # central_age = ageol["MIN_AGE"]  # absolute age of central polygon
             central_poly = ageol.geometry
             for ind, bgeol in geol_clip.iterrows():  # potential neighbouring polygons
                 if ageol.geometry != bgeol.geometry:  # do not compare with self
@@ -1926,7 +1925,7 @@ def process_plutons(config: Config, map_data, workflow: dict):
                             central_poly = central_poly.buffer(0)
                         if not older_polygon.is_valid:
                             older_polygon = older_polygon.buffer(0)
-                        centroid = central_poly.centroid
+                        # centroid = central_poly.centroid
 
                         LineStringC = central_poly.intersection(older_polygon)
                         if (
@@ -1953,7 +1952,7 @@ def process_plutons(config: Config, map_data, workflow: dict):
                                 "geometry": LineStringC,
                             }
                             id = id + 1
-                            first = True  # use first found dist so all arcs converge to same point
+                            # first = True  # use first found dist so all arcs converge to same point
                             for lineC in LineStringC.geoms:  # process all linestrings
                                 if lineC.wkt.split(" ")[0] == "LINESTRING":
                                     # decimate to reduce number of points, but also take second and third point of a series to keep gempy happy
@@ -2522,8 +2521,8 @@ def tidy_data(config: Config, map_data: MapData, use_group, inputs):
     for a_sort in all_sorts.iterrows():
         if a_sort[1]["group"] not in no_contacts:
             for sg in range(len(lines)):
-                for l in lines[sg].split(","):
-                    if a_sort[1]["group"] == l:
+                for line in lines[sg].split(","):
+                    if a_sort[1]["group"] == line:
                         supergroup = "supergroup_" + str(sg)
             ostr = "{},{},{},{},{},{},{},{}\n".format(
                 index,
@@ -2609,12 +2608,12 @@ def tidy_data(config: Config, map_data: MapData, use_group, inputs):
     fao.close()
 
     # Update formation info
-    age_sorted = pd.read_csv(
-        os.path.join(config.tmp_path, "age_sorted_groups.csv"), sep=","
-    )
+    # age_sorted = pd.read_csv(
+    #     os.path.join(config.tmp_path, "age_sorted_groups.csv"), sep=","
+    # )
 
-    newdx = 1
-    gpdx = 1
+    # newdx = 1
+    # gpdx = 1
     # fas = open(os.path.join(config.tmp_path,'all_sorts_clean.csv'),"w")
     # fas.write('index,group number,index in group,number in group,code,group,uctype\n')
     # if(workflow['cover_map']):
@@ -2658,54 +2657,6 @@ def tidy_data(config: Config, map_data: MapData, use_group, inputs):
     new_asc.to_csv(
         os.path.join(config.tmp_path, "all_sorts_clean.csv"), index=None, header=True
     )
-
-    # add colours (hardwired to GSWA or the moment
-    # if(config.clut_path  == ''):
-    # asc = pd.read_csv(os.path.join(config.tmp_path,'all_sorts_clean.csv'),sep=",")
-    # colours = []
-    # for i in range(len(asc)):
-    # r = random.randint(1,256)-1
-    # g = random.randint(1,256)-1
-    # b = random.randint(1,256)-1
-    # hex_rgb = m2l_utils.intstohex((r,g,b))
-    # colours.append(hex_rgb)
-    # asc['colour']  =  colours
-    # asc.to_csv(os.path.join(config.tmp_path,'all_sorts_clean.csv'), index  =  None, header = True)
-    # else:
-    # asc = pd.read_csv(os.path.join(config.tmp_path,'all_sorts_clean.csv'),sep=",")
-    # colours = pd.read_csv(config.clut_path,sep=",")
-    # if( "UNIT_NAME" == 'CODE'):
-    # code = "UNIT_NAME".lower()
-    # else:
-    # code = 'UNITNAME'
-    # #code = "UNIT_NAME"
-
-    # asc2 = pd.merge(asc, colours, how = 'inner',  left_on = 'code', right_on = code)
-    # asc2.drop(['UNITNAME'], axis = 1,inplace = True)
-    # if(not "UNIT_NAME" == 'code'):
-    # asc2.rename(columns  =  {'code_x':'code'}, inplace  =  True)
-    # if('code_y' in asc2.columns):
-    # asc2.drop(['code_y'], axis = 1,inplace = True)
-    # for row in range(len(asc2)-1,0,-1):
-    # if(asc2.iloc[row]['index'] == asc2.iloc[row-1]['index']):
-    # asc2.drop(index = row-1,inplace = True)
-    # asc2.to_csv(os.path.join(config.tmp_path,'all_sorts_clean.csv'), index  =  None, header = True)
-
-
-"""
-    fac = open(os.path.join(config.output_path,'contacts_clean.csv'),"w")
-    fac.write('X,Y,Z,formation\n')
-
-    for acontact in all_contacts.iterrows():
-        if(all_sorts.loc[acontact[1]['formation']]['group'] in no_contacts or not all_sorts.loc[acontact[1]['formation']]['group'] in use_group):
-            continue
-            # print('dud contact:',acontact[1]['formation'])
-        else:
-            ostr = str(acontact[1]['X'])+","+str(acontact[1]['Y'])+","+str(acontact[1]['Z'])+","+acontact[1]['formation']+"\n"
-            fac.write(ostr)
-
-    fac.close()
-"""
 
 
 def tidy_strat(tmp_path):
@@ -2945,7 +2896,7 @@ def calc_thickness(tmp_path, output_path, buffer, max_thickness_allowed, c_l):
                                     i > 0
                                 ):  # if we found any intersections with base of next higher unit
                                     min_dist = 1e8
-                                    min_pt = 0
+                                    # min_pt = 0
                                     for f in range(0, i):  # find closest hit
                                         this_dist = m2l_utils.ptsdist(
                                             crossings[f, 3],
@@ -2955,12 +2906,12 @@ def calc_thickness(tmp_path, output_path, buffer, max_thickness_allowed, c_l):
                                         )
                                         if this_dist < min_dist:
                                             min_dist = this_dist
-                                            min_pt = f
+                                            # min_pt = f
                                     # if not too far, add to output
                                     if min_dist < max_thickness_allowed:
                                         true_thick = sin(radians(dip_mean)) * min_dist
                                         ostr = (
-                                            "{},{},{},{},{},{},{},{},{},{},{}\n".format(
+                                            "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(
                                                 cx[k],
                                                 cy[k],
                                                 ctextcode[k],
@@ -3101,14 +3052,14 @@ def calc_thickness_with_grid(config: Config, map_data: MapData):
                                 i > 0
                             ):  # if we found any intersections with base of next higher unit
                                 min_dist = 1e8
-                                min_pt = 0
+                                # min_pt = 0
                                 for f in range(0, i):  # find closest hit
                                     this_dist = m2l_utils.ptsdist(
                                         crossings[f, 3], crossings[f, 4], cx[k], cy[k]
                                     )
                                     if this_dist < min_dist:
                                         min_dist = this_dist
-                                        min_pt = f
+                                        # min_pt = f
                                         crossx = crossings[f, 3]
                                         crossy = crossings[f, 4]
                                 # if not too far, add to output
@@ -3290,7 +3241,7 @@ def calc_min_thickness_with_grid(config: Config, map_data: MapData):
                                     i > 0
                                 ):  # if we found any intersections with base of next higher unit
                                     min_dist = 1e8
-                                    min_pt = 0
+                                    # min_pt = 0
                                     for f in range(0, i):  # find closest hit
                                         this_dist = m2l_utils.ptsdist(
                                             crossings[f, 3],
@@ -3300,7 +3251,7 @@ def calc_min_thickness_with_grid(config: Config, map_data: MapData):
                                         )
                                         if this_dist < min_dist:
                                             min_dist = this_dist
-                                            min_pt = f
+                                            # min_pt = f
                                             crossx = crossings[f, 3]
                                             crossy = crossings[f, 4]
                                     # if not too far, add to output
@@ -3779,7 +3730,7 @@ def section2model(seismic_line, seismic_bbox, sx, sy):
     sx1 = (sx - seismic_bbox.loc["TL"].geometry.x) / (
         seismic_bbox.loc["TR"].geometry.x - seismic_bbox.loc["TL"].geometry.x
     )
-    sy1 = sy - seismic_bbox.loc["TR"].geometry.y
+    # sy1 = sy - seismic_bbox.loc["TR"].geometry.y
     for indx, lines in seismic_line.iterrows():
         s_ls = LineString(lines.geometry)
         full_dist = s_ls.length
@@ -3944,8 +3895,8 @@ def save_orientations_with_polarity(config: Config, map_data: MapData):
 
         close_dist = 1e9
         close_fm = ""
-        close_x = 0
-        close_y = 0
+        # close_x = 0
+        # close_y = 0
 
         for (
             indx2,
@@ -3963,8 +3914,8 @@ def save_orientations_with_polarity(config: Config, map_data: MapData):
                                 if dist < close_dist:
                                     close_dist = dist
                                     close_fm = acontact["UNIT_NAME"]
-                                    close_x = pt.x
-                                    close_y = pt.y
+                                    # close_x = pt.x
+                                    # close_y = pt.y
                                     sign = 1
                     elif isects.geom_type == "Point":
                         if isects.distance(orig) < buffer * 2:
@@ -3974,8 +3925,8 @@ def save_orientations_with_polarity(config: Config, map_data: MapData):
                             if dist < close_dist:
                                 close_dist = dist
                                 close_fm = acontact["UNIT_NAME"]
-                                close_x = isects.x
-                                close_y = isects.y
+                                # close_x = isects.x
+                                # close_y = isects.y
                                 sign = 1
 
         dx2 = -m2 * buffer
@@ -4000,8 +3951,8 @@ def save_orientations_with_polarity(config: Config, map_data: MapData):
                                 if dist < close_dist:
                                     close_dist = dist
                                     close_fm = acontact["UNIT_NAME"]
-                                    close_x = pt.x
-                                    close_y = pt.y
+                                    # close_x = pt.x
+                                    # close_y = pt.y
                                     sign = 0
                     elif isects.geom_type == "Point":
                         if isects.distance(orig) < buffer * 2:
@@ -4011,8 +3962,8 @@ def save_orientations_with_polarity(config: Config, map_data: MapData):
                             if dist < close_dist:
                                 close_dist = dist
                                 close_fm = acontact["UNIT_NAME"]
-                                close_x = isects.x
-                                close_y = isects.y
+                                # close_x = isects.x
+                                # close_y = isects.y
                                 sign = 0
 
         if not close_fm == "":
@@ -4187,25 +4138,25 @@ def fault_strat_offset(config: Config, map_data: MapData):
                 avg = lambda x0, x1: (x0 + x1) / 2
                 xmids = [
                     avg(pts[0][0], pts[1][0])
-                    for pts in [L[I : I + 2] for I in range(len(L) - 1)]
+                    for pts in [L[index : index + 2] for index in range(len(L) - 1)]
                 ]
                 ymids = [
                     avg(pts[0][1], pts[1][1])
-                    for pts in [L[I : I + 2] for I in range(len(L) - 1)]
+                    for pts in [L[index : index + 2] for index in range(len(L) - 1)]
                 ]
                 xdiffs = [
                     pts[1][0] - pts[0][0]
-                    for pts in [L[I : I + 2] for I in range(len(L) - 1)]
+                    for pts in [L[index : index + 2] for index in range(len(L) - 1)]
                 ]
                 ydiffs = [
                     pts[1][1] - pts[0][1]
-                    for pts in [L[I : I + 2] for I in range(len(L) - 1)]
+                    for pts in [L[index : index + 2] for index in range(len(L) - 1)]
                 ]
 
                 length = lambda p0, p1: Point(p0).distance(Point(p1))
                 seg_lens = [
                     length(pts[0], pts[1])
-                    for pts in [L[I : I + 2] for I in range(len(L) - 1)]
+                    for pts in [L[index : index + 2] for index in range(len(L) - 1)]
                 ]
 
                 m = [ydiff / seglen for ydiff, seglen in zip(ydiffs, seg_lens)]
@@ -4710,10 +4661,10 @@ def save_basal_contacts_orientations_csv(
         i = 0
         # print(contact['UNIT_NAME'])
         first = True
-        if contact.geometry != None and contact.geometry != first_geom:
+        if contact.geometry is not None and contact.geometry != first_geom:
             if contact.geometry.type == "MultiLineString":  # why not LineString?
                 for line in contact.geometry.geoms:
-                    first_in_line = True
+                    # first_in_line = True
                     if i % config.run_flags["contact_decimate"] == 0:
                         if first:
                             lastx = line.coords[0][0]
@@ -4919,7 +4870,7 @@ def process_sills(
                     ):
                         k = 0
                         for lineC in LineStringC:  # process all linestrings
-                            first = True
+                            # first = True
                             if lineC.wkt.split(" ")[0] == "LINESTRING":
                                 # decimate to reduce number of points, but also take second and third point of a series to keep gempy happy
                                 if (
@@ -4963,7 +4914,7 @@ def process_sills(
                                             (lineC.coords[1][1] - lineC.coords[0][1])
                                             / 2
                                         )
-                                        midpoint = Point(midx, midy)
+                                        # midpoint = Point(midx, midy)
                                         dx1 = -lsy * buffer
                                         dy1 = lsx * buffer
                                         dx2 = -dx1
@@ -5408,7 +5359,7 @@ def lmn_from_line_dip(x1, y1, z1, x2, y2, z2, dip):
                 * C**2
                 * (x1**2 - 2 * x1 * x2 + x2**2 + y1**2 - 2 * y1 * y2 + y2**2)
             )
-        except:
+        except Exception:
             dip = dip + 1
             C = cos(radians(dip))
     if Z1 == -99:
@@ -5472,7 +5423,7 @@ def lmn_from_line_dip(x1, y1, z1, x2, y2, z2, dip):
                 * C**2
                 * (x1**2 - 2 * x1 * x2 + x2**2 + y1**2 - 2 * y1 * y2 + y2**2)
             )
-        except:
+        except Exception:
             dip = dip + 1
             C = cos(radians(dip))
     if Z2 == -99:

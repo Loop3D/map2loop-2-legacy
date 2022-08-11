@@ -13,7 +13,6 @@ from math import (
     tan,
     isnan,
 )
-import numpy as np
 import geopandas as gpd
 from geopandas import GeoDataFrame
 import pandas as pd
@@ -457,7 +456,7 @@ def interpolate_orientations(
         fig, ax = plt.subplots(
             figsize=(10, 10),
         )
-        q = ax.quiver(xi, yi, -ZIm, ZIl, headwidth=0)
+        ax.quiver(xi, yi, -ZIm, ZIl, headwidth=0)
         plt.show()
         print(
             "orientations interpolated as dip dip direction",
@@ -789,7 +788,7 @@ def interpolate_contacts(
         )
     else:
         fig, ax = plt.subplots(figsize=(10, 10))
-        q = ax.quiver(xi, yi, ZIl, ZIm, headwidth=0)
+        ax.quiver(xi, yi, ZIl, ZIm, headwidth=0)
         plt.show()
         print(
             "contacts interpolated as strike",
@@ -833,12 +832,12 @@ def save_contact_vectors(config: Config, map_data, workflow: dict):
     ) in geol_file.iterrows():  # loop through distinct linestrings in MultiLineString
         if acontact.geometry and acontact.geometry.type == "MultiLineString":
             for line in acontact.geometry.geoms:  # loop through line segments
-                if i % config.run_flags["contact_decimate"] == 0:
-                    npoint = 1
+                # if i % config.run_flags["contact_decimate"] == 0:
+                #     npoint = 1
                 i = i + 1
         else:
-            if i % config.run_flags["contact_decimate"] == 0:
-                npoint = 1
+            # if i % config.run_flags["contact_decimate"] == 0:
+            #     npoint = 1
             i = i + 1
 
     x = np.zeros(i + 1)
@@ -1073,7 +1072,7 @@ def join_contacts_and_orientations(
     else:
         f = open(os.path.join(output_path, "combo_full.csv"), "w")
     f.write("X,Y,Z,azimuth,dip,polarity,formation\n")
-    last_code = ""
+    # last_code = ""
     for indx, a_point in structure_code.iterrows():
 
         locations = [(a_point["x"], a_point["y"])]
@@ -1088,7 +1087,7 @@ def join_contacts_and_orientations(
 
         if not str(a_point["UNIT_NAME"]) == "nan":
             f.write(ostr)
-        last_code = a_point["UNIT_NAME"]
+        # last_code = a_point["UNIT_NAME"]
     f.close()
     if fault_flag:
         print(
@@ -1278,7 +1277,7 @@ def interpolate_orientations_with_fat(
     fig, ax = plt.subplots(
         figsize=(10, 10),
     )
-    q = ax.quiver(xi, yi, -ZIm, ZIl, headwidth=0)
+    ax.quiver(xi, yi, -ZIm, ZIl, headwidth=0)
     plt.show()
     print(
         "orientations interpolated as dip dip direction",
@@ -2182,8 +2181,8 @@ def interpolation_grids(
     if spacing < 0:
         spacing = -(config.bbox[2] - config.bbox[0]) / spacing
 
-    x = (config.bbox[2] - config.bbox[0]) / spacing
-    y = (config.bbox[3] - config.bbox[1]) / spacing
+    # x = (config.bbox[2] - config.bbox[0]) / spacing
+    # y = (config.bbox[3] - config.bbox[1]) / spacing
 
     xcoords = np.arange(config.bbox[0], config.bbox[2], spacing)
     ycoords = np.arange(config.bbox[1], config.bbox[3], spacing)
@@ -2332,7 +2331,7 @@ def interpolation_grids(
     # mscaled=np.where(dotproduct<0, -mscaled,mscaled)
     dotproduct = np.where(dotproduct > 1, 1, dotproduct)
     dotproduct = np.where(dotproduct < -1, -1, dotproduct)
-    misorientation = np.degrees(np.arccos(dotproduct))
+    # misorientation = np.degrees(np.arccos(dotproduct))
 
     dip = 90.0 - np.degrees(np.arcsin(orientation_interp["n"]))
     mscaled = np.where(mscaled == 0, 1e-5, mscaled)

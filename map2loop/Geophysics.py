@@ -114,7 +114,7 @@ def get_mag_sus(mag_sus_filename, bbox):
     return mag_sus
 
 
-def get_dtm_profile(minlong, minlat, maxlong, maxlat, mag_long, mag_lat, l):
+def get_dtm_profile(minlong, minlat, maxlong, maxlat, mag_long, mag_lat, geometry):
     from owslib.wcs import WebCoverageService
     import rasterio
     from map2loop.m2l_utils import value_from_raster
@@ -128,12 +128,12 @@ def get_dtm_profile(minlong, minlat, maxlong, maxlat, mag_long, mag_lat, l):
         identifier="1", bbox=bbox, format="GeoTIFF", crs=4326, width=200, height=200
     )
     f = open(dtm_file, "wb")
-    bytes_written = f.write(cvg.read())
+    f.write(cvg.read())
     f.close()
     print("dtm geotif saved as", dtm_file)
 
     with rasterio.open(dtm_file) as dtm:
-        band1 = dtm.read(1)
+        # band1 = dtm.read(1)
 
         dtm_data = []
         for i in range(len(mag_long)):
@@ -144,7 +144,7 @@ def get_dtm_profile(minlong, minlat, maxlong, maxlat, mag_long, mag_lat, l):
     df = pd.DataFrame(dtm_data)
 
     dtm_profile = gpd.GeoDataFrame(
-        index=np.arange(mag_long.shape[0]), crs="EPSG:4326", geometry=l
+        index=np.arange(mag_long.shape[0]), crs="EPSG:4326", geometry=geometry
     )
     dtm_profile["dtm"] = df
     dtm_profile = dtm_profile[~dtm_profile["dtm"].isna()]
@@ -213,7 +213,7 @@ def GA_strat_petrophysics(
     GA_den = gpd.read_file(density_filename_local)
 
     for g in geology_strat:
-        g_strat = geology[geology["unitname"] == g]
+        # g_strat = geology[geology["unitname"] == g]
         g_den = GA_den[GA_den["stratigrap"] == g]
         g_ms = GA_ms[GA_ms["stratigrap"] == g]
         g_ms = g_ms[g_ms["value"] > 0]

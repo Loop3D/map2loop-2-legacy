@@ -5,23 +5,23 @@ import matplotlib.pyplot as plt
 def plot_geochron(geochron_filename, bbox):
     geochron = gpd.read_file(geochron_filename, bbox=bbox)
     geochron_sort = geochron.sort_values(by="ANALYSIS_A")
-    fig = plt.figure(figsize=[7, 7])
+    plt.figure(figsize=[7, 7])
     plt.gca().set_ylim(0, 4000)
     xscale = 200
     i = 0
     for ind, date in geochron_sort.iterrows():
         if "Ar-Ar" in date["ANALYSIS_T"]:
             c = "r"
-            label = "Ar-Ar"
+            # label = "Ar-Ar"
         elif "U-Pb" in date["ANALYSIS_T"]:
             c = "b"
-            label = "U-Pb"
+            # label = "U-Pb"
         elif "K-Ar" in date["ANALYSIS_T"]:
             c = "g"
-            label = "K-Ar"
+            # label = "K-Ar"
         else:
             c = "k"
-            label = "other"
+            # label = "other"
 
         if "igneous" in date["ANALYSIS_E"]:
             s = "o"
@@ -97,8 +97,8 @@ def plot_geology_codes(geology_filename, bbox):
 
 
 def plot_geology_parents(geology_filename, bbox):
-    colors = ["b", "g", "r", "c", "m", "y", "k", "w"]
-    fig = plt.figure(figsize=[7, 7])
+    # colors = ["b", "g", "r", "c", "m", "y", "k", "w"]
+    plt.figure(figsize=[7, 7])
     geol = gpd.read_file(geology_filename, bbox=bbox)
 
     geol_unique = geol.drop_duplicates(subset=["CODE"])
@@ -120,7 +120,7 @@ def plot_geology_parents(geology_filename, bbox):
                         min = float(geol_unique_code.loc[code]["MIN_AGE_MA"])
                     if float(geol_unique_code.loc[code]["MAX_AGE_MA"]) > max:
                         max = float(geol_unique_code.loc[code]["MAX_AGE_MA"])
-        if not "_Top" in parent:
+        if "_Top" not in parent:
             minmax_parent[parent.replace("_", "")] = [min, max]
     # display(minmax_parent)
     minmax_parent_sort = sorted(minmax_parent.items(), key=lambda kv: (kv[1], kv[0]))
@@ -157,7 +157,7 @@ def plot_geology_parents(geology_filename, bbox):
 
 
 def plot_orogenic(orogenic_filename, bbox):
-    fig = plt.figure(figsize=[7, 7])
+    plt.figure(figsize=[7, 7])
     geol = gpd.read_file(orogenic_filename, bbox=bbox)
 
     geol_unique = geol.drop_duplicates(subset=["EVENTNAME"])
@@ -208,7 +208,6 @@ def plot_orogenic(orogenic_filename, bbox):
 def plot_linear_segments(linear_filename, bbox, feature):
     import fracpaq as fpq
     import matplotlib.pylab as plt
-    import sys
     import numpy as np
 
     linear = gpd.read_file(linear_filename, bbox=bbox)
@@ -227,10 +226,10 @@ def plot_linear_segments(linear_filename, bbox, feature):
 
     #   defaults
     CM2INCHES = 0.3937
-    bGrid = False
-    bEqualArea = False
+    # bGrid = False
+    # bEqualArea = False
     nBinWidth = 5
-    sColour = "C0"
+    # sColour = "C0"
     xSize = 15.0 * CM2INCHES
     ySize = 15.0 * CM2INCHES
 
@@ -281,16 +280,15 @@ def plot_linear_segments(linear_filename, bbox, feature):
 
 
 def plot_mag(mag_netcdf_path, bbox):
-    import os
     import netCDF4
     import numpy as np
-    from geophys_utils import NetCDFGridUtils
-    from geophys_utils import get_netcdf_edge_points, points2convex_hull
+    # from geophys_utils import NetCDFGridUtils
+    # from geophys_utils import get_netcdf_edge_points, points2convex_hull
     import matplotlib.pyplot as plt
 
     netcdf_dataset = netCDF4.Dataset(mag_netcdf_path, "r")
 
-    max_bytes = 500000000
+    # max_bytes = 500000000
 
     # netcdf_grid_utils = NetCDFGridUtils(netcdf_dataset)
     lats = netcdf_dataset.variables["lat"][:]
@@ -305,16 +303,15 @@ def plot_mag(mag_netcdf_path, bbox):
 
 
 def plot_grav(grav_netcdf_path, bbox):
-    import os
     import netCDF4
     import numpy as np
-    from geophys_utils import NetCDFGridUtils
-    from geophys_utils import get_netcdf_edge_points, points2convex_hull
+    # from geophys_utils import NetCDFGridUtils
+    # from geophys_utils import get_netcdf_edge_points, points2convex_hull
     import matplotlib.pyplot as plt
 
     netcdf_dataset = netCDF4.Dataset(grav_netcdf_path, "r")
 
-    max_bytes = 500000000
+    # max_bytes = 500000000
 
     # netcdf_grid_utils = NetCDFGridUtils(netcdf_dataset)
     lats = netcdf_dataset.variables["lat"][:]
@@ -362,19 +359,18 @@ def plot_mag_sus(mag_sus_filename, bbox):
 
 
 def plot_mag_mag_sus(mag_netcdf_path, mag_sus_filename, bbox):
-    import os
     import netCDF4
     import numpy as np
     import geopandas as gpd
-    from geophys_utils import NetCDFGridUtils
-    from geophys_utils import get_netcdf_edge_points, points2convex_hull
+    # from geophys_utils import NetCDFGridUtils
+    # from geophys_utils import get_netcdf_edge_points, points2convex_hull
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots(1, 2)
 
     netcdf_dataset = netCDF4.Dataset(mag_netcdf_path, "r")
 
-    max_bytes = 500000000
+    # max_bytes = 500000000
 
     # netcdf_grid_utils = NetCDFGridUtils(netcdf_dataset)
     lats = netcdf_dataset.variables["lat"][:]
@@ -399,19 +395,18 @@ def plot_mag_mag_sus(mag_netcdf_path, mag_sus_filename, bbox):
 
 
 def plot_grav_density(grav_netcdf_path, density_filename, bbox):
-    import os
     import netCDF4
     import numpy as np
     import geopandas as gpd
-    from geophys_utils import NetCDFGridUtils
-    from geophys_utils import get_netcdf_edge_points, points2convex_hull
+    # from geophys_utils import NetCDFGridUtils
+    # from geophys_utils import get_netcdf_edge_points, points2convex_hull
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots(1, 2)
 
     netcdf_dataset = netCDF4.Dataset(grav_netcdf_path, "r")
 
-    max_bytes = 500000000
+    # max_bytes = 500000000
 
     # netcdf_grid_utils = NetCDFGridUtils(netcdf_dataset)
     lats = netcdf_dataset.variables["lat"][:]
@@ -434,7 +429,7 @@ def plot_grav_density(grav_netcdf_path, density_filename, bbox):
 
 
 def plot_plutons(geology_filename, bbox):
-    import pandas as pd
+    # import pandas as pd
 
     geol = gpd.read_file(geology_filename, bbox=bbox)
     plutons = geol[geol["ROCKTYPE1"].str.contains("igneous")]
@@ -490,7 +485,6 @@ def plot_plutons(geology_filename, bbox):
 def plot_whole_linear(linear_filename, bbox, feature):
     import fracpaq as fpq
     import matplotlib.pylab as plt
-    import sys
     import numpy as np
 
     linear = gpd.read_file(linear_filename, bbox=bbox)
@@ -508,10 +502,10 @@ def plot_whole_linear(linear_filename, bbox, feature):
 
     #   defaults
     CM2INCHES = 0.3937
-    bGrid = False
-    bEqualArea = False
+    # bGrid = False
+    # bEqualArea = False
     nBinWidth = 5
-    sColour = "C0"
+    # sColour = "C0"
     xSize = 15.0 * CM2INCHES
     ySize = 15.0 * CM2INCHES
 
@@ -564,7 +558,6 @@ def plot_whole_linear(linear_filename, bbox, feature):
 
 
 def get_data(netcdf_path, bbox):
-    import os
     import netCDF4
     import numpy as np
 

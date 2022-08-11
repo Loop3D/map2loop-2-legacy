@@ -1,5 +1,4 @@
 import os
-from tabnanny import verbose
 from map2loop.m2l_enums import Datatype, VerboseLevel
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -13,7 +12,7 @@ from shapely.geometry import (
     LineString,
     Polygon,
 )
-from math import degrees, atan2, acos, degrees
+from math import degrees, atan2, acos
 import warnings
 import beartype
 
@@ -386,7 +385,7 @@ class Topology(object):
                     .replace("?", "_")
                 )
             # print(grp)
-            if not grp in groups:
+            if grp not in groups:
                 groups += [(grp)]
 
             info += [(grp, a_poly["MIN_AGE"], a_poly["MAX_AGE"])]
@@ -401,10 +400,10 @@ class Topology(object):
                 if info[i][0] == groups[j]:
                     if float(info[i][1]) < min_age:
                         min_age = float(info[i][1])
-                        min_ind = i
+                        # min_ind = i
                     if float(info[i][2]) > max_age:
                         max_age = float(info[i][2])
-                        max_ind = i
+                        # max_ind = i
             #        print(groups[j],min_age,max_age,(max_age+min_age)/2)
             ages += [(groups[j], min_age, max_age, (max_age + min_age) / 2)]
         #    print()
@@ -707,7 +706,7 @@ class Topology(object):
         )
         n_faults = len(all_long_faults)
         # print(n_faults)
-        all_faults = {}
+        # all_faults = {}
         unique_list = []
         # display(unique_list)
         for i in range(1, n_faults):
@@ -753,7 +752,7 @@ class Topology(object):
         groups = summary.group.unique()
         ngroups = len(summary.group.unique())
         supergroups = summary.supergroup.unique()
-        nsupergroups = len(summary.supergroup.unique())
+        # nsupergroups = len(summary.supergroup.unique())
         # print(ngroups,'groups',groups,groups[0])
         uf_array = uf_rel.to_numpy()
         gf_array = np.zeros((ngroups, uf_array.shape[1]), dtype="U100")
@@ -1001,7 +1000,7 @@ class Topology(object):
         try:
             if config.verbose_level != VerboseLevel.NONE:
                 print("cycles", list(nx.simple_cycles(GD)))
-        except:
+        except Exception:
             if config.verbose_level != VerboseLevel.NONE:
                 print("no cycles")
 
@@ -1018,7 +1017,7 @@ class Topology(object):
         sub_geol, geology_file_csv, c_l, hint_flag, verbose_level=VerboseLevel.ALL
     ):
         # hint_flag=False
-        if hint_flag == True:
+        if hint_flag is True:
             if verbose_level != VerboseLevel.NONE:
                 print("Using ENS age hints")
             code_hint_file = (
@@ -1029,7 +1028,7 @@ class Topology(object):
             code_hints.set_index("code", inplace=True)
             hint_list = []
             for indx, row in code_hints.iterrows():
-                if not indx in hint_list:
+                if indx not in hint_list:
                     hint_list.append(indx)
         f = open(geology_file_csv, "w+")
         f.write(
@@ -1064,7 +1063,7 @@ class Topology(object):
             f.write('"' + str(sub_geol.loc[i]["UNIT_NAME"]) + '"\t')
             # since map2model is looking for "" not "None"
             f.write('"' + str(sub_geol.loc[i]["GROUP"]).replace("None", "") + '"\t')
-            if hint_flag == True and sub_geol.loc[i]["UNIT_NAME"] in hint_list:
+            if hint_flag is True and sub_geol.loc[i]["UNIT_NAME"] in hint_list:
                 hint = code_hints.loc[sub_geol.loc[i]["UNIT_NAME"]]["hint"]
             else:
                 hint = 0.0
@@ -1180,14 +1179,14 @@ class Topology(object):
                 # print('Fault_'+str(flt["GEOMETRY_OBJECT_ID"]),flt.geometry.type,flt.geometry.centroid )
                 if flt.geometry.type == "LineString":
                     flt_ls = LineString(flt.geometry)
-                    midx = flt_ls.coords[0][0] + (
-                        (flt_ls.coords[0][0] - flt_ls.coords[len(flt_ls.coords) - 1][0])
-                        / 2
-                    )
-                    midy = flt_ls.coords[0][1] + (
-                        (flt_ls.coords[0][1] - flt_ls.coords[len(flt_ls.coords) - 1][1])
-                        / 2
-                    )
+                    # midx = flt_ls.coords[0][0] + (
+                    #     (flt_ls.coords[0][0] - flt_ls.coords[len(flt_ls.coords) - 1][0])
+                    #    / 2
+                    # )
+                    # midy = flt_ls.coords[0][1] + (
+                    #     (flt_ls.coords[0][1] - flt_ls.coords[len(flt_ls.coords) - 1][1])
+                    #     / 2
+                    # )
                     l, m = m2l_utils.pts2dircos(
                         flt_ls.coords[0][0],
                         flt_ls.coords[0][1],
@@ -1447,7 +1446,7 @@ class Topology(object):
             i = i + 1
 
         for n in Gp.nodes:
-            if not "isGroup" in Gp.nodes[n]:
+            if "isGroup" not in Gp.nodes[n]:
                 Gp.nodes[n]["gid"] = recode[Gp.nodes[n]["gid"]]
 
         # check for cycle and arbitrarily remove first of the edges
@@ -1464,7 +1463,7 @@ class Topology(object):
                     + '" was removed as it conflicts with another relationship'
                 )
                 warnings.warn(warning_msg)
-        except:
+        except Exception:
             print("no cycles")
 
         nx.write_gml(Gp, os.path.join(graph_path, "ASUD_strat.gml"))
@@ -1678,7 +1677,7 @@ class Topology(object):
         As_t = As_t.set_index("formation")
 
         for n in Gloop.nodes:
-            if not "Fault" in n and not "Point_data" in n:
+            if "Fault" not in n and "Point_data" not in n:
                 if As_t.loc[n].name in Gloop.nodes:
                     if np.isnan(As_t.loc[n]["thickness std"]):
                         Gloop.nodes[n]["ThicknessStd"] = -1
