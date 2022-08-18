@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.2.9](https://www.github.com/Loop3D/map2loop-2/compare/v1.2.8...v1.2.9) (2022-08-18)
+
+
+### Bug Fixes
+
+* Reset tags to not include v and attempt to get pip install working ([2d0924b](https://www.github.com/Loop3D/map2loop-2/commit/2d0924b4127e7e659e99a2c3258b5cb983e28bd0))
+
 ### [1.2.8](https://www.github.com/Loop3D/map2loop-2/compare/v1.2.7...v1.2.8) (2022-08-03)
 
 
