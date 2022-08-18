@@ -33,7 +33,6 @@ class Project(object):
     """ A high level object implementation of the map2loop workflow.
     """
 
-    @m2l_utils.timer_decorator
     @beartype.beartype
     def __init__(
         self,
@@ -303,7 +302,6 @@ class Project(object):
             })
         self.workflow = workflow
 
-    @m2l_utils.timer_decorator
     @beartype.beartype
     def update_config(self,
                       overwrite=None,
@@ -418,7 +416,6 @@ class Project(object):
 
         self.map_data.load_all_map_data(self.config)
 
-    @m2l_utils.timer_decorator
     def run(self):
         """ The main map2loop process for reading, converting, reprojecting and interpolating map data into event, observation
         and relationship data suitable for further processing
