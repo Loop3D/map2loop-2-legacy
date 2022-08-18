@@ -42,7 +42,8 @@ jobs:
 
   release-please:
     runs-on: ubuntu-latest
-    include-v-in-tag: false
+    with:
+      include-v-in-tag: false
     steps:
       - uses: GoogleCloudPlatform/release-please-action@v2
         id: release
