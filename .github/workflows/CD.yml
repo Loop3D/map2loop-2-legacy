@@ -42,14 +42,14 @@ jobs:
 
   release-please:
     runs-on: ubuntu-latest
-    with:
-      include-v-in-tag: false
     steps:
       - uses: GoogleCloudPlatform/release-please-action@v2
         id: release
         with:
           release-type: python
           package-name: map2loop
+          include-v-in-tag: false
+
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
 
