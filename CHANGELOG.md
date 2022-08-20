@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.10](https://github.com/Loop3D/map2loop-2/compare/v1.2.9...v1.2.10) (2022-08-20)
+
+
+### Bug Fixes
+
+* Remove pypi dependencies while gdal and rasterio can't install easily ([17c9076](https://github.com/Loop3D/map2loop-2/commit/17c9076d11e104e24ab79aa777c69e951f0c058c))
+
 ### [1.2.9](https://www.github.com/Loop3D/map2loop-2/compare/v1.2.8...v1.2.9) (2022-08-18)
 
 
