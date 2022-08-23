@@ -31,7 +31,6 @@ def warning_without_codeline(message, category, filename, lineno, line=""):
 class Project(object):
     """A high level object implementation of the map2loop workflow."""
 
-    @m2l_utils.timer_decorator
     @beartype.beartype
     def __init__(
         self,
@@ -289,7 +288,6 @@ class Project(object):
             except Exception:
                 continue
 
-    @m2l_utils.timer_decorator
     @beartype.beartype
     def update_config(
         self,
@@ -852,7 +850,6 @@ class Project(object):
                 header=True,
             )
 
-    @m2l_utils.timer_decorator
     def __propagate_contact_dips(self):
         if self.config.verbose_level != VerboseLevel.NONE:
             print("Propagating dips along contacts...")
@@ -860,7 +857,6 @@ class Project(object):
             self.config, self.map_data, self.workflow
         )
 
-    @m2l_utils.timer_decorator
     def __calc_thickness(self):
         # Estimate formation thickness and normalised formation thickness
         # basal_contacts_filename = os.path.join(self.config.tmp_path, 'basal_contacts.shp')
@@ -886,7 +882,6 @@ class Project(object):
                 "Normalised Thicknesses",
             )
 
-    @m2l_utils.timer_decorator
     def __create_fold_axial_trace_points(self):
         folds_clip = self.map_data.get_map_data(Datatype.FOLD).copy()
         # folds_clip = gpd.read_file(self.fold_filename)
@@ -900,7 +895,6 @@ class Project(object):
                 self.config, self.map_data, self.workflow
             )
 
-    @m2l_utils.timer_decorator
     def __postprocess(self):
 
         inputs = (
@@ -1016,7 +1010,6 @@ class Project(object):
             warnings.warn(str(e))
             warnings.warn("WARNING: Could not save geology graphic")
 
-    @m2l_utils.timer_decorator
     def __extract_drillholes(self):
         dhdb_filename = self.map_data.get_map_data(
             Datatype.DRILLHOLE

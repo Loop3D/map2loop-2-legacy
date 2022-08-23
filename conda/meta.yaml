@@ -1,10 +1,10 @@
 {% set name = "map2loop" %}
-{% set version = "1.2.2" %}
 
 
 package:
   name: "{{ name|lower }}"
-  version: "{{ environ.get('GIT_DESCRIBE_TAG', '') }}"
+#   version: "{{ environ.get('GIT_DESCRIBE_TAG', '') }}"
+  version: "1.2.10"
 
 source:
   git_url: https://github.com/Loop3D/map2loop-2
@@ -26,7 +26,7 @@ requirements:
     - geopandas
     - pyproj
     - shapely
-    - rasterio
+    - rasterio<=1.2.10
     - descartes
     - matplotlib-base
     - networkx
