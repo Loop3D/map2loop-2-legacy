@@ -1204,7 +1204,7 @@ def save_faults(config: Config, map_data: MapData, workflow: dict):
                         if config.c_l["fdipdir_flag"] == "num":
                             if (
                                 pd.notna(flt[config.c_l["fdipdir"]])
-                                and flt[config.c_l["fdipdir"]] != "-999"
+                                and str(flt[config.c_l["fdipdir"]]) != "-999"
                             ):
                                 azimuth = flt[config.c_l["fdipdir"]]
                             else:
