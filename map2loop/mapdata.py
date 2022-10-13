@@ -343,7 +343,9 @@ class MapData:
             self.save_map_data(output_dir, i, extension)
 
     @beartype.beartype
-    def save_map_data(self, output_dir: str, datatype: Datatype, extension: str = ".csv"):
+    def save_map_data(
+        self, output_dir: str, datatype: Datatype, extension: str = ".csv"
+    ):
         if self.data_states[datatype] == Datastate.CONVERTED:
             try:
                 filename = os.path.join(output_dir, datatype.name, extension)
@@ -497,9 +499,11 @@ class MapData:
                     self.config.c_l["mscm"],
                     self.config.c_l["mcom"],
                 ]
-                sub_mindep = mindeps[columns]
-                Topology.save_mindep_wkt(
-                    sub_mindep, self.config.mindep_filename_wkt, self.config.c_l
+                sub_mindep = mindeps[columns].copy()
+
+                sub_mindep.columns = ["WKT"] + list(sub_mindep.columns[1:])
+                sub_mindep.to_csv(
+                    self.config.mindep_filename_wkt, sep="\t", index=False
                 )
         else:
             print(
@@ -512,10 +516,9 @@ class MapData:
         if self.data_states[Datatype.STRUCTURE] == Datastate.COMPLETE:
             orientations = self.get_map_data(Datatype.STRUCTURE)
             columns = ["geometry", "STRUCTURE_POINT_ID", "DIP", "DIPDIR"]
-            sub_pts = orientations[columns]
-            Topology.save_structure_wkt(
-                sub_pts, self.config.structure_filename_wkt, self.config.c_l
-            )
+            sub_pts = orientations[columns].copy()
+            sub_pts.columns = ["WKT"] + list(sub_pts.columns[1:])
+            sub_pts.to_csv(self.config.structure_filename_wkt, sep="\t", index=False)
         else:
             print(
                 f"Cannot export structure data as it only loaded to {self.data_states[Datatype.STRUCTURE].name} status"
@@ -527,10 +530,16 @@ class MapData:
         if self.data_states[Datatype.FAULT] == Datastate.COMPLETE:
             faults = self.get_map_data(Datatype.FAULT)
             columns = ["geometry", "GEOMETRY_OBJECT_ID", "FEATURE"]
-            sub_lines = faults[columns]
-            Topology.save_faults_wkt(
-                sub_lines, self.config.fault_filename_wkt, self.config.c_l
+            sub_lines = faults[columns].copy()
+
+            # Change geometry column name to WKT
+            sub_lines.columns = ["WKT"] + list(sub_lines.columns[1:])
+            # Filter cells with a feature description containing the word 'fault'
+            mask = sub_lines["FEATURE"].str.contains(
+                "fault", na=False, case=False, regex=True
             )
+            sub_faults = sub_lines[mask]
+            sub_faults.to_csv(self.config.fault_filename_wkt, sep="\t", index=False)
         else:
             print(
                 f"Cannot export fault data as it only loaded to {self.data_states[Datatype.FAULT].name} status"

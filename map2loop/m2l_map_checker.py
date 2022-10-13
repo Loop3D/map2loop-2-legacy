@@ -739,17 +739,6 @@ def check_fault_map(
     faults = rename_columns(
         faults, c_l["fdipest"], "DIP_ESTIMATE", m2l_errors, verbose_level
     )
-    # faults = rename_columns(faults, c_l['fdipest_vals'], 'DIP_TEXT_OPTIONS', m2l_errors, verbose_level)
-
-    # Reset c_l labels to new labels (temporary unit all c_l references removed from non-mapchecker code)
-    # c_l['f'] = 'FEATURE'
-    # c_l['o'] = 'GEOMETRY_OBJECT_ID'
-    # c_l['n'] = 'NAME'
-    # c_l['fdip'] = 'DIP'
-    # c_l['fdipdir'] = 'DIPDIR'
-    # c_l['fdipest'] = 'DIP_ESTIMATE'
-    # c_l['fdipest_vals'] = 'DIP_TEXT_OPTIONS'
-
     return faults
 
 
@@ -792,23 +781,6 @@ def check_mindep_map(
 
         else:
             mindeps = None
-        #     mindeps = mindeps.replace(r'^\s+$', np.nan, regex=True)
-
-        #     for code in ('msc', 'msn', 'mst', 'mtc', 'mscm', 'mcom'):
-        #         if(c_l[code] == 'No_col'):
-        #             mindeps[c_l[code]] = 'No_col'
-        #         if not c_l[code] in mindeps.columns:
-        #             m2l_errors.append(
-        #                 'field named "'+str(c_l[code])+'" not found in mineral deposits file')
-        #         else:
-        #             nans = mindeps[c_l[code]].isnull().sum()
-        #             if(nans > 0):
-        #                 m2l_warnings.append(str(
-        #                     nans)+' NaN/blank found in column '+str(c_l[code])+' of mindep file, replacing with 0')
-        #                 mindeps[c_l[code]].fillna("0", inplace=True)
-
-        # if verbose_level != VerboseLevel.NONE:
-        # show_metadata(mindeps, "mindeps layer")
     return mindeps
 
 

@@ -13,7 +13,15 @@ from .topology import Topology
 import map2model
 from . import m2l_interpolation, m2l_utils, m2l_geometry, m2l_export
 from .map2graph import Map2Graph
-from . import geology_loopdata, structure_loopdata, fault_loopdata, fold_loopdata, mindep_loopdata, metafiles, clut_paths
+from . import (
+    geology_loopdata,
+    structure_loopdata,
+    fault_loopdata,
+    fold_loopdata,
+    mindep_loopdata,
+    metafiles,
+    clut_paths,
+)
 from .mapdata import MapData
 from .stratigraphic_column import StratigraphicColumn
 from .deformation_history import DeformationHistory
@@ -25,7 +33,10 @@ import beartype
 
 def warning_without_codeline(message, category, filename, lineno, line=""):
     return str(message)
+
+
 # warnings.formatwarning = warning_without_codeline
+warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
 class Project(object):
@@ -113,6 +124,7 @@ class Project(object):
         self.map_data = MapData()
         self.stratigraphicColumn = StratigraphicColumn()
         self.deformationHistory = DeformationHistory()
+        self.relationshipList = []
 
         # Sanity check on working projection parameter
         if type(working_projection) == str or type(working_projection) == int:
@@ -170,8 +182,6 @@ class Project(object):
         self.map_data.set_filename(Datatype.DTB_GRID, dtb_grid_filename)
         self.map_data.set_filename(Datatype.COVER_MAP, cover_map_filename)
 
-        self.topology_graph = None
-        self.topology_graph_labels = []
         self.overwrite = overwrite
         self.project_path = project_path
         if type(self.overwrite) == bool:
@@ -363,6 +373,7 @@ class Project(object):
                 and bbox_3d["base"] < bbox_3d["top"]
             ):
                 bbox_valid = True
+
         if bbox_valid is False:
             warnings.warn(
                 "Invalid bounding box specified, attempting to get bounding box and projection from the map files"
@@ -498,10 +509,29 @@ class Project(object):
         with tqdm(total=100, position=0) as pbar:
             pbar.update(0)
 
+            # Populate Stratigraphic Column with Strat Layers from Geology files
+            self.stratigraphicColumn.populate(
+                self.map_data.get_map_data(Datatype.GEOLOGY)
+            )
+
+            # Use map2model to create list of relationships between layers
+            # self.stratigraphicColumn.sort_from_relationship_list(self.relationshipList)
+
+            # Optionally use ASUD to add further relationships or clarify some
+            # Use relationships to put layers in groups/supergroups
+
             if self.config.verbose_level != VerboseLevel.NONE:
                 print("Generating topology analyser input...")
             self.map_data.export_wkt_format_files()
+            # Get relationships between Strata layers``
             self.__run_map2model()
+
+            # Create topology graph from map2model output
+            self.topology = Topology(self.config)
+            if self.config.run_flags["aus"]:
+                self.topology.use_asud(self.config)
+            self.topology.save_units(self.config, self.stratigraphicColumn)
+            self.__display_topology_graph()
             # Map2Graph.map2graph('./test_m2g',self.config.geology_file,self.config.fault_file,self.config.mindep_file,self.config.c_l,self.config.run_flags['deposits'])
             pbar.update(10)  # 10%
 
@@ -509,11 +539,8 @@ class Project(object):
             pbar.update(10)  # 20%
 
             # self.config.join_features(self.map_data.get_map_data(Datatype.GEOLOGY))
-            Topology.save_group(
-                self.topology_graph,
-                self.topology_graph_labels,
-                self.config,
-                self.map_data,
+            self.topology.save_group(
+                self.config, self.map_data, self.stratigraphicColumn
             )
             pbar.update(5)  # 25%
 
@@ -538,19 +565,23 @@ class Project(object):
             self.__process_plutons()
             pbar.update(10)  # 80%
 
-            # Seismic section
+            # Seismic section (defaults false)
             if self.workflow["seismic_section"]:
                 self.__extract_section_features()
 
+            # defaults true
             if self.workflow["contact_dips"]:
                 self.__propagate_contact_dips()
 
+            # defaults true
             if self.workflow["formation_thickness"]:
                 self.__calc_thickness()
 
+            # defaults false
             if self.workflow["fold_axial_traces"]:
                 self.__create_fold_axial_trace_points()
 
+            # defaults false
             if self.workflow["drillholes"]:
                 self.__extract_drillholes()
 
@@ -609,7 +640,9 @@ class Project(object):
             m2l_geometry.update_fault_layer(self.config, self.map_data)
 
             self.update_loop_project_file()
-            self.map_data.export_dtm(os.path.join(self.project_path, "dtm", "dtm_rp.tif"))
+            self.map_data.export_dtm(
+                os.path.join(self.project_path, "dtm", "dtm_rp.tif")
+            )
 
             self.__export_png()
 
@@ -659,30 +692,14 @@ class Project(object):
         if self.config.verbose_level != VerboseLevel.NONE:
             print(run_log)
 
-        if self.config.run_flags["aus"]:
-            if self.config.verbose_level != VerboseLevel.NONE:
-                print("Resolving ambiguities using ASUD...", end="\toutput_dir:")
-            Topology.use_asud(self.config.strat_graph_filename, self.config.graph_path)
-            self.config.strat_graph_filename = os.path.join(
-                self.config.graph_path, "ASUD_strat.gml"
-            )
-            if self.config.verbose_level != VerboseLevel.NONE:
-                print("Done.")
-
-        if self.config.verbose_level != VerboseLevel.NONE:
-            print("Generating topology graph display and unit groups...")
-
-        self.topology_graph_labels, self.topology_graph = Topology.get_series(
-            self.config.strat_graph_filename, "id"
-        )
-
+    def __display_topology_graph(self):
         if self.config.verbose_level != VerboseLevel.NONE:
             selected_nodes = [
-                n for n, v in self.topology_graph.nodes(data=True) if n >= 0
+                n for n, v in self.topology.graph.nodes(data=True) if n >= 0
             ]
             nx.draw_networkx(
-                self.topology_graph,
-                pos=nx.kamada_kawai_layout(self.topology_graph),
+                self.topology.graph,
+                pos=nx.kamada_kawai_layout(self.topology.graph),
                 arrows=True,
                 nodelist=selected_nodes,
             )
@@ -693,7 +710,7 @@ class Project(object):
             )
 
         if self.config.verbose_level != VerboseLevel.NONE:
-            nlist = list(self.topology_graph.nodes.data("LabelGraphics"))
+            nlist = list(self.topology.graph.nodes.data("LabelGraphics"))
             nlist.sort()
             for node in nlist:
                 if node[0] >= 0:
@@ -704,11 +721,6 @@ class Project(object):
                     )
                     # second = elem.split(":").replace("'", "")
                     print(node[0], " ", elem)
-
-        # Save groups of stratigraphic units
-        Topology.save_units(
-            self.topology_graph, self.topology_graph_labels, self.config
-        )
 
     # Interpolates a regular grid of orientations from an shapefile of
     # arbitrarily-located points and saves out four csv files of l, m & n
@@ -725,11 +737,7 @@ class Project(object):
             group_girdle, self.config, self.map_data, self.workflow
         )
 
-        (
-            orientation_interp,
-            contact_interp,
-            combo_interp,
-        ) = m2l_interpolation.interpolation_grids(
+        contact_interp, combo_interp = m2l_interpolation.interpolation_grids(
             self.config, self.map_data, basal_contacts_filename, super_groups
         )
 
@@ -968,7 +976,9 @@ class Project(object):
         # Analyse fault topologies
         if self.config.verbose_level != VerboseLevel.NONE:
             print("Parsing fault relationships")
-        Topology.parse_fault_relationships(self.config)
+        self.topology.parse_fault_relationships(
+            self.config, self.map_data, self.stratigraphicColumn
+        )
         m2l_geometry.save_interpolation_parameters(self.config)
 
     def __export_png(self):
@@ -1033,13 +1043,13 @@ class Project(object):
                 print("No drillhole data for merging.")
 
     @beartype.beartype
-    def save_mapdata_to_shapefiles(self, path:str):
+    def save_mapdata_to_shapefiles(self, path: str):
         if not os.path.exists(path):
             os.mkdir(path)
-        self.map_data.save_all_map_data(path,".shp")
+        self.map_data.save_all_map_data(path, ".shp")
 
     @beartype.beartype
-    def save_mapdata_to_csvs(self, path:str):
+    def save_mapdata_to_csvs(self, path: str):
         if not os.path.exists(path):
             os.mkdir(path)
         self.map_data.save_all_map_data(path)

@@ -2910,24 +2910,22 @@ def calc_thickness(tmp_path, output_path, buffer, max_thickness_allowed, c_l):
                                     # if not too far, add to output
                                     if min_dist < max_thickness_allowed:
                                         true_thick = sin(radians(dip_mean)) * min_dist
-                                        ostr = (
-                                            "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(
-                                                cx[k],
-                                                cy[k],
-                                                ctextcode[k],
-                                                min_dist,
-                                                int(true_thick),
-                                                cl[k],
-                                                cm[k],
-                                                lm,
-                                                mm,
-                                                nm,
-                                                p1.x,
-                                                p1.y,
-                                                p2.x,
-                                                p2.y,
-                                                dip_mean,
-                                            )
+                                        ostr = "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(
+                                            cx[k],
+                                            cy[k],
+                                            ctextcode[k],
+                                            min_dist,
+                                            int(true_thick),
+                                            cl[k],
+                                            cm[k],
+                                            lm,
+                                            mm,
+                                            nm,
+                                            p1.x,
+                                            p1.y,
+                                            p2.x,
+                                            p2.y,
+                                            dip_mean,
                                         )
                                         # ostr = str(cx[k])+','+str(cy[k])+','+ctextcode[k]+','+str(int(true_thick))+\
                                         #    ','+str(cl[k])+','+str(cm[k])+','+str(lm)+','+str(mm)+','+str(nm)+','+\
@@ -5513,8 +5511,8 @@ def update_fault_layer(config: Config, map_data: MapData):
     fault_data = fault_data.rename(columns=columns, inplace=False)
     new_faults = local_faults.merge(fault_data, on="name")
     new_faults.crs = local_faults.crs
-    if len(new_faults) > 0:
-        new_faults.to_file(config.tmp_path + "/faults_clip_data.shp")
+    # if len(new_faults) > 0:
+    #     new_faults.to_file(config.tmp_path + "/faults_clip_data.shp")
 
 
 @beartype.beartype

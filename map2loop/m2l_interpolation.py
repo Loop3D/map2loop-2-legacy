@@ -2355,7 +2355,7 @@ def interpolation_grids(
     orientation_interp = pd.DataFrame(orientation_interp)
     contact_interp = pd.DataFrame(contact_interp)
     combo_interp = pd.DataFrame(combo_interp)
-    return (orientation_interp, contact_interp, combo_interp)
+    return (contact_interp, combo_interp)
 
 
 @beartype.beartype
