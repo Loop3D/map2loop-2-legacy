@@ -17,14 +17,14 @@ def explode_polylines(indf, c_l, dst_crs):
     outdf = gpd.GeoDataFrame(columns=indf.columns, crs=dst_crs)
     for idx, row in indf.iterrows():
         if type(row.geometry) == LineString:
-            rowdf = gpd.GeoDataFrame(data=dict(row), index=[0])
+            rowdf = gpd.GeoDataFrame(data=dict(row), index=[0],crs=dst_crs)
             outdf = pd.concat([outdf, rowdf], ignore_index=True)
         if type(row.geometry) == MultiLineString:
             multdf = gpd.GeoDataFrame(columns=indf.columns, crs=dst_crs)
             recs = len(row.geometry.geoms)
             row_dict = dict(row)
             row_dict.pop("geometry")
-            rowdf = gpd.GeoDataFrame(data=row_dict, index=[0])
+            rowdf = gpd.GeoDataFrame(data=row_dict, index=[0],crs=dst_crs)
             multdf = pd.concat([multdf, *[rowdf] * recs], ignore_index=True)
             i = 0
             for geom in range(recs):
