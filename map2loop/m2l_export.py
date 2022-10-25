@@ -345,70 +345,75 @@ def export_to_projectfile(loopFilename, config: Config, overwrite: bool = False)
 
     form2supergroup = pd.read_csv(
         os.path.join(config.tmp_path, "all_sorts_clean.csv"), sep=","
-    )[["code", "group", "colour"]].rename(
-        columns={"code": "formation", "group": "supergroup"}
+    )[["code", "group", "supergroup", "colour"]].rename(
+        columns={"code": "formation"}
     )
     # Change to formation_summary_thicknesses to get all layers and also dont' need to calc thickness again
-    stratigraphicLayers = pd.read_csv(
-        os.path.join(config.output_path, "formation_thicknesses.csv")
-    )
-    thickness = {}
-    sum = 0
-    num = 0
-    for f in form2supergroup["formation"]:
-        # Ignore cover or cover_up layers
-        if f == "cover" or f == "cover_up":
-            pass
-        elif len(stratigraphicLayers[stratigraphicLayers["formation"] == f]):
-            thickness[f] = np.median(
-                stratigraphicLayers[stratigraphicLayers["formation"] == f]["thickness"]
-            )
-            sum += thickness[f]
-            num += 1
-        else:
-            thickness[f] = -1
-    # Note: thickness of unit without any thickness values is the mean thickness of those with values
-    mean_thickness = sum / num
-    for f in form2supergroup["formation"]:
-        if f == "cover" or f == "cover_up":
-            pass
-        elif thickness[f] == -1:
-            thickness[f] = mean_thickness
+    # stratigraphicLayers = pd.read_csv(
+    #     os.path.join(config.output_path, "formation_thicknesses.csv")
+    # )
+    # thickness = {}
+    # sum = 0
+    # num = 0
+    # for f in form2supergroup["formation"]:
+    #     # Ignore cover or cover_up layers
+    #     if f == "cover" or f == "cover_up":
+    #         pass
+    #     elif len(stratigraphicLayers[stratigraphicLayers["formation"] == f]):
+    #         thickness[f] = np.median(
+    #             stratigraphicLayers[stratigraphicLayers["formation"] == f]["thickness"]
+    #         )
+    #         sum += thickness[f]
+    #         num += 1
+    #     else:
+    #         thickness[f] = -1
+    # # Note: thickness of unit without any thickness values is the mean thickness of those with values
+    # mean_thickness = sum / num
+    # for f in form2supergroup["formation"]:
+    #     if f == "cover" or f == "cover_up":
+    #         pass
+    #     elif thickness[f] == -1:
+    #         thickness[f] = mean_thickness
 
     stratAges = pd.read_csv(os.path.join(config.tmp_path, "age_sorted_groups.csv"))[
         ["group_", "min", "max"]
     ]
     stratAges.rename(
-        columns={"group_": "supergroup", "min": "minAge", "max": "maxAge"}, inplace=True
+        columns={"group_": "group", "min": "minAge", "max": "maxAge"}, inplace=True
     )
-    stratLayers = pd.merge(form2supergroup, stratAges, on=["supergroup"])
+    stratLayers = pd.merge(form2supergroup, stratAges, on=["group"])
+    thicknesses = pd.read_csv(os.path.join(config.output_path,"formation_summary_thicknesses.csv"))
+    stratLayers = pd.merge(stratLayers, thicknesses[['formation','thickness median']], on=["formation"])
     stratLayers["colour1Red"] = [int(a[1:3], 16) for a in stratLayers["colour"]]
     stratLayers["colour1Green"] = [int(a[3:5], 16) for a in stratLayers["colour"]]
     stratLayers["colour1Blue"] = [int(a[5:7], 16) for a in stratLayers["colour"]]
     uniqueLayers = stratLayers[
         [
             "formation",
+            "group",
             "supergroup",
             "colour1Red",
             "colour1Green",
             "colour1Blue",
             "minAge",
             "maxAge",
+            "thickness median"
         ]
     ].drop_duplicates(subset="formation")
     stratigraphicLogData = np.zeros(
         uniqueLayers.shape[0], LoopProjectFile.stratigraphicLayerType
     )
     stratigraphicLogData["layerId"] = range(uniqueLayers.shape[0])
-    stratigraphicLogData["layerId"] += 1
+    # stratigraphicLogData["layerId"] += 1
     stratigraphicLogData["minAge"] = uniqueLayers["minAge"]
     stratigraphicLogData["maxAge"] = uniqueLayers["maxAge"]
     stratigraphicLogData["name"] = uniqueLayers["formation"]
+    stratigraphicLogData["group"] = uniqueLayers["group"]
     stratigraphicLogData["supergroup"] = uniqueLayers["supergroup"]
     stratigraphicLogData["enabled"] = 1
     stratigraphicLogData["rank"] = 0
     stratigraphicLogData["type"] = 4
-    stratigraphicLogData["thickness"] = list(thickness.values())
+    stratigraphicLogData["thickness"] = uniqueLayers["thickness median"]
 
     # Should check format of colour first for "#ffffff" perhaps with regex
     stratigraphicLogData["colour1Red"] = uniqueLayers["colour1Red"]

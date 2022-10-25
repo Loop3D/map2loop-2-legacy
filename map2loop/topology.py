@@ -603,7 +603,7 @@ class Topology(object):
         nx.write_gml(G, os.path.join(config.tmp_path, "fault_network.gml"))
 
     @beartype.beartype
-    def super_groups_and_groups(group_girdle, config: Config, map_data, workflow: dict):
+    def super_groups_and_groups(group_girdle, config: Config, map_data, stratColumn: StratigraphicColumn, workflow: dict):
         group_girdle = pd.DataFrame.from_dict(group_girdle, orient="index")
         group_girdle.columns = ["plunge", "bearing", "num orientations"]
         group_girdle.sort_values(by="num orientations", ascending=False, inplace=True)
@@ -613,9 +613,9 @@ class Topology(object):
         )
         super_group = pd.DataFrame(
             [[group_girdle[0:1].index[0], "Super_Group_0", l, m, n]],
-            columns=["Group", "Super_Group", "l", "m", "n"],
+            columns=["group", "superGroup", "l", "m", "n"],
         )
-        super_group.set_index("Group", inplace=True)
+        super_group.set_index("group", inplace=True)
 
         # geol = gpd.read_file(os.path.join(config.tmp_path, 'geol_clip.shp'))
         local_geol = map_data.get_map_data(Datatype.GEOLOGY).copy()
@@ -637,9 +637,9 @@ class Topology(object):
                     sgname = "Super_Group_" + str(sg_index)
                     super_group_new = pd.DataFrame(
                         [[group_girdle[i : i + 1].index[0], sgname, l, m, n]],
-                        columns=["Group", "Super_Group", "l", "m", "n"],
+                        columns=["group", "superGroup", "l", "m", "n"],
                     )
-                    super_group_new.set_index("Group", inplace=True)
+                    super_group_new.set_index("group", inplace=True)
                     super_group = pd.concat([super_group, super_group_new])
 
                 elif group_girdle.iloc[i]["num orientations"] > 5:
@@ -660,9 +660,9 @@ class Topology(object):
                             sgname = "Super_Group_" + str(sg_i)
                             super_group_old = pd.DataFrame(
                                 [[group_girdle[i : i + 1].index[0], sgname, l, m, n]],
-                                columns=["Group", "Super_Group", "l", "m", "n"],
+                                columns=["group", "superGroup", "l", "m", "n"],
                             )
-                            super_group_old.set_index("Group", inplace=True)
+                            super_group_old.set_index("group", inplace=True)
                             super_group = pd.concat([super_group, super_group_old])
                         sg_i = sg_i + 1
                     if not found:
@@ -671,18 +671,18 @@ class Topology(object):
                         sgname = "Super_Group_" + str(sg_index)
                         super_group_new = pd.DataFrame(
                             [[group_girdle[i : i + 1].index[0], sgname, l, m, n]],
-                            columns=["Group", "Super_Group", "l", "m", "n"],
+                            columns=["group", "superGroup", "l", "m", "n"],
                         )
-                        super_group_new.set_index("Group", inplace=True)
+                        super_group_new.set_index("group", inplace=True)
                         super_group = pd.concat([super_group, super_group_new])
                 else:
                     # not enough orientations to test, so lumped with group with most orientations
                     sgname = "Super_Group_" + str(0)
                     super_group_old = pd.DataFrame(
                         [[group_girdle[i : i + 1].index[0], sgname, l, m, n]],
-                        columns=["Group", "Super_Group", "l", "m", "n"],
+                        columns=["group", "superGroup", "l", "m", "n"],
                     )
-                    super_group_old.set_index("Group", inplace=True)
+                    super_group_old.set_index("group", inplace=True)
                     super_group = pd.concat([super_group, super_group_old])
 
         use_gcode3 = []
@@ -692,17 +692,18 @@ class Topology(object):
         if workflow["cover_map"]:
             use_gcode3.append("cover")
 
-        sg2 = set(super_group["Super_Group"])
+        sg2 = set(super_group["superGroup"])
         super_groups = []
         if workflow["cover_map"]:
             super_groups.append(["cover"])
         for s in sg2:
             temp = []
             for ind, sg in super_group.iterrows():
-                if s == sg["Super_Group"]:
+                if s == sg["superGroup"]:
                     temp.append(ind)
             super_groups.append(temp)
-
+        blah = stratColumn.stratigraphicUnits.merge(super_group[["superGroup"]],on="group")
+        stratColumn.stratigraphicUnits['superGroup'] = blah['superGroup_y']
         f = open(os.path.join(config.tmp_path, "super_groups.csv"), "w")
         for sg in super_groups:
             for s in sg:

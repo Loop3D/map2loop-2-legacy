@@ -587,6 +587,9 @@ class Project(object):
 
             self.__postprocess()
 
+            cmap = pd.DataFrame.from_dict(data=self.config.colour_dict, orient="index", columns=["colour"])
+            cmap.index.name = "name"
+            self.stratigraphicColumn.stratigraphicUnits['colour'] = self.stratigraphicColumn.stratigraphicUnits.merge(cmap,on="name")['colour_y']
             self.config.save_cmap(self.workflow)
 
             point_data = m2l_geometry.combine_point_data(
@@ -734,7 +737,7 @@ class Project(object):
 
         group_girdle = m2l_utils.plot_bedding_stereonets(self.config, self.map_data)
         super_groups, self.use_gcode3 = Topology.super_groups_and_groups(
-            group_girdle, self.config, self.map_data, self.workflow
+            group_girdle, self.config, self.map_data, self.stratigraphicColumn, self.workflow
         )
 
         contact_interp, combo_interp = m2l_interpolation.interpolation_grids(

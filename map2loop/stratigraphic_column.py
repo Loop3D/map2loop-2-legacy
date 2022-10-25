@@ -17,11 +17,12 @@ class StratigraphicColumn(object):
                 ("minAge", float),
                 ("maxAge", float),
                 ("group", str),
+                ("superGroup", str),
                 ("thickness", float),
                 ("colour", str),
                 ("indexInGroup", int),
                 ("groupNum", int),
-                ("NumInGroup", int),
+                ("numInGroup", int),
             ]
         )
         self.stratigraphicUnits = pd.DataFrame(
