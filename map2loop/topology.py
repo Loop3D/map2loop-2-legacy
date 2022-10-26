@@ -461,7 +461,7 @@ class Topology(object):
             os.path.join(config.output_path, "fault_dimensions.csv"), delimiter=","
         )
         faultInfo = df[["Fault"]].copy()
-        faultInfo["FaultId"] = faultInfo["Fault"].replace("Fault_", "")
+        faultInfo["FaultId"] = faultInfo["Fault"].str.replace("Fault_", "")
         faultInfo = faultInfo.reset_index()
 
         # Create int dataframe of unit and fault intersections
