@@ -24,7 +24,7 @@ def explode_polylines(indf, c_l, dst_crs):
             recs = len(row.geometry.geoms)
             row_dict = dict(row)
             row_dict.pop("geometry")
-            rowdf = gpd.GeoDataFrame(data=row_dict, index=[0],crs=dst_crs)
+            rowdf = gpd.GeoDataFrame(data=row_dict, index=[0])
             multdf = pd.concat([multdf, *[rowdf] * recs], ignore_index=True)
             i = 0
             for geom in range(recs):
@@ -37,6 +37,7 @@ def explode_polylines(indf, c_l, dst_crs):
                     "is one of a set of duplicates, so renumbering",
                 )
                 i = i + 1
+            multdf.set_crs(crs=dst_crs, inplace=True)
             outdf = pd.concat([outdf, multdf], ignore_index=True)
     return outdf
 
