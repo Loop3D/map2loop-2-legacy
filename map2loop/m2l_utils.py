@@ -1,25 +1,21 @@
 import sys
-import builtins
 import geopandas as gpd
 import pandas as pd
 from map2loop.m2l_enums import VerboseLevel
+from map2loop.m2l_enums import Datatype
 from shapely.geometry.polygon import Polygon
 from shapely.geometry.multipolygon import MultiPolygon
-from shapely.geometry import Point
 import numpy as np
 import rasterio
-import fiona
-from rasterio.warp import calculate_default_transform, reproject, Resampling
-from rasterio.transform import from_origin
-from rasterio import features
+import rasterio.warp
 import rasterio.mask
-import re  # typo? check
+import fiona
+import re
 import os
 from urllib.request import urlopen
 from math import (
     sin,
     cos,
-    atan,
     atan2,
     asin,
     radians,
@@ -29,49 +25,13 @@ from math import (
     acos,
     fmod,
     fabs,
-    isnan,
     floor,
 )
 from owslib.wcs import WebCoverageService
-from scipy.interpolate import griddata
 import netCDF4
 import time
 import functools
 import beartype
-from .m2l_enums import Datatype, VerboseLevel
-
-# from osgeo import gdal
-
-quiet = False
-
-############################################
-# first test
-############################################
-
-
-def hw():
-    print("Hello world")
-
-
-############################################
-# calculate mod with 0 meaning no mod
-#
-# mod_safe(a,b)
-# Args:
-# a number
-# b modulus Returns: modulus of a,b or 0 if b==0
-#
-# Calculate a modulo b (a%b) for decimation with special case of b=0 resulting in no decimation.
-############################################
-
-
-def mod_safe(a, b):
-
-    if b == 0:
-        return 0
-    else:
-        return a % b
-
 
 ############################################
 # get value from a rasterio raster at location x,y (real world coords)
@@ -307,7 +267,7 @@ def get_dtm_hawaii(
     # import re
 
     grid = (
-        re.sub("\[.*\]", "", data[1])
+        re.sub("\\[.*\\]", "", data[1])
         .replace(",", "")
         .replace("elev.elev", "")
         .replace("\n", " ")
@@ -328,7 +288,7 @@ def get_dtm_hawaii(
     OPeNDAP = OPeNDAP.astype("int16")
     OPeNDAP = np.flipud(OPeNDAP)
 
-    transform = from_origin(minlong, maxlat, 0.008333333, 0.008333333)
+    transform = rasterio.transform.from_origin(minlong, maxlat, 0.008333333, 0.008333333)
 
     new_dataset = rasterio.open(
         path_out,
@@ -487,7 +447,7 @@ def get_dtm(path_out, minlong, maxlong, minlat, maxlat, url="AU"):
 
 def reproject_dtm(path_in, path_out, src_crs, dst_crs):
     with rasterio.open(path_in) as src:
-        transform, width, height = calculate_default_transform(
+        transform, width, height = rasterio.warp.calculate_default_transform(
             src.crs, dst_crs, src.width, src.height, *src.bounds
         )
         kwargs = src.meta.copy()
@@ -497,14 +457,14 @@ def reproject_dtm(path_in, path_out, src_crs, dst_crs):
 
         with rasterio.open(path_out, "w", **kwargs) as dst:
             for i in range(1, src.count + 1):
-                reproject(
+                rasterio.warp.reproject(
                     source=rasterio.band(src, i),
                     destination=rasterio.band(dst, i),
                     src_transform=src.transform,
                     src_crs=src.crs,
                     dst_transform=transform,
                     dst_crs=dst_crs,
-                    resampling=Resampling.nearest,
+                    resampling=rasterio.warp.Resampling.nearest,
                 )
             dst.close()
     print("reprojected dtm geotif saved as", path_out)
@@ -606,7 +566,7 @@ def load_and_reproject_dtm(
         dataset = rasterio.open(url)
 
     # Given an open rasterio dataset reproject it into dst_crs
-    new_transform, new_width, new_height = calculate_default_transform(
+    new_transform, new_width, new_height = rasterio.warp.calculate_default_transform(
         dataset.crs, dst_crs, dataset.width, dataset.height, *dataset.bounds
     )
     params = dataset.meta.copy()
@@ -622,7 +582,7 @@ def load_and_reproject_dtm(
     reprojected_dtm = rasterio.io.MemoryFile()
     with reprojected_dtm.open(**params) as dst:
         data = np.zeros((new_width, new_height), dtype=np.float64)
-        reproject(
+        rasterio.warp.reproject(
             dataset.read(),
             data,
             src_transform=dataset.transform,
@@ -920,7 +880,7 @@ def save_clip_to_bbox(path, geom, minx, maxx, miny, maxy, dst_crs):
 
 try:
     import httplib
-except:
+except Exception:
     import http.client as httplib
 
 ####################################################
@@ -939,7 +899,7 @@ def have_access(url):
         conn.close()
         print("available: " + url)
         return True
-    except:
+    except Exception:
         conn.close()
         print("NOT available: " + url)
         return False
@@ -980,9 +940,9 @@ def ddd2dircos(dip, dipdir):
 
 def dircos2ddd(l, m, n):
     if m > 0:
-        dipdir = (360 + degrees(atan(l / m))) % 360
+        dipdir = (360 + degrees(atan2(l, m))) % 360
     elif m < 0:
-        dipdir = (540 + degrees(atan(l / m))) % 360
+        dipdir = (540 + degrees(atan2(l, m))) % 360
     else:
         dipdir = 90
     dip = 90 - degrees(asin(n))
@@ -1108,26 +1068,24 @@ def plot_bedding_stereonets(config, map_data):
     geology = map_data.get_map_data(Datatype.GEOLOGY)
     # TODO: orientations should be 'clean'
     orientations = map_data.get_map_data(Datatype.STRUCTURE).copy()
-    is_bed = orientations[config.c_l["sf"]].str.contains(
+    is_bed = orientations["STRUCTURE_TYPE"].str.contains(
         config.c_l["bedding"], regex=False
     )
 
     orientations = orientations[is_bed]
-    groups = geology[config.c_l["g"]].unique()
-    codes = geology[config.c_l["c"]].unique()
+    groups = geology["GROUP"].unique()
+    codes = geology["UNIT_NAME"].unique()
     if config.verbose_level != VerboseLevel.NONE:
         print("All observations n=", len(orientations))
         print("groups", groups, "\ncodes", codes)
 
-    if config.c_l["otype"] == "dip direction":
-        strikes = orientations[config.c_l["dd"]].values.astype(float) - 90
-    else:
-        strikes = orientations[config.c_l["dd"]].values.astype(float)
+    # As map_checker converts to dip direction assume orientations are in dip dir
+    strikes = orientations["DIPDIR"].values.astype(float) - 90
 
     if config.verbose_level != VerboseLevel.NONE:
         fig, ax = mplstereonet.subplots(figsize=(7, 7))
-        dips = orientations[config.c_l["d"]].values.astype(float)
-        cax = ax.density_contourf(strikes, dips, measurement="poles")
+        dips = orientations["DIP"].values.astype(float)
+        ax.density_contourf(strikes, dips, measurement="poles")
         ax.pole(strikes, dips, markersize=5, color="w")
         ax.grid(True)
         # text = ax.text(2.2, 1.37, "All data", color='b')
@@ -1135,7 +1093,7 @@ def plot_bedding_stereonets(config, map_data):
         plt.show()
     group_girdle = {}
     for gp in groups:
-        all_orientations = orientations[orientations[config.c_l["g"]] == gp]
+        all_orientations = orientations[orientations["GROUP"] == gp]
         if len(all_orientations) == 1:
             group_girdle[gp] = (-999, -999, 1)
 
@@ -1148,12 +1106,11 @@ def plot_bedding_stereonets(config, map_data):
         elif len(all_orientations) > 0:
 
             ax = None
-            if config.c_l["otype"] == "dip direction":
-                strikes = all_orientations[config.c_l["dd"]].values.astype(float) - 90
-            else:
-                strikes = all_orientations[config.c_l["dd"]].values.astype(float)
 
-            dips = all_orientations[config.c_l["d"]].values.astype(float)
+            # As map_checker converts to dip direction assume orientations are in dip dir
+            strikes = all_orientations["DIPDIR"].values.astype(float) - 90
+
+            dips = all_orientations["DIP"].values.astype(float)
             fit_strike, fit_dip = mplstereonet.fit_girdle(strikes, dips)
             (plunge,), (bearing,) = mplstereonet.pole2plunge_bearing(
                 fit_strike, fit_dip
@@ -1168,7 +1125,7 @@ def plot_bedding_stereonets(config, map_data):
                 print("strike/dip of girdle", fit_strike, "/", fit_dip)
             if config.verbose_level == VerboseLevel.ALL:
                 fig, ax = mplstereonet.subplots(figsize=(5, 5))
-                cax = ax.density_contourf(strikes, dips, measurement="poles")
+                ax.density_contourf(strikes, dips, measurement="poles")
                 ax.pole(strikes, dips, markersize=5, color="w")
                 ax.grid(True)
                 # text = ax.text(2.2, 1.37, gp, color='b')
@@ -1183,50 +1140,6 @@ def plot_bedding_stereonets(config, map_data):
                 )
                 print(gp, "observations has no observations")
 
-    if False:
-        for gp in groups:
-
-            print(
-                "----------------------------------------------------------------------------------------------------------------------"
-            )
-            print(gp)
-            # display(all_sorts2)
-            ind = 0
-            orientations2 = orientations[orientations[config.c_l["g"]] == gp]
-
-            for code in codes:
-                orientations3 = orientations2[orientations2[config.c_l["c"]] == code]
-                ind2 = int(fmod(ind, 3))
-                if len(orientations3) > 0:
-                    print(code, "observations n=", len(orientations3))
-                # display(orientations2)
-                if len(orientations3) > 0:
-                    if ind2 == 0:
-                        fig, ax = mplstereonet.subplots(1, 3, figsize=(15, 15))
-                    if config.c_l["otype"] == "dip direction":
-                        strikes = orientations3[config.c_l["dd"]].values - 90
-                    else:
-                        strikes = orientations3[config.c_l["dd"]].values
-
-                    dips = orientations3[config.c_l["d"]].values
-
-                    cax = ax[ind2].density_contourf(strikes, dips, measurement="poles")
-                    ax[ind2].pole(strikes, dips, markersize=5, color="w")
-                    ax[ind2].grid(True)
-                    # fig.colorbar(cax)
-                    text = ax[ind2].text(2.2, 1.37, code, color="b")
-
-                    # Fit a plane to the girdle of the distribution and display it.
-                    fit_strike, fit_dip = mplstereonet.fit_girdle(strikes, dips)
-                    print("strike/dip of girdle", fit_strike, "/", fit_dip)
-
-                    if (ind2 == 2) and not quiet:
-                        plt.show()
-
-                    ind = ind + 1
-
-            if (ind > 0 and not ind2 == 2) and not quiet:
-                plt.show()
     return group_girdle
 
 
@@ -1243,7 +1156,7 @@ def plot_bedding_stereonets_old(orientations, all_sorts, verbose_level: VerboseL
         fig, ax = mplstereonet.subplots(figsize=(7, 7))
         strikes = orientations["azimuth"].values - 90
         dips = orientations["dip"].values
-        cax = ax.density_contourf(strikes, dips, measurement="poles")
+        ax.density_contourf(strikes, dips, measurement="poles")
         ax.pole(strikes, dips, markersize=5, color="w")
         ax.grid(True)
         # text = ax.text(2.2, 1.37, "All data", color='b')
@@ -1254,7 +1167,6 @@ def plot_bedding_stereonets_old(orientations, all_sorts, verbose_level: VerboseL
         all_sorts2 = all_sorts[all_sorts["group"] == gp]
         all_sorts2.set_index("code", inplace=True)
 
-        frames = {}
         first = True
         for indx, as2 in all_sorts2.iterrows():
             orientations2 = orientations[orientations["formation"] == indx]
@@ -1276,10 +1188,10 @@ def plot_bedding_stereonets_old(orientations, all_sorts, verbose_level: VerboseL
                 fig, ax = mplstereonet.subplots(figsize=(5, 5))
                 strikes = all_orientations["azimuth"].values - 90
                 dips = all_orientations["dip"].values
-                cax = ax.density_contourf(strikes, dips, measurement="poles")
+                ax.density_contourf(strikes, dips, measurement="poles")
                 ax.pole(strikes, dips, markersize=5, color="w")
                 ax.grid(True)
-                text = ax.text(2.2, 1.37, gp, color="b")
+                ax.text(2.2, 1.37, gp, color="b")
                 plt.title(gp)
                 plt.show()
 
@@ -1292,7 +1204,6 @@ def plot_bedding_stereonets_old(orientations, all_sorts, verbose_level: VerboseL
                 "----------------------------------------------------------------------------------------------------------------------"
             )
             print(gp)
-        # display(all_sorts2)
         ind = 0
 
         for indx, as2 in all_sorts2.iterrows():
@@ -1300,7 +1211,6 @@ def plot_bedding_stereonets_old(orientations, all_sorts, verbose_level: VerboseL
             orientations2 = orientations[orientations["formation"] == indx]
             if verbose_level != VerboseLevel.NONE:
                 print(indx, "observations n=", len(orientations2))
-            # display(orientations2)
             if verbose_level == VerboseLevel.ALL:
                 if len(orientations2) > 0:
                     if ind2 == 0:
@@ -1308,11 +1218,11 @@ def plot_bedding_stereonets_old(orientations, all_sorts, verbose_level: VerboseL
                     strikes = orientations2["azimuth"].values - 90
                     dips = orientations2["dip"].values
 
-                    cax = ax[ind2].density_contourf(strikes, dips, measurement="poles")
+                    ax[ind2].density_contourf(strikes, dips, measurement="poles")
                     ax[ind2].pole(strikes, dips, markersize=5, color="w")
                     ax[ind2].grid(True)
                     # fig.colorbar(cax)
-                    text = ax[ind2].text(2.2, 1.37, indx, color="b")
+                    ax[ind2].text(2.2, 1.37, indx, color="b")
 
                     # Fit a plane to the girdle of the distribution and display it.
                     fit_strike, fit_dip = mplstereonet.fit_girdle(strikes, dips)
@@ -1356,24 +1266,8 @@ def display(element):
             from IPython.display import display, Image, HTML
 
             IPython.display(element)
-        except Exception as e:
+        except Exception:
             return False
-
-
-def print(*args, **kwargs):
-    global quiet
-    if not quiet:
-        return builtins.print(*args, **kwargs)
-
-
-def enable_quiet_mode():
-    global quiet
-    quiet = True
-
-
-def disable_quiet_mode():
-    global quiet
-    quiet = False
 
 
 def save_dtm_mesh(dtm_path, output_path):
@@ -1451,16 +1345,32 @@ def save_parameters(
     f.write("bbox_LL: " + str(st_bbox) + "\n")
     f.write("bbox_3d: " + str(proj.config.bbox_3d) + "\n")
     f.write("proj_crs: " + str(proj.map_data.working_projection) + "\n")
-    f.write("geology_layer: " + str(proj.map_data.get_filename(Datatype.GEOLOGY)) + "\n")
+    f.write(
+        "geology_layer: " + str(proj.map_data.get_filename(Datatype.GEOLOGY)) + "\n"
+    )
     f.write("dtm_layer: " + str(proj.map_data.get_filename(Datatype.DTM)) + "\n")
     f.write("fault_layer: " + str(proj.map_data.get_filename(Datatype.FAULT)) + "\n")
     f.write("fold_layer: " + str(proj.map_data.get_filename(Datatype.FOLD)) + "\n")
-    f.write("structure_layer: " + str(proj.map_data.get_filename(Datatype.STRUCTURE)) + "\n")
-    f.write("mindep_layer: " + str(proj.map_data.get_filename(Datatype.MINERAL_DEPOSIT)) + "\n")
-    f.write("section_layer: " + str(proj.map_data.get_filename(Datatype.SECTION)) + "\n")
-    f.write("drillhole_layer: " + str(proj.map_data.get_filename(Datatype.DRILLHOLE)) + "\n")
-    f.write("dtb_grid_layer: " + str(proj.map_data.get_filename(Datatype.DTB_GRID)) + "\n")
-    f.write("cover_map_layer: " + str(proj.map_data.get_filename(Datatype.COVER_MAP)) + "\n")
+    f.write(
+        "structure_layer: " + str(proj.map_data.get_filename(Datatype.STRUCTURE)) + "\n"
+    )
+    f.write(
+        "mindep_layer: "
+        + str(proj.map_data.get_filename(Datatype.MINERAL_DEPOSIT))
+        + "\n"
+    )
+    f.write(
+        "section_layer: " + str(proj.map_data.get_filename(Datatype.SECTION)) + "\n"
+    )
+    f.write(
+        "drillhole_layer: " + str(proj.map_data.get_filename(Datatype.DRILLHOLE)) + "\n"
+    )
+    f.write(
+        "dtb_grid_layer: " + str(proj.map_data.get_filename(Datatype.DTB_GRID)) + "\n"
+    )
+    f.write(
+        "cover_map_layer: " + str(proj.map_data.get_filename(Datatype.COVER_MAP)) + "\n"
+    )
     f.write("fault_params: " + str(fault_params) + "\n")
     f.write("foliation_params: " + str(foliation_params) + "\n")
     f.close()

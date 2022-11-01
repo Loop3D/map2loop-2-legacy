@@ -8,5 +8,7 @@
         "algorithm": "cpp"
     },
     "restructuredtext.languageServer.disabled": true,
-    "esbonio.server.enabled": false
+    "esbonio.server.enabled": false,
+    "python.formatting.provider": "black",
+    "editor.formatOnSave": true
 }

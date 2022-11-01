@@ -2,9 +2,6 @@ import numpy as np
 from scipy.interpolate import Rbf
 import matplotlib.pyplot as plt
 from math import (
-    sin,
-    cos,
-    atan,
     atan2,
     asin,
     radians,
@@ -16,12 +13,11 @@ from math import (
     tan,
     isnan,
 )
-import numpy as np
 import geopandas as gpd
 from geopandas import GeoDataFrame
 import pandas as pd
 import os
-from shapely.geometry import Polygon, LineString, Point
+from shapely.geometry import LineString, Point
 from . import m2l_utils
 import rasterio
 from .m2l_enums import Datatype, VerboseLevel
@@ -164,6 +160,31 @@ def plot(x, y, z, grid):
 
 
 ######################################
+# switch function to select which intepolator to call
+#
+# interpolator_switch(calc, x, y, z, xi, yi)
+# Args:
+# calc string naming the interpolator to use
+# x,y coordinates of points to be interpolated
+# z value to be interpolated
+# xi,yi grid of points where interpolation of z will be calculated - sci_py version of Simple Inverse Distance Weighting interpolation of observations z at x,y locations returned at locations defined by xi,yi arrays
+#
+######################################
+def interpolator_switch(calc, x, y, z, xi, yi):
+    if calc == "simple_idw":
+        val = simple_idw(x, y, z, xi, yi)
+    elif calc == "scipy_idw":
+        val = scipy_idw(x, y, z, xi, yi)
+    elif calc == "scipy_LNDI":
+        val = scipy_LNDI(x, y, z, xi, yi)
+    elif calc == "scipy_CT":
+        val = scipy_CT(x, y, z, xi, yi)
+    else:
+        val = scipy_rbf(x, y, z, xi, yi)
+    return val
+
+
+######################################
 # interpolate three data arrays using various schemes
 #
 # call_interpolator(calc,x,y,l,m,n,xi,yi,nx,ny,fault_flag)
@@ -181,43 +202,16 @@ def plot(x, y, z, grid):
 def call_interpolator(calc, x, y, l, m, n, xi, yi, nx, ny, fault_flag):
     # Calculate IDW or other interpolators
 
-    if calc == "simple_idw":
-        ZIl = simple_idw(x, y, l, xi, yi)
-    elif calc == "scipy_idw":
-        ZIl = scipy_idw(x, y, l, xi, yi)
-    elif calc == "scipy_LNDI":
-        ZIl = scipy_LNDI(x, y, l, xi, yi)
-    elif calc == "scipy_CT":
-        ZIl = scipy_CT(x, y, l, xi, yi)
-    else:
-        ZIl = scipy_rbf(x, y, l, xi, yi)
+    ZIl = interpolator_switch(calc, x, y, l, xi, yi)
     if not fault_flag:
         ZIl = ZIl.reshape((ny, nx))
 
-    if calc == "simple_idw":
-        ZIm = simple_idw(x, y, m, xi, yi)
-    elif calc == "scipy_idw":
-        ZIm = scipy_idw(x, y, m, xi, yi)
-    elif calc == "scipy_LNDI":
-        ZIm = scipy_LNDI(x, y, m, xi, yi)
-    elif calc == "scipy_CT":
-        ZIm = scipy_CT(x, y, m, xi, yi)
-    else:
-        ZIm = scipy_rbf(x, y, m, xi, yi)
+    ZIm = interpolator_switch(calc, x, y, m, xi, yi)
     if not fault_flag:
         ZIm = ZIm.reshape((ny, nx))
 
     if type(n) is not int:
-        if calc == "simple_idw":
-            ZIn = simple_idw(x, y, n, xi, yi)
-        elif calc == "scipy_idw":
-            ZIn = scipy_idw(x, y, n, xi, yi)
-        elif calc == "scipy_LNDI":
-            ZIn = scipy_LNDI(x, y, n, xi, yi)
-        elif calc == "scipy_CT":
-            ZIn = scipy_CT(x, y, n, xi, yi)
-        else:
-            ZIn = scipy_rbf(x, y, n, xi, yi)
+        ZIn = interpolator_switch(calc, x, y, n, xi, yi)
         if not fault_flag:
             ZIn = ZIn.reshape((ny, nx))
     else:
@@ -255,14 +249,14 @@ def interpolate_orientations(
 
     if len(this_gcode) == 1:
         # subset orientations to just those with this group
-        is_gp = structure[c_l["g"]] == this_gcode
+        is_gp = structure["GROUP"] == this_gcode
         gp_structure = structure[is_gp]
         # print('single group')
         # display(gp_structure)
     else:
         # print('first code',this_gcode[0])
         # subset orientations to just those with this group
-        is_gp = structure[c_l["g"]] == this_gcode[0]
+        is_gp = structure["GROUP"] == this_gcode[0]
         gp_structure = structure[is_gp]
         gp_structure_all = gp_structure.copy()
         # print('first group')
@@ -271,7 +265,7 @@ def interpolate_orientations(
         for i in range(1, len(this_gcode)):
             # print('next code',this_gcode[i])
             # subset orientations to just those with this group
-            is_gp = structure[c_l["g"]] == this_gcode[i]
+            is_gp = structure["GROUP"] == this_gcode[i]
             temp_gp_structure = structure[is_gp]
             gp_structure_all = pd.concat(
                 [gp_structure_all, temp_gp_structure], ignore_index=True
@@ -299,12 +293,12 @@ def interpolate_orientations(
     for a_pt in gp_structure_all.iterrows():
         x[i] = a_pt[1]["geometry"].x + (np.random.ranf() * 0.01)
         y[i] = a_pt[1]["geometry"].y + (np.random.ranf() * 0.01)
-        dip[i] = a_pt[1][c_l["d"]]
+        dip[i] = a_pt[1]["DIP"]
 
         if c_l["otype"] == "strike":
-            dipdir[i] = a_pt[1][c_l["dd"]] + 90
+            dipdir[i] = a_pt[1]["DIPDIR"] + 90
         else:
-            dipdir[i] = a_pt[1][c_l["dd"]]
+            dipdir[i] = a_pt[1]["DIPDIR"]
         i = i + 1
 
     l = np.zeros(npts)
@@ -462,7 +456,7 @@ def interpolate_orientations(
         fig, ax = plt.subplots(
             figsize=(10, 10),
         )
-        q = ax.quiver(xi, yi, -ZIm, ZIl, headwidth=0)
+        ax.quiver(xi, yi, -ZIm, ZIl, headwidth=0)
         plt.show()
         print(
             "orientations interpolated as dip dip direction",
@@ -547,10 +541,7 @@ def interpolate_contacts(
             # print(i)
             for line in acontact.geometry:  # loop through line segments
                 # print(i,len(acontact.geometry))
-                if (
-                    m2l_utils.mod_safe(i, decimate) == 0
-                    and acontact[c_l["g"]] in use_gcode
-                ):
+                if i % decimate == 0 and acontact["GROUP"] in use_gcode:
                     # if(acontact['id']==170):
                     # display(npts,line.coords[0][0],line.coords[1][0])
                     dlsx = line.coords[0][0] - line.coords[1][0]
@@ -571,7 +562,7 @@ def interpolate_contacts(
                         height = m2l_utils.value_from_dtm_dtb(
                             dtm, dtb, dtb_null, cover_map, locations
                         )
-                        if str(acontact[c_l["g"]]) == "None":
+                        if str(acontact["GROUP"]) == "None":
                             ostr = (
                                 str(x[i])
                                 + ","
@@ -585,9 +576,13 @@ def interpolate_contacts(
                                 + ","
                                 + str(lsy)
                                 + ","
-                                + acontact[c_l["c"]].replace(" ", "_").replace("-", "_")
+                                + acontact["UNIT_NAME"]
+                                .replace(" ", "_")
+                                .replace("-", "_")
                                 + ","
-                                + acontact[c_l["c"]].replace(" ", "_").replace("-", "_")
+                                + acontact["UNIT_NAME"]
+                                .replace(" ", "_")
+                                .replace("-", "_")
                                 + "\n"
                             )
                         else:
@@ -604,9 +599,11 @@ def interpolate_contacts(
                                 + ","
                                 + str(lsy)
                                 + ","
-                                + acontact[c_l["c"]].replace(" ", "_").replace("-", "_")
+                                + acontact["UNIT_NAME"]
+                                .replace(" ", "_")
+                                .replace("-", "_")
                                 + ","
-                                + acontact[c_l["g"]].replace(" ", "_").replace("-", "_")
+                                + acontact["GROUP"].replace(" ", "_").replace("-", "_")
                                 + "\n"
                             )
                         f.write(ostr)
@@ -615,7 +612,7 @@ def interpolate_contacts(
         else:
             # display(acontact.geometry,acontact.geometry.coords)
             # for line in acontact: # loop through line segments in LineString
-            if m2l_utils.mod_safe(i, decimate) == 0 and acontact[c_l["g"]] in use_gcode:
+            if i % decimate == 0 and acontact["GROUP"] in use_gcode:
                 dlsx = acontact.geometry.coords[0][0] - acontact.geometry.coords[1][0]
                 dlsy = acontact.geometry.coords[0][1] - acontact.geometry.coords[1][1]
                 if (
@@ -635,7 +632,7 @@ def interpolate_contacts(
                     height = m2l_utils.value_from_dtm_dtb(
                         dtm, dtb, dtb_null, cover_map, locations
                     )
-                    if str(acontact[c_l["g"]]) == "None":
+                    if str(acontact["GROUP"]) == "None":
                         ostr = (
                             str(x[i])
                             + ","
@@ -649,9 +646,9 @@ def interpolate_contacts(
                             + ","
                             + str(lsy)
                             + ","
-                            + acontact[c_l["c"]].replace(" ", "_").replace("-", "_")
+                            + acontact["UNIT_NAME"].replace(" ", "_").replace("-", "_")
                             + ","
-                            + acontact[c_l["c"]].replace(" ", "_").replace("-", "_")
+                            + acontact["UNIT_NAME"].replace(" ", "_").replace("-", "_")
                             + "\n"
                         )
                     else:
@@ -668,9 +665,9 @@ def interpolate_contacts(
                             + ","
                             + str(lsy)
                             + ","
-                            + acontact[c_l["c"]].replace(" ", "_").replace("-", "_")
+                            + acontact["UNIT_NAME"].replace(" ", "_").replace("-", "_")
                             + ","
-                            + acontact[c_l["g"]].replace(" ", "_").replace("-", "_")
+                            + acontact["GROUP"].replace(" ", "_").replace("-", "_")
                             + "\n"
                         )
                     # print(ostr)
@@ -791,7 +788,7 @@ def interpolate_contacts(
         )
     else:
         fig, ax = plt.subplots(figsize=(10, 10))
-        q = ax.quiver(xi, yi, ZIl, ZIm, headwidth=0)
+        ax.quiver(xi, yi, ZIl, ZIm, headwidth=0)
         plt.show()
         print(
             "contacts interpolated as strike",
@@ -835,12 +832,12 @@ def save_contact_vectors(config: Config, map_data, workflow: dict):
     ) in geol_file.iterrows():  # loop through distinct linestrings in MultiLineString
         if acontact.geometry and acontact.geometry.type == "MultiLineString":
             for line in acontact.geometry.geoms:  # loop through line segments
-                if m2l_utils.mod_safe(i, config.run_flags["contact_decimate"]) == 0:
-                    npoint = 1
+                # if i % config.run_flags["contact_decimate"] == 0:
+                #     npoint = 1
                 i = i + 1
         else:
-            if m2l_utils.mod_safe(i, config.run_flags["contact_decimate"]) == 0:
-                npoint = 1
+            # if i % config.run_flags["contact_decimate"] == 0:
+            #     npoint = 1
             i = i + 1
 
     x = np.zeros(i + 1)
@@ -860,7 +857,7 @@ def save_contact_vectors(config: Config, map_data, workflow: dict):
             # print(i)
             for line in acontact.geometry.geoms:  # loop through line segments
                 # print(i,len(acontact.geometry))
-                if m2l_utils.mod_safe(i, config.run_flags["contact_decimate"]) == 0:
+                if i % config.run_flags["contact_decimate"] == 0:
                     # if(acontact['id']==170):
                     # display(npts,line.coords[0][0],line.coords[1][0])
                     dlsx = line.coords[0][0] - line.coords[1][0]
@@ -886,7 +883,7 @@ def save_contact_vectors(config: Config, map_data, workflow: dict):
                             locations,
                         )
 
-                        if str(acontact[config.c_l["g"]]) == "None":
+                        if str(acontact["GROUP"]) == "None":
                             ostr = "{},{},{},{},{},{},{},{}\n".format(
                                 x[i],
                                 y[i],
@@ -894,14 +891,14 @@ def save_contact_vectors(config: Config, map_data, workflow: dict):
                                 angle % 180,
                                 lsx,
                                 lsy,
-                                acontact[config.c_l["c"]]
+                                acontact["UNIT_NAME"]
                                 .replace(" ", "_")
                                 .replace("-", "_"),
-                                acontact[config.c_l["c"]]
+                                acontact["UNIT_NAME"]
                                 .replace(" ", "_")
                                 .replace("-", "_"),
                             )
-                            # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact[config.c_l['c']].replace(" ","_").replace("-","_")+","+acontact[config.c_l['c']].replace(" ","_").replace("-","_")+"\n"
+                            # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact["UNIT_NAME"].replace(" ","_").replace("-","_")+","+acontact["UNIT_NAME"].replace(" ","_").replace("-","_")+"\n"
                         else:
                             ostr = "{},{},{},{},{},{},{},{}\n".format(
                                 x[i],
@@ -910,24 +907,19 @@ def save_contact_vectors(config: Config, map_data, workflow: dict):
                                 angle % 180,
                                 lsx,
                                 lsy,
-                                acontact[config.c_l["c"]]
+                                acontact["UNIT_NAME"]
                                 .replace(" ", "_")
                                 .replace("-", "_"),
-                                acontact[config.c_l["g"]]
-                                .replace(" ", "_")
-                                .replace("-", "_"),
+                                acontact["GROUP"].replace(" ", "_").replace("-", "_"),
                             )
-                            # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact[config.c_l['c']].replace(" ","_").replace("-","_")+","+acontact[config.c_l['g']].replace(" ","_").replace("-","_")+"\n"
+                            # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact["UNIT_NAME"].replace(" ","_").replace("-","_")+","+acontact["GROUP"].replace(" ","_").replace("-","_")+"\n"
                         f.write(ostr)
                         npts = npts + 1
                 i = i + 1
         else:
             # display(acontact.geometry,acontact.geometry.coords)
             # for line in acontact: # loop through line segments in LineString
-            if (
-                acontact.geometry
-                and m2l_utils.mod_safe(i, config.run_flags["contact_decimate"]) == 0
-            ):
+            if acontact.geometry and i % config.run_flags["contact_decimate"] == 0:
                 dlsx = acontact.geometry.coords[0][0] - acontact.geometry.coords[1][0]
                 dlsy = acontact.geometry.coords[0][1] - acontact.geometry.coords[1][1]
                 if (
@@ -951,7 +943,7 @@ def save_contact_vectors(config: Config, map_data, workflow: dict):
                         workflow["cover_map"],
                         locations,
                     )
-                    if str(acontact[config.c_l["g"]]) == "None":
+                    if str(acontact["GROUP"]) == "None":
                         ostr = "{},{},{},{},{},{},{},{}\n".format(
                             x[i],
                             y[i],
@@ -959,14 +951,10 @@ def save_contact_vectors(config: Config, map_data, workflow: dict):
                             angle % 180,
                             lsx,
                             lsy,
-                            acontact[config.c_l["c"]]
-                            .replace(" ", "_")
-                            .replace("-", "_"),
-                            acontact[config.c_l["c"]]
-                            .replace(" ", "_")
-                            .replace("-", "_"),
+                            acontact["UNIT_NAME"].replace(" ", "_").replace("-", "_"),
+                            acontact["UNIT_NAME"].replace(" ", "_").replace("-", "_"),
                         )
-                        # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact[config.c_l['c']].replace(" ","_").replace("-","_")+","+acontact[config.c_l['c']].replace(" ","_").replace("-","_")+"\n"
+                        # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact["UNIT_NAME"].replace(" ","_").replace("-","_")+","+acontact["UNIT_NAME"].replace(" ","_").replace("-","_")+"\n"
                     else:
                         ostr = "{},{},{},{},{},{},{},{}\n".format(
                             x[i],
@@ -975,14 +963,10 @@ def save_contact_vectors(config: Config, map_data, workflow: dict):
                             angle % 180,
                             lsx,
                             lsy,
-                            acontact[config.c_l["c"]]
-                            .replace(" ", "_")
-                            .replace("-", "_"),
-                            acontact[config.c_l["g"]]
-                            .replace(" ", "_")
-                            .replace("-", "_"),
+                            acontact["UNIT_NAME"].replace(" ", "_").replace("-", "_"),
+                            acontact["GROUP"].replace(" ", "_").replace("-", "_"),
                         )
-                        # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact[config.c_l['c']].replace(" ","_").replace("-","_")+","+acontact[config.c_l['g']].replace(" ","_").replace("-","_")+"\n"
+                        # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact["UNIT_NAME"].replace(" ","_").replace("-","_")+","+acontact["GROUP"].replace(" ","_").replace("-","_")+"\n"
                     # print(ostr)
                     f.write(ostr)
                     # print(npts,dlsx,dlsy)
@@ -1088,7 +1072,7 @@ def join_contacts_and_orientations(
     else:
         f = open(os.path.join(output_path, "combo_full.csv"), "w")
     f.write("X,Y,Z,azimuth,dip,polarity,formation\n")
-    last_code = ""
+    # last_code = ""
     for indx, a_point in structure_code.iterrows():
 
         locations = [(a_point["x"], a_point["y"])]
@@ -1097,11 +1081,13 @@ def join_contacts_and_orientations(
         ostr = ostr + str(a_point["y"]) + ","
         ostr = ostr + str(height) + "," + str(int(a_point["dipdirection"])) + ","
         ostr = ostr + str(int(a_point["dip"])) + ",1,"
-        ostr = ostr + str(a_point[c_l["c"]]).replace("-", "_").replace(" ", "_") + "\n"
+        ostr = (
+            ostr + str(a_point["UNIT_NAME"]).replace("-", "_").replace(" ", "_") + "\n"
+        )
 
-        if not str(a_point[c_l["c"]]) == "nan":
+        if not str(a_point["UNIT_NAME"]) == "nan":
             f.write(ostr)
-        last_code = a_point[c_l["c"]]
+        # last_code = a_point["UNIT_NAME"]
     f.close()
     if fault_flag:
         print(
@@ -1145,14 +1131,14 @@ def interpolate_orientations_with_fat(
 
     if len(this_gcode) == 1:
         # subset orientations to just those with this group
-        is_gp = structure[c_l["g"]] == this_gcode
+        is_gp = structure["GROUP"] == this_gcode
         gp_structure = structure[is_gp]
         print("single group")
         # display(gp_structure)
     else:
         print("first code", this_gcode[0])
         # subset orientations to just those with this group
-        is_gp = structure[c_l["g"]] == this_gcode[0]
+        is_gp = structure["GROUP"] == this_gcode[0]
         gp_structure = structure[is_gp]
         gp_structure_all = gp_structure.copy()
         print("first group")
@@ -1161,7 +1147,7 @@ def interpolate_orientations_with_fat(
         for i in range(1, len(this_gcode)):
             print("next code", this_gcode[i])
             # subset orientations to just those with this group
-            is_gp = structure[c_l["g"]] == this_gcode[i]
+            is_gp = structure["GROUP"] == this_gcode[i]
             temp_gp_structure = structure[is_gp]
             gp_structure_all = pd.concat(
                 [gp_structure_all, temp_gp_structure], ignore_index=True
@@ -1186,11 +1172,11 @@ def interpolate_orientations_with_fat(
     for ind, a_pt in gp_structure_all.iterrows():
         x[i] = a_pt["geometry"].x
         y[i] = a_pt["geometry"].y
-        dip[i] = a_pt[c_l["d"]]
+        dip[i] = a_pt["DIP"]
         if c_l["otype"] == "strike":
-            dipdir[i] = float(a_pt[c_l["dd"]]) + 90
+            dipdir[i] = float(a_pt["DIPDIR"]) + 90
         else:
-            dipdir[i] = a_pt[c_l["dd"]]
+            dipdir[i] = a_pt["DIPDIR"]
         i = i + 1
 
     for ind, a_pt in fat_orientations.iterrows():
@@ -1291,7 +1277,7 @@ def interpolate_orientations_with_fat(
     fig, ax = plt.subplots(
         figsize=(10, 10),
     )
-    q = ax.quiver(xi, yi, -ZIm, ZIl, headwidth=0)
+    ax.quiver(xi, yi, -ZIm, ZIl, headwidth=0)
     plt.show()
     print(
         "orientations interpolated as dip dip direction",
@@ -1363,12 +1349,12 @@ def process_fault_throw_and_near_orientations(
     # loop through all faults
 
     for index, fault in faults.iterrows():
-        # if(fault[c_l['o']]!=1071):
+        # if(fault["GEOMETRY_OBJECT_ID"]!=1071):
         # continue
         if fault.geometry.type == "LineString":
             # in is dangerous as Fault_1 is in Fault_10
-            if "Fault_" + str(fault[c_l["o"]]) in fault_names:
-                # print('LineString','Fault_'+str(fault[c_l['o']]),len(fault.geometry.coords))
+            if "Fault_" + str(fault["GEOMETRY_OBJECT_ID"]) in fault_names:
+                # print('LineString','Fault_'+str(fault["GEOMETRY_OBJECT_ID"]),len(fault.geometry.coords))
                 lcoords = []
                 rcoords = []
                 index = []
@@ -1420,15 +1406,15 @@ def process_fault_throw_and_near_orientations(
                 for ind, indl in lcode.iterrows():
 
                     if ind < len(lcode) and not isnan(indl["index_right"]):
-                        ntest1 = str(indl[c_l["ds"]])
-                        ntest2 = str(indl[c_l["r1"]])
+                        ntest1 = str(indl["DESCRIPTION"])
+                        ntest2 = str(indl["ROCKTYPE1"])
 
                         if not ntest1 == "None" and not ntest2 == "None":
                             if ind == 1 or (
-                                not lastlcode == indl[c_l["c"]]
+                                not lastlcode == indl["UNIT_NAME"]
                                 and (
-                                    (not c_l["sill"] in indl[c_l["ds"]])
-                                    or (not c_l["intrusive"] in indl[c_l["r1"]])
+                                    (not c_l["sill"] in indl["DESCRIPTION"])
+                                    or (not c_l["intrusive"] in indl["ROCKTYPE1"])
                                 )
                             ):
                                 all_coords_x.append(indl.geometry.x)
@@ -1438,43 +1424,45 @@ def process_fault_throw_and_near_orientations(
                                     firstlx = indl.geometry.x
                                     firstly = indl.geometry.y
                                     firstlc = (
-                                        indl[c_l["c"]]
+                                        indl["UNIT_NAME"]
                                         .replace(" ", "_")
                                         .replace("-", "_")
                                     )
                                 lastlx = indl.geometry.x
                                 lastly = indl.geometry.y
                                 lastlc = (
-                                    indl[c_l["c"]].replace(" ", "_").replace("-", "_")
+                                    indl["UNIT_NAME"]
+                                    .replace(" ", "_")
+                                    .replace("-", "_")
                                 )
 
                             if lastlcode == "" and (
-                                (not c_l["sill"] in indl[c_l["ds"]])
-                                or (not c_l["intrusive"] in indl[c_l["r1"]])
+                                (not c_l["sill"] in indl["DESCRIPTION"])
+                                or (not c_l["intrusive"] in indl["ROCKTYPE1"])
                             ):
-                                lastlcode = indl[c_l["c"]]
+                                lastlcode = indl["UNIT_NAME"]
 
-                            # print('l',ind,indl[c_l['c']],indl[c_l['ds']],indl[c_l['r1']])
+                            # print('l',ind,indl["UNIT_NAME"],indl["DESCRIPTION"],indl["ROCKTYPE1"])
                             if (
                                 not ntest1 == "None"
                                 and not ntest2 == "None"
-                                and not str(indl[c_l["c"]]) == "nan"
+                                and not str(indl["UNIT_NAME"]) == "nan"
                             ):
-                                if (not indl[c_l["c"]] == lastlcode) and (
-                                    (not c_l["sill"] in indl[c_l["ds"]])
-                                    or (not c_l["intrusive"] in indl[c_l["r1"]])
+                                if (not indl["UNIT_NAME"] == lastlcode) and (
+                                    (not c_l["sill"] in indl["DESCRIPTION"])
+                                    or (not c_l["intrusive"] in indl["ROCKTYPE1"])
                                 ):
                                     lcontact.append(
                                         [
                                             (
                                                 ind,
                                                 lastlcode,
-                                                indl[c_l["c"]],
+                                                indl["UNIT_NAME"],
                                                 indl.geometry,
                                             )
                                         ]
                                     )
-                                    lastlcode = indl[c_l["c"]]
+                                    lastlcode = indl["UNIT_NAME"]
 
                 # add points to list if they have different geology code than previous node on right side
 
@@ -1483,15 +1471,15 @@ def process_fault_throw_and_near_orientations(
                 lastrcode = ""
                 for ind, indr in rcode.iterrows():
                     if ind < len(rcode) and not isnan(indr["index_right"]):
-                        ntest1 = str(indr[c_l["ds"]])
-                        ntest2 = str(indr[c_l["r1"]])
+                        ntest1 = str(indr["DESCRIPTION"])
+                        ntest2 = str(indr["ROCKTYPE1"])
 
                         if not ntest1 == "None" and not ntest2 == "None":
                             if ind == 1 or (
-                                not lastrcode == indr[c_l["c"]]
+                                not lastrcode == indr["UNIT_NAME"]
                                 and (
-                                    (not c_l["sill"] in indr[c_l["ds"]])
-                                    or (not c_l["intrusive"] in indr[c_l["r1"]])
+                                    (not c_l["sill"] in indr["DESCRIPTION"])
+                                    or (not c_l["intrusive"] in indr["ROCKTYPE1"])
                                 )
                             ):
                                 all_coords_x.append(indr.geometry.x)
@@ -1501,45 +1489,47 @@ def process_fault_throw_and_near_orientations(
                                     firstrx = indr.geometry.x
                                     firstry = indr.geometry.y
                                     firstrc = (
-                                        indr[c_l["c"]]
+                                        indr["UNIT_NAME"]
                                         .replace(" ", "_")
                                         .replace("-", "_")
                                     )
                                 lastrx = indr.geometry.x
                                 lastry = indr.geometry.y
                                 lastrc = (
-                                    indr[c_l["c"]].replace(" ", "_").replace("-", "_")
+                                    indr["UNIT_NAME"]
+                                    .replace(" ", "_")
+                                    .replace("-", "_")
                                 )
 
                             if lastrcode == "" and (
-                                (not c_l["sill"] in indr[c_l["ds"]])
-                                or (not c_l["intrusive"] in indr[c_l["r1"]])
+                                (not c_l["sill"] in indr["DESCRIPTION"])
+                                or (not c_l["intrusive"] in indr["ROCKTYPE1"])
                             ):
-                                lastrcode = indr[c_l["c"]]
-                            # print('r',ind,indr[c_l['c']],indr[c_l['ds']],indr[c_l['r1']])
+                                lastrcode = indr["UNIT_NAME"]
+                            # print('r',ind,indr["UNIT_NAME"],indr["DESCRIPTION"],indr["ROCKTYPE1"])
 
-                            # print(lastrcode,ntest1,ntest2,str(indr[c_l['c']]),indr[c_l['c']],c_l['sill'],c_l['intrusive'])
+                            # print(lastrcode,ntest1,ntest2,str(indr["UNIT_NAME"]),indr["UNIT_NAME"],c_l['sill'],c_l['intrusive'])
 
                             if (
                                 not ntest1 == "None"
                                 and not ntest2 == "None"
-                                and not str(indr[c_l["c"]]) == "nan"
+                                and not str(indr["UNIT_NAME"]) == "nan"
                             ):
-                                if (not indr[c_l["c"]] == lastrcode) and (
-                                    (not c_l["sill"] in indr[c_l["ds"]])
-                                    or (not c_l["intrusive"] in indr[c_l["r1"]])
+                                if (not indr["UNIT_NAME"] == lastrcode) and (
+                                    (not c_l["sill"] in indr["DESCRIPTION"])
+                                    or (not c_l["intrusive"] in indr["ROCKTYPE1"])
                                 ):
                                     rcontact.append(
                                         [
                                             (
                                                 ind,
                                                 lastrcode,
-                                                indr[c_l["c"]],
+                                                indr["UNIT_NAME"],
                                                 indr.geometry,
                                             )
                                         ]
                                     )
-                                    lastrcode = indr[c_l["c"]]
+                                    lastrcode = indr["UNIT_NAME"]
 
                 locations = [(firstlx, firstly)]
                 first_height_l = m2l_utils.value_from_dtm_dtb(
@@ -1590,11 +1580,17 @@ def process_fault_throw_and_near_orientations(
                                     lc[0][3].x, lc[0][3].y, rc[0][3].x, rc[0][3].y
                                 )
                                 if not (l == 0.0 and m == 0.0):
-                                    fdc.append((l, m, "Fault_" + str(fault[c_l["o"]])))
+                                    fdc.append(
+                                        (
+                                            l,
+                                            m,
+                                            "Fault_" + str(fault["GEOMETRY_OBJECT_ID"]),
+                                        )
+                                    )
                                     all_coordsdist.append((dist))
         else:
             # in is dangerous as Fault_1 is in Fault_10
-            if "Fault_" + str(fault[c_l["o"]]) in fault_names:
+            if "Fault_" + str(fault["GEOMETRY_OBJECT_ID"]) in fault_names:
                 for fls in fault.geometry:
                     fault_ls = LineString(fls)
                     lcoords = []
@@ -1639,15 +1635,15 @@ def process_fault_throw_and_near_orientations(
                     for ind, indl in lcode.iterrows():
 
                         if ind < len(lcode) and not isnan(indl["index_right"]):
-                            ntest1 = str(indl[c_l["ds"]])
-                            ntest2 = str(indl[c_l["r1"]])
+                            ntest1 = str(indl["DESCRIPTION"])
+                            ntest2 = str(indl["ROCKTYPE1"])
 
                             if not ntest1 == "None" and not ntest2 == "None":
                                 if ind == 1 or (
-                                    not lastlcode == indl[c_l["c"]]
+                                    not lastlcode == indl["UNIT_NAME"]
                                     and (
-                                        (not c_l["sill"] in indl[c_l["ds"]])
-                                        or (not c_l["intrusive"] in indl[c_l["r1"]])
+                                        (not c_l["sill"] in indl["DESCRIPTION"])
+                                        or (not c_l["intrusive"] in indl["ROCKTYPE1"])
                                     )
                                 ):
                                     all_coords_x.append(indl.geometry.x)
@@ -1657,44 +1653,44 @@ def process_fault_throw_and_near_orientations(
                                         firstlx = indl.geometry.x
                                         firstly = indl.geometry.y
                                         firstlc = (
-                                            indl[c_l["c"]]
+                                            indl["UNIT_NAME"]
                                             .replace(" ", "_")
                                             .replace("-", "_")
                                         )
                                     lastlx = indl.geometry.x
                                     lastly = indl.geometry.y
                                     lastlc = (
-                                        indl[c_l["c"]]
+                                        indl["UNIT_NAME"]
                                         .replace(" ", "_")
                                         .replace("-", "_")
                                     )
 
                                 if lastlcode == "" and (
-                                    (not c_l["sill"] in indl[c_l["ds"]])
-                                    or (not c_l["intrusive"] in indl[c_l["r1"]])
+                                    (not c_l["sill"] in indl["DESCRIPTION"])
+                                    or (not c_l["intrusive"] in indl["ROCKTYPE1"])
                                 ):
-                                    lastlcode = indl[c_l["c"]]
+                                    lastlcode = indl["UNIT_NAME"]
 
                                 if (
                                     not ntest1 == "None"
                                     and not ntest2 == "None"
-                                    and not str(indl[c_l["c"]]) == "nan"
+                                    and not str(indl["UNIT_NAME"]) == "nan"
                                 ):
-                                    if (not indl[c_l["c"]] == lastlcode) and (
-                                        (not c_l["sill"] in indl[c_l["ds"]])
-                                        or (not c_l["intrusive"] in indl[c_l["r1"]])
+                                    if (not indl["UNIT_NAME"] == lastlcode) and (
+                                        (not c_l["sill"] in indl["DESCRIPTION"])
+                                        or (not c_l["intrusive"] in indl["ROCKTYPE1"])
                                     ):
                                         lcontact.append(
                                             [
                                                 (
                                                     ind,
                                                     lastlcode,
-                                                    indl[c_l["c"]],
+                                                    indl["UNIT_NAME"],
                                                     indl.geometry,
                                                 )
                                             ]
                                         )
-                                        lastlcode = indl[c_l["c"]]
+                                        lastlcode = indl["UNIT_NAME"]
 
                     # add points to list if they have different geology code than previous node on right side
 
@@ -1703,15 +1699,15 @@ def process_fault_throw_and_near_orientations(
                     lastrcode = ""
                     for ind, indr in rcode.iterrows():
                         if ind < len(rcode) and not isnan(indr["index_right"]):
-                            ntest1 = str(indr[c_l["ds"]])
-                            ntest2 = str(indr[c_l["r1"]])
+                            ntest1 = str(indr["DESCRIPTION"])
+                            ntest2 = str(indr["ROCKTYPE1"])
 
                             if not ntest1 == "None" and not ntest2 == "None":
                                 if ind == 1 or (
-                                    not lastrcode == indr[c_l["c"]]
+                                    not lastrcode == indr["UNIT_NAME"]
                                     and (
-                                        (not c_l["sill"] in indr[c_l["ds"]])
-                                        or (not c_l["intrusive"] in indr[c_l["r1"]])
+                                        (not c_l["sill"] in indr["DESCRIPTION"])
+                                        or (not c_l["intrusive"] in indr["ROCKTYPE1"])
                                     )
                                 ):
                                     all_coords_x.append(indr.geometry.x)
@@ -1721,44 +1717,44 @@ def process_fault_throw_and_near_orientations(
                                         firstrx = indr.geometry.x
                                         firstry = indr.geometry.y
                                         firstrc = (
-                                            indr[c_l["c"]]
+                                            indr["UNIT_NAME"]
                                             .replace(" ", "_")
                                             .replace("-", "_")
                                         )
                                     lastrx = indr.geometry.x
                                     lastry = indr.geometry.y
                                     lastrc = (
-                                        indr[c_l["c"]]
+                                        indr["UNIT_NAME"]
                                         .replace(" ", "_")
                                         .replace("-", "_")
                                     )
 
                                 if lastrcode == "" and (
-                                    (not c_l["sill"] in indr[c_l["ds"]])
-                                    or (not c_l["intrusive"] in indr[c_l["r1"]])
+                                    (not c_l["sill"] in indr["DESCRIPTION"])
+                                    or (not c_l["intrusive"] in indr["ROCKTYPE1"])
                                 ):
-                                    lastrcode = indr[c_l["c"]]
+                                    lastrcode = indr["UNIT_NAME"]
 
                                 if (
                                     not ntest1 == "None"
                                     and not ntest2 == "None"
-                                    and not str(indr[c_l["c"]]) == "nan"
+                                    and not str(indr["UNIT_NAME"]) == "nan"
                                 ):
-                                    if (not indr[c_l["c"]] == lastrcode) and (
-                                        (not c_l["sill"] in indr[c_l["ds"]])
-                                        or (not c_l["intrusive"] in indr[c_l["r1"]])
+                                    if (not indr["UNIT_NAME"] == lastrcode) and (
+                                        (not c_l["sill"] in indr["DESCRIPTION"])
+                                        or (not c_l["intrusive"] in indr["ROCKTYPE1"])
                                     ):
                                         rcontact.append(
                                             [
                                                 (
                                                     ind,
                                                     lastrcode,
-                                                    indr[c_l["c"]],
+                                                    indr["UNIT_NAME"],
                                                     indr.geometry,
                                                 )
                                             ]
                                         )
-                                        lastrcode = indr[c_l["c"]]
+                                        lastrcode = indr["UNIT_NAME"]
 
                     locations = [(firstlx, firstly)]
                     first_height_l = m2l_utils.value_from_dtm_dtb(
@@ -1814,7 +1810,12 @@ def process_fault_throw_and_near_orientations(
                                     )
                                     if not (l == 0.0 and m == 0.0):
                                         fdc.append(
-                                            (l, m, "Fault_" + str(fault[c_l["o"]]))
+                                            (
+                                                l,
+                                                m,
+                                                "Fault_"
+                                                + str(fault["GEOMETRY_OBJECT_ID"]),
+                                            )
                                         )
                                         all_coordsdist.append((dist))
 
@@ -2033,39 +2034,10 @@ def process_fault_throw_and_near_orientations(
 def call_interpolator_grid(calc, x, y, l, m, n, xi, yi):
     # Calculate IDW or other interpolators
 
-    if calc == "simple_idw":
-        ZIl = simple_idw(x, y, l, xi, yi)
-    elif calc == "scipy_idw":
-        ZIl = scipy_idw(x, y, l, xi, yi)
-    elif calc == "scipy_LNDI":
-        ZIl = scipy_LNDI(x, y, l, xi, yi)
-    elif calc == "scipy_CT":
-        ZIl = scipy_CT(x, y, l, xi, yi)
-    else:
-        ZIl = scipy_rbf(x, y, l, xi, yi)
-
-    if calc == "simple_idw":
-        ZIm = simple_idw(x, y, m, xi, yi)
-    elif calc == "scipy_idw":
-        ZIm = scipy_idw(x, y, m, xi, yi)
-    elif calc == "scipy_LNDI":
-        ZIm = scipy_LNDI(x, y, m, xi, yi)
-    elif calc == "scipy_CT":
-        ZIm = scipy_CT(x, y, m, xi, yi)
-    else:
-        ZIm = scipy_rbf(x, y, m, xi, yi)
-
+    ZIl = interpolator_switch(calc, x, y, l, xi, yi)
+    ZIm = interpolator_switch(calc, x, y, m, xi, yi)
     if type(n) is not int:
-        if calc == "simple_idw":
-            ZIn = simple_idw(x, y, n, xi, yi)
-        elif calc == "scipy_idw":
-            ZIn = scipy_idw(x, y, n, xi, yi)
-        elif calc == "scipy_LNDI":
-            ZIn = scipy_LNDI(x, y, n, xi, yi)
-        elif calc == "scipy_CT":
-            ZIn = scipy_CT(x, y, n, xi, yi)
-        else:
-            ZIn = scipy_rbf(x, y, n, xi, yi)
+        ZIn = interpolator_switch(calc, x, y, n, xi, yi)
     else:
         ZIn = 0
 
@@ -2087,19 +2059,19 @@ def interpolate_orientation_grid(structures, calc, xcoords, ycoords, c_l):
     for a_pt in structures.iterrows():
         x[i] = a_pt[1]["geometry"].x + (np.random.ranf())
         y[i] = a_pt[1]["geometry"].y + (np.random.ranf())
-        dip[i] = a_pt[1][c_l["d"]]
+        dip[i] = a_pt[1]["DIP"]
 
         if c_l["otype"] == "strike":
-            dipdir[i] = a_pt[1][c_l["dd"]] + 90
+            dipdir[i] = a_pt[1]["DIPDIR"] + 90
         else:
-            dipdir[i] = a_pt[1][c_l["dd"]]
+            dipdir[i] = a_pt[1]["DIPDIR"]
 
         i = i + 1
 
     for i in range(0, npts):
         l[i], m[i], n[i] = m2l_utils.ddd2dircos(dip[i], dipdir[i])
         # this code is now in the right place?
-        if structures.iloc[i][c_l["bo"]] == c_l["btype"]:
+        if structures.iloc[i]["POLARITY"] == c_l["btype"]:
             l[i] = -l[i]
             m[i] = -m[i]
             n[i] = -n[i]
@@ -2120,10 +2092,6 @@ def interpolate_orientation_grid(structures, calc, xcoords, ycoords, c_l):
     return (l2, m2, n2, dip, dip_direction)
 
 
-def is_odd(num):
-    return num & 0x1
-
-
 def pts2dircos_arr(p1x, p1y, p2x, p2y):
     dx = p1x - p2x
     dy = p1y - p2y
@@ -2140,18 +2108,18 @@ def interpolate_contacts_grid(contacts, calc, xcoords_group, ycoords_group):
     ) in contacts.iterrows():  # loop through distinct linestrings in MultiLineString
         if acontact.geometry.type == "MultiLineString":
             for line in acontact.geometry.geoms:
-                if m2l_utils.mod_safe(i, decimate) == 0:
+                if i % decimate == 0:
                     listarray.append([line.coords[0][0], line.coords[0][1]])
                 i = i + 1
         else:
-            if m2l_utils.mod_safe(i, decimate) == 0:
+            if 1 % decimate == 0:
                 listarray.append(
                     [acontact.geometry.coords[0][0], acontact.geometry.coords[0][1]]
                 )
             i = i + 1
 
     coords = np.array(listarray)
-    if is_odd(len(coords)):
+    if len(coords) & 0x1:
         coords2 = coords[: len(coords) - 1, :].reshape((int(len(coords) / 2), 4))
     else:
         coords2 = coords[: len(coords), :].reshape((int(len(coords) / 2), 4))
@@ -2193,27 +2161,28 @@ def interpolate_contacts_grid(contacts, calc, xcoords_group, ycoords_group):
 @beartype.beartype
 def interpolation_grids(
     config: Config, map_data, basal_contacts_filename: str, super_groups: list
-):
+):  # -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    # Note: Hint type returns don't work properly for python 3.8 or older
     geology = map_data.get_map_data(Datatype.GEOLOGY).copy()
     orientations = map_data.get_map_data(Datatype.STRUCTURE).copy()
 
-    is_bed = orientations[config.c_l["sf"]].str.contains(
+    is_bed = orientations["STRUCTURE_TYPE"].str.contains(
         config.c_l["bedding"], regex=False
     )
 
     orientations = orientations[is_bed]
     contacts = gpd.read_file(basal_contacts_filename, bbox=config.bbox)
 
-    geology[config.c_l["g"]].fillna(geology[config.c_l["g2"]], inplace=True)
-    geology[config.c_l["g"]].fillna(geology[config.c_l["c"]], inplace=True)
+    geology["GROUP"].fillna(geology["GROUP2"], inplace=True)
+    geology["GROUP"].fillna(geology["UNIT_NAME"], inplace=True)
 
     spacing = config.run_flags["interpolation_spacing"]
     scheme = config.run_flags["interpolation_scheme"]
     if spacing < 0:
         spacing = -(config.bbox[2] - config.bbox[0]) / spacing
 
-    x = (config.bbox[2] - config.bbox[0]) / spacing
-    y = (config.bbox[3] - config.bbox[1]) / spacing
+    # x = (config.bbox[2] - config.bbox[0]) / spacing
+    # y = (config.bbox[3] - config.bbox[1]) / spacing
 
     xcoords = np.arange(config.bbox[0], config.bbox[2], spacing)
     ycoords = np.arange(config.bbox[1], config.bbox[3], spacing)
@@ -2230,7 +2199,7 @@ def interpolation_grids(
     nodes.crs = map_data.working_projection
     nodes_code = gpd.sjoin(nodes, geology, how="left", predicate="within")
     # orientations = gpd.sjoin(structures, geology, how="left", predicate="within")
-    orientations = orientations[orientations[config.c_l["d"]] != 0]
+    orientations = orientations[orientations["DIP"] != 0]
     first_supergroup = True
     # avoids massive memory rbf calcs by splitting calc into (non-threaded) chunks, maybe try dask + masks??
     split = 25000
@@ -2249,28 +2218,22 @@ def interpolation_grids(
             for group in groups:
 
                 if first:
-                    all_nodes = nodes_code_row[nodes_code_row[config.c_l["g"]] == group]
-                    all_structures = orientations[
-                        orientations[config.c_l["g"]] == group
-                    ]
+                    all_nodes = nodes_code_row[nodes_code_row["GROUP"] == group]
+                    all_structures = orientations[orientations["GROUP"] == group]
                     all_contacts = contacts[
-                        contacts[config.c_l["g"]]
-                        == group.replace(" ", "_").replace("-", "_")
+                        contacts["GROUP"] == group.replace(" ", "_").replace("-", "_")
                     ]
                     first = False
                 else:
-                    another_node = nodes_code_row[
-                        nodes_code_row[config.c_l["g"]] == group
-                    ]
+                    another_node = nodes_code_row[nodes_code_row["GROUP"] == group]
                     all_nodes = pd.concat([all_nodes, another_node], sort=False)
 
                 another_contact = contacts[
-                    contacts[config.c_l["g"]]
-                    == group.replace(" ", "_").replace("-", "_")
+                    contacts["GROUP"] == group.replace(" ", "_").replace("-", "_")
                 ]
                 all_contacts = pd.concat([all_contacts, another_contact], sort=False)
 
-                another_structure = orientations[orientations[config.c_l["g"]] == group]
+                another_structure = orientations[orientations["GROUP"] == group]
                 all_structures = pd.concat(
                     [all_structures, another_structure], sort=False
                 )
@@ -2359,15 +2322,16 @@ def interpolation_grids(
     lscaled = -scale * contact_interp["m"]
     mscaled = scale * contact_interp["l"]
     scale2 = np.sqrt(orientation_interp["l"] ** 2 + orientation_interp["m"] ** 2)
-    loscaled = np.where(scale2 > 0, contact_interp["l"] / scale2, 0)
-    moscaled = np.where(scale2 > 0, contact_interp["m"] / scale2, 0)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        loscaled = np.where(scale2 > 0, contact_interp["l"] / scale2, 0)
+        moscaled = np.where(scale2 > 0, contact_interp["m"] / scale2, 0)
     dotproduct = (-contact_interp["m"] * loscaled) + (contact_interp["l"] * moscaled)
 
     # lscaled=np.where(dotproduct<0, -lscaled,lscaled)
     # mscaled=np.where(dotproduct<0, -mscaled,mscaled)
     dotproduct = np.where(dotproduct > 1, 1, dotproduct)
     dotproduct = np.where(dotproduct < -1, -1, dotproduct)
-    misorientation = np.degrees(np.arccos(dotproduct))
+    # misorientation = np.degrees(np.arccos(dotproduct))
 
     dip = 90.0 - np.degrees(np.arcsin(orientation_interp["n"]))
     mscaled = np.where(mscaled == 0, 1e-5, mscaled)
@@ -2391,7 +2355,7 @@ def interpolation_grids(
     orientation_interp = pd.DataFrame(orientation_interp)
     contact_interp = pd.DataFrame(contact_interp)
     combo_interp = pd.DataFrame(combo_interp)
-    return (orientation_interp, contact_interp, combo_interp)
+    return (contact_interp, combo_interp)
 
 
 @beartype.beartype
@@ -2426,13 +2390,13 @@ def process_fault_throw_and_near_faults_from_grid(
 
     # Looping through each fault
     for index, fault in local_faults.iterrows():
-        # if(fault[config.c_l['o']]!=1071):
+        # if(fault["GEOMETRY_OBJECT_ID"]!=1071):
         # continue
         if not str(fault.geometry.type) == "None":
             if fault.geometry.type == "LineString":
                 # in is dangerous as Fault_1 is in Fault_10
-                if "Fault_" + str(fault[config.c_l["o"]]) in fault_names:
-                    # print('LineString','Fault_'+str(fault[config.c_l['o']]),len(fault.geometry.coords))
+                if "Fault_" + str(fault["GEOMETRY_OBJECT_ID"]) in fault_names:
+                    # print('LineString','Fault_'+str(fault["GEOMETRY_OBJECT_ID"]),len(fault.geometry.coords))
                     lcoords = []
                     rcoords = []
                     index = []
@@ -2485,18 +2449,12 @@ def process_fault_throw_and_near_faults_from_grid(
                     lgroups = []
                     for ind, indl in lcode.iterrows():
                         if (
-                            not str(indl[config.c_l["c"]]) == "nan"
-                            and not str(indl[config.c_l["r1"]]) == "nan"
+                            not str(indl["UNIT_NAME"]) == "nan"
+                            and not str(indl["ROCKTYPE1"]) == "nan"
                         ):
-                            if (
-                                m2l_utils.mod_safe(ind, decimate_near) == 0
-                                or ind == len(lcode) - 1
-                            ):
-                                if (
-                                    not config.c_l["sill"] in indl[config.c_l["ds"]]
-                                ) or (
-                                    not config.c_l["intrusive"]
-                                    in indl[config.c_l["r1"]]
+                            if ind % decimate_near == 0 or ind == len(lcode) - 1:
+                                if (not config.c_l["sill"] in indl["DESCRIPTION"]) or (
+                                    not config.c_l["intrusive"] in indl["ROCKTYPE1"]
                                 ):
                                     locations = [(indl.geometry.x, indl.geometry.y)]
                                     last_height_l = m2l_utils.value_from_dtm_dtb(
@@ -2506,30 +2464,27 @@ def process_fault_throw_and_near_faults_from_grid(
                                         workflow["cover_map"],
                                         locations,
                                     )
-                                    if not indl[config.c_l["g"]] in lgroups:
+                                    if not indl["GROUP"] in lgroups:
                                         ostr = "{},{},{},{}\n".format(
                                             indl.geometry.x,
                                             indl.geometry.y,
                                             last_height_l,
-                                            indl[config.c_l["c"]]
+                                            indl["UNIT_NAME"]
                                             .replace(" ", "_")
                                             .replace("-", "_"),
                                         )
                                         fftc.write(ostr)
-                                        lgroups.append(indl[config.c_l["g"]])
+                                        lgroups.append(indl["GROUP"])
                     rgroups = []
                     for ind, indr in rcode.iterrows():
                         if (
-                            not str(indr[config.c_l["c"]]) == "nan"
-                            and not str(indr[config.c_l["r1"]]) == "nan"
+                            not str(indr["UNIT_NAME"]) == "nan"
+                            and not str(indr["ROCKTYPE1"]) == "nan"
                         ):
-                            if (not config.c_l["sill"] in indr[config.c_l["ds"]]) or (
-                                not config.c_l["intrusive"] in indr[config.c_l["r1"]]
+                            if (not config.c_l["sill"] in indr["DESCRIPTION"]) or (
+                                not config.c_l["intrusive"] in indr["ROCKTYPE1"]
                             ):
-                                if (
-                                    m2l_utils.mod_safe(ind, decimate_near) == 0
-                                    or ind == len(rcode) - 1
-                                ):
+                                if ind % decimate_near == 0 or ind == len(rcode) - 1:
                                     locations = [(indr.geometry.x, indr.geometry.y)]
                                     last_height_r = m2l_utils.value_from_dtm_dtb(
                                         dtm,
@@ -2538,17 +2493,17 @@ def process_fault_throw_and_near_faults_from_grid(
                                         workflow["cover_map"],
                                         locations,
                                     )
-                                    if not indr[config.c_l["g"]] in rgroups:
+                                    if not indr["GROUP"] in rgroups:
                                         ostr = "{},{},{},{}\n".format(
                                             indr.geometry.x,
                                             indr.geometry.y,
                                             last_height_r,
-                                            indr[config.c_l["c"]]
+                                            indr["UNIT_NAME"]
                                             .replace(" ", "_")
                                             .replace("-", "_"),
                                         )
                                         fftc.write(ostr)
-                                        rgroups.append(indr[config.c_l["g"]])
+                                        rgroups.append(indr["GROUP"])
 
                     # add points to list if they have different geology code than previous node on left side
 
@@ -2558,20 +2513,17 @@ def process_fault_throw_and_near_faults_from_grid(
 
                     for ind, indl in lcode.iterrows():
                         if ind < len(lcode) and not isnan(indl["index_right"]):
-                            ntest1 = str(indl[config.c_l["ds"]])
-                            ntest2 = str(indl[config.c_l["r1"]])
+                            ntest1 = str(indl["DESCRIPTION"])
+                            ntest2 = str(indl["ROCKTYPE1"])
 
                             if not ntest1 == "None" and not ntest2 == "None":
                                 if ind == 1 or (
-                                    not lastlcode == indl[config.c_l["c"]]
+                                    not lastlcode == indl["UNIT_NAME"]
                                     and (
-                                        (
-                                            not config.c_l["sill"]
-                                            in indl[config.c_l["ds"]]
-                                        )
+                                        (not config.c_l["sill"] in indl["DESCRIPTION"])
                                         or (
                                             not config.c_l["intrusive"]
-                                            in indl[config.c_l["r1"]]
+                                            in indl["ROCKTYPE1"]
                                         )
                                     )
                                 ):
@@ -2582,41 +2534,37 @@ def process_fault_throw_and_near_faults_from_grid(
                                         firstlx = indl.geometry.x
                                         firstly = indl.geometry.y
                                         firstlc = (
-                                            indl[config.c_l["c"]]
+                                            indl["UNIT_NAME"]
                                             .replace(" ", "_")
                                             .replace("-", "_")
                                         )
                                     lastlx = indl.geometry.x
                                     lastly = indl.geometry.y
                                     lastlc = (
-                                        indl[config.c_l["c"]]
+                                        indl["UNIT_NAME"]
                                         .replace(" ", "_")
                                         .replace("-", "_")
                                     )
 
                                 if lastlcode == "" and (
-                                    (not config.c_l["sill"] in indl[config.c_l["ds"]])
+                                    (not config.c_l["sill"] in indl["DESCRIPTION"])
                                     or (
-                                        not config.c_l["intrusive"]
-                                        in indl[config.c_l["r1"]]
+                                        not config.c_l["intrusive"] in indl["ROCKTYPE1"]
                                     )
                                 ):
-                                    lastlcode = indl[config.c_l["c"]]
+                                    lastlcode = indl["UNIT_NAME"]
 
-                                # print('l',ind,indl[config.c_l['c']],indl[config.c_l['ds']],indl[config.c_l['r1']])
+                                # print('l',ind,indl["UNIT_NAME"],indl["DESCRIPTION"],indl["ROCKTYPE1"])
                                 if (
                                     not ntest1 == "None"
                                     and not ntest2 == "None"
-                                    and not str(indl[config.c_l["c"]]) == "nan"
+                                    and not str(indl["UNIT_NAME"]) == "nan"
                                 ):
-                                    if (not indl[config.c_l["c"]] == lastlcode) and (
-                                        (
-                                            not config.c_l["sill"]
-                                            in indl[config.c_l["ds"]]
-                                        )
+                                    if (not indl["UNIT_NAME"] == lastlcode) and (
+                                        (not config.c_l["sill"] in indl["DESCRIPTION"])
                                         or (
                                             not config.c_l["intrusive"]
-                                            in indl[config.c_l["r1"]]
+                                            in indl["ROCKTYPE1"]
                                         )
                                     ):
                                         lcontact.append(
@@ -2624,12 +2572,12 @@ def process_fault_throw_and_near_faults_from_grid(
                                                 (
                                                     ind,
                                                     lastlcode,
-                                                    indl[config.c_l["c"]],
+                                                    indl["UNIT_NAME"],
                                                     indl.geometry,
                                                 )
                                             ]
                                         )
-                                        lastlcode = indl[config.c_l["c"]]
+                                        lastlcode = indl["UNIT_NAME"]
                                         locations = [(lastlx, lastly)]
                                         last_height_l = m2l_utils.value_from_dtm_dtb(
                                             dtm,
@@ -2642,7 +2590,7 @@ def process_fault_throw_and_near_faults_from_grid(
                                             lastlx,
                                             lastly,
                                             last_height_l,
-                                            indl[config.c_l["c"]]
+                                            indl["UNIT_NAME"]
                                             .replace(" ", "_")
                                             .replace("-", "_"),
                                         )
@@ -2655,20 +2603,17 @@ def process_fault_throw_and_near_faults_from_grid(
                     lastrcode = ""
                     for ind, indr in rcode.iterrows():
                         if ind < len(rcode) and not isnan(indr["index_right"]):
-                            ntest1 = str(indr[config.c_l["ds"]])
-                            ntest2 = str(indr[config.c_l["r1"]])
+                            ntest1 = str(indr["DESCRIPTION"])
+                            ntest2 = str(indr["ROCKTYPE1"])
 
                             if not ntest1 == "None" and not ntest2 == "None":
                                 if ind == 1 or (
-                                    not lastrcode == indr[config.c_l["c"]]
+                                    not lastrcode == indr["UNIT_NAME"]
                                     and (
-                                        (
-                                            not config.c_l["sill"]
-                                            in indr[config.c_l["ds"]]
-                                        )
+                                        (not config.c_l["sill"] in indr["DESCRIPTION"])
                                         or (
                                             not config.c_l["intrusive"]
-                                            in indr[config.c_l["r1"]]
+                                            in indr["ROCKTYPE1"]
                                         )
                                     )
                                 ):
@@ -2679,43 +2624,39 @@ def process_fault_throw_and_near_faults_from_grid(
                                         firstrx = indr.geometry.x
                                         firstry = indr.geometry.y
                                         firstrc = (
-                                            indr[config.c_l["c"]]
+                                            indr["UNIT_NAME"]
                                             .replace(" ", "_")
                                             .replace("-", "_")
                                         )
                                     lastrx = indr.geometry.x
                                     lastry = indr.geometry.y
                                     lastrc = (
-                                        indr[config.c_l["c"]]
+                                        indr["UNIT_NAME"]
                                         .replace(" ", "_")
                                         .replace("-", "_")
                                     )
 
                                 if lastrcode == "" and (
-                                    (not config.c_l["sill"] in indr[config.c_l["ds"]])
+                                    (not config.c_l["sill"] in indr["DESCRIPTION"])
                                     or (
-                                        not config.c_l["intrusive"]
-                                        in indr[config.c_l["r1"]]
+                                        not config.c_l["intrusive"] in indr["ROCKTYPE1"]
                                     )
                                 ):
-                                    lastrcode = indr[config.c_l["c"]]
-                                # print('r',ind,indr[config.c_l['c']],indr[config.c_l['ds']],indr[config.c_l['r1']])
+                                    lastrcode = indr["UNIT_NAME"]
+                                # print('r',ind,indr["UNIT_NAME"],indr["DESCRIPTION"],indr["ROCKTYPE1"])
 
-                                # print(lastrcode,ntest1,ntest2,str(indr[config.c_l['c']]),indr[config.c_l['c']],config.c_l['sill'],config.c_l['intrusive'])
+                                # print(lastrcode,ntest1,ntest2,str(indr["UNIT_NAME"]),indr["UNIT_NAME"],config.c_l['sill'],config.c_l['intrusive'])
 
                                 if (
                                     not ntest1 == "None"
                                     and not ntest2 == "None"
-                                    and not str(indr[config.c_l["c"]]) == "nan"
+                                    and not str(indr["UNIT_NAME"]) == "nan"
                                 ):
-                                    if (not indr[config.c_l["c"]] == lastrcode) and (
-                                        (
-                                            not config.c_l["sill"]
-                                            in indr[config.c_l["ds"]]
-                                        )
+                                    if (not indr["UNIT_NAME"] == lastrcode) and (
+                                        (not config.c_l["sill"] in indr["DESCRIPTION"])
                                         or (
                                             not config.c_l["intrusive"]
-                                            in indr[config.c_l["r1"]]
+                                            in indr["ROCKTYPE1"]
                                         )
                                     ):
                                         rcontact.append(
@@ -2723,12 +2664,12 @@ def process_fault_throw_and_near_faults_from_grid(
                                                 (
                                                     ind,
                                                     lastrcode,
-                                                    indr[config.c_l["c"]],
+                                                    indr["UNIT_NAME"],
                                                     indr.geometry,
                                                 )
                                             ]
                                         )
-                                        lastrcode = indr[config.c_l["c"]]
+                                        lastrcode = indr["UNIT_NAME"]
                                         locations = [(lastrx, lastry)]
                                         last_height_r = m2l_utils.value_from_dtm_dtb(
                                             dtm,
@@ -2741,7 +2682,7 @@ def process_fault_throw_and_near_faults_from_grid(
                                             lastrx,
                                             lastry,
                                             last_height_r,
-                                            indr[config.c_l["c"]]
+                                            indr["UNIT_NAME"]
                                             .replace(" ", "_")
                                             .replace("-", "_"),
                                         )
@@ -2775,7 +2716,8 @@ def process_fault_throw_and_near_faults_from_grid(
                                             (
                                                 l,
                                                 m,
-                                                "Fault_" + str(fault[config.c_l["o"]]),
+                                                "Fault_"
+                                                + str(fault["GEOMETRY_OBJECT_ID"]),
                                             )
                                         )
                                         all_coordsdist.append((dist))
@@ -2783,7 +2725,7 @@ def process_fault_throw_and_near_faults_from_grid(
             # Between these dividers shouldn't be neccessary anymore.
             else:
                 # in is dangerous as Fault_1 is in Fault_10
-                if "Fault_" + str(fault[config.c_l["o"]]) in fault_names:
+                if "Fault_" + str(fault["GEOMETRY_OBJECT_ID"]) in fault_names:
                     for fls in fault.geometry:
                         fault_ls = LineString(fls)
                         lcoords = []
@@ -2836,20 +2778,20 @@ def process_fault_throw_and_near_faults_from_grid(
                         for ind, indl in lcode.iterrows():
 
                             if ind < len(lcode) and not isnan(indl["index_right"]):
-                                ntest1 = str(indl[config.c_l["ds"]])
-                                ntest2 = str(indl[config.c_l["r1"]])
+                                ntest1 = str(indl["DESCRIPTION"])
+                                ntest2 = str(indl["ROCKTYPE1"])
 
                                 if not ntest1 == "None" and not ntest2 == "None":
                                     if ind == 1 or (
-                                        not lastlcode == indl[config.c_l["c"]]
+                                        not lastlcode == indl["UNIT_NAME"]
                                         and (
                                             (
                                                 not config.c_l["sill"]
-                                                in indl[config.c_l["ds"]]
+                                                in indl["DESCRIPTION"]
                                             )
                                             or (
                                                 not config.c_l["intrusive"]
-                                                in indl[config.c_l["r1"]]
+                                                in indl["ROCKTYPE1"]
                                             )
                                         )
                                     ):
@@ -2860,45 +2802,40 @@ def process_fault_throw_and_near_faults_from_grid(
                                             firstlx = indl.geometry.x
                                             firstly = indl.geometry.y
                                             firstlc = (
-                                                indl[config.c_l["c"]]
+                                                indl["UNIT_NAME"]
                                                 .replace(" ", "_")
                                                 .replace("-", "_")
                                             )
                                         lastlx = indl.geometry.x
                                         lastly = indl.geometry.y
                                         lastlc = (
-                                            indl[config.c_l["c"]]
+                                            indl["UNIT_NAME"]
                                             .replace(" ", "_")
                                             .replace("-", "_")
                                         )
 
                                     if lastlcode == "" and (
-                                        (
-                                            not config.c_l["sill"]
-                                            in indl[config.c_l["ds"]]
-                                        )
+                                        (not config.c_l["sill"] in indl["DESCRIPTION"])
                                         or (
                                             not config.c_l["intrusive"]
-                                            in indl[config.c_l["r1"]]
+                                            in indl["ROCKTYPE1"]
                                         )
                                     ):
-                                        lastlcode = indl[config.c_l["c"]]
+                                        lastlcode = indl["UNIT_NAME"]
 
                                     if (
                                         not ntest1 == "None"
                                         and not ntest2 == "None"
-                                        and not str(indl[config.c_l["c"]]) == "nan"
+                                        and not str(indl["UNIT_NAME"]) == "nan"
                                     ):
-                                        if (
-                                            not indl[config.c_l["c"]] == lastlcode
-                                        ) and (
+                                        if (not indl["UNIT_NAME"] == lastlcode) and (
                                             (
                                                 not config.c_l["sill"]
-                                                in indl[config.c_l["ds"]]
+                                                in indl["DESCRIPTION"]
                                             )
                                             or (
                                                 not config.c_l["intrusive"]
-                                                in indl[config.c_l["r1"]]
+                                                in indl["ROCKTYPE1"]
                                             )
                                         ):
                                             lcontact.append(
@@ -2906,12 +2843,12 @@ def process_fault_throw_and_near_faults_from_grid(
                                                     (
                                                         ind,
                                                         lastlcode,
-                                                        indl[config.c_l["c"]],
+                                                        indl["UNIT_NAME"],
                                                         indl.geometry,
                                                     )
                                                 ]
                                             )
-                                            lastlcode = indl[config.c_l["c"]]
+                                            lastlcode = indl["UNIT_NAME"]
                                             locations = [(lastlx, lastly)]
                                             last_height_l = (
                                                 m2l_utils.value_from_dtm_dtb(
@@ -2926,7 +2863,7 @@ def process_fault_throw_and_near_faults_from_grid(
                                                 lastlx,
                                                 lastly,
                                                 last_height_l,
-                                                indl[config.c_l["c"]]
+                                                indl["UNIT_NAME"]
                                                 .replace(" ", "_")
                                                 .replace("-", "_"),
                                             )
@@ -2939,20 +2876,20 @@ def process_fault_throw_and_near_faults_from_grid(
                         lastrcode = ""
                         for ind, indr in rcode.iterrows():
                             if ind < len(rcode) and not isnan(indr["index_right"]):
-                                ntest1 = str(indr[config.c_l["ds"]])
-                                ntest2 = str(indr[config.c_l["r1"]])
+                                ntest1 = str(indr["DESCRIPTION"])
+                                ntest2 = str(indr["ROCKTYPE1"])
 
                                 if not ntest1 == "None" and not ntest2 == "None":
                                     if ind == 1 or (
-                                        not lastrcode == indr[config.c_l["c"]]
+                                        not lastrcode == indr["UNIT_NAME"]
                                         and (
                                             (
                                                 not config.c_l["sill"]
-                                                in indr[config.c_l["ds"]]
+                                                in indr["DESCRIPTION"]
                                             )
                                             or (
                                                 not config.c_l["intrusive"]
-                                                in indr[config.c_l["r1"]]
+                                                in indr["ROCKTYPE1"]
                                             )
                                         )
                                     ):
@@ -2963,45 +2900,40 @@ def process_fault_throw_and_near_faults_from_grid(
                                             firstrx = indr.geometry.x
                                             firstry = indr.geometry.y
                                             firstrc = (
-                                                indr[config.c_l["c"]]
+                                                indr["UNIT_NAME"]
                                                 .replace(" ", "_")
                                                 .replace("-", "_")
                                             )
                                         lastrx = indr.geometry.x
                                         lastry = indr.geometry.y
                                         lastrc = (
-                                            indr[config.c_l["c"]]
+                                            indr["UNIT_NAME"]
                                             .replace(" ", "_")
                                             .replace("-", "_")
                                         )
 
                                     if lastrcode == "" and (
-                                        (
-                                            not config.c_l["sill"]
-                                            in indr[config.c_l["ds"]]
-                                        )
+                                        (not config.c_l["sill"] in indr["DESCRIPTION"])
                                         or (
                                             not config.c_l["intrusive"]
-                                            in indr[config.c_l["r1"]]
+                                            in indr["ROCKTYPE1"]
                                         )
                                     ):
-                                        lastrcode = indr[config.c_l["c"]]
+                                        lastrcode = indr["UNIT_NAME"]
 
                                     if (
                                         not ntest1 == "None"
                                         and not ntest2 == "None"
-                                        and not str(indr[config.c_l["c"]]) == "nan"
+                                        and not str(indr["UNIT_NAME"]) == "nan"
                                     ):
-                                        if (
-                                            not indr[config.c_l["c"]] == lastrcode
-                                        ) and (
+                                        if (not indr["UNIT_NAME"] == lastrcode) and (
                                             (
                                                 not config.c_l["sill"]
-                                                in indr[config.c_l["ds"]]
+                                                in indr["DESCRIPTION"]
                                             )
                                             or (
                                                 not config.c_l["intrusive"]
-                                                in indr[config.c_l["r1"]]
+                                                in indr["ROCKTYPE1"]
                                             )
                                         ):
                                             rcontact.append(
@@ -3009,12 +2941,12 @@ def process_fault_throw_and_near_faults_from_grid(
                                                     (
                                                         ind,
                                                         lastrcode,
-                                                        indr[config.c_l["c"]],
+                                                        indr["UNIT_NAME"],
                                                         indr.geometry,
                                                     )
                                                 ]
                                             )
-                                            lastrcode = indr[config.c_l["c"]]
+                                            lastrcode = indr["UNIT_NAME"]
                                             locations = [(lastrx, lastry)]
                                             last_height_r = (
                                                 m2l_utils.value_from_dtm_dtb(
@@ -3029,7 +2961,7 @@ def process_fault_throw_and_near_faults_from_grid(
                                                 lastrx,
                                                 lastry,
                                                 last_height_r,
-                                                indr[config.c_l["c"]]
+                                                indr["UNIT_NAME"]
                                                 .replace(" ", "_")
                                                 .replace("-", "_"),
                                             )
@@ -3113,12 +3045,12 @@ def process_fault_throw_and_near_faults_from_grid(
                                 lcode.iloc[len(lcode) - 3].geometry.x,
                                 lcode.iloc[len(lcode) - 3].geometry.y,
                                 last_height_l,
-                                str(lcode.iloc[len(lcode) - 3][config.c_l["c"]])
+                                str(lcode.iloc[len(lcode) - 3]["UNIT_NAME"])
                                 .replace(" ", "_")
                                 .replace("-", "_"),
                             )
                             if (
-                                not str(lcode.iloc[len(lcode) - 3][config.c_l["c"]])
+                                not str(lcode.iloc[len(lcode) - 3]["UNIT_NAME"])
                                 == "nan"
                             ):
                                 fftc.write(ostr)
@@ -3140,12 +3072,12 @@ def process_fault_throw_and_near_faults_from_grid(
                                 lcode.iloc[len(rcode) - 3].geometry.x,
                                 rcode.iloc[len(rcode) - 3].geometry.y,
                                 last_height_r,
-                                str(rcode.iloc[len(rcode) - 3][config.c_l["c"]])
+                                str(rcode.iloc[len(rcode) - 3]["UNIT_NAME"])
                                 .replace(" ", "_")
                                 .replace("-", "_"),
                             )
                             if (
-                                not str(rcode.iloc[len(rcode) - 3][config.c_l["c"]])
+                                not str(rcode.iloc[len(rcode) - 3]["UNIT_NAME"])
                                 == "nan"
                             ):
                                 fftc.write(ostr)
@@ -3185,7 +3117,7 @@ def process_fault_throw_and_near_faults_from_grid(
                                                     l,
                                                     m,
                                                     "Fault_"
-                                                    + str(fault[config.c_l["o"]]),
+                                                    + str(fault["GEOMETRY_OBJECT_ID"]),
                                                 )
                                             )
                                             all_coordsdist.append((dist))

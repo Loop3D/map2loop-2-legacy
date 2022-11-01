@@ -1,4 +1,9 @@
 
+# Installing map2loop
+
+Marks instructions 
+
+
 1)	create a clean python env with
 
 conda create --name loop python=3.8                 # --name  =  minus minus name (no spaces)! If you already have an env called loop, call it loop2 or something.

@@ -1,5 +1,6 @@
 from enum import IntEnum
 
+
 class Datatype(IntEnum):
     GEOLOGY = 0
     STRUCTURE = 1
@@ -13,6 +14,7 @@ class Datatype(IntEnum):
     COVER_MAP = 9
     METADATA = 10
 
+
 class Datastate(IntEnum):
     UNNAMED = 0
     UNLOADED = 1
@@ -24,10 +26,12 @@ class Datastate(IntEnum):
     MERGED = 7
     ERRORED = 9
 
+
 class ErrorState(IntEnum):
     NONE = 0
     URLERROR = 1
     CONFIGERROR = 2
+
 
 class VerboseLevel(IntEnum):
     NONE = 0
