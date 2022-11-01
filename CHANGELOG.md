@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.3.0](https://github.com/Loop3D/map2loop-2/compare/v1.2.10...1.3.0) (2022-11-01)
+
+
+### Features
+
+* Merged classes into master, with version bump ([4cc796e](https://github.com/Loop3D/map2loop-2/commit/4cc796e38abcc4d7be4a641b64da54b17e637eed))
+
+
+### Bug Fixes
+
+* add crs to temporary geodataframe to solve crs mismatch ([4d7023a](https://github.com/Loop3D/map2loop-2/commit/4d7023aa45265b5b729d5cea573fe955103ba6e3))
+* Add supergroup to stratigraphic column, fix thickness values in projectfile output ([8387655](https://github.com/Loop3D/map2loop-2/commit/83876550293d0143d6dac0914d67807e93343bad))
+* Move crs assignment to after geology has been specified ([e74e9e9](https://github.com/Loop3D/map2loop-2/commit/e74e9e91918571b227ed368e8ef21b21f3906fe7))
+* rework of topology file structure and graph usage ([a5419e8](https://github.com/Loop3D/map2loop-2/commit/a5419e8d8f70a5dbd41db4fd842a0127b52b89aa))
+* Without explicit string type replacement silently fails ([451a876](https://github.com/Loop3D/map2loop-2/commit/451a876b9c3549e49d3f3f9691d87c2ee595ddd0))
+
 ## [1.2.10](https://github.com/Loop3D/map2loop-2/compare/v1.2.9...v1.2.10) (2022-08-20)
 
 
