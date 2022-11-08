@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/Loop3D/map2loop-2/compare/1.3.0...1.3.1) (2022-11-08)
+
+
+### Bug Fixes
+
+* version bump for mambaforge build ([31eabb3](https://github.com/Loop3D/map2loop-2/commit/31eabb37eab016b30d918d8793f159769fa4313c))
+
 ## [1.3.0](https://github.com/Loop3D/map2loop-2/compare/v1.2.10...1.3.0) (2022-11-01)
 
 
