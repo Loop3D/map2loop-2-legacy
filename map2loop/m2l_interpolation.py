@@ -295,10 +295,8 @@ def interpolate_orientations(
         y[i] = a_pt[1]["geometry"].y + (np.random.ranf() * 0.01)
         dip[i] = a_pt[1]["DIP"]
 
-        if c_l["otype"] == "strike":
-            dipdir[i] = a_pt[1]["DIPDIR"] + 90
-        else:
-            dipdir[i] = a_pt[1]["DIPDIR"]
+        # All orientation have been converted to dipdir
+        dipdir[i] = a_pt[1]["DIPDIR"]
         i = i + 1
 
     l = np.zeros(npts)
@@ -1173,10 +1171,8 @@ def interpolate_orientations_with_fat(
         x[i] = a_pt["geometry"].x
         y[i] = a_pt["geometry"].y
         dip[i] = a_pt["DIP"]
-        if c_l["otype"] == "strike":
-            dipdir[i] = float(a_pt["DIPDIR"]) + 90
-        else:
-            dipdir[i] = a_pt["DIPDIR"]
+        # All orientation have been converted to dipdir
+        dipdir[i] = a_pt["DIPDIR"]
         i = i + 1
 
     for ind, a_pt in fat_orientations.iterrows():
@@ -2061,10 +2057,8 @@ def interpolate_orientation_grid(structures, calc, xcoords, ycoords, c_l):
         y[i] = a_pt[1]["geometry"].y + (np.random.ranf())
         dip[i] = a_pt[1]["DIP"]
 
-        if c_l["otype"] == "strike":
-            dipdir[i] = a_pt[1]["DIPDIR"] + 90
-        else:
-            dipdir[i] = a_pt[1]["DIPDIR"]
+        # All orientation have been converted to dipdir
+        dipdir[i] = a_pt[1]["DIPDIR"]
 
         i = i + 1
 

@@ -541,22 +541,9 @@ def load_and_reproject_dtm(
         dataset = memfile.open(**src_params)
         dataset.write(nc_data, 1)
     elif url.startswith("http"):
-        # Load open topography dataset as last resort
-        link = (
-            "https://portal.opentopography.org/otr/getdem?demtype=SRTMGL3&west="
-            + str(tb_ll[0])
-            + "&south="
-            + str(tb_ll[1])
-            + "&east="
-            + str(tb_ll[2])
-            + "&north="
-            + str(tb_ll[3])
-            + "&outputFormat=GTiff"
-        )
-
         if verbose:
-            print("Attempting to load open topography dtm data from", link)
-        img = urlopen(link)
+            print("Attempting to load digital terrin from", url)
+        img = urlopen(url)
         memfile = rasterio.io.MemoryFile(img.read())
         dataset = memfile.open()
     else:

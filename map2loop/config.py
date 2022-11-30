@@ -68,7 +68,8 @@ class Config(object):
             "use_fat": True,
             "use_roi_clip": False,
             "roi_clip_path": "",
-            "drift_prefix": ["None"],
+            "drift_prefix": [],
+            "ignore_codes": [],
             "fault_fault_weight": 3,
             "fault_weight": 1,
             "formation_weight": 7,
@@ -254,6 +255,7 @@ class Config(object):
             i = 0
             for key in self.colour_dict.keys():
                 self.colour_dict[key] = random_colours[i]
+                i=i+1
 
         self.cmap = colors.ListedColormap(self.colour_dict.values(), name="geol_key")
 

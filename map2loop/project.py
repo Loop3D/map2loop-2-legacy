@@ -500,9 +500,16 @@ class Project(object):
             print("ERROR: Error state set at ", self.errorStateMsg)
             return
 
+        # Add drift_prefix to ignore_codes for ignoring units in geology layer
+        # TODO: Need to deprecate drift_prefix and remove from notebooks
+        if (type(self.config.run_flags["drift_prefix"]) == list
+            and type(self.config.run_flags["ignore_codes"]) == list):
+            self.config.run_flags["ignore_codes"] = self.config.run_flags["ignore_codes"] + self.config.run_flags["drift_prefix"]
+
         # set orientation/structure data to recreate with dirty flag and unloaded state
         # because half way through run process (merge_structure_with geology)
         # the geopandas is fundamentally changed which breaks export_wkt_format_files call
+        # if the process is re-run (ie. run() is called again without __init__ or update_config)
         # TODO: Fix so that both version of orientations are possible without reloading the file
         self.map_data.data_states[Datatype.STRUCTURE] = Datastate.UNLOADED
         self.map_data.dirtyflags[Datatype.STRUCTURE] = True

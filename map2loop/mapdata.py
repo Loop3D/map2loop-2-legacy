@@ -7,7 +7,6 @@ import os
 from . import m2l_map_checker
 from .m2l_enums import Datatype, Datastate, VerboseLevel
 import warnings
-from .topology import Topology
 from . import m2l_utils, m2l_geometry, m2l_interpolation
 import time
 import matplotlib.pyplot as plt
@@ -257,7 +256,7 @@ class MapData:
             self.data[Datatype.GEOLOGY] = m2l_map_checker.check_geology_map(
                 self.data[Datatype.GEOLOGY],
                 self.config.c_l,
-                self.config.run_flags["drift_prefix"],
+                self.config.run_flags["ignore_codes"],
                 _warnings,
                 _errors,
                 True,
@@ -346,7 +345,8 @@ class MapData:
     def save_map_data(
         self, output_dir: str, datatype: Datatype, extension: str = ".csv"
     ):
-        if self.data_states[datatype] == Datastate.CONVERTED:
+        if (self.data_states[datatype] == Datastate.CONVERTED
+            or self.data_states[datatype] == Datastate.COMPLETE):
             try:
                 filename = os.path.join(output_dir, datatype.name, extension)
                 if extension == ".csv":
@@ -536,7 +536,7 @@ class MapData:
             sub_lines.columns = ["WKT"] + list(sub_lines.columns[1:])
             # Filter cells with a feature description containing the word 'fault'
             mask = sub_lines["FEATURE"].str.contains(
-                "fault", na=False, case=False, regex=True
+                self.config.c_l["fault"], na=False, case=False, regex=True
             )
             sub_faults = sub_lines[mask]
             sub_faults.to_csv(self.config.fault_filename_wkt, sep="\t", index=False)
@@ -580,10 +580,13 @@ class MapData:
                     time.sleep(1)
                     i += 1
         else:
-            dtm = m2l_utils.load_and_reproject_dtm(
-                self.config.polygon, self.working_projection, url=source
-            )
-            success = True
+            try:
+                dtm = m2l_utils.load_and_reproject_dtm(
+                    self.config.polygon, self.working_projection, url=source
+                )
+                success = True
+            except Exception as e:
+                warnings.warn(str(e))
         if success is False:
             raise NameError(
                 f"map2loop error: Could not access DTM server after {num_attempts} attempts"

@@ -117,7 +117,7 @@ def check_all_maps(
     geology = check_geology_map(
         mapdata.get_map_data(Datatype.GEOLOGY),
         config.c_l,
-        config.run_flags["drift_prefix"],
+        config.run_flags["ignore_codes"],
         m2l_warnings,
         m2l_errors,
         verbose_level=verbose_level,
@@ -233,13 +233,12 @@ def check_structure_map(
         )
 
     # Check for strike and convert to dip direction
-    if c_l["otype"] == "strike" and "strike" in orientations.columns:
+    if c_l["otype"] == "strike" and c_l["dd"] in orientations.columns:
         if verbose_level != VerboseLevel.NONE:
             print("converting strike/dip orientation to dipdir/dip")
         orientations[c_l["dd"]] = orientations.apply(
-            lambda row: row["strike"] + 90.0, axis=1
+            lambda row: row[c_l["dd"]] + 90.0, axis=1
         )
-        c_l["otype"] = "dip direction"
 
     # Check for duplicate column references
     if c_l["sf"] == c_l["ds"]:
@@ -461,10 +460,6 @@ def check_geology_map(
     if explode_intrusives:
         geology = _explode_intrusives(geology, c_l)
 
-    # Convert types
-    geology[c_l["max"]] = geology[c_l["max"]].astype(np.float64)
-    geology[c_l["min"]] = geology[c_l["min"]].astype(np.float64)
-
     unique_c = list(set(geology[c_l["c"]]))
     if len(unique_c) < 2:
         m2l_errors.append(
@@ -508,6 +503,10 @@ def check_geology_map(
     if c_l["max"] not in geology.columns:
         m2l_warnings.append("No max age for geology polygons")
         geology[c_l["max"]] = 100
+
+    # Convert types
+    geology[c_l["max"]] = geology[c_l["max"]].astype(np.float64)
+    geology[c_l["min"]] = geology[c_l["min"]].astype(np.float64)
 
     if c_l["c"] not in geology.columns:
         m2l_errors.append("Must have primary strat coding field for geology polygons")
