@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.3.2](https://github.com/Loop3D/map2loop-2/compare/1.3.1...1.3.2) (2022-11-30)
+
+
+### Bug Fixes
+
+* Add clipping of local file dtm ([3359927](https://github.com/Loop3D/map2loop-2/commit/3359927b8ef7f9bc78527cb0e6f70982deca581f))
+* Fix strike conversion logic, Replace drift_prefix with ignore_codes option, remove opentopography dtm ([97d26ed](https://github.com/Loop3D/map2loop-2/commit/97d26ed0f6f6d5545a4c3c3ad2c47dee3bfe7c9a))
+* Move sjoin out of loop for efficiency ([fe59514](https://github.com/Loop3D/map2loop-2/commit/fe59514b2737aaed751b334bd2a62bd47b8d7f5b))
+* version bump ([e9200d1](https://github.com/Loop3D/map2loop-2/commit/e9200d18337835546aea202f0ac62ec705253ad2))
+
 ## [1.3.1](https://github.com/Loop3D/map2loop-2/compare/1.3.0...1.3.1) (2022-11-08)
 
 
