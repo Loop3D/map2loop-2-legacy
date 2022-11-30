@@ -473,6 +473,7 @@ def reproject_dtm(path_in, path_out, src_crs, dst_crs):
 def load_and_reproject_dtm(
     polygon, dst_crs, dtm_crs="EPSG:4326", url="AU", verbose=False
 ):
+    local_file = False
     if url == "AU":
         url = "http://services.ga.gov.au/gis/services/DEM_SRTM_1Second_over_Bathymetry_Topography/MapServer/WCSServer?"
 
@@ -551,6 +552,7 @@ def load_and_reproject_dtm(
         if verbose:
             print("Attempting to load dtm data from", url)
         dataset = rasterio.open(url)
+        local_file = True
 
     # Given an open rasterio dataset reproject it into dst_crs
     new_transform, new_width, new_height = rasterio.warp.calculate_default_transform(
@@ -580,8 +582,25 @@ def load_and_reproject_dtm(
         dst.close()
     dataset.close()
 
-    return reprojected_dtm
+    if local_file == False:
+        return reproject_dtm
 
+    # Clip reprojected image
+    reprojected_open = reprojected_dtm.open()
+    out_image, out_transform = rasterio.mask.mask(reprojected_open,polygon.geometry,crop=True)
+    params = reprojected_open.meta.copy()
+    params.update({
+        "height":out_image.shape[1],
+        "width":out_image.shape[2],
+        "transform":out_transform
+    })
+    clipped_dtm = rasterio.io.MemoryFile()
+    with clipped_dtm.open(**params) as dst:
+        dst.write(out_image)
+        dst.close()
+    reprojected_open.close()
+
+    return clipped_dtm
 
 ############################################
 # get bounds of a dtm
