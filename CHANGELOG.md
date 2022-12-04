@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.3](https://github.com/Loop3D/map2loop-2/compare/1.3.2...1.3.3) (2022-12-04)
+
+
+### Bug Fixes
+
+* version bump ([d9bdd34](https://github.com/Loop3D/map2loop-2/commit/d9bdd343461f1bf278da4e7665aca18ebf5a8422))
+
 ## [1.3.2](https://github.com/Loop3D/map2loop-2/compare/1.3.1...1.3.2) (2022-11-30)
 
 
