@@ -583,7 +583,7 @@ def load_and_reproject_dtm(
     dataset.close()
 
     if local_file == False:
-        return reproject_dtm
+        return reprojected_dtm
 
     # Clip reprojected image
     reprojected_open = reprojected_dtm.open()
