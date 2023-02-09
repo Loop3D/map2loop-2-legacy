@@ -288,7 +288,9 @@ def get_dtm_hawaii(
     OPeNDAP = OPeNDAP.astype("int16")
     OPeNDAP = np.flipud(OPeNDAP)
 
-    transform = rasterio.transform.from_origin(minlong, maxlat, 0.008333333, 0.008333333)
+    transform = rasterio.transform.from_origin(
+        minlong, maxlat, 0.008333333, 0.008333333
+    )
 
     new_dataset = rasterio.open(
         path_out,
@@ -582,18 +584,22 @@ def load_and_reproject_dtm(
         dst.close()
     dataset.close()
 
-    if local_file == False:
+    if local_file is False:
         return reprojected_dtm
 
     # Clip reprojected image
     reprojected_open = reprojected_dtm.open()
-    out_image, out_transform = rasterio.mask.mask(reprojected_open,polygon.geometry,crop=True)
+    out_image, out_transform = rasterio.mask.mask(
+        reprojected_open, polygon.geometry, crop=True
+    )
     params = reprojected_open.meta.copy()
-    params.update({
-        "height":out_image.shape[1],
-        "width":out_image.shape[2],
-        "transform":out_transform
-    })
+    params.update(
+        {
+            "height": out_image.shape[1],
+            "width": out_image.shape[2],
+            "transform": out_transform,
+        }
+    )
     clipped_dtm = rasterio.io.MemoryFile()
     with clipped_dtm.open(**params) as dst:
         dst.write(out_image)
@@ -601,6 +607,7 @@ def load_and_reproject_dtm(
     reprojected_open.close()
 
     return clipped_dtm
+
 
 ############################################
 # get bounds of a dtm

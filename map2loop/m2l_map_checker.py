@@ -17,7 +17,7 @@ def explode_polylines(indf, c_l, dst_crs):
     outdf = gpd.GeoDataFrame(columns=indf.columns, crs=dst_crs)
     for idx, row in indf.iterrows():
         if type(row.geometry) == LineString:
-            rowdf = gpd.GeoDataFrame(data=dict(row), index=[0],crs=dst_crs)
+            rowdf = gpd.GeoDataFrame(data=dict(row), index=[0], crs=dst_crs)
             outdf = pd.concat([outdf, rowdf], ignore_index=True)
         if type(row.geometry) == MultiLineString:
             multdf = gpd.GeoDataFrame(columns=indf.columns, crs=dst_crs)
@@ -346,8 +346,8 @@ def _explode_intrusives(geology, c_l):
     # Note: Can't use "INTRUSIVE" and "SILL" in place of c_l["..."] as they are str field
     # to use for look up not column names
     geol_clip_tmp = geol_clip_tmp[
-        geol_clip_tmp[c_l["r1"]].str.contains(c_l["intrusive"])
-        & ~geol_clip_tmp[c_l["ds"]].str.contains(c_l["sill"])
+        geol_clip_tmp[c_l["r1"]].astype(str).str.contains(c_l["intrusive"])
+        & ~geol_clip_tmp[c_l["ds"]].astype(str).str.contains(c_l["sill"])
     ]
     # print('tmp',len(geol_clip_tmp))
     geol_clip_tmp.reset_index(inplace=True)
@@ -357,8 +357,8 @@ def _explode_intrusives(geology, c_l):
 
     geol_clip_tmp.reset_index(inplace=True)
     geol_clip_not = geology[
-        (~geology[c_l["r1"]].str.contains(c_l["intrusive"]))
-        | geology[c_l["ds"]].str.contains(c_l["sill"])
+        (~geology[c_l["r1"]].astype(str).astype(str).str.contains(c_l["intrusive"]))
+        | geology[c_l["ds"]].astype(str).astype(str).str.contains(c_l["sill"])
     ]
     # print('not',len(geol_clip_not))
     geol_clip_not.index = pd.RangeIndex(
@@ -513,10 +513,12 @@ def check_geology_map(
 
     for code in ("c", "g", "g2", "ds", "u", "r1"):
         if c_l[code] in geology.columns:
-            geology[c_l[code]].str.replace(",", " ")
+            geology[c_l[code]].astype(str).astype(str).str.replace(",", " ")
             if code == "c" or code == "g" or code == "g2":
-                geology[c_l[code]] = geology[c_l[code]].str.replace(
-                    "[ -/?]", "_", regex=True
+                geology[c_l[code]] = (
+                    geology[c_l[code]]
+                    .astype(str)
+                    .str.replace("[ -/?]", "_", regex=True)
                 )
 
             nans = geology[c_l[code]].isnull().sum()
@@ -532,7 +534,7 @@ def check_geology_map(
 
     # Remove geology that has code starting with ignore_codes strings
     for code in ignore_codes:
-        geology = geology[~geology[c_l["u"]].str.startswith(code)]
+        geology = geology[~geology[c_l["u"]].astype(str).str.startswith(code)]
 
     if verbose_level != VerboseLevel.NONE:
         show_metadata(geology, "geology layer")
@@ -570,7 +572,9 @@ def check_fold_map(
             if not len(unique_g) == len(folds):
                 m2l_warnings.append("duplicate fold polyline unique IDs")
 
-            folds = folds[folds[c_l["ff"]].str.contains(c_l["fold"], case=False)]
+            folds = folds[
+                folds[c_l["ff"]].astype(str).str.contains(c_l["fold"], case=False)
+            ]
 
             folds = folds.replace(r"^\s+$", np.nan, regex=True)
 
@@ -586,7 +590,7 @@ def check_fold_map(
                     folds[c_l["t"]] = "None"
 
                 if c_l[code] in folds.columns:
-                    folds[c_l[code]].str.replace(",", " ")
+                    folds[c_l[code]].astype(str).str.replace(",", " ")
 
                     nans = folds[c_l[code]].isnull().sum()
                     if nans > 0:
@@ -624,7 +628,7 @@ def check_fault_map(
         return faults
 
     # Process fault polylines
-    faults = faults[faults[c_l["f"]].str.contains(c_l["fault"], case=False)]
+    faults = faults[faults[c_l["f"]].astype(str).str.contains(c_l["fault"], case=False)]
     faults = faults.replace(r"^\s+$", np.nan, regex=True)
 
     # Check for missing columns and fill with default values

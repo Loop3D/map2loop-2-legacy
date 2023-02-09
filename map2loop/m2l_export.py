@@ -121,6 +121,7 @@ def loop2LoopStructural(m2l_directory):
         viewer.add_model(cmap="tab20")
         viewer.interactive()
 
+
 def rand_cmap(
     nlabels, type="bright", first_color_black=True, last_color_black=False, verbose=True
 ):
@@ -234,7 +235,7 @@ def display_LS_map(
 
     dtm_val = dtm.read(1)
 
-    grid = np.array((dtm_val.shape[0] * dtm_val.shape[1], 3))
+    # grid = np.array((dtm_val.shape[0] * dtm_val.shape[1], 3))
     scale = (dtm.bounds[2] - dtm.bounds[0]) / dtm_val.shape[1]
     x = np.linspace(dtm.bounds[0], dtm.bounds[2], dtm_val.shape[1])
     y = np.linspace(dtm.bounds[3], dtm.bounds[1], dtm_val.shape[0])
@@ -249,7 +250,9 @@ def display_LS_map(
         [xx.flatten(order="F"), yy.flatten(order="F"), zz.flatten(order="F")]
     ).T
     v = model.evaluate_model(model.scale(points), scale=False)
-    transform = rasterio.transform.from_origin(dtm.bounds[0], dtm.bounds[3], scale, scale)
+    transform = rasterio.transform.from_origin(
+        dtm.bounds[0], dtm.bounds[3], scale, scale
+    )
 
     memfile = rasterio.MemoryFile()
     new_dataset = memfile.open(
@@ -345,9 +348,7 @@ def export_to_projectfile(loopFilename, config: Config, overwrite: bool = False)
 
     form2supergroup = pd.read_csv(
         os.path.join(config.tmp_path, "all_sorts_clean.csv"), sep=","
-    )[["code", "group", "supergroup", "colour"]].rename(
-        columns={"code": "formation"}
-    )
+    )[["code", "group", "supergroup", "colour"]].rename(columns={"code": "formation"})
     # Change to formation_summary_thicknesses to get all layers and also dont' need to calc thickness again
     # stratigraphicLayers = pd.read_csv(
     #     os.path.join(config.output_path, "formation_thicknesses.csv")
@@ -382,8 +383,12 @@ def export_to_projectfile(loopFilename, config: Config, overwrite: bool = False)
         columns={"group_": "group", "min": "minAge", "max": "maxAge"}, inplace=True
     )
     stratLayers = pd.merge(form2supergroup, stratAges, on=["group"])
-    thicknesses = pd.read_csv(os.path.join(config.output_path,"formation_summary_thicknesses.csv"))
-    stratLayers = pd.merge(stratLayers, thicknesses[['formation','thickness median']], on=["formation"])
+    thicknesses = pd.read_csv(
+        os.path.join(config.output_path, "formation_summary_thicknesses.csv")
+    )
+    stratLayers = pd.merge(
+        stratLayers, thicknesses[["formation", "thickness median"]], on=["formation"]
+    )
     stratLayers["colour1Red"] = [int(a[1:3], 16) for a in stratLayers["colour"]]
     stratLayers["colour1Green"] = [int(a[3:5], 16) for a in stratLayers["colour"]]
     stratLayers["colour1Blue"] = [int(a[5:7], 16) for a in stratLayers["colour"]]
@@ -397,7 +402,7 @@ def export_to_projectfile(loopFilename, config: Config, overwrite: bool = False)
             "colour1Blue",
             "minAge",
             "maxAge",
-            "thickness median"
+            "thickness median",
         ]
     ].drop_duplicates(subset="formation")
     stratigraphicLogData = np.zeros(

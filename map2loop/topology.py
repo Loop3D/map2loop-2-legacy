@@ -9,7 +9,8 @@ import numpy as np
 from math import degrees, acos
 import warnings
 import beartype
-from map2loop.m2l_interpolation import interpolate_contacts
+
+# from map2loop.m2l_interpolation import interpolate_contacts
 
 from map2loop.stratigraphic_column import StratigraphicColumn
 
@@ -603,7 +604,13 @@ class Topology(object):
         nx.write_gml(G, os.path.join(config.tmp_path, "fault_network.gml"))
 
     @beartype.beartype
-    def super_groups_and_groups(group_girdle, config: Config, map_data, stratColumn: StratigraphicColumn, workflow: dict):
+    def super_groups_and_groups(
+        group_girdle,
+        config: Config,
+        map_data,
+        stratColumn: StratigraphicColumn,
+        workflow: dict,
+    ):
         group_girdle = pd.DataFrame.from_dict(group_girdle, orient="index")
         group_girdle.columns = ["plunge", "bearing", "num orientations"]
         group_girdle.sort_values(by="num orientations", ascending=False, inplace=True)
@@ -702,8 +709,10 @@ class Topology(object):
                 if s == sg["superGroup"]:
                     temp.append(ind)
             super_groups.append(temp)
-        blah = stratColumn.stratigraphicUnits.merge(super_group[["superGroup"]],on="group")
-        stratColumn.stratigraphicUnits['superGroup'] = blah['superGroup_y']
+        blah = stratColumn.stratigraphicUnits.merge(
+            super_group[["superGroup"]], on="group"
+        )
+        stratColumn.stratigraphicUnits["superGroup"] = blah["superGroup_y"]
         f = open(os.path.join(config.tmp_path, "super_groups.csv"), "w")
         for sg in super_groups:
             for s in sg:
@@ -716,7 +725,7 @@ class Topology(object):
     def use_asud(self, config: Config):
         if config.verbose_level != VerboseLevel.NONE:
             print("Resolving ambiguities using ASUD...", end="\toutput_dir:")
-        if type(self.asud) == None:
+        if type(self.asud) is None:
             print("Failed to load ASUD data, continuing without ASUD help")
             return
 
@@ -905,8 +914,8 @@ class Topology(object):
 
         pd.to_numeric(Af_o["dip"], downcast="float")
         pd.to_numeric(Af_o["DipDirection"], downcast="float")
-        from sklearn import cluster
-        from sklearn.exceptions import ConvergenceWarning
+        # from sklearn import cluster
+        # from sklearn.exceptions import ConvergenceWarning
 
         def convert_dd_lmn(dip, dipdir):
             r_dd = np.radians(dipdir)

@@ -1,7 +1,6 @@
 import os
 import sys
 import setuptools
-import subprocess
 from map2loop import __version__
 
 head, tail = os.path.split(sys.argv[0])
@@ -36,25 +35,25 @@ setuptools.setup(
     # dependency_links deprecated and not recommended
     # dependency_links=["https://www.lfd.uci.edu/~gohlke/pythonlibs/rasterio‑1.2.10‑cp39‑cp39‑win_amd64.whl; platform_system=='Windows'"],
     # install_requires=[
-        # "numpy",
-        # "gdal==3.5.1",
-        # "pandas",
-        # "geopandas",
-        # "pyproj",
-        # "shapely",
-        # "rasterio==1.2.10",
-        # "descartes",
-        # "matplotlib",
-        # "networkx",
-        # "scipy",
-        # "owslib",
-        # "tqdm",
-        # "mplstereonet",
-        # "hjson",
-        # "loopprojectfile",
-        # "beartype",
-        # "cftime>=1.4.0",
-        # "map2model-loop3d"
+    #     "numpy",
+    #     "gdal==3.5.1",
+    #     "pandas",
+    #     "geopandas",
+    #     "pyproj",
+    #     "shapely",
+    #     "rasterio==1.2.10",
+    #     "descartes",
+    #     "matplotlib",
+    #     "networkx",
+    #     "scipy",
+    #     "owslib",
+    #     "tqdm",
+    #     "mplstereonet",
+    #     "hjson",
+    #     "loopprojectfile",
+    #     "beartype",
+    #     "cftime>=1.4.0",
+    #     "map2model-loop3d"
     # ],
     url="https://github.com/Loop3D/map2loop-2",
     packages=setuptools.find_packages(),

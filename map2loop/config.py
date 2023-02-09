@@ -255,7 +255,7 @@ class Config(object):
             i = 0
             for key in self.colour_dict.keys():
                 self.colour_dict[key] = random_colours[i]
-                i=i+1
+                i = i + 1
 
         self.cmap = colors.ListedColormap(self.colour_dict.values(), name="geol_key")
 

@@ -2379,7 +2379,6 @@ def process_fault_throw_and_near_faults_from_grid(
     fftc = open(os.path.join(config.output_path, "fault_tip_contacts.csv"), "w")
     fftc.write("X,Y,Z,formation\n")
 
-
     # All faults should be LineStrings but just in case they aren't filter for
     # only LineStrings
     local_faults = local_faults[local_faults.geometry.type == "LineString"]
@@ -2405,17 +2404,11 @@ def process_fault_throw_and_near_faults_from_grid(
                 dy = m_step * l
                 for inc in np.arange(0.1, 1, 0.01):
                     midx = fault.geometry.coords[i][0] + (
-                        (
-                            fault.geometry.coords[i + 1][0]
-                            - fault.geometry.coords[i][0]
-                        )
+                        (fault.geometry.coords[i + 1][0] - fault.geometry.coords[i][0])
                         * inc
                     )
                     midy = fault.geometry.coords[i][1] + (
-                        (
-                            fault.geometry.coords[i + 1][1]
-                            - fault.geometry.coords[i][1]
-                        )
+                        (fault.geometry.coords[i + 1][1] - fault.geometry.coords[i][1])
                         * inc
                     )
                     lcoords.append([(midx + dx, midy - dy)])
@@ -2428,13 +2421,21 @@ def process_fault_throw_and_near_faults_from_grid(
     # As creation of new GeoDataFrames and each sjoin are very expensive per call
     # ensure these are outside of loop by multiplexing a list of points and then
     # demultiplexing after call
-    lgdf = gpd.GeoDataFrame({'FaultIds':faultIds,'Indexes':indexList}, crs=map_data.working_projection, geometry=lgeomList)
-    rgdf = gpd.GeoDataFrame({'FaultIds':faultIds,'Indexes':indexList}, crs=map_data.working_projection, geometry=rgeomList)
+    lgdf = gpd.GeoDataFrame(
+        {"FaultIds": faultIds, "Indexes": indexList},
+        crs=map_data.working_projection,
+        geometry=lgeomList,
+    )
+    rgdf = gpd.GeoDataFrame(
+        {"FaultIds": faultIds, "Indexes": indexList},
+        crs=map_data.working_projection,
+        geometry=rgeomList,
+    )
     lcodeList = gpd.sjoin(lgdf, geology, how="left", predicate="within")
     rcodeList = gpd.sjoin(rgdf, geology, how="left", predicate="within")
 
-    for _,fault in local_faults.iterrows():
-        lcode = lcodeList[lcodeList['FaultIds']==fault["GEOMETRY_OBJECT_ID"]]
+    for _, fault in local_faults.iterrows():
+        lcode = lcodeList[lcodeList["FaultIds"] == fault["GEOMETRY_OBJECT_ID"]]
         lgroups = []
         for ind, indl in lcode.iterrows():
             if (
@@ -2458,14 +2459,12 @@ def process_fault_throw_and_near_faults_from_grid(
                                 indl.geometry.x,
                                 indl.geometry.y,
                                 last_height_l,
-                                indl["UNIT_NAME"]
-                                .replace(" ", "_")
-                                .replace("-", "_"),
+                                indl["UNIT_NAME"].replace(" ", "_").replace("-", "_"),
                             )
                             fftc.write(ostr)
                             lgroups.append(indl["GROUP"])
 
-        rcode = rcodeList[rcodeList['FaultIds']==fault["GEOMETRY_OBJECT_ID"]]
+        rcode = rcodeList[rcodeList["FaultIds"] == fault["GEOMETRY_OBJECT_ID"]]
         rgroups = []
         for ind, indr in rcode.iterrows():
             if (
@@ -2489,9 +2488,7 @@ def process_fault_throw_and_near_faults_from_grid(
                                 indr.geometry.x,
                                 indr.geometry.y,
                                 last_height_r,
-                                indr["UNIT_NAME"]
-                                .replace(" ", "_")
-                                .replace("-", "_"),
+                                indr["UNIT_NAME"].replace(" ", "_").replace("-", "_"),
                             )
                             fftc.write(ostr)
                             rgroups.append(indr["GROUP"])
@@ -2512,36 +2509,31 @@ def process_fault_throw_and_near_faults_from_grid(
                         not lastlcode == indl["UNIT_NAME"]
                         and (
                             (not config.c_l["sill"] in indl["DESCRIPTION"])
-                            or (
-                                not config.c_l["intrusive"]
-                                in indl["ROCKTYPE1"]
-                            )
+                            or (not config.c_l["intrusive"] in indl["ROCKTYPE1"])
                         )
                     ):
                         all_coords_x.append(indl.geometry.x)
                         all_coords_y.append(indl.geometry.y)
                         if first:
                             first = False
-                            firstlx = indl.geometry.x
-                            firstly = indl.geometry.y
-                            firstlc = (
-                                indl["UNIT_NAME"]
-                                .replace(" ", "_")
-                                .replace("-", "_")
-                            )
+                            # firstlx = indl.geometry.x
+                            # firstly = indl.geometry.y
+                            # firstlc = (
+                            #     indl["UNIT_NAME"]
+                            #     .replace(" ", "_")
+                            #     .replace("-", "_")
+                            # )
                         lastlx = indl.geometry.x
                         lastly = indl.geometry.y
-                        lastlc = (
-                            indl["UNIT_NAME"]
-                            .replace(" ", "_")
-                            .replace("-", "_")
-                        )
+                        # lastlc = (
+                        #     indl["UNIT_NAME"]
+                        #     .replace(" ", "_")
+                        #     .replace("-", "_")
+                        # )
 
                     if lastlcode == "" and (
                         (not config.c_l["sill"] in indl["DESCRIPTION"])
-                        or (
-                            not config.c_l["intrusive"] in indl["ROCKTYPE1"]
-                        )
+                        or (not config.c_l["intrusive"] in indl["ROCKTYPE1"])
                     ):
                         lastlcode = indl["UNIT_NAME"]
 
@@ -2553,10 +2545,7 @@ def process_fault_throw_and_near_faults_from_grid(
                     ):
                         if (not indl["UNIT_NAME"] == lastlcode) and (
                             (not config.c_l["sill"] in indl["DESCRIPTION"])
-                            or (
-                                not config.c_l["intrusive"]
-                                in indl["ROCKTYPE1"]
-                            )
+                            or (not config.c_l["intrusive"] in indl["ROCKTYPE1"])
                         ):
                             lcontact.append(
                                 [
@@ -2581,9 +2570,7 @@ def process_fault_throw_and_near_faults_from_grid(
                                 lastlx,
                                 lastly,
                                 last_height_l,
-                                indl["UNIT_NAME"]
-                                .replace(" ", "_")
-                                .replace("-", "_"),
+                                indl["UNIT_NAME"].replace(" ", "_").replace("-", "_"),
                             )
                             fftc.write(ostr)
 
@@ -2602,36 +2589,25 @@ def process_fault_throw_and_near_faults_from_grid(
                         not lastrcode == indr["UNIT_NAME"]
                         and (
                             (not config.c_l["sill"] in indr["DESCRIPTION"])
-                            or (
-                                not config.c_l["intrusive"]
-                                in indr["ROCKTYPE1"]
-                            )
+                            or (not config.c_l["intrusive"] in indr["ROCKTYPE1"])
                         )
                     ):
                         all_coords_x.append(indr.geometry.x)
                         all_coords_y.append(indr.geometry.y)
                         if first:
                             first = False
-                            firstrx = indr.geometry.x
-                            firstry = indr.geometry.y
-                            firstrc = (
-                                indr["UNIT_NAME"]
-                                .replace(" ", "_")
-                                .replace("-", "_")
-                            )
+                            # firstrx = indr.geometry.x
+                            # firstry = indr.geometry.y
+                            # firstrc = (
+                            #     indr["UNIT_NAME"].replace(" ", "_").replace("-", "_")
+                            # )
                         lastrx = indr.geometry.x
                         lastry = indr.geometry.y
-                        lastrc = (
-                            indr["UNIT_NAME"]
-                            .replace(" ", "_")
-                            .replace("-", "_")
-                        )
+                        # lastrc = indr["UNIT_NAME"].replace(" ", "_").replace("-", "_")
 
                     if lastrcode == "" and (
                         (not config.c_l["sill"] in indr["DESCRIPTION"])
-                        or (
-                            not config.c_l["intrusive"] in indr["ROCKTYPE1"]
-                        )
+                        or (not config.c_l["intrusive"] in indr["ROCKTYPE1"])
                     ):
                         lastrcode = indr["UNIT_NAME"]
                     # print('r',ind,indr["UNIT_NAME"],indr["DESCRIPTION"],indr["ROCKTYPE1"])
@@ -2645,10 +2621,7 @@ def process_fault_throw_and_near_faults_from_grid(
                     ):
                         if (not indr["UNIT_NAME"] == lastrcode) and (
                             (not config.c_l["sill"] in indr["DESCRIPTION"])
-                                or (
-                                not config.c_l["intrusive"]
-                                in indr["ROCKTYPE1"]
-                            )
+                            or (not config.c_l["intrusive"] in indr["ROCKTYPE1"])
                         ):
                             rcontact.append(
                                 [
@@ -2673,9 +2646,7 @@ def process_fault_throw_and_near_faults_from_grid(
                                 lastrx,
                                 lastry,
                                 last_height_r,
-                                indr["UNIT_NAME"]
-                                .replace(" ", "_")
-                                .replace("-", "_"),
+                                indr["UNIT_NAME"].replace(" ", "_").replace("-", "_"),
                             )
                             fftc.write(ostr)
 
@@ -2707,8 +2678,7 @@ def process_fault_throw_and_near_faults_from_grid(
                                 (
                                     l,
                                     m,
-                                    "Fault_"
-                                    + str(fault["GEOMETRY_OBJECT_ID"]),
+                                    "Fault_" + str(fault["GEOMETRY_OBJECT_ID"]),
                                 )
                             )
                             all_coordsdist.append((dist))

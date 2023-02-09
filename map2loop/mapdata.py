@@ -345,8 +345,10 @@ class MapData:
     def save_map_data(
         self, output_dir: str, datatype: Datatype, extension: str = ".csv"
     ):
-        if (self.data_states[datatype] == Datastate.CONVERTED
-            or self.data_states[datatype] == Datastate.COMPLETE):
+        if (
+            self.data_states[datatype] == Datastate.CONVERTED
+            or self.data_states[datatype] == Datastate.COMPLETE
+        ):
             try:
                 filename = os.path.join(output_dir, datatype.name, extension)
                 if extension == ".csv":
