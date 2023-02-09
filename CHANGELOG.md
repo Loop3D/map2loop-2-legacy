@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.4](https://github.com/Loop3D/map2loop-2/compare/1.3.3...1.3.4) (2023-02-09)
+
+
+### Bug Fixes
+
+* m2l_map_checker.py added type conversion for string comparisons, *.py coding standard compliance changes ([57ed24c](https://github.com/Loop3D/map2loop-2/commit/57ed24c44ad5c1244cd4b0ed82b476b7e6df7705))
+* Version bump ([22b4912](https://github.com/Loop3D/map2loop-2/commit/22b49128803b1bb29c192c9f5391af693e0a148b))
+
 ## [1.3.3](https://github.com/Loop3D/map2loop-2/compare/1.3.2...1.3.3) (2022-12-04)
 
 
