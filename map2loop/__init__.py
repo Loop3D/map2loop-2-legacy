@@ -8,7 +8,7 @@ map2loop API
 # import map2loop
 # map2loop._clut_path = newpath
 
-__version__ = "1.3.3"
+__version__ = "1.3.4"
 
 geology_loopdata = {
     "WA": "http://13.211.217.129:8080/geoserver/loop/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=loop:500k_geol_28350&bbox={BBOX_STR}&srs=EPSG:28350&outputFormat=shape-zip",
