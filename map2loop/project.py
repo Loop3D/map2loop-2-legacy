@@ -224,7 +224,7 @@ class Project(object):
             "formation_thickness": True,
             "polarity": False,
             "strat_offset": True,
-            "contact_dips": True,
+            "contact_dips": False,
             "drillholes": False,
             "cover_contacts": True,
             "cover_orientations": True,
