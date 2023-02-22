@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.5](https://github.com/Loop3D/map2loop-2/compare/1.3.4...1.3.5) (2023-02-22)
+
+
+### Bug Fixes
+
+* Removed bug where southern dipdir were being inverted ([92eef44](https://github.com/Loop3D/map2loop-2/commit/92eef44cde1905639b40d326522670abf657b20d))
+* Set interpolated contact observations default to false ([948d817](https://github.com/Loop3D/map2loop-2/commit/948d8178e318d33d29c39cd42b667c3518adc5e6))
+
 ## [1.3.4](https://github.com/Loop3D/map2loop-2/compare/1.3.3...1.3.4) (2023-02-09)
 
 
