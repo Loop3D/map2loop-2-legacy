@@ -85,7 +85,6 @@ def save_orientations(config: Config, map_data: MapData, workflow):
     for indx, apoint in structure_clip.iterrows():
         if not str(apoint["ROCKTYPE1"]) == "None":
             if not str(apoint["ROCKTYPE1"]) == "nan":
-
                 if not config.c_l["intrusive"] in apoint["ROCKTYPE1"]:
                     if (
                         apoint["DIP"] != 0
@@ -145,7 +144,6 @@ def save_orientations(config: Config, map_data: MapData, workflow):
         for indx, apoint in structures.iterrows():
             if not str(apoint["ROCKTYPE1"]) == "None":
                 if not str(apoint["ROCKTYPE1"]) == "nan":
-
                     if not config.c_l["intrusive"] in apoint["ROCKTYPE1"]:
                         if (
                             apoint["DIP"] != 0
@@ -270,7 +268,7 @@ def create_orientations(config: Config, map_data: MapData, workflow: dict):
     geology = map_data.get_map_data(Datatype.GEOLOGY)
     for i in range(0, ngroups):
         for indx, apoly in geology.iterrows():
-            agroup = apoint["GROUP"]
+            agroup = apoly["GROUP"]
             # print(agroup)
             if groups[i][0] == agroup:
                 lgroups = list(groups[i])
@@ -485,11 +483,9 @@ def save_basal_contacts(
                         ntest1 = str(plist[b_poly + 5])
                         ntest2 = str(plist[b_poly + 3])
                         if not ntest1 == "None" and not ntest2 == "None":
-
                             if (
                                 plist[a_poly] != plist[b_poly]
                             ):  # do not compare with self
-
                                 # is a neighbour, but not a sill
                                 if a_polygon.intersects(b_polygon):
                                     # intrusion_mode = 0 (sills only excluded)
@@ -523,7 +519,6 @@ def save_basal_contacts(
                                 if (
                                     out[0][0] > central
                                 ):  # neighbour is older than central
-
                                     if not a_polygon.is_valid:
                                         a_polygon = a_polygon.buffer(0)
                                     if not b_polygon.is_valid:
@@ -779,7 +774,6 @@ def save_basal_contacts(
 
 @beartype.beartype
 def save_basal_no_faults(config: Config, map_data: MapData) -> gpd.GeoDataFrame:
-
     output_filename = os.path.join(config.tmp_path, "basal_contacts.shp")
     faults = map_data.get_map_data(Datatype.FAULT)
     contacts = map_data.basal_contacts
@@ -1133,7 +1127,6 @@ def save_faults(config: Config, map_data: MapData, workflow: dict):
                     strike = sqrt((dlsx * dlsx) + (dlsy * dlsy))
                     azimuth_fault = degrees(atan2(dlsy, -dlsx)) % 180
                     if strike > config.run_flags["min_fault_length"]:
-
                         i = 0
                         saved = 0
                         fault_dip = 90.0
@@ -1678,11 +1671,9 @@ def create_basal_contact_orientations(
         all_structures = structures[is_gp]
 
         for ind, astr in all_structures.iterrows():  # loop through valid orientations
-
             orig = Point(astr["geometry"])
             np = acontact.geometry.interpolate(acontact.geometry.project(orig))
             if np.distance(orig) < dist_buffer:
-
                 for line in acontact.geometry:  # loop through line segments
                     # loop through line segments
                     for pair in m2l_utils.pairs(list(line.coords)):
@@ -2178,7 +2169,6 @@ def process_plutons(config: Config, map_data, workflow: dict):
     an = open(os.path.join(config.tmp_path, "groups2.csv"), "w")
 
     for i in range(0, orig_ngroups):
-
         if config.verbose_level != VerboseLevel.NONE:
             print(i, gp_names[i].replace(" ", "_").replace("-", "_"))
         an.write(gp_names[i].replace(" ", "_").replace("-", "_") + "\n")
@@ -2232,7 +2222,6 @@ def process_plutons(config: Config, map_data, workflow: dict):
 
 @beartype.beartype
 def tidy_data(config: Config, map_data: MapData, use_group, inputs):
-
     use_projected_contacts = True
 
     contacts = pd.read_csv(os.path.join(config.output_path, "contacts4.csv"), sep=",")
@@ -2642,7 +2631,6 @@ def tidy_data(config: Config, map_data: MapData, use_group, inputs):
     )
 
     for ind, a_s in all_sorts.iterrows():
-
         if a_s["code"] == "cover" or a_s["code"] == "cover_up":
             ostr = "{},{},{},{}\n".format(a_s["code"], 5000, "nan", "fudge")
             fs.write(ostr)
@@ -2852,7 +2840,6 @@ def calc_thickness(tmp_path, output_path, buffer, max_thickness_allowed, c_l):
 
             g = 0
             for indx, apair in all_sorts.iterrows():  # loop through all basal contacts
-
                 if ctextcode[k] == apair["code"]:
                     # if(all_sorts.iloc[g]['group'] == all_sorts.iloc[g-1]['group']):
                     # subset contacts to just those with 'a' code
@@ -2869,7 +2856,6 @@ def calc_thickness(tmp_path, output_path, buffer, max_thickness_allowed, c_l):
                     ):  # loop through distinct linestrings for upper contact
                         # if(bboxes_intersect(ddline.bounds,acontact[1].geometry.bounds)):
                         if not str(acontact.geometry) == "None":
-
                             if ddline.intersects(acontact.geometry):
                                 isects = ddline.intersection(acontact.geometry)
                                 if isects.geom_type == "MultiPoint":
@@ -3000,9 +2986,7 @@ def calc_thickness_with_grid(config: Config, map_data: MapData):
 
         g = 0
         for indx, apair in all_sorts.iterrows():  # loop through all basal contacts
-
             if ctextcode[k] == apair["code"]:
-
                 # subset contacts to just those with 'a' code
                 is_contacta = (
                     contact_lines["UNIT_NAME"] == all_sorts.iloc[g - 1]["code"]
@@ -3017,7 +3001,6 @@ def calc_thickness_with_grid(config: Config, map_data: MapData):
                 ):  # loop through distinct linestrings for upper contact
                     # if(bboxes_intersect(ddline.bounds,acontact[1].geometry.bounds)):
                     if not str(acontact.geometry) == "None":
-
                         if ddline.intersects(acontact.geometry):
                             isects = ddline.intersection(acontact.geometry)
                             if isects.geom_type == "MultiPoint":
@@ -3162,7 +3145,6 @@ def calc_min_thickness_with_grid(config: Config, map_data: MapData):
     # display("ppp",cx.shape,cy.shape,ox.shape,oy.shape,dip.shape,azimuth.shape,dist.shape)
     n_est = 0
     for k in range(0, clength):  # loop through all contact segments
-
         if not (ctextcode[k] in found_codes):
             # print(ctextcode[k])
             r = int(
@@ -3187,9 +3169,7 @@ def calc_min_thickness_with_grid(config: Config, map_data: MapData):
 
             g = 0
             for indx, apair in all_sorts.iterrows():  # loop through all basal contacts
-
                 if ctextcode[k] == apair["code"]:
-
                     # subset contacts to just those with 'a' code
                     is_contacta = (
                         contact_lines["UNIT_NAME"] != all_sorts.iloc[g - 1]["code"]
@@ -3205,7 +3185,6 @@ def calc_min_thickness_with_grid(config: Config, map_data: MapData):
                         # if(bboxes_intersect(ddline.bounds,acontact[1].geometry.bounds)):
 
                         if not str(acontact.geometry) == "None":
-
                             if ddline.intersects(acontact.geometry):
                                 isects = ddline.intersection(acontact.geometry)
                                 if isects.geom_type == "MultiPoint":
@@ -4022,7 +4001,6 @@ def save_orientations_with_polarity(config: Config, map_data: MapData):
 ###################################################
 @beartype.beartype
 def fault_strat_offset(config: Config, map_data: MapData):
-
     fm_thick = pd.read_csv(
         os.path.join(config.output_path, "formation_summary_thicknesses.csv"),
         sep=",",
@@ -4258,7 +4236,6 @@ def process_cover(
     use_vector: bool = True,
     use_grid: bool = True,
 ):
-
     if (
         use_grid and use_vector
     ):  # assumes a grid of depth to cover, with a defined null value for no cover, and a vector description of cover limits
@@ -4296,7 +4273,6 @@ def process_cover(
         allpts.write("X,Y,Z,formation\n")
         dtm = map_data.get_map_data(Datatype.DTM).open()
         for indx, pt in actual_cover.iterrows():
-
             locations = [(pt["X"], pt["Y"])]
             height = m2l_utils.value_from_dtm_dtb(
                 dtm, map_data.dtb, map_data.dtb_null, workflow["cover_map"], locations
@@ -4331,7 +4307,6 @@ def process_cover(
                         and pt[1] > bbox[1]
                         and pt[1] < bbox[3]
                     ):
-
                         locations = [(pt[0], pt[1])]
 
                         height = m2l_utils.value_from_dtm_dtb(
@@ -4368,7 +4343,6 @@ def process_cover(
                                     and pt[1] > bbox[1]
                                     and pt[1] < bbox[3]
                                 ):
-
                                     locations = [(pt[0], pt[1])]
 
                                     height = m2l_utils.value_from_dtm_dtb(
@@ -4549,7 +4523,6 @@ def process_cover(
                                     and pt[1] > bbox[1]
                                     and pt[1] < bbox[3]
                                 ):
-
                                     dlsx = lastx - pt[0]
                                     dlsy = lasty - pt[1]
                                     lastx = pt[0]
@@ -4840,7 +4813,6 @@ def process_sills(
     bbox,
     buffer,
 ):
-
     sills = geol_clip[geol_clip["DESCRIPTION"].str.contains(c_l["sill"])]
     sills = sills[sills["ROCKTYPE1"].str.contains(c_l["intrusive"])]
 
@@ -4994,7 +4966,6 @@ def process_sills(
 
 
 def combine_point_data(output_path, tmp_path):
-
     Aorientations = pd.read_csv(
         os.path.join(output_path, "orientations_clean.csv"), sep=","
     )
@@ -5231,14 +5202,12 @@ def fault_filter(output_path, filter, cutoff, relationship, median_cutoff):
         nodes_use = []
 
         for f in range(0, len(fault_list)):
-
             if median_offset[f] < median:
                 nodes_ignore.append(fault_list[f])
             else:
                 nodes_use.append(fault_list[f])
 
     else:
-
         nodes_all = []
         if median_cutoff:
             for v in Gloop.nodes():
