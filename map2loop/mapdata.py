@@ -350,7 +350,7 @@ class MapData:
             or self.data_states[datatype] == Datastate.COMPLETE
         ):
             try:
-                filename = os.path.join(output_dir, datatype.name, extension)
+                filename = os.path.join(output_dir, str(datatype.name + extension))
                 if extension == ".csv":
                     self.data[datatype].write_csv(filename)
                 else:
@@ -671,11 +671,10 @@ class MapData:
             )
 
         # Create arbitrary points for series without orientation data
-        m2l_geometry.create_orientations(self.config, self, workflow)
+        # m2l_geometry.create_orientations(self.config, self, workflow)
 
     @beartype.beartype
     def export_contacts(self, workflow: dict):
-
         self.basal_contacts = m2l_geometry.save_basal_contacts(
             self.config, self, workflow
         )
@@ -705,7 +704,6 @@ class MapData:
 
     @beartype.beartype
     def export_faults(self, workflow: dict, dip_grid, dip_dir_grid):
-
         m2l_geometry.save_faults(self.config, self, workflow)
 
         faults = self.get_map_data(Datatype.FAULT)

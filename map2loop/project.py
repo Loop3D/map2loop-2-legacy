@@ -484,7 +484,6 @@ class Project(object):
         pass
 
     def _calculate_unit_thicknesses(self):
-
         return {}
 
     def _extract_basal_contacts(self):
@@ -929,7 +928,6 @@ class Project(object):
             )
 
     def __postprocess(self):
-
         inputs = (
             "invented_orientations",
             "fat_orientations",
@@ -969,7 +967,6 @@ class Project(object):
                 os.path.join(self.config.output_path, "fault_dimensions.csv"), sep=","
             )
             if len(fault_test) > 0:
-
                 m2l_geometry.fault_strat_offset(self.config, self.map_data)
 
                 if self.config.verbose_level == VerboseLevel.ALL:
@@ -1068,10 +1065,10 @@ class Project(object):
                 print("No drillhole data for merging.")
 
     @beartype.beartype
-    def save_mapdata_to_shapefiles(self, path: str):
+    def save_mapdata_to_shapefiles(self, path: str, extension: str = ".shp.zip"):
         if not os.path.exists(path):
             os.mkdir(path)
-        self.map_data.save_all_map_data(path, ".shp")
+        self.map_data.save_all_map_data(path, extension)
 
     @beartype.beartype
     def save_mapdata_to_csvs(self, path: str):
