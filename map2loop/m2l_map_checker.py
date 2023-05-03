@@ -50,7 +50,6 @@ def check_all_maps(
     roi_clip_path,
     verbose_level: VerboseLevel = VerboseLevel.ALL,
 ):
-
     m2l_errors = []
     m2l_warnings = []
     if (
@@ -441,12 +440,23 @@ def check_geology_map(
     # geology = geology.rename(columns=dict(zip(c_l.values(),[ new_mapping[item] if item in new_mapping else item for item in c_l.keys() ])))
     # Remapping done at the end of function
 
-    # make each pluton its own formation and group
-    if c_l["o"] not in geology.columns:  # object id
+    # parse object id
+    if c_l["o"] in geology.columns:
+        # Check if id in all layers is blank and set to index
+        if len(geology[~geology[c_l["o"]].isnull()]) == 0:
+            geology = geology.reset_index()
+            geology[c_l["o"]] = geology.index
+        # Check if some id values are blank and set appropriately
+        elif len(geology[~geology[c_l["o"]].isnull()] != len(geology)):
+            next_index = np.nanmax(geology[c_l["o"]]) + 1
+            for ind, layer in geology.iterrows():
+                if pd.isna(layer[c_l["o"]]):
+                    geology.loc[ind, c_l["o"]] = next_index
+                    next_index = next_index + 1
+    else:
         geology = geology.reset_index()
         geology[c_l["o"]] = geology.index
 
-    # make each pluton its own formation and group
     if c_l["r1"] not in geology.columns:
         m2l_warnings.append("No extra litho for geology polygons")
         geology[c_l["r1"]] = np.nan
