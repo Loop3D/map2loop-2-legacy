@@ -749,7 +749,7 @@ class Project(object):
     def __test_interpolation(self):
         # TODO: Add basal contacts to storage structure
         basal_contacts_filename = os.path.join(
-            self.config.tmp_path, "basal_contacts.shp"
+            self.config.tmp_path, "basal_contacts.shp.zip"
         )
 
         group_girdle = m2l_utils.plot_bedding_stereonets(self.config, self.map_data)

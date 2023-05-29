@@ -1,5 +1,6 @@
 from shapely.geometry import (
     Polygon,
+    MultiLineString,
     LineString,
     Point,
     MultiPolygon,
@@ -405,354 +406,131 @@ def extract_poly_coords(geom, i):
 def save_basal_contacts(
     config: Config, map_data: MapData, workflow: dict
 ) -> gpd.GeoDataFrame:
-    plist = []
-    i = 0
+    # dissolve geometry into a single unit for rows with the same unit name
+    geology = map_data.get_map_data(Datatype.GEOLOGY).copy()
+    # Remove intrusions for geology
+    geology = geology[~geology["ROCKTYPE1"].str.contains(config.c_l["intrusive"])]
+    geology = geology.dissolve(by="UNIT_NAME", as_index=False)
+    units = geology["UNIT_NAME"].unique()
+    column_names = ["UNIT_NAME_1", "UNIT_NAME_2", "geometry"]
+    contacts = gpd.GeoDataFrame(crs=geology.crs, columns=column_names, data=None)
+    while len(units) > 1:
+        unit1 = units[0]
+        units = units[1:]
+        for unit2 in units:
+            if unit1 != unit2:
+                join = gpd.overlay(
+                    geology[geology["UNIT_NAME"] == unit1],
+                    geology[geology["UNIT_NAME"] == unit2],
+                    keep_geom_type=False,
+                )[column_names]
+                join["geometry"] = join.buffer(1)
+                buffered = geology[geology["UNIT_NAME"] == unit2][["geometry"]].copy()
+                buffered["geometry"] = buffered.boundary
+                end = gpd.overlay(buffered, join, keep_geom_type=False)
+                if len(end):
+                    contacts = pd.concat([contacts, end], ignore_index=True)
 
-    all_geom = map_data.get_map_data(Datatype.GEOLOGY).explode(ignore_index=True)
+    # get stratigraphic column from (all_sorts.csv)
+    units = pd.read_csv(os.path.join(config.tmp_path, "all_sorts.csv"))["code"].tolist()
+    groups = pd.read_csv(os.path.join(config.tmp_path, "all_sorts.csv"))[
+        "group"
+    ].tolist()
 
-    for indx, ageol in all_geom.iterrows():  # central polygon
-        all_coords = extract_poly_coords(ageol.geometry, 0)
-        plist += (
-            i,
-            list(all_coords["exterior_coords"]),
-            ageol["UNIT_NAME"],
-            ageol["DESCRIPTION"],
-            ageol["GROUP"],
-            ageol["ROCKTYPE1"],
-            ageol["GEOMETRY_OBJECT_ID"],
-        )
-        i = i + 1
-        for j in range(0, len(all_coords["interior_coords"]), 2):
-            plist += (
-                i,
-                list(all_coords["interior_coords"][j + 1]),
-                ageol["UNIT_NAME"],
-                ageol["DESCRIPTION"],
-                ageol["GROUP"],
-                ageol["ROCKTYPE1"],
-                ageol["GEOMETRY_OBJECT_ID"],
-            )
-            i = i + 1
-
-    dtm = map_data.get_map_data(Datatype.DTM).open()
-    ag = open(os.path.join(config.tmp_path, "all_sorts.csv"), "r")
-    contents = ag.readlines()
-    ag.close
-    # print("surfaces:",len(contents))
-    # print("polygons:",len(all_geom))
-    ulist = []
-    for i in range(1, len(contents)):
-        # print(contents[i].replace("\n",""))
-        cont_list = contents[i].split(",")
-        ulist.append([i, cont_list[4].replace("\n", "")])
-    # print(ulist)
-
-    allc = open(os.path.join(config.tmp_path, "all_contacts.csv"), "w")
-    allc.write("GROUP_,id,x,y,z,code\n")
-    ac = open(os.path.join(config.tmp_path, "contacts.csv"), "w")
-    ac.write("X,Y,Z,formation\n")
-    j = 0
-    allpts = 0
-    deci_points = 0
-    ls_dict = {}
-    ls_dict_decimate = {}
-    id = 0
-    # print(len(plist))
-    for a_poly in range(0, len(plist), 7):
-        ntest1 = str(plist[a_poly + 5])
-        ntest2 = str(plist[a_poly + 3])
-        if not ntest1 == "None" and not ntest2 == "None":
-            if not config.c_l["intrusive"] in plist[a_poly + 5]:
-                a_polygon = Polygon(plist[a_poly + 1])
-                agp = str(plist[a_poly + 4])
-                if agp == "None":
-                    agp = plist[a_poly + 2].replace(" ", "_").replace("-", "_")
-
-                neighbours = []
-                j += 1
-                out = [
-                    item
-                    for item in ulist
-                    if plist[a_poly + 2].replace(" ", "_").replace("-", "_") in item
-                ]
-                if len(out) > 0:
-                    central = out[0][0]  # relative age of central polygon
-
-                    for b_poly in range(0, len(plist), 7):
-                        b_polygon = LineString(plist[b_poly + 1])
-                        ntest1 = str(plist[b_poly + 5])
-                        ntest2 = str(plist[b_poly + 3])
-                        if not ntest1 == "None" and not ntest2 == "None":
-                            if (
-                                plist[a_poly] != plist[b_poly]
-                            ):  # do not compare with self
-                                # is a neighbour, but not a sill
-                                if a_polygon.intersects(b_polygon):
-                                    # intrusion_mode = 0 (sills only excluded)
-                                    if (
-                                        not config.c_l["sill"] in plist[b_poly + 3]
-                                        or not config.c_l["intrusive"]
-                                        in plist[b_poly + 5]
-                                    ) and config.run_flags["intrusion_mode"] == 0:
-                                        neighbours.append((b_poly))
-                                    # intrusion_mode = 1 (all intrusions  excluded)
-                                    elif (
-                                        not config.c_l["intrusive"] in plist[b_poly + 5]
-                                    ) and config.run_flags["intrusion_mode"] == 1:
-                                        neighbours.append((b_poly))
-
-                    if len(neighbours) > 0:
-                        for i in range(0, len(neighbours)):
-                            b_polygon = LineString(plist[neighbours[i] + 1])
-
-                            out = [
-                                item
-                                for item in ulist
-                                if plist[neighbours[i] + 2]
-                                .replace(" ", "_")
-                                .replace("-", "_")
-                                in item
-                            ]
-
-                            if len(out) > 0:
-                                # if(out[0][0] > central and out[0][0] < youngest_older): # neighbour is older than central, and younger than previous candidate
-                                if (
-                                    out[0][0] > central
-                                ):  # neighbour is older than central
-                                    if not a_polygon.is_valid:
-                                        a_polygon = a_polygon.buffer(0)
-                                    if not b_polygon.is_valid:
-                                        b_polygon = b_polygon.buffer(0)
-                                    a_snapped = snap(a_polygon, b_polygon, 10)
-                                    try:
-                                        LineStringC = a_snapped.intersection(b_polygon)
-                                    except Exception:
-                                        print(
-                                            "unable to intersect polygons",
-                                            a_poly,
-                                            b_poly,
-                                        )
-                                        continue
-                                    # ignore weird intersections for now, worry about them later!
-                                    if (
-                                        LineStringC.wkt.split(" ")[0]
-                                        == "GEOMETRYCOLLECTION"
-                                    ):
-                                        # print("debug:GC")
-                                        continue
-                                    elif (
-                                        LineStringC.wkt.split(" ")[0] == "MULTIPOLYGON"
-                                        or LineStringC.wkt.split(" ")[0] == "POLYGON"
-                                    ):
-                                        # print("debug:MP,P", ageol['UNIT_NAME'])
-                                        pass
-
-                                    elif (
-                                        LineStringC.wkt.split(" ")[0]
-                                        == "MULTILINESTRING"
-                                    ):
-                                        k = 0
-
-                                        if str(plist[a_poly + 4]) == "None":
-                                            ls_dict[id] = {
-                                                "id": id,
-                                                "UNIT_NAME": plist[a_poly + 2]
-                                                .replace(" ", "_")
-                                                .replace("-", "_"),
-                                                "GROUP": plist[a_poly + 2]
-                                                .replace(" ", "_")
-                                                .replace("-", "_"),
-                                                "geometry": LineStringC,
-                                            }
-                                        else:
-                                            ls_dict[id] = {
-                                                "id": id,
-                                                "UNIT_NAME": plist[a_poly + 2]
-                                                .replace(" ", "_")
-                                                .replace("-", "_"),
-                                                "GROUP": plist[a_poly + 4]
-                                                .replace(" ", "_")
-                                                .replace("-", "_"),
-                                                "geometry": LineStringC,
-                                            }
-                                        id = id + 1
-                                        for (
-                                            lineC
-                                        ) in (
-                                            LineStringC.geoms
-                                        ):  # process all linestrings
-                                            # decimate to reduce number of points, but also take second and third point of a series to keep gempy happy
-                                            if (
-                                                k % config.run_flags["contact_decimate"]
-                                                == 0
-                                                or k
-                                                == int((len(LineStringC.geoms) - 1) / 2)
-                                                or k == len(LineStringC.geoms) - 1
-                                            ):
-                                                # doesn't like point right on edge?
-                                                locations = [
-                                                    (
-                                                        lineC.coords[0][0],
-                                                        lineC.coords[0][1],
-                                                    )
-                                                ]
-                                                if (
-                                                    lineC.coords[0][0] > dtm.bounds[0]
-                                                    and lineC.coords[0][0]
-                                                    < dtm.bounds[2]
-                                                    and lineC.coords[0][1]
-                                                    > dtm.bounds[1]
-                                                    and lineC.coords[0][1]
-                                                    < dtm.bounds[3]
-                                                ):
-                                                    height = (
-                                                        m2l_utils.value_from_dtm_dtb(
-                                                            dtm,
-                                                            map_data.dtb,
-                                                            map_data.dtb_null,
-                                                            workflow["cover_map"],
-                                                            locations,
-                                                        )
-                                                    )
-                                                    ostr = "{},{},{},{}\n".format(
-                                                        lineC.coords[0][0],
-                                                        lineC.coords[0][1],
-                                                        height,
-                                                        plist[a_poly + 2]
-                                                        .replace(" ", "_")
-                                                        .replace("-", "_"),
-                                                    )
-                                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+str(plist[a_poly+2].replace(" ","_").replace("-","_"))+"\n"
-                                                    ac.write(ostr)
-                                                    allc.write(
-                                                        agp
-                                                        + ","
-                                                        + str(
-                                                            ageol["GEOMETRY_OBJECT_ID"]
-                                                        )
-                                                        + ","
-                                                        + ostr
-                                                    )
-                                                    if str(plist[a_poly + 4]) == "None":
-                                                        ls_dict_decimate[
-                                                            deci_points
-                                                        ] = {
-                                                            "id": allpts,
-                                                            "UNIT_NAME": plist[
-                                                                a_poly + 2
-                                                            ]
-                                                            .replace(" ", "_")
-                                                            .replace("-", "_"),
-                                                            "GROUP": plist[a_poly + 2]
-                                                            .replace(" ", "_")
-                                                            .replace("-", "_"),
-                                                            "geometry": Point(
-                                                                lineC.coords[0][0],
-                                                                lineC.coords[0][1],
-                                                            ),
-                                                        }
-                                                    else:
-                                                        ls_dict_decimate[
-                                                            deci_points
-                                                        ] = {
-                                                            "id": allpts,
-                                                            "UNIT_NAME": plist[
-                                                                a_poly + 2
-                                                            ]
-                                                            .replace(" ", "_")
-                                                            .replace("-", "_"),
-                                                            "GROUP": plist[a_poly + 4]
-                                                            .replace(" ", "_")
-                                                            .replace("-", "_"),
-                                                            "geometry": Point(
-                                                                lineC.coords[0][0],
-                                                                lineC.coords[0][1],
-                                                            ),
-                                                        }
-                                                    allpts += 1
-                                                    deci_points = deci_points + 1
-                                                else:
-                                                    continue
-                                                    # print("debug:edge points")
-                                            else:
-                                                # doesn't like point right on edge?
-                                                locations = [
-                                                    (
-                                                        lineC.coords[0][0] + 0.0000001,
-                                                        lineC.coords[0][1],
-                                                    )
-                                                ]
-                                                if (
-                                                    lineC.coords[0][0] > dtm.bounds[0]
-                                                    and lineC.coords[0][0]
-                                                    < dtm.bounds[2]
-                                                    and lineC.coords[0][1]
-                                                    > dtm.bounds[1]
-                                                    and lineC.coords[0][1]
-                                                    < dtm.bounds[3]
-                                                ):
-                                                    height = (
-                                                        m2l_utils.value_from_dtm_dtb(
-                                                            dtm,
-                                                            map_data.dtb,
-                                                            map_data.dtb_null,
-                                                            workflow["cover_map"],
-                                                            locations,
-                                                        )
-                                                    )
-                                                    ostr = "{},{},{},{}\n".format(
-                                                        lineC.coords[0][0],
-                                                        lineC.coords[0][1],
-                                                        height,
-                                                        plist[a_poly + 2]
-                                                        .replace(" ", "_")
-                                                        .replace("-", "_"),
-                                                    )
-                                                    # ostr = str(lineC.coords[0][0])+","+str(lineC.coords[0][1])+","+height+","+str(plist[a_poly+2].replace(" ","_").replace("-","_"))+"\n"
-                                                    allc.write(
-                                                        agp
-                                                        + ","
-                                                        + str(
-                                                            ageol["GEOMETRY_OBJECT_ID"]
-                                                        )
-                                                        + ","
-                                                        + ostr
-                                                    )
-                                                    allpts += 1
-                                            k += 1
-                                    # apparently this is not needed
-                                    elif LineStringC.wkt.split(" ")[0] == "LINESTRING":
-                                        k = 0
-                                        for (
-                                            pt
-                                        ) in (
-                                            LineStringC.coords
-                                        ):  # process one linestring
-                                            k += 1
-                                    # apparently this is not needed
-                                    elif LineStringC.wkt.split(" ")[0] == "POINT":
-                                        # print("debug:POINT")
-                                        k = 0
-                                        k += 1
-                                    else:
-                                        k = 0
-                                        k += 1
-
-    ac.close()
-    allc.close()
-    if config.verbose_level != VerboseLevel.NONE:
-        print("basal contacts saved allpts = ", allpts, "deci_pts = ", deci_points)
-        print(
-            "saved as",
-            os.path.join(config.tmp_path, "all_contacts.csv"),
-            "and",
-            os.path.join(config.tmp_path, "contacts.csv"),
-        )
-    # print(ls_dict)
-    df = pd.DataFrame.from_dict(ls_dict, "index")
-    basal_contacts = gpd.GeoDataFrame(
-        df, crs=map_data.working_projection, geometry="geometry"
+    # assign contact as basal based on its location in the column
+    # also if it's adjacent indicate it's a basal contact otherwise indicate it
+    # has skipped a unit with the abnormal contact type
+    basal_contacts = contacts.copy()
+    basal_contacts["ID"] = basal_contacts.apply(
+        lambda row: min(
+            units.index(row["UNIT_NAME_1"]),
+            units.index(row["UNIT_NAME_2"]),
+        ),
+        axis=1,
     )
+    basal_contacts["UNIT_NAME"] = basal_contacts.apply(
+        lambda row: units[row["ID"]], axis=1
+    )
+    basal_contacts["GROUP"] = basal_contacts.apply(
+        lambda row: groups[row["ID"]], axis=1
+    )
+    basal_contacts["distance"] = basal_contacts.apply(
+        lambda row: abs(
+            units.index(row["UNIT_NAME_1"]) - units.index(row["UNIT_NAME_2"])
+        ),
+        axis=1,
+    )
+    basal_contacts["type"] = basal_contacts.apply(
+        lambda row: "ABNORMAL" if abs(row["distance"]) > 1 else "BASAL", axis=1
+    )
+    basal_contacts = basal_contacts[["geometry", "ID", "UNIT_NAME", "GROUP", "type"]]
+
+    # # sample points along the boundary of polygons or lines
+    # spacing = 250
+    # schema = {"ID": str, "X": float, "Y": float}
+    # df = pd.DataFrame(columns=schema.keys()).astype(schema)
+    # for _, row in basal_contacts.iterrows():
+    #     if type(row.geometry) == MultiPolygon:
+    #         targets = row.geometry.boundary.geoms
+    #     elif type(row.geometry) == Polygon:
+    #         targets = [row.geometry.boundary]
+    #     elif type(row.geometry) == MultiLineString:
+    #         targets = row.geometry.geoms
+    #     elif type(row.geometry) == LineString:
+    #         targets = [row.geometry]
+    #     else:
+    #         targets = []
+
+    #     # For the main cases Polygon and LineString the list 'targets' has one element
+    #     for target in targets:
+    #         df2 = pd.DataFrame(columns=schema.keys()).astype(schema)
+    #         distances = np.arange(0, target.length, spacing)[:-1]
+    #         points = [target.interpolate(distance) for distance in distances]
+    #         df2["X"] = [point.x for point in points]
+    #         df2["Y"] = [point.y for point in points]
+    #         df2["ID"] = row["ID"]
+    #         df2["GROUP"] = row["GROUP"]
+    #         df2["CODE"] = row["UNIT_NAME"]
+    #         df = pd.concat([df, df2])
+    # df.reset_index(drop=True, inplace=True)
+
+    # # get "Z" height value for contact points
+    # dtm = map_data.get_map_data(Datatype.DTM).open()
+    # df["Z"] = df.apply(
+    #     lambda row: m2l_utils.value_from_dtm_dtb(
+    #         dtm,
+    #         map_data.dtb,
+    #         map_data.dtb_null,
+    #         workflow["cover_map"],
+    #         [(row["X"], row["Y"])],
+    #     ),
+    #     axis=1,
+    # )
+
+    # # decimate by config.run_flags["contact_decimate"] for contacts output
+    # decimate_value = max(1, config.run_flags["contact_decimate"])
+    # decimated_contacts = df.iloc[::decimate_value].copy()
+
+    # # Setup output (all_contacts.csv, contacts.csv)
+    # decimated_contacts.rename(columns={"CODE": "formation"}, inplace=True)
+    # decimated_contacts[["X", "Y", "Z", "formation"]].to_csv(
+    #     os.path.join(config.tmp_path, "contacts.csv")
+    # )
+    # df.rename(
+    #     columns={
+    #         "GROUP": "GROUP_",
+    #         "ID": "id",
+    #         "X": "x",
+    #         "Y": "y",
+    #         "Z": "z",
+    #         "CODE": "code",
+    #     },
+    #     inplace=True,
+    # )
+    # df[["GROUP_", "id", "x", "y", "z", "code"]].to_csv(
+    #     os.path.join(config.tmp_path, "all_contacts.csv")
+    # )
+
     return basal_contacts
 
 
@@ -774,7 +552,7 @@ def save_basal_contacts(
 
 @beartype.beartype
 def save_basal_no_faults(config: Config, map_data: MapData) -> gpd.GeoDataFrame:
-    output_filename = os.path.join(config.tmp_path, "basal_contacts.shp")
+    output_filename = os.path.join(config.tmp_path, "basal_contacts.shp.zip")
     faults = map_data.get_map_data(Datatype.FAULT)
     contacts = map_data.basal_contacts
     if faults is not None:
@@ -786,30 +564,19 @@ def save_basal_no_faults(config: Config, map_data: MapData) -> gpd.GeoDataFrame:
         ]
         faults_clip = faults_clip.dropna(subset=["geometry"])
 
-        # df = pd.DataFrame.from_dict(map_data.basal_contacts, "index")
-        # print(df)
-        # contacts = gpd.GeoDataFrame(df, crs=map_data.working_projection, geometry='geometry')
-
         # defines buffer around faults where strat nodes will be removed
-        # print(faults_clip)
         fault_zone = faults_clip.buffer(config.run_flags["dist_buffer"])
-        # print("Length fault zone = ", len(fault_zone))
-        # print(len(fault_zone))
-        # print(fault_zone)
         all_fz = fault_zone.unary_union
-        # print("Length all_fz = ", len(all_fz))
 
         # deletes contact nodes within buffer
         contacts_nofaults = contacts.difference(all_fz)
 
         ls_nf = {}
-
         cnf_copy = contacts_nofaults.copy()
 
         # print(contacts_nofaults.shape)
         for i in range(0, len(contacts_nofaults)):
             j = len(contacts_nofaults) - i - 1
-            # print(j)
             # remove rows with geometry collections ( ==  empty?)
             if cnf_copy.iloc[j].geom_type == "GeometryCollection":
                 cnf_copy.drop([j, j], inplace=True)
@@ -828,12 +595,9 @@ def save_basal_no_faults(config: Config, map_data: MapData) -> gpd.GeoDataFrame:
         )
         contacts_nf.to_file(driver="ESRI Shapefile", filename=output_filename)
 
-        # contacts_nofaults  =  gpd.read_file('./data/faults_clip.shp')
         if config.verbose_level != VerboseLevel.NONE:
             print("basal contacts without faults saved as", output_filename)
     else:
-        # df = pd.DataFrame.from_dict(map_data.basal_contacts, "index")
-        # contacts = gpd.GeoDataFrame(df, crs=map_data.working_projection, geometry='geometry')
         contacts.to_file(driver="ESRI Shapefile", filename=output_filename)
         if config.verbose_level != VerboseLevel.NONE:
             print("basal contacts without faults saved as", output_filename)
@@ -857,113 +621,58 @@ def save_basal_no_faults(config: Config, map_data: MapData) -> gpd.GeoDataFrame:
 def save_basal_contacts_csv(
     contacts: gpd.GeoDataFrame, config: Config, map_data: MapData, workflow: dict
 ):
-    f = open(os.path.join(config.output_path, "contacts4.csv"), "w")
-    f.write("X,Y,Z,formation\n")
-    dtm = map_data.get_map_data(Datatype.DTM).open()
-    for index, contact in contacts.iterrows():
-        i = 0
-        lastx, lasty = -1e7, -1e7
-        first = True
-        if not str(contact.geometry) == "None":
-            if contact.geometry.type == "MultiLineString":
-                for line in contact.geometry.geoms:
-                    # continuation of line
-                    if line.coords[0][0] == lastx and line.coords[0][1] == lasty:
-                        if (
-                            i % config.run_flags["contact_decimate"] == 0
-                            or i == int((len(contact.geometry.geoms) - 1) / 2)
-                            or i == len(contact.geometry.geoms) - 1
-                        ):
-                            locations = [(line.coords[0][0], line.coords[0][1])]
-                            height = m2l_utils.value_from_dtm_dtb(
-                                dtm,
-                                map_data.dtb,
-                                map_data.dtb_null,
-                                workflow["cover_map"],
-                                locations,
-                            )
-                            ostr = "{},{},{},{}\n".format(
-                                line.coords[0][0],
-                                line.coords[0][1],
-                                height,
-                                contact["UNIT_NAME"],
-                            )
-                            # ostr = str(line.coords[0][0])+','+str(line.coords[0][1])+','+str(height)+','+str(contact['UNIT_NAME'])+'\n'
-                            f.write(ostr)
-                    else:  # new line
-                        if not first:
-                            locations = [(lastx, lasty)]
-                            height = m2l_utils.value_from_dtm_dtb(
-                                dtm,
-                                map_data.dtb,
-                                map_data.dtb_null,
-                                workflow["cover_map"],
-                                locations,
-                            )
-                            ostr = "{},{},{},{}\n".format(
-                                lastx, lasty, height, contact["UNIT_NAME"]
-                            )
-                            # ostr = str(lastx)+','+str(lasty)+','+str(height)+','+str(contact['UNIT_NAME'])+'\n'
-                            f.write(ostr)
-                        locations = [(line.coords[0][0], line.coords[0][1])]
-                        height = m2l_utils.value_from_dtm_dtb(
-                            dtm,
-                            map_data.dtb,
-                            map_data.dtb_null,
-                            workflow["cover_map"],
-                            locations,
-                        )
-                        ostr = "{},{},{},{}\n".format(
-                            line.coords[0][0],
-                            line.coords[0][1],
-                            height,
-                            contact["UNIT_NAME"],
-                        )
-                        # ostr = str(line.coords[0][0])+','+str(line.coords[0][1])+','+str(height)+','+str(contact['UNIT_NAME'])+'\n'
-                        f.write(ostr)
-                        first = False
-                    i = i + 1
-                    lastx = line.coords[1][0]
-                    lasty = line.coords[1][1]
+    # sample points along the boundary of polygons or lines
+    spacing = 250
+    schema = {"ID": str, "X": float, "Y": float}
+    df = pd.DataFrame(columns=schema.keys()).astype(schema)
+    for _, row in contacts.iterrows():
+        if type(row.geometry) == MultiPolygon:
+            targets = row.geometry.boundary.geoms
+        elif type(row.geometry) == Polygon:
+            targets = [row.geometry.boundary]
+        elif type(row.geometry) == MultiLineString:
+            targets = row.geometry.geoms
+        elif type(row.geometry) == LineString:
+            targets = [row.geometry]
+        else:
+            targets = []
 
-            elif contact.geometry.type == "LineString":
-                locations = [
-                    (contact.geometry.coords[0][0], contact.geometry.coords[0][1])
-                ]
-                height = m2l_utils.value_from_dtm_dtb(
-                    dtm,
-                    map_data.dtb,
-                    map_data.dtb_null,
-                    workflow["cover_map"],
-                    locations,
-                )
-                ostr = "{},{},{},{}\n".format(
-                    contact.geometry.coords[0][0],
-                    contact.geometry.coords[0][1],
-                    height,
-                    contact["UNIT_NAME"],
-                )
-                # ostr = str(contact.geometry.coords[0][0])+','+str(contact.geometry.coords[0][1])+','+str(height)+','+str(contact['UNIT_NAME'])+'\n'
-                f.write(ostr)
-                locations = [
-                    (contact.geometry.coords[1][0], contact.geometry.coords[1][1])
-                ]
-                height = m2l_utils.value_from_dtm_dtb(
-                    dtm,
-                    map_data.dtb,
-                    map_data.dtb_null,
-                    workflow["cover_map"],
-                    locations,
-                )
-                ostr = "{},{},{},{}\n".format(
-                    contact.geometry.coords[1][0],
-                    contact.geometry.coords[1][1],
-                    height,
-                    contact["UNIT_NAME"],
-                )
-                # ostr = str(contact.geometry.coords[1][0])+','+str(contact.geometry.coords[1][1])+','+str(height)+','+str(contact['UNIT_NAME'])+'\n'
-                f.write(ostr)
-    f.close()
+        # For the main cases Polygon and LineString the list 'targets' has one element
+        for target in targets:
+            df2 = pd.DataFrame(columns=schema.keys()).astype(schema)
+            distances = np.arange(0, target.length, spacing)[:-1]
+            points = [target.interpolate(distance) for distance in distances]
+            df2["X"] = [point.x for point in points]
+            df2["Y"] = [point.y for point in points]
+            # df2["ID"] = row["ID"]
+            df2["GROUP"] = row["GROUP"]
+            df2["UNIT_NAME"] = row["UNIT_NAME"]
+            df = pd.concat([df, df2])
+    df.reset_index(drop=True, inplace=True)
+
+    # get "Z" height value for contact points
+    dtm = map_data.get_map_data(Datatype.DTM).open()
+    df["Z"] = df.apply(
+        lambda row: m2l_utils.value_from_dtm_dtb(
+            dtm,
+            map_data.dtb,
+            map_data.dtb_null,
+            workflow["cover_map"],
+            [(row["X"], row["Y"])],
+        ),
+        axis=1,
+    )
+
+    # decimate by config.run_flags["contact_decimate"] for contacts output
+    decimate_value = max(1, config.run_flags["contact_decimate"])
+    decimated_contacts = df.iloc[::decimate_value].copy()
+
+    # Setup output (contacts4.csv)
+    decimated_contacts.rename(columns={"UNIT_NAME": "formation"}, inplace=True)
+    decimated_contacts[["X", "Y", "Z", "formation"]].to_csv(
+        os.path.join(config.output_path, "contacts4.csv")
+    )
+
     if config.verbose_level != VerboseLevel.NONE:
         print(
             "decimated contacts saved as",
@@ -2775,7 +2484,7 @@ def calc_thickness(tmp_path, output_path, buffer, max_thickness_allowed, c_l):
     contact_points_file = os.path.join(tmp_path, "raw_contacts.csv")
     interpolated_combo_file = os.path.join(tmp_path, "combo_full.csv")
     # load basal contacts as geopandas dataframe
-    contact_lines = gpd.read_file(os.path.join(tmp_path, "/basal_contacts.shp"))
+    contact_lines = gpd.read_file(os.path.join(tmp_path, "/basal_contacts.shp.zip"))
     all_sorts = pd.read_csv(os.path.join(tmp_path, "all_sorts.csv"))
     contacts = pd.read_csv(contact_points_file)
     orientations = pd.read_csv(interpolated_combo_file)
@@ -2932,7 +2641,9 @@ def calc_thickness_with_grid(config: Config, map_data: MapData):
     contact_points_file = os.path.join(config.tmp_path, "raw_contacts.csv")
     dtm = map_data.get_map_data(Datatype.DTM).open()
     # load basal contacts as geopandas dataframe
-    contact_lines = gpd.read_file(os.path.join(config.tmp_path, "basal_contacts.shp"))
+    contact_lines = gpd.read_file(
+        os.path.join(config.tmp_path, "basal_contacts.shp.zip")
+    )
     all_sorts = pd.read_csv(os.path.join(config.tmp_path, "all_sorts.csv"))
     all_sorts["index2"] = all_sorts.index
     # all_sorts.set_index('code',inplace=True)
@@ -3121,7 +2832,9 @@ def calc_min_thickness_with_grid(config: Config, map_data: MapData):
     dtm = map_data.get_map_data(Datatype.DTM).open()
     contact_points_file = os.path.join(config.tmp_path, "raw_contacts.csv")
     # load basal contacts as geopandas dataframe
-    contact_lines = gpd.read_file(os.path.join(config.tmp_path, "basal_contacts.shp"))
+    contact_lines = gpd.read_file(
+        os.path.join(config.tmp_path, "basal_contacts.shp.zip")
+    )
     all_sorts = pd.read_csv(os.path.join(config.tmp_path, "all_sorts.csv"))
     contacts = pd.read_csv(contact_points_file)
 
@@ -3843,7 +3556,9 @@ def extract_section(
 @beartype.beartype
 def save_orientations_with_polarity(config: Config, map_data: MapData):
     buffer = 10000
-    contact_lines = gpd.read_file(os.path.join(config.tmp_path, "basal_contacts.shp"))
+    contact_lines = gpd.read_file(
+        os.path.join(config.tmp_path, "basal_contacts.shp.zip")
+    )
     all_sorts = pd.read_csv(os.path.join(config.tmp_path, "all_sorts.csv"), sep=",")
     orientations = pd.read_csv(
         os.path.join(config.output_path, "orientations.csv"), sep=","
