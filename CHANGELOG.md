@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.3.6](https://github.com/Loop3D/map2loop-2/compare/1.3.5...1.3.6) (2023-05-29)
+
+
+### Bug Fixes
+
+* Fill nan in id column of geology shapefile causing missing layers ([55ebd9c](https://github.com/Loop3D/map2loop-2/commit/55ebd9cd15e48b97a86ef579b2e09f065ecc4010))
+* Rework contact calculations to use geopandas functions rather than multi-layered for loop. Potential fix to Bug [#101](https://github.com/Loop3D/map2loop-2/issues/101) ([ffb263e](https://github.com/Loop3D/map2loop-2/commit/ffb263ec6c511b28a6fc44cf29c8e1a62484bdd2))
+* Version bump ([a92fa41](https://github.com/Loop3D/map2loop-2/commit/a92fa4145586b944a322f7a6fd9d6256b0624c9a))
+
 ## [1.3.5](https://github.com/Loop3D/map2loop-2/compare/1.3.4...1.3.5) (2023-02-22)
 
 
