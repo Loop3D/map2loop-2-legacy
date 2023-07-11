@@ -385,7 +385,7 @@ class Project(object):
             bbox_3d = {
                 "minx": 0,
                 "maxx": 1000,
-                ",miny": 0,
+                "miny": 0,
                 "maxy": 1000,
                 "base": -10000,
                 "top": 1200,
