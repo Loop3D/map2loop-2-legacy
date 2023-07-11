@@ -448,8 +448,10 @@ def check_geology_map(
             geology[c_l["o"]] = geology.index
         # Check if some id values are blank and set appropriately
         elif len(geology[~geology[c_l["o"]].isnull()] != len(geology)):
-            vals = geology[geology[c_l["o"]].astype(str).str.isnumeric()]
-            next_index = np.nanmax(int(vals)) + 1
+            vals = geology[geology[c_l["o"]].astype(str).str.isnumeric()][
+                c_l["o"]
+            ].astype(int)
+            next_index = int(np.nanmax(vals)) + 1
             for ind, layer in geology.iterrows():
                 if pd.isna(layer[c_l["o"]]):
                     geology.loc[ind, c_l["o"]] = next_index
