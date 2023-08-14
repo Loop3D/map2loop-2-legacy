@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.3.7](https://github.com/Loop3D/map2loop-2/compare/1.3.6...1.3.7) (2023-08-14)
+
+
+### Bug Fixes
+
+* Forgot to access series and typecast to int result ([864857b](https://github.com/Loop3D/map2loop-2/commit/864857b175f7a12519a6181b7d16a1ed49f2d968))
+* Type casting of object_ids so that mixture of str, numeric and nans can be evaluated. Please type fix ([633d62d](https://github.com/Loop3D/map2loop-2/commit/633d62d1808c2c8fab761fc872308a2cab0a89d6))
+* Version bump ([d844980](https://github.com/Loop3D/map2loop-2/commit/d84498072187458f1d313523dfe10f77157885e2))
+
 ## [1.3.6](https://github.com/Loop3D/map2loop-2/compare/1.3.5...1.3.6) (2023-05-29)
 
 
