@@ -447,7 +447,7 @@ def check_geology_map(
             geology = geology.reset_index()
             geology[c_l["o"]] = geology.index
         # Check if some id values are blank and set appropriately
-        elif len(geology[~geology[c_l["o"]].isnull()] != len(geology)):
+        elif len(geology[~geology[c_l["o"]].isnull()]) != len(geology):
             vals = geology[geology[c_l["o"]].astype(str).str.isnumeric()][
                 c_l["o"]
             ].astype(int)
