@@ -16,7 +16,7 @@ from math import (
 import geopandas as gpd
 import pandas as pd
 import os
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString, Point, MultiLineString
 from . import m2l_utils
 import rasterio
 from .m2l_enums import Datatype, VerboseLevel
@@ -817,159 +817,57 @@ def interpolate_contacts(
 def save_contact_vectors(config: Config, map_data, workflow: dict):
     geol_file = map_data.basal_contacts_no_faults
     dtm = map_data.get_map_data(Datatype.DTM).open()
-    # geol_file = gpd.read_file(geology_file, bbox=config.bbox)
-    # print(len(geol_file))
-    # geol_file.plot( color='black',edgecolor='black')
 
     npts = 0
     i = 0
-    for (
-        indx,
-        acontact,
-    ) in geol_file.iterrows():  # loop through distinct linestrings in MultiLineString
-        if acontact.geometry and acontact.geometry.type == "MultiLineString":
-            for line in acontact.geometry.geoms:  # loop through line segments
-                # if i % config.run_flags["contact_decimate"] == 0:
-                #     npoint = 1
-                i = i + 1
-        else:
-            # if i % config.run_flags["contact_decimate"] == 0:
-            #     npoint = 1
-            i = i + 1
-
-    x = np.zeros(i + 1)
-    y = np.zeros(i + 1)
-    l = np.zeros(i + 1)
-    m = np.zeros(i + 1)
-
     f = open(os.path.join(config.tmp_path, "raw_contacts.csv"), "w")
     f.write("X,Y,Z,angle,lsx,lsy,formation,group\n")
-    j = 0
-    i = 0
-    for (
-        indx,
-        acontact,
-    ) in geol_file.iterrows():  # loop through distinct linestrings in MultiLineString
-        if acontact.geometry and acontact.geometry.type == "MultiLineString":
-            # print(i)
-            for line in acontact.geometry.geoms:  # loop through line segments
-                # print(i,len(acontact.geometry))
-                if i % config.run_flags["contact_decimate"] == 0:
-                    # if(acontact['id']==170):
-                    # display(npts,line.coords[0][0],line.coords[1][0])
-                    dlsx = line.coords[0][0] - line.coords[1][0]
-                    dlsy = line.coords[0][1] - line.coords[1][1]
-                    if (
-                        not line.coords[0][0] == line.coords[1][0]
-                        or not line.coords[0][1] == line.coords[1][1]
-                    ):
-                        lsx = dlsx / sqrt((dlsx * dlsx) + (dlsy * dlsy))
-                        lsy = dlsy / sqrt((dlsx * dlsx) + (dlsy * dlsy))
-                        x[i] = line.coords[1][0] + (dlsx / 2)
-                        y[i] = line.coords[1][1] + (dlsy / 2)
-                        angle = degrees(atan2(lsx, lsy))
-                        l[i] = lsx
-                        m[i] = lsy
-                        # doesn't like point right on edge?
-                        locations = [(x[i], y[i])]
-                        height = m2l_utils.value_from_dtm_dtb(
-                            dtm,
-                            map_data.dtb,
-                            map_data.dtb_null,
-                            workflow["cover_map"],
-                            locations,
-                        )
-
-                        if str(acontact["GROUP"]) == "None":
-                            ostr = "{},{},{},{},{},{},{},{}\n".format(
-                                x[i],
-                                y[i],
-                                height,
-                                angle % 180,
-                                lsx,
-                                lsy,
-                                acontact["UNIT_NAME"]
-                                .replace(" ", "_")
-                                .replace("-", "_"),
+    # loop through distinct linestrings in MultiLineString
+    for indx, acontact in geol_file.iterrows():
+        if acontact.geometry:
+            if acontact.geometry.type == "LineString":
+                geom = MultiLineString([acontact.geometry])
+            elif acontact.geometry.type == "MultiLineString":
+                geom = acontact.geometry
+            for line in geom.geoms:
+                for i in range(len(line.coords) - 1):
+                    if i % config.run_flags["contact_decimate"] == 0:
+                        dlsx = line.coords[i][0] - line.coords[i + 1][0]
+                        dlsy = line.coords[i][1] - line.coords[i + 1][1]
+                        if (
+                            not line.coords[i][0] == line.coords[i + 1][0]
+                            or not line.coords[i][1] == line.coords[i + 1][1]
+                        ):
+                            lsx = dlsx / sqrt((dlsx * dlsx) + (dlsy * dlsy))
+                            lsy = dlsy / sqrt((dlsx * dlsx) + (dlsy * dlsy))
+                            x = line.coords[i + 1][0] + (dlsx / 2)
+                            y = line.coords[i + 1][1] + (dlsy / 2)
+                            angle = degrees(atan2(lsx, lsy))
+                            # doesn't like point right on edge?
+                            locations = [(x, y)]
+                            height = m2l_utils.value_from_dtm_dtb(
+                                dtm,
+                                map_data.dtb,
+                                map_data.dtb_null,
+                                workflow["cover_map"],
+                                locations,
+                            )
+                            unitname = str(
                                 acontact["UNIT_NAME"]
                                 .replace(" ", "_")
                                 .replace("-", "_"),
                             )
-                            # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact["UNIT_NAME"].replace(" ","_").replace("-","_")+","+acontact["UNIT_NAME"].replace(" ","_").replace("-","_")+"\n"
-                        else:
-                            ostr = "{},{},{},{},{},{},{},{}\n".format(
-                                x[i],
-                                y[i],
-                                height,
-                                angle % 180,
-                                lsx,
-                                lsy,
-                                acontact["UNIT_NAME"]
-                                .replace(" ", "_")
-                                .replace("-", "_"),
+                            groupname = str(
                                 acontact["GROUP"].replace(" ", "_").replace("-", "_"),
                             )
-                            # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact["UNIT_NAME"].replace(" ","_").replace("-","_")+","+acontact["GROUP"].replace(" ","_").replace("-","_")+"\n"
-                        f.write(ostr)
-                        npts = npts + 1
-                i = i + 1
-        else:
-            # display(acontact.geometry,acontact.geometry.coords)
-            # for line in acontact: # loop through line segments in LineString
-            if acontact.geometry and i % config.run_flags["contact_decimate"] == 0:
-                dlsx = acontact.geometry.coords[0][0] - acontact.geometry.coords[1][0]
-                dlsy = acontact.geometry.coords[0][1] - acontact.geometry.coords[1][1]
-                if (
-                    not acontact.geometry.coords[0][0] == acontact.geometry.coords[1][0]
-                    or not acontact.geometry.coords[0][1]
-                    == acontact.geometry.coords[1][1]
-                ):
-                    lsx = dlsx / sqrt((dlsx * dlsx) + (dlsy * dlsy))
-                    lsy = dlsy / sqrt((dlsx * dlsx) + (dlsy * dlsy))
-                    x[i] = acontact.geometry.coords[1][0] + (dlsx / 2)
-                    y[i] = acontact.geometry.coords[1][1] + (dlsy / 2)
-                    angle = degrees(atan2(lsx, lsy))
-                    l[i] = lsx
-                    m[i] = lsy
-                    # doesn't like point right on edge?
-                    locations = [(x[i], y[i])]
-                    height = m2l_utils.value_from_dtm_dtb(
-                        dtm,
-                        map_data.dtb,
-                        map_data.dtb_null,
-                        workflow["cover_map"],
-                        locations,
-                    )
-                    if str(acontact["GROUP"]) == "None":
-                        ostr = "{},{},{},{},{},{},{},{}\n".format(
-                            x[i],
-                            y[i],
-                            height,
-                            angle % 180,
-                            lsx,
-                            lsy,
-                            acontact["UNIT_NAME"].replace(" ", "_").replace("-", "_"),
-                            acontact["UNIT_NAME"].replace(" ", "_").replace("-", "_"),
-                        )
-                        # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact["UNIT_NAME"].replace(" ","_").replace("-","_")+","+acontact["UNIT_NAME"].replace(" ","_").replace("-","_")+"\n"
-                    else:
-                        ostr = "{},{},{},{},{},{},{},{}\n".format(
-                            x[i],
-                            y[i],
-                            height,
-                            angle % 180,
-                            lsx,
-                            lsy,
-                            acontact["UNIT_NAME"].replace(" ", "_").replace("-", "_"),
-                            acontact["GROUP"].replace(" ", "_").replace("-", "_"),
-                        )
-                        # ostr=str(x[i])+","+str(y[i])+","+str(height)+","+str(angle%180)+","+str(lsx)+","+str(lsy)+","+acontact["UNIT_NAME"].replace(" ","_").replace("-","_")+","+acontact["GROUP"].replace(" ","_").replace("-","_")+"\n"
-                    # print(ostr)
-                    f.write(ostr)
-                    # print(npts,dlsx,dlsy)
-                    npts = npts + 1
-                i = i + 1
-        j = j + 1
+                            if str(acontact["GROUP"]) == "None":
+                                groupname = unitname
+                            ostr = "{},{},{},{},{},{},{},{}\n".format(
+                                x, y, height, angle % 180, lsx, lsy, unitname, groupname
+                            )
+                            f.write(ostr)
+                            npts = npts + 1
+                    i = i + 1
     f.close()
     if config.verbose_level != VerboseLevel.NONE:
         print(
@@ -1071,7 +969,6 @@ def join_contacts_and_orientations(
     f.write("X,Y,Z,azimuth,dip,polarity,formation\n")
     # last_code = ""
     for indx, a_point in structure_code.iterrows():
-
         locations = [(a_point["x"], a_point["y"])]
         height = m2l_utils.value_from_dtm_dtb(dtm, dtb, dtb_null, cover_map, locations)
         ostr = str(a_point["x"]) + ","
@@ -1399,7 +1296,6 @@ def process_fault_throw_and_near_orientations(
                 lastlcode = ""
 
                 for ind, indl in lcode.iterrows():
-
                     if ind < len(lcode) and not isnan(indl["index_right"]):
                         ntest1 = str(indl["DESCRIPTION"])
                         ntest2 = str(indl["ROCKTYPE1"])
@@ -1628,7 +1524,6 @@ def process_fault_throw_and_near_orientations(
                     lcontact = []
                     lastlcode = ""
                     for ind, indl in lcode.iterrows():
-
                         if ind < len(lcode) and not isnan(indl["index_right"]):
                             ntest1 = str(indl["DESCRIPTION"])
                             ntest2 = str(indl["ROCKTYPE1"])
@@ -2040,7 +1935,6 @@ def call_interpolator_grid(calc, x, y, l, m, n, xi, yi):
 
 
 def interpolate_orientation_grid(structures, calc, xcoords, ycoords, c_l):
-
     npts = len(structures)
     x = np.zeros(npts)
     y = np.zeros(npts)
@@ -2209,7 +2103,6 @@ def interpolation_grids(
                 print(groups)
             first = True
             for group in groups:
-
                 if first:
                     all_nodes = nodes_code_row[nodes_code_row["GROUP"] == group]
                     all_structures = orientations[orientations["GROUP"] == group]
@@ -2355,7 +2248,6 @@ def interpolation_grids(
 def process_fault_throw_and_near_faults_from_grid(
     config: Config, map_data, workflow, dip_grid, dip_dir_grid
 ):
-
     local_faults = map_data.get_map_data(Datatype.FAULT)
     local_faults = local_faults.dropna(subset=["geometry"])
     geology = map_data.get_map_data(Datatype.GEOLOGY)
