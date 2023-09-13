@@ -92,7 +92,6 @@ class Config(object):
         clut_path: str = "",
         run_flags=dict(),
     ):
-
         self.project_path = project_path
         self.graph_path = os.path.join(project_path, "graph")
         self.tmp_path = os.path.join(project_path, "tmp")
@@ -192,6 +191,61 @@ class Config(object):
                     self.c_l = hjson.load(raw_data)
         except Exception as e:
             self.errorState = str(e)
+        self.check_for_reserved_codes_and_labels()
+
+    def check_for_reserved_codes_and_labels(self):
+        reserved_labels_structure = {
+            "d": "DIP",
+            "dd": "DIPDIR",
+            "sf": "STRUCTURE_TYPE",
+            "ds": "DESCRIPTION",
+            "bo": "POLARITY",
+            "gi": "STRUCTURE_POINT_ID",
+        }
+        reserved_labels_geology = {
+            "g": "GROUP",
+            "u": "CODE",
+            "g2": "GROUP2",
+            "c": "UNIT_NAME",
+            "r1": "ROCKTYPE1",
+            "r2": "ROCKTYPE2",
+            "min": "MIN_AGE",
+            "max": "MAX_AGE",
+            "o": "GEOMETRY_OBJECT_ID",
+        }
+        reserved_labels_fault = {
+            "n": "NAME",
+            "f": "FEATURE",
+            "fdip": "DIP",
+            "fdipdir": "DIPDIR",
+            "fdipest": "DIP_ESTIMATE",
+            "o": "GEOMETRY_OBJECT_ID",
+        }
+
+        for label in reserved_labels_structure.keys():
+            if (
+                self.c_l[label] in reserved_labels_structure.values()
+                and not self.c_l[label] == reserved_labels_structure[label]
+            ):
+                raise ValueError(
+                    f"Metadata label '{label}' uses reserved keyword {self.c_l[label]} from structure dataframes, please rename this column to something else."
+                )
+        for label in reserved_labels_geology.keys():
+            if (
+                self.c_l[label] in reserved_labels_geology.values()
+                and not self.c_l[label] == reserved_labels_geology[label]
+            ):
+                raise ValueError(
+                    f"Metadata label '{label}' uses reserved keyword {self.c_l[label]} from geology dataframes, please rename this column to something else."
+                )
+        for label in reserved_labels_fault.keys():
+            if (
+                self.c_l[label] in reserved_labels_fault.values()
+                and not self.c_l[label] == reserved_labels_fault[label]
+            ):
+                raise ValueError(
+                    f"Metadata label '{label}' uses reserved keyword {self.c_l[label]} from fault dataframes, please rename this column to something else."
+                )
 
     # TODO: Make it more obvious when formations are not found and random colours are assigned
     def create_cmap(self):
