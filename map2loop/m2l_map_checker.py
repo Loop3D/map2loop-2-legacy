@@ -562,8 +562,12 @@ def check_geology_map(
     geology = rename_columns(geology, c_l["c"], "UNIT_NAME", m2l_errors, verbose_level)
     geology = rename_columns(geology, c_l["r1"], "ROCKTYPE1", m2l_errors, verbose_level)
     geology = rename_columns(geology, c_l["r2"], "ROCKTYPE2", m2l_errors, verbose_level)
-    geology = rename_columns(geology, c_l["min"], "MIN_AGE", m2l_errors, verbose_level)
-    geology = rename_columns(geology, c_l["max"], "MAX_AGE", m2l_errors, verbose_level)
+    if c_l["min"] == c_l["max"]:
+        geology = rename_columns(geology, c_l["max"], "MAX_AGE", m2l_errors, verbose_level)
+        geology["MIN_AGE"] = geology["MAX_AGE"].copy()
+    else:
+        geology = rename_columns(geology, c_l["min"], "MIN_AGE", m2l_errors, verbose_level)
+        geology = rename_columns(geology, c_l["max"], "MAX_AGE", m2l_errors, verbose_level)
     geology = rename_columns(
         geology, c_l["o"], "GEOMETRY_OBJECT_ID", m2l_errors, verbose_level
     )
