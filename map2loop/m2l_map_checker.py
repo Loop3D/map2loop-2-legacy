@@ -452,7 +452,10 @@ def check_geology_map(
             vals = geology[
                 geology[c_l["o"]].astype(str).str.replace(".", "", 1).str.isdigit()
             ][c_l["o"]].astype(int)
-            next_index = int(np.nanmax(vals)) + 1
+            if len(vals):
+                next_index = int(np.nanmax(vals)) + 1
+            else:
+                next_index = 0
             for ind, layer in geology.iterrows():
                 if pd.isna(layer[c_l["o"]]):
                     geology.loc[ind, c_l["o"]] = next_index
