@@ -242,7 +242,6 @@ def get_dtm_hawaii(
     maxlat,
     url="https://pae-paha.pacioos.hawaii.edu/thredds/dodsC/srtm30plus_v11_land.ascii?elev",
 ):
-
     step_out = 0
     minxll = int(((minlong + 180) * 120) - step_out)
     maxxll = int(((maxlong + 180) * 120) + step_out)
@@ -324,7 +323,6 @@ def get_dtm_hawaii(
 
 
 def get_dtm_topography_org(path_out, minlong, maxlong, minlat, maxlat):
-
     link = (
         "https://portal.opentopography.org/otr/getdem?demtype=SRTMGL3&west="
         + str(minlong)
@@ -622,11 +620,9 @@ def load_and_reproject_dtm(
 
 def get_dtm_bounds(path_in, dst_crs):
     with rasterio.open(path_in) as dataset:
-
         # Read the dataset's valid data mask as a ndarray.
         mask = dataset.dataset_mask()
         for geom, val in rasterio.features.shapes(mask, transform=dataset.transform):
-
             # Transform shapes from the dataset's own coordinate
             # reference system to 28350.
             geom_rp = rasterio.warp.transform_geom(
@@ -774,12 +770,12 @@ def _clip_multi_poly_line(shp, clip_obj):
     clipped = _clip_line_poly(shp.explode().reset_index(level=[1]), clip_obj)
 
     lines = clipped[
-        (clipped.geometry.type == "MultiLineString")
-        | (clipped.geometry.type == "LineString")
+        (clipped.geometry.geom_type == "MultiLineString")
+        | (clipped.geometry.geom_type == "LineString")
     ]
     line_diss = lines.dissolve(by=[lines.index]).drop(columns="level_1")
 
-    polys = clipped[clipped.geometry.type == "Polygon"]
+    polys = clipped[clipped.geometry.geom_type == "Polygon"]
     # print(polys)
     polys.fillna("null", inplace=True)
     poly_diss = polys.dissolve(by=[polys.index]).drop(columns="level_1")
@@ -855,12 +851,12 @@ def clip_shp(shp, clip_obj):
         return ()
         # raise ValueError("Shape and crop extent do not overlap.")
 
-    if any(shp.geometry.type == "MultiPoint"):
+    if any(shp.geometry.geom_type == "MultiPoint"):
         return _clip_multi_point(shp, clip_obj)
-    elif any(shp.geometry.type == "Point"):
+    elif any(shp.geometry.geom_type == "Point"):
         return _clip_points(shp, clip_obj)
-    elif any(shp.geometry.type == "MultiPolygon") or any(
-        shp.geometry.type == "MultiLineString"
+    elif any(shp.geometry.geom_type == "MultiPolygon") or any(
+        shp.geometry.geom_type == "MultiLineString"
     ):
         return _clip_multi_poly_line(shp, clip_obj)
     else:
@@ -1112,7 +1108,6 @@ def plot_bedding_stereonets(config, map_data):
                 print(gp, "observations has 1 observation")
 
         elif len(all_orientations) > 0:
-
             ax = None
 
             # As map_checker converts to dip direction assume orientations are in dip dir
@@ -1340,7 +1335,6 @@ def save_dtm_ascii(dtm_path):
 def save_parameters(
     model_name, vtk_model_path, proj, foliation_params, fault_params, st_bbox, m2lv, LSv
 ):
-
     f = open(os.path.join(vtk_model_path, "params.txt"), "w")
 
     f.write("map2loop version: " + m2lv + "\n")

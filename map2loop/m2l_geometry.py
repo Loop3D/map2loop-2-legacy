@@ -358,14 +358,14 @@ def extract_poly_coords(geom, i):
     Returns:
         [dict]: [exterior and interior coordinates]
     """
-    if geom.type == "Polygon":
+    if geom.geom_type == "Polygon":
         exterior_coords = geom.exterior.coords[:]
         interior_coords = []
         for interior in geom.interiors:
             interior_coords += (i, interior.coords[:])
             i = i + 1
 
-    elif geom.type == "MultiPolygon":
+    elif geom.geom_type == "MultiPolygon":
         exterior_coords = []
         interior_coords = []
         for part in geom.geoms:
@@ -374,7 +374,7 @@ def extract_poly_coords(geom, i):
             interior_coords += epc["interior_coords"]
             i = i + 1
     else:
-        raise ValueError("Unhandled geometry type: " + repr(geom.type))
+        raise ValueError("Unhandled geometry type: " + repr(geom.geom_type))
     return {"exterior_coords": exterior_coords, "interior_coords": interior_coords}
 
 
@@ -824,8 +824,8 @@ def save_faults(config: Config, map_data: MapData, workflow: dict):
         for indx, flt in local_faults.iterrows():
             if config.c_l["fault"].lower() in flt["FEATURE"].lower():
                 fault_name = "Fault_" + str(flt["GEOMETRY_OBJECT_ID"])
-                # display(flt.geometry.type)
-                if flt.geometry.type == "LineString":
+                # display(flt.geometry.geom_type)
+                if flt.geometry.geom_type == "LineString":
                     flt_ls = LineString(flt.geometry)
                     dlsx = (
                         flt_ls.coords[0][0] - flt_ls.coords[len(flt_ls.coords) - 1][0]
@@ -1088,8 +1088,8 @@ def save_faults(config: Config, map_data: MapData, workflow: dict):
 
                 # shouldn't happen any more
                 elif (
-                    flt.geometry.type == "MultiLineString"
-                    or flt.geometry.type == "GeometryCollection"
+                    flt.geometry.geom_type == "MultiLineString"
+                    or flt.geometry.geom_type == "GeometryCollection"
                 ):
                     sum_strike = 0
                     first = True
@@ -1281,8 +1281,8 @@ def save_fold_axial_traces(config: Config, map_data: MapData, workflow: dict):
 
     for indx, fold in folds_clip.iterrows():
         fold_name = str(fold["GEOMETRY_OBJECT_ID"])
-        if not str(fold.geometry.type) == "None":
-            if fold.geometry.type == "MultiLineString":
+        if not str(fold.geometry.geom_type) == "None":
+            if fold.geometry.geom_type == "MultiLineString":
                 for mls in fold.geometry:
                     fold_ls = LineString(mls)
 
@@ -1684,7 +1684,7 @@ def process_plutons(config: Config, map_data, workflow: dict):
                                         testpx = lineC.coords[0][0] - lsy
                                         testpy = lineC.coords[0][0] + lsx
 
-                                        if ageol.geometry.type == "Polygon":
+                                        if ageol.geometry.geom_type == "Polygon":
                                             if Polygon(ageol.geometry).contains(
                                                 Point(testpx, testpy)
                                             ):
@@ -1826,7 +1826,7 @@ def process_plutons(config: Config, map_data, workflow: dict):
                                 testpx = lineC.coords[0][0] - lsy
                                 testpy = lineC.coords[0][0] + lsx
 
-                                if ageol.geometry.type == "Polygon":
+                                if ageol.geometry.geom_type == "Polygon":
                                     if Polygon(ageol.geometry).contains(
                                         Point(testpx, testpy)
                                     ):
@@ -3105,8 +3105,8 @@ def save_fold_axial_traces_orientations(
     dummy.append(1)
     for indx, fold in folds_clip.iterrows():
         fold_name = str(fold["GEOMETRY_OBJECT_ID"])
-        if not str(fold.geometry.type) == "None":
-            if fold.geometry.type == "MultiLineString":
+        if not str(fold.geometry.geom_type) == "None":
+            if fold.geometry.geom_type == "MultiLineString":
                 for mls in fold.geometry:
                     fold_ls = LineString(mls)
 
@@ -4348,7 +4348,7 @@ def save_basal_contacts_orientations_csv(
         # print(contact['UNIT_NAME'])
         first = True
         if contact.geometry is not None and contact.geometry != first_geom:
-            if contact.geometry.type == "MultiLineString":  # why not LineString?
+            if contact.geometry.geom_type == "MultiLineString":  # why not LineString?
                 for line in contact.geometry.geoms:
                     # first_in_line = True
                     if i % config.run_flags["contact_decimate"] == 0:
@@ -4507,7 +4507,7 @@ def save_basal_contacts_orientations_csv(
                     i = i + 1
             else:
                 if config.verbose_level != VerboseLevel.NONE:
-                    print("other basal contact geom ignored", contact.geometry.type)
+                    print("other basal contact geom ignored", contact.geometry.geom_type)
     f.close()
     fp.close()
 
@@ -4545,7 +4545,7 @@ def process_sills(
                         print(
                             geol["GEOMETRY_OBJECT_ID"],
                             "debug:",
-                            LineStringC.geometry.type,
+                            LineStringC.geometry.geom_type,
                         )
                         continue
 
@@ -4605,7 +4605,7 @@ def process_sills(
                                         dx2 = -dx1
                                         dy2 = -dy1
 
-                                        if sill.geometry.type == "Polygon":
+                                        if sill.geometry.geom_type == "Polygon":
                                             if Polygon(sill.geometry).contains(
                                                 Point(testpx, testpy)
                                             ):

@@ -534,7 +534,7 @@ def interpolate_contacts(
         indx,
         acontact,
     ) in geol_file.iterrows():  # loop through distinct linestrings in MultiLineString
-        if acontact.geometry.type == "MultiLineString":
+        if acontact.geometry.geom_type == "MultiLineString":
             # print(i)
             for line in acontact.geometry:  # loop through line segments
                 # print(i,len(acontact.geometry))
@@ -825,9 +825,9 @@ def save_contact_vectors(config: Config, map_data, workflow: dict):
     # loop through distinct linestrings in MultiLineString
     for indx, acontact in geol_file.iterrows():
         if acontact.geometry:
-            if acontact.geometry.type == "LineString":
+            if acontact.geometry.geom_type == "LineString":
                 geom = MultiLineString([acontact.geometry])
-            elif acontact.geometry.type == "MultiLineString":
+            elif acontact.geometry.geom_type == "MultiLineString":
                 geom = acontact.geometry
             for line in geom.geoms:
                 for i in range(len(line.coords) - 1):
@@ -1243,7 +1243,7 @@ def process_fault_throw_and_near_orientations(
     for index, fault in faults.iterrows():
         # if(fault["GEOMETRY_OBJECT_ID"]!=1071):
         # continue
-        if fault.geometry.type == "LineString":
+        if fault.geometry.geom_type == "LineString":
             # in is dangerous as Fault_1 is in Fault_10
             if "Fault_" + str(fault["GEOMETRY_OBJECT_ID"]) in fault_names:
                 # print('LineString','Fault_'+str(fault["GEOMETRY_OBJECT_ID"]),len(fault.geometry.coords))
@@ -1487,7 +1487,7 @@ def process_fault_throw_and_near_orientations(
                     lcoords = []
                     rcoords = []
                     index = []
-                    # display("MLS DEBUG",fault.geometry.type)
+                    # display("MLS DEBUG",fault.geometry.geom_type)
 
                     j = 0
                     for i in range(0, len(fault_ls.coords) - 1):
@@ -1993,7 +1993,7 @@ def interpolate_contacts_grid(contacts, calc, xcoords_group, ycoords_group):
         indx,
         acontact,
     ) in contacts.iterrows():  # loop through distinct linestrings in MultiLineString
-        if acontact.geometry.type == "MultiLineString":
+        if acontact.geometry.geom_type == "MultiLineString":
             for line in acontact.geometry.geoms:
                 if i % decimate == 0:
                     listarray.append([line.coords[0][0], line.coords[0][1]])
@@ -2273,7 +2273,7 @@ def process_fault_throw_and_near_faults_from_grid(
 
     # All faults should be LineStrings but just in case they aren't filter for
     # only LineStrings
-    local_faults = local_faults[local_faults.geometry.type == "LineString"]
+    local_faults = local_faults[local_faults.geometry.geom_type == "LineString"]
     lgeomList = []
     rgeomList = []
     faultIds = []
@@ -2584,7 +2584,7 @@ def process_fault_throw_and_near_faults_from_grid(
             #             lcoords = []
             #             rcoords = []
             #             index = []
-            #             # display("MLS DEBUG",fault.geometry.type)
+            #             # display("MLS DEBUG",fault.geometry.geom_type)
 
             #             j = 0
             #             for i in range(0, len(fault_ls.coords) - 1):

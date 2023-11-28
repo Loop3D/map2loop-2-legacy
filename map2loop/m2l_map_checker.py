@@ -2,6 +2,7 @@ import os
 import geopandas as gpd
 from shapely.geometry import LineString, Polygon, MultiLineString
 import warnings
+from unidecode import unidecode
 import numpy as np
 import pandas as pd
 from math import sqrt
@@ -560,14 +561,21 @@ def check_geology_map(
         geology, c_l["ds"], "DESCRIPTION", m2l_errors, verbose_level
     )
     geology = rename_columns(geology, c_l["c"], "UNIT_NAME", m2l_errors, verbose_level)
+    geology["UNIT_NAME"] = [unidecode(name) for name in geology["UNIT_NAME"]]
     geology = rename_columns(geology, c_l["r1"], "ROCKTYPE1", m2l_errors, verbose_level)
     geology = rename_columns(geology, c_l["r2"], "ROCKTYPE2", m2l_errors, verbose_level)
     if c_l["min"] == c_l["max"]:
-        geology = rename_columns(geology, c_l["max"], "MAX_AGE", m2l_errors, verbose_level)
+        geology = rename_columns(
+            geology, c_l["max"], "MAX_AGE", m2l_errors, verbose_level
+        )
         geology["MIN_AGE"] = geology["MAX_AGE"].copy()
     else:
-        geology = rename_columns(geology, c_l["min"], "MIN_AGE", m2l_errors, verbose_level)
-        geology = rename_columns(geology, c_l["max"], "MAX_AGE", m2l_errors, verbose_level)
+        geology = rename_columns(
+            geology, c_l["min"], "MIN_AGE", m2l_errors, verbose_level
+        )
+        geology = rename_columns(
+            geology, c_l["max"], "MAX_AGE", m2l_errors, verbose_level
+        )
     geology = rename_columns(
         geology, c_l["o"], "GEOMETRY_OBJECT_ID", m2l_errors, verbose_level
     )
@@ -718,7 +726,7 @@ def check_fault_map(
 
         for indx, flt in faults.iterrows():
             if c_l["fault"].lower() in flt[c_l["f"]].lower():
-                if flt.geometry.type == "LineString":
+                if flt.geometry.geom_type == "LineString":
                     flt_ls = LineString(flt.geometry)
                     if len(flt_ls.coords) > 0:
                         dlsx = (
@@ -874,8 +882,8 @@ def show_metadata(gdf, name):
         print("    # items", len(gdf))
         types = []
         for i, g in gdf.iterrows():
-            if g.geometry.type not in types:
-                types.append(g.geometry.type)
+            if g.geometry.geom_type not in types:
+                types.append(g.geometry.geom_type)
 
         print("    Data types", types)
     else:

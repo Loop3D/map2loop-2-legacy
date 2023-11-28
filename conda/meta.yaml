@@ -39,6 +39,7 @@ requirements:
     - loopprojectfile
     - beartype
     - cftime>=1.4.0
+    - unidecode
 
 # test:
 #   imports:

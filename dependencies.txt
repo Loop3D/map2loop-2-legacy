@@ -16,3 +16,4 @@ hjson
 loopprojectfile
 beartype
 cftime>=1.4.0
+unidecode
