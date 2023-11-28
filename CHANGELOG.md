@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.8](https://github.com/Loop3D/map2loop-2/compare/1.3.7...1.3.8) (2023-11-28)
+
+
+### Bug Fixes
+
+* Change to force CICD ([f05ee0f](https://github.com/Loop3D/map2loop-2/commit/f05ee0f99160bb38264c6554a61c5257ab4aa8dd))
+
 ## [1.3.7](https://github.com/Loop3D/map2loop-2/compare/1.3.6...1.3.7) (2023-08-14)
 
 
