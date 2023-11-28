@@ -54,6 +54,7 @@ setuptools.setup(
     #     "beartype",
     #     "cftime>=1.4.0",
     #     "map2model-loop3d"
+    #     "unidecode"
     # ],
     url="https://github.com/Loop3D/map2loop-2",
     packages=setuptools.find_packages(),
