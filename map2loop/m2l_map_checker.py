@@ -522,8 +522,8 @@ def check_geology_map(
         geology[c_l["max"]] = 100
 
     # Convert types
-    geology[c_l["max"]] = geology[c_l["max"]].astype(np.float64)
-    geology[c_l["min"]] = geology[c_l["min"]].astype(np.float64)
+    geology[c_l["max"]] = geology[c_l["max"]].astype(float)
+    geology[c_l["min"]] = geology[c_l["min"]].astype(float)
 
     if c_l["c"] not in geology.columns:
         m2l_errors.append("Must have primary strat coding field for geology polygons")

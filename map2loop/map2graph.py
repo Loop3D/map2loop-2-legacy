@@ -1001,7 +1001,7 @@ class Map2Graph(object):
             if Gloop.nodes[v]["ntype"] == "bbox":
                 data = Gloop.nodes[v]["data"]
                 bbox = np.array(
-                    data.replace("[", "").replace("]", "").split(","), dtype=np.float32
+                    data.replace("[", "").replace("]", "").split(","), dtype=float
                 )
         return bbox
 
@@ -1019,7 +1019,7 @@ class Map2Graph(object):
                 yscale = Gloop.nodes[v]["yscale"]
 
                 dtm = np.array(
-                    data.replace("[", "").replace("]", "").split(","), dtype=np.float32
+                    data.replace("[", "").replace("]", "").split(","), dtype=float
                 )
                 shape = shape.replace("(", "").replace(")", "").split(",")
                 x = int(shape[0])

@@ -283,7 +283,7 @@ def get_dtm_hawaii(
     #        OPeNDAP[sizey-1-j][i]=int(float(grid[k]))
     #        k+=1
 
-    OPeNDAP = np.asarray(grid, dtype=np.float16).reshape(sizey, sizex)
+    OPeNDAP = np.asarray(grid, dtype=float).reshape(sizey, sizex)
     OPeNDAP = OPeNDAP.astype("int16")
     OPeNDAP = np.flipud(OPeNDAP)
 
@@ -536,7 +536,7 @@ def load_and_reproject_dtm(
             "transform": transform,
             "driver": "GTiff",
             "count": 1,
-            "dtype": np.float32,
+            "dtype": float,
         }
         memfile = rasterio.io.MemoryFile()
         dataset = memfile.open(**src_params)
@@ -570,7 +570,7 @@ def load_and_reproject_dtm(
     )
     reprojected_dtm = rasterio.io.MemoryFile()
     with reprojected_dtm.open(**params) as dst:
-        data = np.zeros((new_width, new_height), dtype=np.float64)
+        data = np.zeros((new_width, new_height), dtype=float)
         rasterio.warp.reproject(
             dataset.read(),
             data,
